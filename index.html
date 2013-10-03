@@ -1,0 +1,110 @@
+﻿<!doctype html>
+<html>
+<head>
+  <title></title>
+  <script src="../../polymer/polymer.js"></script>
+  <link rel="import" href="../../polymer-elements/elements.html">
+  <link rel="import" href="../../polymer-ui-elements/elements.html">
+  <link rel="import" href="../../more-elements/code-mirror/code-mirror.html">
+  <link rel="import" href="../x-dom-serializer/x-dom-serializer.html">
+  <link rel="import" href="../x-inspector/x-inspector.html">
+  <style>
+    html {
+      position: relative;
+      height: 100%;
+    }
+    body {
+      font-family: Neue Helvetica, Roboto, Arial;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
+    x-foo {
+      display: block;
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+
+  <x-foo></x-foo>
+
+  <polymer-element name="x-foo" lightdom>
+    <template>
+
+      <style>
+        iframe {
+          width: 100%;
+          height: 100%;
+          border: none;
+        }
+        x-inspector {
+          width: 520px;
+        }
+      </style>
+
+      <polymer-layout vertical></polymer-layout>
+      <polymer-ui-toolbar>
+        <polymer-ui-icon-button icon="menu"></polymer-ui-icon-button>
+        <polymer-ui-icon icon="none"></polymer-ui-icon>
+        <polymer-selector selected="{{selected}}">
+          <polymer-ui-icon-button icon="settings"></polymer-ui-icon-button>
+          <polymer-ui-icon-button icon="refresh"></polymer-ui-icon-button>
+        </polymer-selector>
+      </polymer-ui-toolbar>
+      <polymer-ui-pages flex selected="{{selected}}">
+        <section>
+          <polymer-layout></polymer-layout>
+          <div flex>
+            <iframe id="frame" src="designer.html"></iframe>
+          </div>
+          <x-inspector id="inspector"></x-inspector>
+        </section>
+        <section>
+          <polymer-layout></polymer-layout>
+          <code-mirror id="code" flex></code-mirror>
+        </section>
+      </polymer-ui-pages>
+
+      <x-dom-serializer id="serializer" nolayout></x-dom-serializer>
+    </template>
+
+    <script>
+      Polymer('x-foo', {
+        selected: 0,
+        ready: function() {
+          window.designWindow = this.$.frame.contentWindow;
+          designWindow.addEventListener('designer-ready', this.designerReady.bind(this));
+          designWindow.addEventListener('design-change', this.designChange.bind(this));
+        },
+        designerReady: function(event) {
+          this.designer = event.target;
+          this.designer.loadLinks([
+            '../../more-elements/metadata.html',
+            '../../polymer-elements/metadata.html',
+            '../../polymer-ui-elements/metadata.html'
+          ]);
+        },
+        designChange: function(event) {
+          this.$.inspector.sourceElement = this.designer.selected;
+          this.$.inspector.update();
+        },
+        selectedChanged: function() {
+          this.designToCode();
+          this.$.code.refresh();
+        },
+        designToCode: function() {
+          //var html = this.designer.$.canvas.innerHTML;
+          var html = this.$.serializer.dumpElement(this.designer.$.canvas);
+          this.$.code.mirror.setValue(html);
+        }
+      });
+    </script>
+  </polymer-element>
+</body>
+</html>
