@@ -31,6 +31,14 @@
   </style>
 </head>
 <body>
+  <script>
+    var metadata = [
+      '/~sjmiles/polymer/more-elements/metadata.html',
+      '/~sjmiles/polymer/polymer-elements/metadata.html',
+      '/~sjmiles/polymer/polymer-ui-elements/metadata.html',
+      '/~sjmiles/polymer/polytaire-elements/metadata.html'
+    ];
+  </script>
 
   <x-foo></x-foo>
 
@@ -84,11 +92,7 @@
         },
         designerReady: function(event) {
           this.designer = event.target;
-          this.designer.loadLinks([
-            '../../more-elements/metadata.html',
-            '../../polymer-elements/metadata.html',
-            '../../polymer-ui-elements/metadata.html'
-          ]);
+          this.designer.loadLinks(window.metadata);
         },
         designChange: function(event) {
           this.$.inspector.sourceElement = this.designer.selected;
