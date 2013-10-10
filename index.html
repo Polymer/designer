@@ -53,7 +53,7 @@
           border: none;
         }
         x-inspector {
-          width: 520px;
+          width: 320px;
         }
       </style>
 
@@ -76,7 +76,7 @@
           <div flex>
             <iframe id="frame" src="designer.html"></iframe>
           </div>
-          <x-inspector id="inspector"></x-inspector>
+          <x-inspector id="inspector" on-delete-element="deleteElement" on-parent-element="selectParentElement"></x-inspector>
         </section>
         <section>
           <polymer-layout></polymer-layout>
@@ -120,6 +120,12 @@
         designChange: function(event) {
           this.$.inspector.sourceElement = this.designer.selected;
           this.$.inspector.update();
+        },
+        deleteElement: function(event) {
+          this.designer.deleteElement();
+        },
+        selectParentElement: function(event) {
+          this.designer.selectParentElement();
         },
         selectedChanged: function() {
           this.designToCode();
