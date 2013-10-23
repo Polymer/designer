@@ -61,8 +61,8 @@
 
       <polymer-ui-toolbar theme="polymer-ui-light-theme">
         <polymer-ui-icon-button icon="menu"></polymer-ui-icon-button>
-        <polymer-ui-icon-button icon="briefcase" on-tap="saveAction"></polymer-ui-icon-button>
-        <polymer-ui-icon-button icon="add" on-tap="loadAction"></polymer-ui-icon-button>
+        <polymer-ui-icon-button icon="briefcase" on-tap="{{saveAction}}"></polymer-ui-icon-button>
+        <polymer-ui-icon-button icon="add" on-tap="{{loadAction}}"></polymer-ui-icon-button>
         <polymer-ui-icon icon="none"></polymer-ui-icon>
         <polymer-selector selected="{{selected}}">
           <polymer-ui-icon-button icon="settings"></polymer-ui-icon-button>
@@ -76,7 +76,7 @@
           <div flex>
             <iframe id="frame" src="designer.html"></iframe>
           </div>
-          <x-inspector id="inspector" on-delete-element="deleteElement" on-parent-element="selectParentElement" on-bind-property="applyPropertyBinding"></x-inspector>
+          <x-inspector id="inspector" on-delete-element="{{deleteElement}}" on-parent-element="{{selectParentElement}}" on-bind-property="{{applyPropertyBinding}}"></x-inspector>
         </section>
         <section>
           <polymer-layout></polymer-layout>
@@ -85,8 +85,8 @@
       </polymer-ui-pages>
 
       <x-dom-serializer id="serializer"></x-dom-serializer>
-      <x-file-document id="loadFile" Xfilename="index.html" root="http://localhost:3003/designer/" on-file-document-loaded="documentLoaded" text="{{remoteHtml}}"></x-file-document>
-      <x-file-document id="saveFile" Xfilename="index.html" root="http://localhost:3003/designer/" on-file-document-saved="documentSaved"></x-file-document>
+      <x-file-document id="loadFile" Xfilename="index.html" root="http://localhost:3003/designer/" on-file-document-loaded="{{documentLoaded}}" text="{{remoteHtml}}"></x-file-document>
+      <x-file-document id="saveFile" Xfilename="index.html" root="http://localhost:3003/designer/" on-file-document-saved="{{documentSaved}}"></x-file-document>
     </template>
 
     <script>
