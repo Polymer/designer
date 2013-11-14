@@ -96,6 +96,7 @@
           window.designWindow = this.$.frame.contentWindow;
           designWindow.addEventListener('designer-ready', this.designerReady.bind(this));
           designWindow.addEventListener('design-change', this.designChange.bind(this));
+          this.$.frame.src += window.location.search;
         },
         loadAction: function() {
           this.$.loadFile.fileName = "test.html";
