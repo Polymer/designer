@@ -1,0 +1,14 @@
+{
+  "name": "designer",
+  "private": true,
+  "dependencies": {
+    "platform": "Polymer/platform#master",
+    "x-designer": "Polymer/x-designer#master",
+    "polymer-elements": "Polymer/polymer-elements#master",
+    "polymer-ui-elements": "Polymer/polymer-ui-elements#master",
+    "code-mirror": "Polymer/code-mirror#master",
+    "x-dom-serializer": "Polymer/x-dom-serializer#master",
+    "x-inspector": "Polymer/x-inspector#master",
+    "x-file-document": "Polymer/x-file-document#master"
+  }
+}
