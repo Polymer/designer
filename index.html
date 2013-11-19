@@ -96,7 +96,6 @@
           window.designWindow = this.$.frame.contentWindow;
           designWindow.addEventListener('designer-ready', this.designerReady.bind(this));
           designWindow.addEventListener('design-change', this.designChange.bind(this));
-          this.$.frame.src += window.location.search;
         },
         loadAction: function() {
           this.$.loadFile.fileName = "test.html";
@@ -115,7 +114,12 @@
         },
         designerReady: function(event) {
           this.designer = event.target;
-          this.designer.loadLinks(window.metadata);
+          this.designer.loadLinks(window.metadata, function() {
+            var tag = Platform.flags.element;
+            if (tag) {
+              this.designer.createElement(tag);
+            }
+          }.bind(this));
         },
         designChange: function(event) {
           this.$.inspector.sourceElement = this.designer.selected;
