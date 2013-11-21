@@ -73,7 +73,7 @@
         <section>
           <polymer-layout></polymer-layout>
           <div flex>
-            <iframe id="frame" src="designer.html"></iframe>
+            <iframe id="frame" src="designer.html" on-load="{{designWindowLoaded}}"></iframe>
           </div>
           <x-inspector id="inspector" on-delete-element="{{deleteElement}}" on-parent-element="{{selectParentElement}}" on-bind-property="{{applyPropertyBinding}}"></x-inspector>
         </section>
@@ -93,6 +93,8 @@
         selected: 0,
         remoteHtml: '',
         ready: function() {
+        },
+        designWindowLoaded: function() {
           window.designWindow = this.$.frame.contentWindow;
           designWindow.addEventListener('designer-ready', this.designerReady.bind(this));
           designWindow.addEventListener('design-change', this.designChange.bind(this));
