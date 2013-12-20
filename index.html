@@ -15,7 +15,7 @@
       height: 100%;
     }
     body {
-      font-family: Neue Helvetica, Roboto, Arial;
+      font-family: 'Helvetica Neue', Helvetica, Roboto, Arial;
       height: 100%;
       margin: 0;
       overflow: hidden;
@@ -51,19 +51,40 @@
           height: 100%;
           border: none;
         }
-        x-inspector {
+        #appbar {
+          xbackground: #4285f4;
+        }
+        #viewSelector {
+          padding: 4px;
+          background: #E0E0E0;
+          border-radius: 2px;
+          margin-left: 8px;
+        }
+        #inspector {
+          position: relative;
           width: 350px;
+          border-left: 1px solid silver;
+          transition: width 0.3s;
+          box-shadow: -5px 0 8px rgba(0, 0, 0, 0.14);
+        }
+        #inspector.maximized {
+          width: 0;
+          border: 0;
+        }
+        #frameContainer {
+          height: 100%;
+          z-index: 0;
         }
       </style>
 
       <polymer-layout vertical></polymer-layout>
 
-      <polymer-ui-toolbar theme="polymer-ui-light-theme">
+      <polymer-ui-toolbar id="appbar" theme="polymer-ui-light-theme">
         <polymer-ui-icon-button icon="menu"></polymer-ui-icon-button>
         <polymer-ui-icon-button icon="briefcase" on-tap="{{saveAction}}"></polymer-ui-icon-button>
         <polymer-ui-icon-button icon="add" on-tap="{{loadAction}}"></polymer-ui-icon-button>
-        <polymer-ui-icon icon="none"></polymer-ui-icon>
-        <polymer-selector selected="{{selected}}">
+        <polymer-ui-icon-button icon="maximize" on-tap="{{fullscreenAction}}"></polymer-ui-icon-button>
+        <polymer-selector id="viewSelector" selected="{{selected}}">
           <polymer-ui-icon-button src="assets/design.png"></polymer-ui-icon-button>
           <polymer-ui-icon-button src="assets/code.png"></polymer-ui-icon-button>
         </polymer-selector>
@@ -71,8 +92,8 @@
 
       <polymer-ui-pages flex selected="{{selected}}">
         <section>
-          <polymer-layout></polymer-layout>
-          <div flex>
+          <polymer-flex-layout></polymer-flex-layout>
+          <div id="frameContainer" flex>
             <iframe id="frame" src="designer.html" on-load="{{designWindowLoaded}}"></iframe>
           </div>
           <x-inspector id="inspector" on-delete-element="{{deleteElement}}" on-parent-element="{{selectParentElement}}" on-bind-property="{{applyPropertyBinding}}"></x-inspector>
@@ -143,6 +164,13 @@
         designToCode: function() {
           //var html = this.designer.$.canvas.innerHTML;
           this.$.code.mirror.setValue(this.html);
+        },
+        fullscreenAction: function() {
+          this.maximized = !this.maximized;
+        },
+        maximizedChanged: function() {
+          this.designer.maximized = this.maximized;
+          this.$.inspector.classList.toggle('maximized', this.maximized);
         },
         applyPropertyBinding: function(event, detail) {
           this.designer.applyPropertyBinding(
