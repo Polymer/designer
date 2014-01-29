@@ -34,7 +34,7 @@
 <body>
   <script>
     var metadata = [
-      'components/more-elements/metadata.html',
+      //'components/more-elements/metadata.html',
       'components/polymer-elements/metadata.html',
       'components/polymer-ui-elements/metadata.html'
     ];
@@ -85,20 +85,20 @@
         <polymer-ui-icon-button icon="add" on-tap="{{loadAction}}"></polymer-ui-icon-button>
         <polymer-ui-icon-button icon="maximize" on-tap="{{fullscreenAction}}"></polymer-ui-icon-button>
         <polymer-selector id="viewSelector" selected="{{selected}}">
-          <polymer-ui-icon-button src="assets/design.png"></polymer-ui-icon-button>
-          <polymer-ui-icon-button src="assets/code.png"></polymer-ui-icon-button>
+          <polymer-ui-icon-button src="assets/design.png" name="design"></polymer-ui-icon-button>
+          <polymer-ui-icon-button src="assets/code.png" name="code"></polymer-ui-icon-button>
         </polymer-selector>
       </polymer-ui-toolbar>
 
       <polymer-ui-pages flex selected="{{selected}}">
-        <section>
+        <section name="design">
           <polymer-flex-layout></polymer-flex-layout>
           <div id="frameContainer" flex>
             <iframe id="frame" src="designer.html" on-load="{{designWindowLoaded}}"></iframe>
           </div>
           <x-inspector id="inspector" on-delete-element="{{deleteElement}}" on-parent-element="{{selectParentElement}}" on-bind-property="{{applyPropertyBinding}}"></x-inspector>
         </section>
-        <section>
+        <section name="code">
           <polymer-layout></polymer-layout>
           <code-mirror id="code" flex></code-mirror>
         </section>
@@ -111,7 +111,7 @@
 
     <script>
       Polymer('x-foo', {
-        selected: 0,
+        selected: 'design',
         remoteHtml: '',
         ready: function() {
         },
@@ -128,19 +128,28 @@
         },
         remoteHtmlChanged: function() {
           //console.log(this.remoteHtml);
-          this.designer.$.canvas.innerHTML = this.remoteHtml;
+          this.loadHtml(this.remoteHtml);
         },
         saveAction: function() {
           this.$.saveFile.text = this.html;
           this.$.saveFile.fileName = "test.html";
           this.$.saveFile.save();
         },
+        loadHtml: function(html) {
+          this.designer.$.canvas.innerHTML = html;
+        },
         designerReady: function(event) {
+          //console.log('designerReady');
           this.designer = event.target;
           this.designer.loadLinks(window.metadata, function() {
-            var tag = Platform.flags.element;
-            if (tag) {
-              this.designer.createElement(tag);
+            if (this.pendingHtml) {
+              this.designer.loadHtml(this.pendingHtml);
+              this.pendingHtml = null;
+            } else {
+              var tag = Platform.flags.element;
+              if (tag) {
+                this.designer.createElement(tag);
+              }
             }
           }.bind(this));
         },
@@ -155,15 +164,26 @@
           this.designer.selectParentElement();
         },
         selectedChanged: function() {
-          this.designToCode();
-          this.$.code.refresh();
+          if (this.selected == 'code') {
+            this.designToCode();
+            this.$.code.refresh();  
+          } else {
+            this.codeToDesign();
+          }
         },
         get html() {
           return this.$.serializer.dumpElement(this.designer.$.canvas);
         },
         designToCode: function() {
-          //var html = this.designer.$.canvas.innerHTML;
           this.$.code.mirror.setValue(this.html);
+        },
+        codeToDesign: function() {
+          this.pendingHtml = this.$.code.mirror.getValue();
+          this.reloadDesigner();
+        },
+        reloadDesigner: function() {
+          //this.$.frame.onload = this.designWindowLoaded.bind(this);
+          designWindow.location.reload();
         },
         fullscreenAction: function() {
           this.maximized = !this.maximized;
