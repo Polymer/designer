@@ -81,8 +81,6 @@
 
       <polymer-ui-toolbar id="appbar" theme="polymer-ui-light-theme">
         <polymer-ui-icon-button icon="menu"></polymer-ui-icon-button>
-        <polymer-ui-icon-button icon="briefcase" on-tap="{{saveAction}}"></polymer-ui-icon-button>
-        <polymer-ui-icon-button icon="add" on-tap="{{loadAction}}"></polymer-ui-icon-button>
         <polymer-ui-icon-button icon="maximize" on-tap="{{fullscreenAction}}"></polymer-ui-icon-button>
         <polymer-selector id="viewSelector" selected="{{selected}}">
           <polymer-ui-icon-button src="assets/design.png" name="design"></polymer-ui-icon-button>
@@ -105,8 +103,8 @@
       </polymer-ui-pages>
 
       <x-dom-serializer id="serializer"></x-dom-serializer>
-      <x-file-document id="loadFile" Xfilename="index.html" root="http://localhost:3003/designer/" on-file-document-loaded="{{documentLoaded}}" text="{{remoteHtml}}"></x-file-document>
-      <x-file-document id="saveFile" Xfilename="index.html" root="http://localhost:3003/designer/" on-file-document-saved="{{documentSaved}}"></x-file-document>
+      <!-- <x-file-document id="loadFile" Xfilename="index.html" root="http://localhost:3003/designer/" on-file-document-loaded="{{documentLoaded}}" text="{{remoteHtml}}"></x-file-document>
+      <x-file-document id="saveFile" Xfilename="index.html" root="http://localhost:3003/designer/" on-file-document-saved="{{documentSaved}}"></x-file-document> -->
     </template>
 
     <script>
@@ -116,6 +114,7 @@
         ready: function() {
         },
         designWindowLoaded: function() {
+          this.$.frame.style.display = null;
           window.designWindow = this.$.frame.contentWindow;
           designWindow.addEventListener('designer-ready', this.designerReady.bind(this));
           designWindow.addEventListener('design-change', this.designChange.bind(this));
@@ -168,6 +167,7 @@
             this.designToCode();
             this.$.code.refresh();  
           } else {
+            this.$.frame.style.display = 'none';
             this.codeToDesign();
           }
         },
