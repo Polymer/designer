@@ -2,14 +2,15 @@
   "name": "designer",
   "private": true,
   "dependencies": {
-    "platform": "Polymer/platform#master",
-    "x-designer": "Polymer/x-designer#master",
-    "code-mirror": "Polymer/code-mirror#master",
-    "x-dom-serializer": "Polymer/x-dom-serializer#master",
-    "x-inspector": "Polymer/x-inspector#master",
-    "x-file-document": "Polymer/x-file-document#master",
-    "polymer-elements": "Polymer/polymer-elements#master",
-    "polymer-ui-elements": "Polymer/polymer-ui-elements#master",
-    "more-elements": "Polymer/more-elements#master"
-  }
+    "platform": "Polymer/platform#0.2.1",
+    "x-designer": "Polymer/x-designer#0.2.1",
+    "code-mirror": "Polymer/code-mirror#0.2.1",
+    "x-dom-serializer": "Polymer/x-dom-serializer#0.2.1",
+    "x-inspector": "Polymer/x-inspector#0.2.1",
+    "x-file-document": "Polymer/x-file-document#0.2.1",
+    "polymer-elements": "Polymer/polymer-elements#0.2.1",
+    "polymer-ui-elements": "Polymer/polymer-ui-elements#0.2.1",
+    "more-elements": "Polymer/more-elements#0.2.1"
+  },
+  "version": "0.2.1"
 }
