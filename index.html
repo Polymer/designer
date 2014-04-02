@@ -115,12 +115,27 @@
         selected: 'design',
         remoteHtml: '',
         ready: function() {
+          document.addEventListener('keydown', 
+              this.KeydownAndPromptForUnload.bind(this, window));
         },
         designWindowLoaded: function() {
           this.$.frame.style.display = null;
           window.designWindow = this.$.frame.contentWindow;
           designWindow.addEventListener('designer-ready', this.designerReady.bind(this));
           designWindow.addEventListener('design-change', this.designChange.bind(this));
+          designWindow.document.addEventListener('keydown', 
+              this.KeydownAndPromptForUnload.bind(this, designWindow));
+        },
+        KeydownAndPromptForUnload: function(w, e) {
+          // backspace
+          if (e.keyCode == 8) {
+            w.onbeforeunload = function() {
+              return ' ';
+            }
+            setTimeout(function() {
+              w.onbeforeunload = null;
+            }, 0);
+          }
         },
         loadAction: function() {
           this.$.loadFile.fileName = "test.html";
