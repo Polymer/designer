@@ -6,6 +6,7 @@
   <link rel="import" href="components/polymer-elements/elements.html">
   <link rel="import" href="components/polymer-ui-elements/elements.html">
   <link rel="import" href="components/code-mirror/code-mirror.html">
+  <link rel="import" href="components/github-elements/github-elements.html">
   <link rel="import" href="components/x-dom-serializer/x-dom-serializer.html">
   <link rel="import" href="components/x-inspector/x-inspector.html">
   <link rel="import" href="components/x-file-document/x-file-document.html">
@@ -20,7 +21,7 @@
       margin: 0;
       overflow: hidden;
     }
-    x-foo {
+    designer-element {
       display: block;
       position: absolute;
       top: 0;
@@ -43,9 +44,9 @@
     ];
   </script>
 
-  <x-foo></x-foo>
+  <designer-element id="designer"></designer-element>
 
-  <polymer-element name="x-foo" Xlightdom>
+  <polymer-element name="designer-element">
     <template>
 
       <style>
@@ -83,12 +84,13 @@
       <polymer-layout vertical></polymer-layout>
 
       <polymer-ui-toolbar id="appbar" theme="polymer-ui-light-theme">
-        <polymer-ui-icon-button icon="menu"></polymer-ui-icon-button>
+        <!-- <polymer-ui-icon-button icon="menu"></polymer-ui-icon-button> -->
         <polymer-ui-icon-button icon="maximize" on-tap="{{fullscreenAction}}"></polymer-ui-icon-button>
         <polymer-selector id="viewSelector" selected="{{selected}}">
           <polymer-ui-icon-button src="assets/design.png" name="design"></polymer-ui-icon-button>
           <polymer-ui-icon-button src="assets/code.png" name="code"></polymer-ui-icon-button>
         </polymer-selector>
+        <polymer-ui-icon-button icon="add" on-tap="{{saveAction}}"></polymer-ui-icon-button>
       </polymer-ui-toolbar>
 
       <polymer-ui-pages flex selected="{{selected}}">
@@ -104,19 +106,19 @@
           <code-mirror id="code" flex></code-mirror>
         </section>
       </polymer-ui-pages>
-
       <x-dom-serializer id="serializer"></x-dom-serializer>
-      <!-- <x-file-document id="loadFile" Xfilename="index.html" root="http://localhost:3003/designer/" on-file-document-loaded="{{documentLoaded}}" text="{{remoteHtml}}"></x-file-document>
-      <x-file-document id="saveFile" Xfilename="index.html" root="http://localhost:3003/designer/" on-file-document-saved="{{documentSaved}}"></x-file-document> -->
+      <github-element id="github" on-files-loaded="{{documentLoaded}}" on-files-saved="{{documentSaved}}" on-token-changed="{{tokenChangeHandler}}"></github-element>
     </template>
 
     <script>
-      Polymer('x-foo', {
+      Polymer('designer-element', {
         selected: 'design',
         remoteHtml: '',
+        fileName: 'designer.html',
         ready: function() {
           document.addEventListener('keydown', 
               this.KeydownAndPromptForUnload.bind(this, window));
+          this.firstLoad = true;
         },
         designWindowLoaded: function() {
           this.$.frame.style.display = null;
@@ -137,30 +139,17 @@
             }, 0);
           }
         },
-        loadAction: function() {
-          this.$.loadFile.fileName = "test.html";
-        },
-        documentLoaded: function(event, detail, sender) {
-          console.dir(sender);
-        },
-        remoteHtmlChanged: function() {
-          //console.log(this.remoteHtml);
-          this.loadHtml(this.remoteHtml);
-        },
-        saveAction: function() {
-          this.$.saveFile.text = this.html;
-          this.$.saveFile.fileName = "test.html";
-          this.$.saveFile.save();
-        },
-        loadHtml: function(html) {
-          this.designer.$.canvas.innerHTML = html;
-        },
         designerReady: function(event) {
           //console.log('designerReady');
           this.designer = event.target;
           this.designer.loadLinks(window.metadata, function() {
+            if (this.firstLoad) {
+              this.firstLoad = false;
+              this.loadRemoteContent();
+              return;
+            }
             if (this.pendingHtml) {
-              this.designer.loadHtml(this.pendingHtml);
+              this.loadHtml(this.pendingHtml);
               this.pendingHtml = null;
             } else {
               var tag = Platform.flags.element;
@@ -221,6 +210,47 @@
         applyPropertyBinding: function(event, detail) {
           this.designer.applyPropertyBinding(
               detail.obj, detail.name, detail.path);  
+        },
+        saveAction: function() {
+          var options = {};
+          options[this.fileName] = {content: this.html};
+          // TODO(sorvell): update just 404's =(
+          /*if (this.fileId) {
+            this.$.github.update(this.fileId, 'designer', true, options);
+          } else {*/
+            this.$.github.save('designer', true, options);
+          //}
+        },
+        loadRemoteContent: function() {
+          var id = window.location.hash.replace('#', '');
+          if (id) {
+            this.fileId = id;
+            this.$.github.load(id);
+          }
+        },
+        documentLoaded: function(event, detail) {
+          var doc = detail && detail[this.fileName];
+          if (doc) {
+            this.remoteHtml = doc.content;
+          }
+        },
+        documentSaved: function(event, detail) {
+          this.fileId = detail.id; 
+        },
+        remoteHtmlChanged: function() {
+          //console.log(this.remoteHtml);
+          this.loadHtml(this.remoteHtml);
+        },
+        loadHtml: function(html) {
+          this.designer.loadHtml(html);
+        },
+        tokenChangeHandler: function() {
+          this.$.github.cancel();
+          /*
+          this.async(function() {
+            this.$.github.style.position = 'static';
+          });
+          */
         }
       });
     </script>
