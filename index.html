@@ -91,6 +91,7 @@
           <polymer-ui-icon-button src="assets/code.png" name="code"></polymer-ui-icon-button>
         </polymer-selector>
         <polymer-ui-icon-button icon="add" on-tap="{{saveAction}}"></polymer-ui-icon-button>
+        <polymer-ui-icon-button icon="shortcut" on-click="{{shareAction}}"></polymer-ui-icon-button>
       </polymer-ui-toolbar>
 
       <polymer-ui-pages flex selected="{{selected}}">
@@ -221,6 +222,17 @@
             this.$.github.save('designer', true, options);
           //}
         },
+        shareAction: function() {
+          this.sharing = true;
+          // must open window immediately so that it opens in a tab, not a window
+          this.shareWindow = window.open(this.getGistUrl());
+          this.saveAction();
+        },
+        share: function() {
+          if (this.fileId && this.shareWindow) {
+            this.shareWindow.location.href = this.getGistUrl();
+          }
+        },
         loadRemoteContent: function() {
           var id = window.location.hash.replace('#', '');
           if (id) {
@@ -236,6 +248,10 @@
         },
         documentSaved: function(event, detail) {
           this.fileId = detail.id; 
+          if (this.sharing) {
+            this.sharing = false;
+            this.share();
+          }
         },
         remoteHtmlChanged: function() {
           //console.log(this.remoteHtml);
@@ -246,11 +262,15 @@
         },
         tokenChangeHandler: function() {
           this.$.github.cancel();
+          // make login work
           /*
           this.async(function() {
             this.$.github.style.position = 'static';
           });
           */
+        },
+        getGistUrl: function() {
+          return 'https://gist.github.com/anonymous/' + this.fileId;
         }
       });
     </script>
