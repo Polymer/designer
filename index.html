@@ -108,7 +108,7 @@
         </section>
       </polymer-ui-pages>
       <x-dom-serializer id="serializer"></x-dom-serializer>
-      <github-element id="github" on-files-loaded="{{documentLoaded}}" on-files-saved="{{documentSaved}}" on-token-changed="{{tokenChangeHandler}}"></github-element>
+      <github-element id="github" token="{{githubToken}}" on-files-loaded="{{documentLoaded}}" on-files-saved="{{documentSaved}}" on-token-changed="{{tokenChangeHandler}}"></github-element>
     </template>
 
     <script>
@@ -116,6 +116,7 @@
         selected: 'design',
         remoteHtml: '',
         fileName: 'designer.html',
+        githubToken: '77777d8808da580cd6134b7390b5fd306c66d1d6',
         ready: function() {
           document.addEventListener('keydown', 
               this.KeydownAndPromptForUnload.bind(this, window));
@@ -222,12 +223,11 @@
         saveAction: function() {
           var options = {};
           options[this.fileName] = {content: this.html};
-          // TODO(sorvell): update just 404's =(
-          /*if (this.fileId) {
+          if (this.fileId) {
             this.$.github.update(this.fileId, 'designer', true, options);
-          } else {*/
+          } else {
             this.$.github.save('designer', true, options);
-          //}
+          }
         },
         shareAction: function() {
           this.sharing = true;
