@@ -174,17 +174,24 @@
           if (this.selected == 'code') {
             this.designToCode();
             this.$.code.refresh();
-            this.async(function() {
-              this.$.code.focus();
-              // TODO(sorvell): we want to fold the <style> element.
-              // we should search for it rather than assume it's on the first line
-              // search looks like it needs a CodeMirror plugin.
-              this.$.code.mirror.foldCode(0);
-              this.$.code.mirror.execCommand('goLineDown');
-            });
+            this.async('prepareCode')
           } else {
             this.$.frame.style.display = 'none';
             this.codeToDesign();
+          }
+        },
+        // TODO(sorvell): probably should factor this code setup to be elsewhere
+        prepareCode: function() {
+          this.$.code.focus();
+          // fold style tag
+          var cm = this.$.code.mirror;
+          var c = cm.getSearchCursor('<style>');
+          if (c.find()) {
+            var l = c.pos.from.line;
+            cm.foldCode(l);
+            cm.setSelection({line: l})
+            cm.execCommand('goLineDown');
+            cm.execCommand('goLineStart');
           }
         },
         get html() {
