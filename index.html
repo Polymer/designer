@@ -116,6 +116,7 @@
         selected: 'design',
         remoteHtml: '',
         fileName: 'designer.html',
+        githubUser: 'designer-polymer',
         githubToken: '77777d8808da580cd6134b7390b5fd306c66d1d6',
         ready: function() {
           document.addEventListener('keydown', 
@@ -277,7 +278,7 @@
           */
         },
         getGistUrl: function() {
-          return 'https://gist.github.com/anonymous/' + this.fileId;
+          return 'https://gist.github.com/' + this.githubUser + '/' + this.fileId;
         }
       });
     </script>
