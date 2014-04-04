@@ -1,0 +1,60 @@
+﻿:host {
+  position: relative;
+}
+
+#title {
+  height: 54px;
+  line-height: 54px;
+  font-size: 1.5px;
+  padding-left: 22px;
+  background-color: #E0E0E0;
+  border-bottom: 1px solid #E1E1E1;
+}
+
+#list {
+  background-color: #F2F2F2;
+  position: absolute;
+  top: 0;
+  right: 0px;
+  left: 0px;
+  bottom: 0px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.item {
+  font-weight: bold;
+  cursor: pointer;
+  padding: 12px;
+  margin: 4px 0;
+  background-color: white;
+  border: 1px solid #D3D2D2;
+  border-radius: 5px;
+  -webkit-transition: border 0.5s;
+}
+
+.group-item {
+  font-weight: 500;
+}
+
+.group-item.palette-selected {
+  color: #4285f4;
+}
+
+.simple-item {
+  height: 40px;
+  line-height: 40px;
+  opacity: 0.7;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #000;
+  white-space: nowrap;
+}
+
+[ishidden] {
+  display: none;
+}
