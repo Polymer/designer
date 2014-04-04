@@ -1,26 +1,27 @@
 <!doctype html>
 <html>
 <head>
+
   <title>Designer</title>
-  <script src="components/platform/platform.js"></script>
-  <link rel="import" href="components/polymer-elements/elements.html">
-  <link rel="import" href="components/polymer-ui-elements/elements.html">
-  <link rel="import" href="components/code-mirror/code-mirror.html">
-  <link rel="import" href="components/github-elements/github-elements.html">
-  <link rel="import" href="components/x-dom-serializer/x-dom-serializer.html">
-  <link rel="import" href="components/x-inspector/x-inspector.html">
-  <link rel="import" href="components/x-file-document/x-file-document.html">
+
+  <script src="components/platform-dev/platform.js"></script>
+
+  <link rel="import" href="elements/designer-element/designer-element.html">
+
   <style>
+
     html {
       position: relative;
       height: 100%;
     }
+
     body {
       font-family: 'Helvetica Neue', Helvetica, Roboto, Arial;
       height: 100%;
       margin: 0;
       overflow: hidden;
     }
+
     designer-element {
       display: block;
       position: absolute;
@@ -30,258 +31,24 @@
       left: 0;
       overflow: hidden;
     }
+
   </style>
+
 </head>
 <body>
+
   <script>
     var metadata = [
       /* 'components/core-elements/metadata.html', */
-      'components/paper-elements/metadata.html',
-      'components/polymer-elements/metadata.html',
-      'components/polymer-ui-elements/metadata.html',
-      'components/more-elements/metadata.html',
-      'components/polytype/metadata.html'
+      '../../components/paper-elements/metadata.html',
+      '../../components/polymer-elements/metadata.html',
+      '../../components/polymer-ui-elements/metadata.html',
+      '../../components/more-elements/metadata.html',
+      '../../components/polytype/metadata.html'
     ];
   </script>
 
   <designer-element id="designer"></designer-element>
 
-  <polymer-element name="designer-element">
-    <template>
-
-      <style>
-        iframe {
-          width: 100%;
-          height: 100%;
-          border: none;
-        }
-        #appbar {
-          xbackground: #4285f4;
-        }
-        #viewSelector {
-          padding: 4px;
-          background: #E0E0E0;
-          border-radius: 2px;
-          margin-left: 8px;
-        }
-        #inspector {
-          position: relative;
-          width: 350px;
-          border-left: 1px solid silver;
-          transition: width 0.3s;
-          box-shadow: -5px 0 8px rgba(0, 0, 0, 0.14);
-        }
-        #inspector.maximized {
-          width: 0;
-          border: 0;
-        }
-        #frameContainer {
-          height: 100%;
-          z-index: 0;
-        }
-      </style>
-
-      <polymer-layout vertical></polymer-layout>
-
-      <polymer-ui-toolbar id="appbar" theme="polymer-ui-light-theme">
-        <!-- <polymer-ui-icon-button icon="menu"></polymer-ui-icon-button> -->
-        <polymer-ui-icon-button icon="maximize" on-tap="{{fullscreenAction}}"></polymer-ui-icon-button>
-        <polymer-selector id="viewSelector" selected="{{selected}}">
-          <polymer-ui-icon-button src="assets/design.png" name="design"></polymer-ui-icon-button>
-          <polymer-ui-icon-button src="assets/code.png" name="code"></polymer-ui-icon-button>
-        </polymer-selector>
-        <polymer-ui-icon-button icon="add" on-tap="{{saveAction}}"></polymer-ui-icon-button>
-        <polymer-ui-icon-button icon="shortcut" on-click="{{shareAction}}"></polymer-ui-icon-button>
-      </polymer-ui-toolbar>
-
-      <polymer-ui-pages flex selected="{{selected}}">
-        <section name="design">
-          <polymer-flex-layout></polymer-flex-layout>
-          <div id="frameContainer" flex>
-            <iframe id="frame" src="designer.html" on-load="{{designWindowLoaded}}"></iframe>
-          </div>
-          <x-inspector id="inspector" on-delete-element="{{deleteElement}}" on-parent-element="{{selectParentElement}}" on-bind-property="{{applyPropertyBinding}}"></x-inspector>
-        </section>
-        <section name="code">
-          <polymer-layout></polymer-layout>
-          <code-mirror id="code" flex></code-mirror>
-        </section>
-      </polymer-ui-pages>
-      <x-dom-serializer id="serializer"></x-dom-serializer>
-      <github-element id="github" token="{{githubToken}}" on-files-loaded="{{documentLoaded}}" on-files-saved="{{documentSaved}}" on-token-changed="{{tokenChangeHandler}}"></github-element>
-    </template>
-
-    <script>
-      Polymer('designer-element', {
-        selected: 'design',
-        remoteHtml: '',
-        fileName: 'designer.html',
-        githubUser: 'designer-polymer',
-        githubToken: '77777d8808da580cd6134b7390b5fd306c66d1d6',
-        ready: function() {
-          document.addEventListener('keydown', 
-              this.KeydownAndPromptForUnload.bind(this, window));
-          this.firstLoad = true;
-        },
-        designWindowLoaded: function() {
-          this.$.frame.style.display = null;
-          window.designWindow = this.$.frame.contentWindow;
-          designWindow.addEventListener('designer-ready', this.designerReady.bind(this));
-          designWindow.addEventListener('design-change', this.designChange.bind(this));
-          designWindow.document.addEventListener('keydown', 
-              this.KeydownAndPromptForUnload.bind(this, designWindow));
-        },
-        KeydownAndPromptForUnload: function(w, e) {
-          // backspace
-          if (e.keyCode == 8) {
-            w.onbeforeunload = function() {
-              return ' ';
-            }
-            setTimeout(function() {
-              w.onbeforeunload = null;
-            }, 0);
-          }
-        },
-        designerReady: function(event) {
-          //console.log('designerReady');
-          this.designer = event.target;
-          this.designer.loadLinks(window.metadata, function() {
-            if (this.firstLoad) {
-              this.firstLoad = false;
-              this.loadRemoteContent();
-              return;
-            }
-            if (this.pendingHtml) {
-              this.loadHtml(this.pendingHtml);
-              this.pendingHtml = null;
-            } else {
-              var tag = Platform.flags.element;
-              if (tag) {
-                this.designer.createElement(tag);
-              }
-            }
-          }.bind(this));
-        },
-        designChange: function(event) {
-          this.$.inspector.sourceElement = this.designer.selected;
-          this.$.inspector.update();
-        },
-        deleteElement: function(event) {
-          this.designer.deleteElement();
-        },
-        selectParentElement: function(event) {
-          this.designer.selectParentElement();
-        },
-        selectedChanged: function() {
-          if (this.selected == 'code') {
-            this.designToCode();
-            this.$.code.refresh();
-            this.async('prepareCode')
-          } else {
-            this.$.frame.style.display = 'none';
-            this.codeToDesign();
-          }
-        },
-        // TODO(sorvell): probably should factor this code setup to be elsewhere
-        prepareCode: function() {
-          this.$.code.focus();
-          // fold style tag
-          var cm = this.$.code.mirror;
-          var c = cm.getSearchCursor('<style>');
-          if (c.find()) {
-            var l = c.pos.from.line;
-            cm.foldCode(l);
-            cm.setSelection({line: l})
-            cm.execCommand('goLineDown');
-            cm.execCommand('goLineStart');
-          }
-        },
-        get html() {
-          return this.$.serializer.dumpElement(this.designer.$.canvas);
-        },
-        designToCode: function() {
-          this.$.code.mirror.setValue(this.html);
-        },
-        codeToDesign: function() {
-          this.pendingHtml = this.$.code.mirror.getValue();
-          this.reloadDesigner();
-        },
-        reloadDesigner: function() {
-          //this.$.frame.onload = this.designWindowLoaded.bind(this);
-          designWindow.location.reload();
-        },
-        fullscreenAction: function() {
-          this.maximized = !this.maximized;
-        },
-        maximizedChanged: function() {
-          this.designer.maximized = this.maximized;
-          this.$.inspector.classList.toggle('maximized', this.maximized);
-        },
-        applyPropertyBinding: function(event, detail) {
-          this.designer.applyPropertyBinding(
-              detail.obj, detail.name, detail.path);  
-        },
-        saveAction: function() {
-          var options = {};
-          options[this.fileName] = {content: this.html};
-          if (this.fileId) {
-            this.$.github.update(this.fileId, 'designer', true, options);
-          } else {
-            this.$.github.save('designer', true, options);
-          }
-        },
-        shareAction: function() {
-          this.sharing = true;
-          // must open window immediately so that it opens in a tab, not a window
-          this.shareWindow = window.open(this.getGistUrl());
-          this.saveAction();
-        },
-        share: function() {
-          if (this.fileId && this.shareWindow) {
-            this.shareWindow.location.href = this.getGistUrl();
-          }
-        },
-        loadRemoteContent: function() {
-          var id = window.location.hash.replace('#', '');
-          if (id) {
-            this.fileId = id;
-            this.$.github.load(id);
-          }
-        },
-        documentLoaded: function(event, detail) {
-          var doc = detail && detail[this.fileName];
-          if (doc) {
-            this.remoteHtml = doc.content;
-          }
-        },
-        documentSaved: function(event, detail) {
-          this.fileId = detail.id; 
-          if (this.sharing) {
-            this.sharing = false;
-            this.share();
-          }
-        },
-        remoteHtmlChanged: function() {
-          //console.log(this.remoteHtml);
-          this.loadHtml(this.remoteHtml);
-        },
-        loadHtml: function(html) {
-          this.designer.loadHtml(html);
-        },
-        tokenChangeHandler: function() {
-          this.$.github.cancel();
-          // make login work
-          /*
-          this.async(function() {
-            this.$.github.style.position = 'static';
-          });
-          */
-        },
-        getGistUrl: function() {
-          return 'https://gist.github.com/' + this.githubUser + '/' + this.fileId;
-        }
-      });
-    </script>
-  </polymer-element>
 </body>
 </html>

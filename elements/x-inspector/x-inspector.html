@@ -1,0 +1,111 @@
+<!--
+Copyright 2013 The Polymer Authors. All rights reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+-->
+<link rel="import" href="../../components/polymer-ui-icon-button/polymer-ui-icon-button.html">
+<link rel="import" href="../x-property-inspector/x-property-inspector.html">
+<link rel="import" href="../x-meta/x-meta.html">
+<script src="reflection.js"></script>
+
+<polymer-element name="x-style-inspector" attributes="sourceElement">
+  <template>
+    <template repeat="{{properties}}">
+      <x-property-inspector property="{{}}" nobind></x-property-inspector>
+    </template>
+    <x-meta id="meta">
+      <property name="backgroundColor" kind="color"></property>
+      <property name="opacity" kind="range" min="0" max="1" step="0.1" defaultvalue="1"></property>
+      <property name="border"></property>
+      <property name="padding"></property>
+      <property name="margin"></property>
+      <property name="display"></property>
+      <property name="left"></property>
+      <property name="top"></property>
+      <property name="width"></property>
+      <property name="height"></property>
+      <!-- <property name="test" kind="tk-compound-editor"></property> -->
+    </x-meta>
+  </template>
+  <script>
+    Polymer('x-style-inspector', {
+      properties: null,
+      sourceElementChanged: function() {
+        this.properties = Reflection.styles(this.sourceElement,
+          this.$.meta.properties);
+      }
+    });
+  </script>
+</polymer-element>
+
+<polymer-element name="x-inspector" attributes="sourceElement">
+  <template>
+    <link rel="stylesheet" href="x-inspector.css">
+    <div id="header">
+      <div id="crumbList">
+        <template repeat="{{crumbs}}">
+          <polymer-ui-icon-button src="assets/ic_chevron_left_darkreg.png" on-click="{{selectParentElement}}" hidden="{{top}}"></polymer-ui-icon-button>
+          <b>{{name}}</b>
+        </template>
+      </div>
+      <polymer-ui-icon-button id="deleteIcon" src="assets/ic_delete_darkreg.png" on-click="{{deleteElement}}"></polymer-ui-icon-button>
+    </div>
+    <div id="interior">
+      <template repeat="{{properties}}">
+        <x-property-inspector property="{{}}" hidden="{{meta.hidden}}"></x-property-inspector>
+      </template>
+      <x-style-inspector sourceElement="{{sourceElement}}"></x-style-inspector>
+    </div>
+    <x-meta id="meta"></x-meta>
+  </template>
+  <script>
+    Polymer('x-inspector', {
+      sourceElement: null,
+      properties: null,
+      crumbs: [],
+      sourceElementChanged: function() {
+        this.update();
+      },
+      update: function() {
+        // meta-data attached here
+        if (this.sourceElement) {
+          this.properties = Reflection.properties(this.sourceElement);
+          this.crumbs = this.listCrumbs();
+        } else {
+          this.name = '';
+          this.properties = [];
+          this.crumbs = [];
+        }
+        // right-align crumbs
+        this.async(function() {
+          this.$.crumbList.scrollLeft = 1e4;
+        });
+      },
+      listCrumbs: function() {
+        var crumbs = [];
+        var elt = this.sourceElement;
+        if (elt.hasAttribute('designer')) {
+          return [{
+            name: 'component',
+            top: true
+          }]
+        }
+        var crumb = {};
+        while (elt && !elt.hasAttribute('designer')) {
+          crumb = {
+            name: elt.localName
+          };
+          crumbs.unshift(crumb);
+          elt = elt.parentNode;
+        }
+        return crumbs;
+      },
+      deleteElement: function() {
+        this.fire('delete-element');
+      },
+      selectParentElement: function() {
+        this.fire('parent-element');
+      }
+    });
+  </script>
+</polymer-element>

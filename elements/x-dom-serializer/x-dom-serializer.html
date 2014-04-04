@@ -1,0 +1,281 @@
+<link rel="import" href="../../components/polymer/polymer.html">
+<link rel="import" href="../x-binding/x-binding.html"></link>
+
+<polymer-element name="x-serializer">
+  <script>
+    Polymer('x-serializer', {
+      tab: '  ',
+      attributesBlacklist: ['style', 'tabindex', 'role'],
+      dumpTag: function(node, indent) {
+        if (node.dumpTag) {
+          return node.dumpTag(this.dumpTab, indent, this.tab);
+        }
+        if (node.nodeType == Node.TEXT_NODE) {
+          return this.dumpTextNode(node, indent);
+        }
+        var html = '';
+        html += indent + '<' + node.localName;
+        var attributes = this.dumpAttributes(node);
+        Object.keys(attributes).forEach(function(k) {
+          var v = attributes[k];
+          if (v !== null && v !== undefined) {
+            // json properties can contain " so surround them with '
+            var sep = typeof v === 'string' && v.indexOf('"') >= 0 ? '\'' : '"';
+            html += ' ' + k + (v !== '' ? '=' + sep + v + sep: '');
+          }
+        })
+        html += '>';
+        var end = {input: 1}[node.localName] ? '\n' : '</' + node.localName + '>\n';
+        if (node.meta && node.meta.hideSubtree) {
+          html += end;
+        } else {
+          var root = node.content || node;
+          if (root.firstElementChild) {
+            Array.prototype.forEach.call(root.children, function(c, i) {
+              if (i == 0) {
+                html += '\n';
+              }
+              html += this.dumpTag(c, indent + this.tab);
+            }, this);
+            html += indent + end;
+          } else {
+            html += root.firstChild ? this.dumpTextNode(root.firstChild, indent)
+               + end : end;
+          }
+        }
+        return html;
+      },
+      dumpAttributes: function(node) {
+        var p$ = Reflection.properties(node);
+        var attributes = {};
+        p$.forEach(function(p) {
+          var v = p.value, n = p.name, binding = Bindings.getBinding(node, n);
+          if (n == 'textContent') {
+            return;
+          }
+          if (node.publish && node.publish[n] === undefined) {
+            return;
+          }
+          if (binding) {
+            v = '{{ ' + binding + ' }}';
+          } else if (!((v || v === 0) && (typeof v === 'string' || typeof v === 'number' ||
+              typeof v === 'boolean'))) {
+            v = null;
+          }
+          if (v != null) {
+            attributes[n.toLowerCase()] = v;
+          }
+        });
+        for (var i=0, a, n; (a = node.attributes[i]); i++) {
+          n = a.name.toLowerCase();
+          if (attributes[n] === undefined) {
+            attributes[n] = a.value;
+          }
+        }
+        this.filterAttributes(attributes);
+        return attributes;
+      },
+      // special handling for certain attributes: style, class
+      filterAttributes: function(attributes) {
+        for (var i in attributes) {
+          if (this.attributesBlacklist.indexOf(i) >= 0 || i.match(/^aria/)) {
+            attributes[i] = null;
+          }
+        }
+        var v = attributes['class'];
+        v = v ? v.replace(/selected-element/g, '') : null;
+        if (v && (v.trim() == 'selected')) {
+          v = '';
+        }
+        attributes['class'] = v || null;
+      },
+      dumpTextNode: function(node) {
+        var binding = Bindings.getBinding(node, 'textContent');
+        return binding ? '{{ ' + binding + ' }}' : node.textContent;
+      }
+    });
+  </script>
+</polymer-element>
+
+<polymer-element name="x-dom-serializer" extends="x-serializer">
+  <script>
+    Polymer('x-dom-serializer', {
+      //elementBlackList: ['style'],
+      elementBlackList: [],
+      propertyBlackList: null,
+      ready: function() {
+        var node = document.createElement('x-serializer-blacklist');
+        this.propertyBlackList = Object.keys(node.__proto__);
+      },
+      dumpElement: function(node, indent) {
+        var html = '', indent = indent || '';
+        if (!node.querySelector('link[rel=import]')) {
+          html+= this.dumpImports(node, indent);
+        }
+        html += this.dumpChildren(node, indent);
+        //var name = ''; //node.elementAttributes.name || '';
+        //
+        // resolve properties to attributes before dumping
+        //var proto = this.dumpProto(node, indent + this.tab + this.tab);
+        //var script = 'Polymer(\'' + name +'\', ' + proto + ');';
+        //html += indent + '<polymer-element' + this.dumpElementAttributes(node) +
+        //  '>\n' + indent + this.tab + '<template>\n';
+        //
+        //html += indent + this.dumpStyle(node, indent + this.tab + this.tab);
+        //
+        //html += indent + this.tab + '</template>\n' +
+          //indent + this.tab +'<script>\n' +
+          //indent + this.tab + this.tab + script + '\n' +
+          //indent + this.tab +'</s' + 'cript>\n'+
+          //indent + '</polymer-element>';
+        return html;
+      },
+      dumpChildren: function(node, indent) {
+        var children = '', indent = indent || '';
+        Array.prototype.forEach.call(node.children, function(c) {
+          if (this.elementBlackList.indexOf(c.localName) < 0) {
+            children += this.dumpTag(c, indent);
+          }
+        }, this);
+        return children || (indent + '\n');
+      },
+      dumpTextNode: function(node, indent) {
+        if (node.parentNode.localName === 'style') {
+          var style = node.parentNode;
+          return this.cssTextFromSheet(style, style.sheet, indent);
+        } else {
+          return this.super(arguments);
+        }
+      },
+      dumpElementAttributes: function(node) {
+        var html = '';
+        if (node.elementAttributes) {
+          Object.keys(node.elementAttributes).forEach(function(a) {
+            html += ' ' + a + '="' + node.elementAttributes[a] + '"';
+          });
+        }
+        return html;
+      },
+      dumpProto: function(node, indent) {
+        var dump = '{\n';
+        var props = Object.keys(node.__proto__).filter(function(p) {
+          return (this.propertyBlackList.indexOf(p) < 0);
+        }, this);
+        if (!props.length) {
+          dump += indent + this.tab;
+        }
+        props.forEach(function(k, i) {
+          var value = node.__proto__[k], nodeValue = node[k];
+          dump += indent + this.tab + k + ': ';
+          if (typeof value == 'function') {
+            dump += value.toString();
+          } else {
+            dump += (typeof value == 'string' ? '\'' + nodeValue +
+              '\'' : nodeValue);
+          }
+          dump += (i <  props.length-1 ? ',\n' : '');
+        }, this);
+        dump += '\n' + indent + '}';
+        return dump;
+      },
+      /*
+      dumpStyle: function(node, startIndent) {
+        var css = startIndent + '<style>\n';
+        var style = node.querySelector('style');
+        if (style && style.sheet) {
+          css += this.cssTextFromSheet(node, style.sheet, startIndent, this.tab)
+            || '';
+        }
+        var tab = this.tab;
+        function subtree(root, indent) {
+          var e = root.firstElementChild;
+          while (e) {
+            var parts = e.hasAttribute('style') ?
+              e.getAttribute('style').split(';') : null;
+            if (parts && e.id) {
+              css += indent + '#' + e.id + ' {\n';
+              parts.forEach(function(p) {
+                if (p) {
+                  p = p.trim();
+                  if (p === 'position: absolute') {
+                    p = p + ' !important';
+                  }
+                  css += indent + tab + p.trim() + ';\n';
+                }
+              });
+              css += indent + '}' + '\n';
+            }
+            if (e.firstElementChild) {
+              subtree(e, indent);
+            }
+            e = e.nextElementSibling;
+          }
+        }
+        subtree(node, (startIndent || '') + this.tab);
+        css += startIndent + '</style>\n';
+        return css;
+      },
+      */
+      cssTextFromSheet: function(node, sheet, indent) {
+        if (sheet) {
+          var rules = sheet.cssRules;
+          var css = [indent];
+          for (var i=0, r; i < rules.length; i++) {
+            if (!(this.ignoreSelector(node, rules[i].selectorText))) {
+              r = this.dumpRule(rules[i], indent + this.tab);
+              if (r) {
+                css.push(r);
+              }
+            }
+          }
+          css.push('');
+          return css.join('\n');
+        }
+        return '';
+      },
+      // ignore id selectors
+      ignoreSelector: function (node, selector) {
+        //return selector.match(/^#[^, ]*$/) && node.querySelector(selector);
+      },
+      dumpRule: function(rule, indent) {
+        if (!rule.style.cssText) {
+          return null;
+        }
+        indent = indent || '';
+        // format
+        var css = indent + rule.selectorText + ' {\n' +
+            rule.style.cssText.replace(/([^;]*);\s*:?/g, indent + this.tab + 
+            '$1;\n') + 
+            indent + '}';
+        return css;
+      },
+      dumpImports: function(element, indent) {
+        var n$ = element.querySelectorAll('*');
+        var imports = [], metas=[];
+        for (var i=0, l=n$.length, n, m; (i<l) && (n=n$[i]); i++) {
+          m = n.meta;
+          if (m && metas.indexOf(m) < 0) {
+            metas.push(m);
+            var f = m.getImports().content.cloneNode(true);
+            imports = imports.concat(f.querySelectorAll('link[rel=import]').array());
+          }
+        }
+        var href = window.location.origin + window.location.pathname;
+        var d = document.createElement('div'), urls=[];
+        for (var i=0, l=imports.length, n, h; (i<l) && (n=imports[i]); i++) {
+          h = n.href.replace(href, '').replace('components', '..');
+          if (urls.indexOf(h) < 0) {
+            urls.push(h);
+            n.setAttribute('href', h);
+            d.appendChild(n);
+            d.appendChild(document.createTextNode('\n'));
+          }
+        }
+        return d.innerHTML;
+      }
+    });
+  </script>
+</polymer-element>
+
+<!-- this element exists to generate a property black list for polymer-element -->
+<polymer-element name="x-serializer-blacklist" noscript></polymer-element>
