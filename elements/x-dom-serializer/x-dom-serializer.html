@@ -252,12 +252,15 @@
       dumpImports: function(element, indent) {
         var n$ = element.querySelectorAll('*');
         var imports = [], metas=[];
-        for (var i=0, l=n$.length, n, m; (i<l) && (n=n$[i]); i++) {
+        for (var i=0, l=n$.length, n, m, p; (i<l) && (n=n$[i]); i++) {
           m = n.meta;
           if (m && metas.indexOf(m) < 0) {
             metas.push(m);
-            var f = m.getImports().content.cloneNode(true);
-            imports = imports.concat(f.querySelectorAll('link[rel=import]').array());
+            p = m.getImports();
+            if (p) {
+              p = p.content.cloneNode(true);
+              imports = imports.concat(p.querySelectorAll('link[rel=import]').array());
+            }
           }
         }
         var href = window.location.origin + window.location.pathname;
