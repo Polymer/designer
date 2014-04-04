@@ -67,7 +67,7 @@
     <section name="design">
       <polymer-flex-layout></polymer-flex-layout>
       <div id="frameContainer" flex>
-        <iframe id="frame" src="designer.html" on-load="{{designWindowLoaded}}"></iframe>
+        <iframe id="frame" src="designer.html"></iframe>
       </div>
       <x-inspector id="inspector" on-delete-element="{{deleteElement}}" on-parent-element="{{selectParentElement}}" on-bind-property="{{applyPropertyBinding}}"></x-inspector>
     </section>
@@ -93,6 +93,7 @@
     ready: function() {
       document.addEventListener('keydown', 
           this.KeydownAndPromptForUnload.bind(this, window));
+      window.addEventListener('message', this.designWindowLoaded.bind(this));
       this.firstLoad = true;
     },
     designWindowLoaded: function() {
@@ -179,7 +180,6 @@
       this.reloadDesigner();
     },
     reloadDesigner: function() {
-      //this.$.frame.onload = this.designWindowLoaded.bind(this);
       designWindow.location.reload();
     },
     fullscreenAction: function() {
