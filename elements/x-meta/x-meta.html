@@ -55,11 +55,6 @@
           var an = a.name.toLowerCase(), bn = b.name.toLowerCase();
           return an == bn ? 0 : an < bn ? -1 : 1;
         });
-        /*
-        console.group('categories');
-        this.categories.forEach(function(c) {console.log(c.name);});
-        console.groupEnd('categories');
-        */
       },
       idChanged: function(inOld) {
         this.unregister(this, inOld);

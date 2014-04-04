@@ -5,7 +5,9 @@
 <link rel="import" href="../x-meta/x-meta.html">
 
 <polymer-element name="x-palette" attributes="canvas drag">
+
   <template>
+
     <style>
       :host {
         position: relative;
@@ -32,8 +34,6 @@
         -ms-user-select: none;
       }
       .item {
-        Xfont-size: 15px;
-        Xmargin: 10px 6px 10px 10px;
         font-weight: bold;
         cursor: pointer;
         padding: 12px;
@@ -59,27 +59,8 @@
         color: #000;
         white-space: nowrap;
       }
-      .stage{
-        background: url('stage.png');
-        color: white;
-      }
-      .grill {
-        background: url('grill.png');
-        color: white;
-      }
-      .satin {
-        background: url('satin.png');
-        color: white;
-      }
-      .bluefog {
-        background: url('bluefog.png');
-        color: white;
-      }
       [ishidden] {
         display: none;
-      }
-      [loaded] {
-        Xborder: 1px solid green;
       }
     </style>
 
@@ -89,7 +70,7 @@
 
       <polymer-ui-menu selectedClass="palette-selected">
 
-        <template repeat="{{categories}}"
+        <template repeat="{{categories}}">
 
           <polymer-ui-submenu-item class="group-item" label="{{name}}">
 
