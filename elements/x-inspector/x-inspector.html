@@ -40,25 +40,36 @@ license that can be found in the LICENSE file.
 
 <polymer-element name="x-inspector" attributes="sourceElement">
   <template>
+
     <link rel="stylesheet" href="x-inspector.css">
-    <div id="header">
+
+    <div id="header" theme="polymer-ui-light-theme">
+
       <div id="crumbList">
         <template repeat="{{crumbs}}">
           <polymer-ui-icon-button src="assets/ic_chevron_left_darkreg.png" on-click="{{selectParentElement}}" hidden="{{top}}"></polymer-ui-icon-button>
           <b>{{name}}</b>
         </template>
       </div>
-      <polymer-ui-icon-button id="deleteIcon" src="assets/ic_delete_darkreg.png" on-click="{{deleteElement}}"></polymer-ui-icon-button>
+
+      <polymer-ui-icon-button class="fright" src="assets/ic_delete_darkreg.png" on-click="{{deleteElement}}"></polymer-ui-icon-button>
+      <!--<polymer-ui-icon-button class="fright" icon="right"></polymer-ui-icon-button>
+      <polymer-ui-icon-button class="fright" icon="left"></polymer-ui-icon-button>-->
+
     </div>
+
     <div id="interior">
       <template repeat="{{properties}}">
         <x-property-inspector property="{{}}" hidden="{{meta.hidden}}"></x-property-inspector>
       </template>
       <x-style-inspector sourceElement="{{sourceElement}}"></x-style-inspector>
     </div>
+
     <x-meta id="meta"></x-meta>
+
   </template>
   <script>
+
     Polymer('x-inspector', {
       sourceElement: null,
       properties: null,
@@ -107,5 +118,7 @@ license that can be found in the LICENSE file.
         this.fire('parent-element');
       }
     });
+
   </script>
+
 </polymer-element>

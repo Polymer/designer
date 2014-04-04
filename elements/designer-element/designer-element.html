@@ -59,8 +59,14 @@
       <polymer-ui-icon-button src="assets/design.png" name="design"></polymer-ui-icon-button>
       <polymer-ui-icon-button src="assets/code.png" name="code"></polymer-ui-icon-button>
     </polymer-selector>
+    <span style="padding-right: 24px;"></span>
     <polymer-ui-icon-button icon="add" on-tap="{{saveAction}}"></polymer-ui-icon-button>
+    <!-- shareAction has to be triggered from on-click to allow opening a tab (otherwise can only open a floating window) -->
     <polymer-ui-icon-button icon="shortcut" on-click="{{shareAction}}"></polymer-ui-icon-button>
+    <span style="padding-right: 16px;"></span>
+    <polymer-ui-icon-button icon="left" on-tap="{{promoteElement}}"></polymer-ui-icon-button>
+    <polymer-ui-icon-button icon="right" on-tap="{{demoteElement}}"></polymer-ui-icon-button>
+
   </polymer-ui-toolbar>
 
   <polymer-ui-pages flex selected="{{selected}}">
@@ -90,11 +96,13 @@
     fileName: 'designer.html',
     githubUser: 'designer-polymer',
     githubToken: '77777d8808da580cd6134b7390b5fd306c66d1d6',
+
     ready: function() {
       document.addEventListener('keydown', 
           this.KeydownAndPromptForUnload.bind(this, window));
       this.firstLoad = true;
     },
+
     designWindowLoaded: function() {
       this.$.frame.style.display = null;
       window.designWindow = this.$.frame.contentWindow;
@@ -103,6 +111,7 @@
       designWindow.document.addEventListener('keydown', 
           this.KeydownAndPromptForUnload.bind(this, designWindow));
     },
+
     KeydownAndPromptForUnload: function(w, e) {
       // backspace
       if (e.keyCode == 8) {
@@ -114,6 +123,7 @@
         }, 0);
       }
     },
+
     designerReady: function(event) {
       //console.log('designerReady');
       this.designer = event.target;
@@ -134,16 +144,28 @@
         }
       }.bind(this));
     },
+
     designChange: function(event) {
       this.$.inspector.sourceElement = this.designer.selected;
       this.$.inspector.update();
     },
+
     deleteElement: function(event) {
       this.designer.deleteElement();
     },
+
+    promoteElement: function(event) {
+      this.designer.promoteElement();
+    },
+
+    demoteElement: function(event) {
+      this.designer.demoteElement();
+    },
+
     selectParentElement: function(event) {
       this.designer.selectParentElement();
     },
+
     selectedChanged: function() {
       if (this.selected == 'code') {
         this.designToCode();
@@ -154,6 +176,7 @@
         this.codeToDesign();
       }
     },
+
     // TODO(sorvell): probably should factor this code setup to be elsewhere
     prepareCode: function() {
       this.$.code.focus();
@@ -168,31 +191,39 @@
         cm.execCommand('goLineStart');
       }
     },
+
     get html() {
       return this.$.serializer.dumpElement(this.designer.$.canvas);
     },
+
     designToCode: function() {
       this.$.code.mirror.setValue(this.html);
     },
+
     codeToDesign: function() {
       this.pendingHtml = this.$.code.mirror.getValue();
       this.reloadDesigner();
     },
+
     reloadDesigner: function() {
       //this.$.frame.onload = this.designWindowLoaded.bind(this);
       designWindow.location.reload();
     },
+
     fullscreenAction: function() {
       this.maximized = !this.maximized;
     },
+
     maximizedChanged: function() {
       this.designer.maximized = this.maximized;
       this.$.inspector.classList.toggle('maximized', this.maximized);
     },
+
     applyPropertyBinding: function(event, detail) {
       this.designer.applyPropertyBinding(
           detail.obj, detail.name, detail.path);  
     },
+
     saveAction: function() {
       var options = {};
       options[this.fileName] = {content: this.html};
@@ -202,17 +233,20 @@
         this.$.github.save('designer', true, options);
       }
     },
+
     shareAction: function() {
       this.sharing = true;
       // must open window immediately so that it opens in a tab, not a window
       this.shareWindow = window.open(this.getGistUrl());
       this.saveAction();
     },
+
     share: function() {
       if (this.fileId && this.shareWindow) {
         this.shareWindow.location.href = this.getGistUrl();
       }
     },
+
     loadRemoteContent: function() {
       var id = window.location.hash.replace('#', '');
       if (id) {
@@ -220,12 +254,14 @@
         this.$.github.load(id);
       }
     },
+
     documentLoaded: function(event, detail) {
       var doc = detail && detail[this.fileName];
       if (doc) {
         this.remoteHtml = doc.content;
       }
     },
+
     documentSaved: function(event, detail) {
       this.fileId = detail.id; 
       if (this.sharing) {
@@ -233,13 +269,16 @@
         this.share();
       }
     },
+
     remoteHtmlChanged: function() {
       //console.log(this.remoteHtml);
       this.loadHtml(this.remoteHtml);
     },
+
     loadHtml: function(html) {
       this.designer.loadHtml(html);
     },
+
     tokenChangeHandler: function() {
       this.$.github.cancel();
       // make login work
@@ -249,9 +288,11 @@
       });
       */
     },
+
     getGistUrl: function() {
       return 'https://gist.github.com/' + this.githubUser + '/' + this.fileId;
     }
+
   });
 
 </script>

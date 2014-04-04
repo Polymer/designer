@@ -6,156 +6,114 @@
 <link rel="import" href="../x-tree/x-tree.html">
 
 <polymer-element name="x-designer" attributes="selected maximized">
-  <template>
-    <style>
-      :host {
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        outline: 0;
-      }
-      #canvas {
-        background-color: white;
-        -webkit-transition: left 0.4s;
-        transition: left 0.4s;
-        /*overflow: hidden;*/
-        z-index: 1;
-      }
-      #tools {
-        width: 284px;
-        z-index: 1;
-        box-shadow: 5px 0 8px rgba(0, 0, 0, 0.16);
-        transition: width 0.3s;
-      }
-      #tools.maximized {
-        width: 0;
-      }
-      #palette {
-        -webkit-transition: left 0.4s;
-        transition: left 0.4s;
-      }
-      #tree {
-        height: 300px;
-        overflow: hidden;
-      }
-      #canvas:not(.maximized) .selected-element {
-        outline: solid 10px rgba(72, 154, 254, 0.20);
-        outline-offset: -2px;
-      }
-    </style>
+<template>
 
-    <x-meta id="meta" categories="{{elements}}"></x-meta>
+  <link rel="stylesheet" href="x-designer.css">
 
-    <polymer-flex-layout></polymer-flex-layout>
-    <section id="tools">
-      <polymer-flex-layout vertical></polymer-flex-layout>
-      <x-palette flex id="palette" elements="{{elements}}" canvas="{{$.canvas}}" on-palette-drag="{{paletteDrag}}" on-palette-create-drag-object="{{paletteCreateDragObject}}"></x-palette>
-      <polymer-ui-splitter direction="down"></polymer-ui-splitter>
-      <x-tree id="tree" canvas="{{$.canvas}}" selected="{{selected}}"></x-tree>
-    </section>
-    <x-designable flex id="canvas" tabIndex="-1" selected="{{selected}}" on-design-change="{{designChange}}"></x-designable>
+  <x-meta id="meta" categories="{{elements}}"></x-meta>
 
-  </template>
-  <script>
-  (function() {
-    Polymer('x-designer', {
-      maximized: false,
-      selectedTab: 'design',
-      ready: function() {
-        this.fire('designer-ready');
-      },
-      paletteDrag: function(event, drag) {
-        this.$.canvas.drag(drag);
-      },
-      paletteCreateDragObject: function(event, detail) {
-        detail.element = this.createElement(detail.tag);
-        this.$.canvas.makeElementDraggable(detail.element);
-      },
-      designChange: function() {
-        this.$.canvas.update();
-        this.$.tree.update();
-      },
-      createElement: function(tag) {
-        var meta = this.$.meta.byId(tag);
-        var element = meta.createElement();
-        this.$.canvas.appendChild(element);
-        this.$.canvas.decorateElement(element);
-        //this.selected = element;
-        return element;
-      },
-      deleteElement: function() {
-        this.$.canvas.deleteElement();
-      },
-      selectParentElement: function() {
-        this.$.canvas.selectParentElement();
-      },
-      maximizedChanged: function() {
-        this.$.tools.classList.toggle('maximized', this.maximized);
-        this.$.canvas.classList.toggle('maximized', this.maximized);
-        this.$.canvas.dragDisabled = this.maximized;
-      },
-      inspectTarget: function(event) {
-        var t = event.target;
-        if (t) {
-          if (t === this.$.canvas) {
-            this.selected = null;
-          } else {
-            // don't allow selection within a node with meta.hideSubtree
-            var n = t;
-            while (n) {
-              if (n.meta && n.meta.hideSubtree) {
-                t = n;
-                break;
-              }
-              n = n.parentNode;
+  <polymer-flex-layout></polymer-flex-layout>
+
+  <section id="tools">
+    <polymer-flex-layout vertical></polymer-flex-layout>
+    <x-palette flex id="palette" elements="{{elements}}" canvas="{{$.canvas}}" on-palette-drag="{{paletteDrag}}" on-palette-create-drag-object="{{paletteCreateDragObject}}"></x-palette>
+    <polymer-ui-splitter direction="down"></polymer-ui-splitter>
+    <x-tree id="tree" canvas="{{$.canvas}}" selected="{{selected}}"></x-tree>
+  </section>
+
+  <x-designable flex id="canvas" tabIndex="-1" selected="{{selected}}" on-design-change="{{designChange}}"></x-designable>
+
+</template>
+<script>
+
+  Polymer('x-designer', {
+
+    maximized: false,
+    selectedTab: 'design',
+
+    ready: function() {
+      this.fire('designer-ready');
+    },
+
+    paletteDrag: function(event, drag) {
+      this.$.canvas.drag(drag);
+    },
+
+    paletteCreateDragObject: function(event, detail) {
+      detail.element = this.createElement(detail.tag);
+      this.$.canvas.makeElementDraggable(detail.element);
+    },
+
+    designChange: function() {
+      this.$.canvas.update();
+      this.$.tree.update();
+    },
+
+    createElement: function(tag) {
+      var meta = this.$.meta.byId(tag);
+      var element = meta.createElement();
+      this.$.canvas.appendChild(element);
+      this.$.canvas.decorateElement(element);
+      return element;
+    },
+
+    deleteElement: function() {
+      this.$.canvas.deleteElement();
+    },
+
+    promoteElement: function() {
+      this.$.canvas.promoteElement();
+    },
+
+    demoteElement: function() {
+      this.$.canvas.demoteElement();
+    },
+
+    selectParentElement: function() {
+      this.$.canvas.selectParentElement();
+    },
+
+    maximizedChanged: function() {
+      this.$.tools.classList.toggle('maximized', this.maximized);
+      this.$.canvas.classList.toggle('maximized', this.maximized);
+      this.$.canvas.dragDisabled = this.maximized;
+    },
+
+    inspectTarget: function(event) {
+      var t = event.target;
+      if (t) {
+        if (t === this.$.canvas) {
+          this.selected = null;
+        } else {
+          // don't allow selection within a node with meta.hideSubtree
+          var n = t;
+          while (n) {
+            if (n.meta && n.meta.hideSubtree) {
+              t = n;
+              break;
             }
-            this.selected = t;
+            n = n.parentNode;
           }
-          Platform.flush();
+          this.selected = t;
         }
-      },
-      loadLinks: function(urls, callback) {
-        Polymer.import(urls, callback);
-      },
-      loadHtml: function(html) {
-        this.$.canvas.loadHtml(html);
-      },
-      applyPropertyBinding: function(obj, name, path) {
-        this.$.canvas.applyPropertyBinding(obj, name, path);
-      }
-      /*applySource: function(source) {
-        this.$.designElement = this.$.designElement.applySource(source);
-      },
-      sourceApplied: function(event, node) {
-        this.$.meta.ensureMeta(node);
-        // reselect selection
-        if (this.selected && this.selected.id) {
-          var selected = this.$.canvas.querySelector('#' + this.selected.id);
-        }
-        this.selected = selected || this.$.designElement;
-      },
-      publishElement: function(source) {
-        this.$.publisher.publishElement(source);
-      },
-      dumpPreviewSource: function(source) {
-        var n = this.$.designElement.elementAttributes.name;
-        source = source + '\n<' + n + '></' + n + '>';
-        return source;
-      },
-      previewElement: function(source) {
-        this.$.preview.open(this.dumpPreviewSource(source));
-      },
-      previewElementSource: function(source) {
-        this.$.preview.openSource(this.dumpPreviewSource(source));
-      },
-      clearElement: function() {
         Platform.flush();
-        this.applySource(this.$.designElement.defaultSource);
       }
-      */
-    });
-  })();
-  </script>
+    },
+
+    loadLinks: function(urls, callback) {
+      Polymer.import(urls, callback);
+    },
+
+    loadHtml: function(html) {
+      this.$.canvas.loadHtml(html);
+    },
+
+    applyPropertyBinding: function(obj, name, path) {
+      this.$.canvas.applyPropertyBinding(obj, name, path);
+    }
+
+  });
+
+</script>
+
 </polymer-element>

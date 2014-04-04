@@ -1,0 +1,41 @@
+﻿:host {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  outline: 0;
+}
+
+#canvas {
+  background-color: white;
+  -webkit-transition: left 0.4s;
+  transition: left 0.4s;
+  z-index: 1;
+}
+
+#tools {
+  width: 284px;
+  z-index: 1;
+  box-shadow: 5px 0 8px rgba(0, 0, 0, 0.16);
+  transition: width 0.3s;
+}
+
+#tools.maximized {
+  width: 0;
+}
+
+#palette {
+  -webkit-transition: left 0.4s;
+  transition: left 0.4s;
+}
+
+#tree {
+  height: 300px;
+  overflow: hidden;
+}
+
+#canvas:not(.maximized) .selected-element {
+  outline: solid 10px rgba(72, 154, 254, 0.20);
+  outline-offset: -2px;
+}

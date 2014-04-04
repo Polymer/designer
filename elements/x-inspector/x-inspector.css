@@ -19,14 +19,14 @@ license that can be found in the LICENSE file.
 
 #crumbList {
   display: inline-block;
-  width: 80%;
+  width: 60%;
   vertical-align: middle;
   overflow: hidden;
   float: left;
   font-size: 0.8em;
 }
 
-#deleteIcon {
+.fright {
   float: right;
 }
 
