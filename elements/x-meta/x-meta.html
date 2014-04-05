@@ -128,7 +128,9 @@
       getImports: function() {
         var t = this.querySelector('#imports');
         // resolve urls in template.
-        Platform.urlResolver.resolveTemplate(t);
+        if (t) {
+          Platform.urlResolver.resolveTemplate(t);
+        }
         return t;
       },
       loadImports: function(callback) {
