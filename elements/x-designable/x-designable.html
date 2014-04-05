@@ -49,14 +49,34 @@
     deleteElement: function() {
       var e = this.selected;
       if (e && e !== this) {
-        //if (e === this.$.designElement) {
-        //  this.clearElement();
-        //} else {
-          e.parentNode.removeChild(e);
-          forSubtree(e, this.removeElementRule.bind(this));
-          this.selected = null;
-        //}
+        e.parentNode.removeChild(e);
+        forSubtree(e, this.removeElementRule.bind(this));
+        this.selected = null;
       }
+    },
+
+    promoteElement: function() {
+      var e = this.selected;
+      if (e && e !== this) {
+        e.parentNode.insertBefore(e, e.previousElementSibling);
+      }
+      this.notify();
+    },
+
+    demoteElement: function() {
+      var e = this.selected;
+      if (e && e !== this) {
+        var n = e.nextElementSibling;
+        if (n) {
+          n = n.nextElementSibling;
+          if (n) {
+            e.parentNode.insertBefore(e, n);
+          } else {
+            e.parentNode.appendChild(e);
+          }
+        }
+      }
+      this.notify();
     },
 
     selectParentElement: function() {
