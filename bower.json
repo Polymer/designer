@@ -5,6 +5,7 @@
     "platform": "Polymer/platform#master",
     "code-mirror": "Polymer/code-mirror#master",
     "github-elements": "PolymerLabs/github-elements#master",
+    "x-meta": "PolymerLabs/x-meta#master",
     "polymer-elements": "Polymer/polymer-elements#master",
     "polymer-ui-elements": "Polymer/polymer-ui-elements#master",
     "more-elements": "Polymer/more-elements#master"

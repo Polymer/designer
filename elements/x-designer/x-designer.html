@@ -1,4 +1,3 @@
-<link rel="import" href="../../components/polymer-layout/polymer-layout.html">
 <link rel="import" href="../../components/polymer-flex-layout/polymer-flex-layout.html">
 <link rel="import" href="../../components/polymer-ui-splitter/polymer-ui-splitter.html">
 <link rel="import" href="../x-designable/x-designable.html">
@@ -100,8 +99,11 @@
       }
     },
 
-    loadLinks: function(urls, callback) {
-      Polymer.import(urls, callback);
+    'import': function(urls, callback) {
+      var imports = urls.map(function(u) {
+        return '../' + u;
+      }, this);
+      Polymer.import(imports, callback);
     },
 
     loadHtml: function(html) {

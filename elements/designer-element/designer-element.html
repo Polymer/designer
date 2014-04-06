@@ -1,94 +1,60 @@
-<link rel="import" href="../../components/polymer-layout/polymer-layout.html">
-<link rel="import" href="../../components/polymer-flex-layout/polymer-flex-layout.html">
-<link rel="import" href="../../components/polymer-ui-toolbar/polymer-ui-toolbar.html">
-<link rel="import" href="../../components/polymer-ui-icon-button/polymer-ui-icon-button.html">
+<link rel="import" href="../../components/core-selector/core-selector.html">
+<link rel="import" href="../../components/core-layout/core-layout.html">
+<link rel="import" href="../../components/core-pages/core-pages.html">
+
+<link rel="import" href="../../components/paper-appbar/paper-appbar.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 
 <link rel="import" href="../../components/code-mirror/code-mirror.html">
 <link rel="import" href="../../components/github-elements/github-elements.html">
 
 <link rel="import" href="../x-dom-serializer/x-dom-serializer.html">
-
 <link rel="import" href="../x-inspector/x-inspector.html">
 <link rel="import" href="../x-file-document/x-file-document.html">
 
 <polymer-element name="designer-element">
 <template>
 
-  <style>
+  <link rel="stylesheet" href="designer-element.css">
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
+  <core-layout flow="v"></core-layout>
 
-    #viewSelector {
-      padding: 4px;
-      background: #E0E0E0;
-      border-radius: 2px;
-      margin-left: 8px;
-    }
+  <paper-appbar id="appbar" theme="paper-light-theme">
 
-    #inspector {
-      position: relative;
-      width: 350px;
-      border-left: 1px solid silver;
-      transition: width 0.3s;
-      box-shadow: -5px 0 8px rgba(0, 0, 0, 0.14);
-    }
+    <paper-icon-button icon="maximize" on-tap="{{fullscreenAction}}"></paper-icon-button>
 
-    #inspector.maximized {
-      width: 0;
-      border: 0;
-    }
-
-    #frameContainer {
-      height: 100%;
-      z-index: 0;
-    }
-
-  </style>
-
-  <polymer-layout vertical></polymer-layout>
-
-  <polymer-ui-toolbar id="appbar" theme="polymer-ui-light-theme">
-
-    <polymer-ui-icon-button icon="maximize" on-tap="{{fullscreenAction}}"></polymer-ui-icon-button>
-
-    <polymer-selector id="viewSelector" selected="{{selected}}">
-      <polymer-ui-icon-button src="assets/design.png" name="design"></polymer-ui-icon-button>
-      <polymer-ui-icon-button src="assets/code.png" name="code"></polymer-ui-icon-button>
-    </polymer-selector>
+    <core-selector id="viewSelector" selected="{{selected}}">
+      <paper-icon-button src="assets/design.png" name="design"></paper-icon-button>
+      <paper-icon-button src="assets/code.png" name="code"></paper-icon-button>
+    </core-selector>
 
     <span style="padding-right: 24px;"></span>
 
-    <polymer-ui-icon-button icon="add" on-tap="{{saveAction}}"></polymer-ui-icon-button>
+    <paper-icon-button icon="add" on-tap="{{saveAction}}"></paper-icon-button>
     <!-- shareAction has to be triggered from on-click to allow opening a tab (otherwise can only open a floating window) -->
-    <polymer-ui-icon-button icon="shortcut" on-click="{{shareAction}}"></polymer-ui-icon-button>
+    <paper-icon-button icon="shortcut" on-click="{{shareAction}}"></paper-icon-button>
 
     <span style="padding-right: 16px;"></span>
 
-    <polymer-ui-icon-button icon="left" on-tap="{{promoteElement}}"></polymer-ui-icon-button>
-    <polymer-ui-icon-button icon="right" on-tap="{{demoteElement}}"></polymer-ui-icon-button>
+    <paper-icon-button icon="left" on-tap="{{promoteElement}}"></paper-icon-button>
+    <paper-icon-button icon="right" on-tap="{{demoteElement}}"></paper-icon-button>
 
-  </polymer-ui-toolbar>
+  </paper-appbar>
 
-  <polymer-ui-pages flex selected="{{selected}}">
+  <core-pages core-flex selected="{{selected}}">
 
-    <section name="design">
-      <polymer-flex-layout></polymer-flex-layout>
-      <div id="frameContainer" flex>
+    <core-layout name="design">
+      <div id="frameContainer" core-flex>
         <iframe id="frame" src="designer.html"></iframe>
       </div>
       <x-inspector id="inspector" on-delete-element="{{deleteElement}}" on-parent-element="{{selectParentElement}}" on-bind-property="{{applyPropertyBinding}}"></x-inspector>
-    </section>
+    </core-layout>
 
-    <section name="code">
-      <polymer-layout></polymer-layout>
-      <code-mirror id="code" flex></code-mirror>
-    </section>
+    <core-layout name="code">
+      <code-mirror id="code" core-flex></code-mirror>
+    </core-layout>
 
-  </polymer-ui-pages>
+  </core-pages>
 
   <x-dom-serializer id="serializer"></x-dom-serializer>
 
@@ -133,24 +99,26 @@
     },
 
     designerReady: function(event) {
-      //console.log('designerReady');
       this.designer = event.target;
-      this.designer.loadLinks(window.metadata, function() {
-        if (this.firstLoad) {
-          this.firstLoad = false;
-          this.loadRemoteContent();
-          return;
+      // crosses iframe boundary
+      this.designer.import(window.metadata, this.importsLoaded.bind(this));
+    },
+
+    importsLoaded: function() {
+      if (this.firstLoad) {
+        this.firstLoad = false;
+        this.loadRemoteContent();
+        return;
+      }
+      if (this.pendingHtml) {
+        this.loadHtml(this.pendingHtml);
+        this.pendingHtml = null;
+      } else {
+        var tag = Platform.flags.element;
+        if (tag) {
+          this.designer.createElement(tag);
         }
-        if (this.pendingHtml) {
-          this.loadHtml(this.pendingHtml);
-          this.pendingHtml = null;
-        } else {
-          var tag = Platform.flags.element;
-          if (tag) {
-            this.designer.createElement(tag);
-          }
-        }
-      }.bind(this));
+      }
     },
 
     designChange: function(event) {
