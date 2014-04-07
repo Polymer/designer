@@ -165,10 +165,10 @@
       var c = cm.getSearchCursor('<style>');
       if (c.find()) {
         var l = c.pos.from.line;
-        cm.foldCode(l);
         cm.setSelection({line: l})
+        cm.foldCode(l);
         cm.execCommand('goLineDown');
-        cm.execCommand('goLineStart');
+        cm.execCommand('goLineStartSmart');
       }
     },
 
