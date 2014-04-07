@@ -1,9 +1,8 @@
 <link rel="import" href="../../components/core-selector/core-selector.html">
 <link rel="import" href="../../components/core-layout/core-layout.html">
 <link rel="import" href="../../components/core-pages/core-pages.html">
-
-<link rel="import" href="../../components/paper-appbar/paper-appbar.html">
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/core-toolbar/core-toolbar.html">
+<link rel="import" href="../../components/core-icon-button/core-icon-button.html">
 
 <link rel="import" href="../../components/code-mirror/code-mirror.html">
 <link rel="import" href="../../components/github-elements/github-elements.html">
@@ -19,35 +18,40 @@
 
   <core-layout flow="v"></core-layout>
 
-  <paper-appbar id="appbar" theme="paper-light-theme">
+  <core-toolbar id="appbar" theme="paper-light-theme">
 
-    <paper-icon-button icon="maximize" on-tap="{{fullscreenAction}}"></paper-icon-button>
+    <core-icon-button icon="maximize" on-tap="{{fullscreenAction}}"></core-icon-button>
 
     <core-selector id="viewSelector" selected="{{selected}}">
-      <paper-icon-button src="assets/design.png" name="design"></paper-icon-button>
-      <paper-icon-button src="assets/code.png" name="code"></paper-icon-button>
+      <core-icon-button src="assets/design.png" name="design"></core-icon-button>
+      <core-icon-button src="assets/code.png" name="code"></core-icon-button>
     </core-selector>
 
     <span style="padding-right: 24px;"></span>
 
-    <paper-icon-button icon="add" on-tap="{{saveAction}}"></paper-icon-button>
-    <!-- shareAction has to be triggered from on-click to allow opening a tab (otherwise can only open a floating window) -->
-    <paper-icon-button icon="shortcut" on-click="{{shareAction}}"></paper-icon-button>
+    <core-icon-button icon="add" on-tap="{{saveAction}}"></core-icon-button>
+    <!-- shareAction must be triggered from click to allow opening a tab (otherwise can only open a floating window) -->
+    <core-icon-button icon="shortcut" on-click="{{shareAction}}"></core-icon-button>
 
     <span style="padding-right: 16px;"></span>
 
-    <paper-icon-button icon="left" on-tap="{{promoteElement}}"></paper-icon-button>
-    <paper-icon-button icon="right" on-tap="{{demoteElement}}"></paper-icon-button>
+    <core-icon-button icon="left" on-tap="{{promoteElement}}"></core-icon-button>
+    <core-icon-button icon="right" on-tap="{{demoteElement}}"></core-icon-button>
 
-  </paper-appbar>
+  </core-toolbar>
 
   <core-pages core-flex selected="{{selected}}">
 
     <core-layout name="design">
+
       <div id="frameContainer" core-flex>
+
         <iframe id="frame" src="designer.html"></iframe>
+
       </div>
+
       <x-inspector id="inspector" on-delete-element="{{deleteElement}}" on-parent-element="{{selectParentElement}}" on-bind-property="{{applyPropertyBinding}}"></x-inspector>
+
     </core-layout>
 
     <core-layout name="code">
@@ -83,7 +87,7 @@
       designWindow.addEventListener('designer-ready', this.designerReady.bind(this));
       designWindow.addEventListener('design-change', this.designChange.bind(this));
       designWindow.document.addEventListener('keydown', 
-          this.KeydownAndPromptForUnload.bind(this, designWindow));
+        this.KeydownAndPromptForUnload.bind(this, designWindow));
     },
 
     KeydownAndPromptForUnload: function(w, e) {

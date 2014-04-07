@@ -25,17 +25,6 @@
   -ms-user-select: none;
 }
 
-.item {
-  font-weight: bold;
-  cursor: pointer;
-  padding: 12px;
-  margin: 4px 0;
-  background-color: white;
-  border: 1px solid #D3D2D2;
-  border-radius: 5px;
-  -webkit-transition: border 0.5s;
-}
-
 .group-item {
   font-weight: 500;
 }

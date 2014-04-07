@@ -1,4 +1,4 @@
-<link rel="import" href="../../components/polymer-flex-layout/polymer-flex-layout.html">
+<link rel="import" href="../../components/core-layout/core-layout.html">
 <link rel="import" href="../../components/polymer-ui-splitter/polymer-ui-splitter.html">
 <link rel="import" href="../x-designable/x-designable.html">
 <link rel="import" href="../x-palette/x-palette.html">
@@ -11,16 +11,16 @@
 
   <x-meta id="meta" categories="{{elements}}"></x-meta>
 
-  <polymer-flex-layout></polymer-flex-layout>
+  <core-layout></core-layout>
 
   <section id="tools">
-    <polymer-flex-layout vertical></polymer-flex-layout>
-    <x-palette flex id="palette" elements="{{elements}}" canvas="{{$.canvas}}" on-palette-drag="{{paletteDrag}}" on-palette-create-drag-object="{{paletteCreateDragObject}}"></x-palette>
+    <core-layout flow="v"></core-layout>
+    <x-palette core-flex id="palette" elements="{{elements}}" canvas="{{$.canvas}}" on-palette-drag="{{paletteDrag}}" on-palette-create-drag-object="{{paletteCreateDragObject}}"></x-palette>
     <polymer-ui-splitter direction="down"></polymer-ui-splitter>
     <x-tree id="tree" canvas="{{$.canvas}}" selected="{{selected}}"></x-tree>
   </section>
 
-  <x-designable flex id="canvas" tabIndex="-1" selected="{{selected}}" on-design-change="{{designChange}}"></x-designable>
+  <x-designable core-flex id="canvas" tabIndex="-1" selected="{{selected}}" on-design-change="{{designChange}}"></x-designable>
 
 </template>
 <script>

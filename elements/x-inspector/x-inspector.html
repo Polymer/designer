@@ -3,9 +3,12 @@ Copyright 2013 The Polymer Authors. All rights reserved.
 Use of this source code is governed by a BSD-style
 license that can be found in the LICENSE file.
 -->
-<link rel="import" href="../../components/polymer-ui-icon-button/polymer-ui-icon-button.html">
+
+<link rel="import" href="../../components/core-icon-button/core-icon-button.html">
+<link rel="import" href="../../components/x-meta/x-meta.html">
+
 <link rel="import" href="../x-property-inspector/x-property-inspector.html">
-<link rel="import" href="../x-meta/x-meta.html">
+
 <script src="reflection.js"></script>
 
 <polymer-element name="x-style-inspector" attributes="sourceElement">
@@ -47,14 +50,14 @@ license that can be found in the LICENSE file.
 
       <div id="crumbList">
         <template repeat="{{crumbs}}">
-          <polymer-ui-icon-button src="assets/ic_chevron_left_darkreg.png" on-click="{{selectParentElement}}" hidden="{{top}}"></polymer-ui-icon-button>
+          <core-icon-button src="assets/ic_chevron_left_darkreg.png" on-click="{{selectParentElement}}" hidden="{{top}}"></core-icon-button>
           <b>{{name}}</b>
         </template>
       </div>
 
-      <polymer-ui-icon-button class="fright" src="assets/ic_delete_darkreg.png" on-click="{{deleteElement}}"></polymer-ui-icon-button>
-      <!--<polymer-ui-icon-button class="fright" icon="right"></polymer-ui-icon-button>
-      <polymer-ui-icon-button class="fright" icon="left"></polymer-ui-icon-button>-->
+      <core-icon-button class="fright" src="assets/ic_delete_darkreg.png" on-click="{{deleteElement}}"></core-icon-button>
+      <!--<core-icon-button class="fright" icon="right"></core-icon-button>
+      <core-icon-button class="fright" icon="left"></core-icon-button>-->
 
     </div>
 

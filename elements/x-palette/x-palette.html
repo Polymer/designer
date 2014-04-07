@@ -1,7 +1,7 @@
-<link rel="import" href="../../components/polymer-ui-icon/polymer-ui-icon.html">
-<link rel="import" href="../../components/polymer-ui-menu/polymer-ui-menu.html">
-<link rel="import" href="../../components/polymer-ui-menu-item/polymer-ui-menu-item.html">
-<link rel="import" href="../../components/polymer-ui-submenu-item/polymer-ui-submenu-item.html">
+<link rel="import" href="../../components/core-icon/core-icon.html">
+<link rel="import" href="../../components/core-item/core-item.html">
+<link rel="import" href="../../components/core-menu/core-menu.html">
+<link rel="import" href="../../components/core-menu/core-submenu.html">
 <link rel="import" href="../../components/x-meta/x-meta.html">
 
 <polymer-element name="x-palette" attributes="canvas drag">
@@ -14,21 +14,21 @@
 
     <div id="list" on-trackstart="{{trackStart}}" on-track="{{track}}" on-trackend="{{trackEnd}}">
 
-      <polymer-ui-menu selectedClass="palette-selected">
+      <core-menu selectedClass="palette-selected">
 
         <template repeat="{{categories}}">
 
-          <polymer-ui-submenu-item class="group-item" label="{{name}}">
+          <core-submenu class="group-item" label="{{name}}">
 
             <template repeat="{{list}}">
               <div class="simple-item" tag="{{id}}" loaded?="{{importsLoaded}}" ishidden?="{{isHidden}}">{{label}}</div>
             </template>
 
-          </polymer-ui-submenu-item>
+          </core-submenu>
 
         </template>
 
-      </polymer-ui-menu>
+      </core-menu>
 
     </div>
 
@@ -38,9 +38,6 @@
     Polymer('x-palette', {
 
       categories: null,
-
-      ready: function() {
-      },
 
       trackStart: function(event) {
         event.stopPropagation();
