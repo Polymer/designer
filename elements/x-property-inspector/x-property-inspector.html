@@ -27,7 +27,7 @@ license that can be found in the LICENSE file.
         display: inline-block;
         width: 92%;
       }
-      polymer-ui-icon#icon {
+      core-icon#icon {
         opacity: 0.3;
         vertical-align: middle;
       }
@@ -53,7 +53,7 @@ license that can be found in the LICENSE file.
     <div class="property-name">{{property.name}}:</div>
     <span id="container"><content></content></span>
     <div id="iconContainer" on-click="{{linkTap}}" nodisplay?="{{nobind}}">
-      <polymer-ui-icon id="icon" src="assets/link_dark.png" size="16"></polymer-ui-icon>
+      <core-icon id="icon" src="assets/link_dark.png" size="16"></core-icon>
     </div>  
     <x-flip-out id="animOut" target="{{$.container}}" on-polymer-animation-end="{{animOutComplete}}"></x-flip-out>
     <x-flip-in id="animIn" target="{{$.container}}"></x-flip-in>
