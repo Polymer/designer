@@ -51,8 +51,7 @@
     createElement: function(tag) {
       var meta = this.$.meta.byId(tag);
       var element = meta.createElement();
-      this.$.canvas.appendChild(element);
-      this.$.canvas.decorateElement(element);
+      this.$.canvas.addElement(element);
       return element;
     },
 

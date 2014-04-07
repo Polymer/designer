@@ -93,7 +93,12 @@ license that can be found in the LICENSE file.
       update: function() {
         // meta-data attached here
         if (this.sourceElement) {
-          this.properties = Reflection.properties(this.sourceElement);
+          if (this.sourceElement._getInspectorProps) {
+            var p$ = this.sourceElement._getInspectorProps();
+            this.properties = Reflection.objectProperties(p$);
+          } else {
+           this.properties = Reflection.properties(this.sourceElement);
+          }
           this.crumbs = this.listCrumbs();
         } else {
           this.name = '';

@@ -75,11 +75,12 @@
                 }
                 text = ' "' + text + '"';
               }
+              var info = e.treeInfo || {name: e.localName, id: e.id}
               components.push({
                 indent: indent,
-                name: e.localName,
+                name: info.name,
                 element: e,
-                id: e.id ? ' #' + e.id + '': '',
+                id: info.id ? ' #' + info.id + '': '',
                 text: text,
                 selected: (e == selected) ? 'selected' : ''
               });

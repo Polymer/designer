@@ -1,4 +1,5 @@
 <link rel="import" href="../../components/polymer/polymer.html">
+<link rel="import" href="../x-design-host/x-design-host.html">
 
 <polymer-element name="x-designable" designer attributes="selected" on-keydown="{{keydown}}" on-pointerdown="{{pointerDown}}" on-pointerup="{{pointerUp}}" on-trackstart="{{trackStart}}" on-track="{{track}}" on-trackend="{{trackEnd}}">
 
@@ -29,6 +30,8 @@
 
     ready: function() {
       this.meta = document.createElement('x-meta');
+      this.makeDesignHost();
+      this.appendChild(this.designHost);
     },
 
     // communication
@@ -46,6 +49,11 @@
     },
 
     // commands
+    addElement: function(element) {
+      this.designHost.appendChild(element);
+      this.decorateElement(element);
+    },
+
     deleteElement: function() {
       var e = this.selected;
       if (e && e !== this) {
@@ -91,7 +99,6 @@
     },
 
     update: function() {
-      this.marshalNodeReferences(this);
     },
 
     //
@@ -166,7 +173,7 @@
       s.webkitTransition = null;
       // designer is absolutely positioned, ad-hoc
       s.position = 'absolute';
-      if (element.parentNode !== this) {
+      if (element.parentNode !== this.designHost) {
         s.left = s.top = s.position = '';
       }
       var self = this;
@@ -211,7 +218,7 @@
         target.removeAttribute(name);
       }
       if (path) {
-        target.bind(name, new PathObserver(this, path));
+        target.bind(name, new PathObserver(this.designHost.model, path));
       }
     },
 
@@ -311,8 +318,11 @@
     },
 
     findContainer: function(element, container) {
+      if (container === this) {
+        container = this.designHost;
+      }
       while (container) {
-        if (container === this || element !== container && container.meta && container.meta.isContainer) {
+        if (container === this.designHost || element !== container && container.meta && container.meta.isContainer) {
           return container;
         }
         container = container.parentNode;
@@ -338,7 +348,7 @@
         // nominal target
         elt = target;
         // find top level parent
-        while (elt && elt.parentNode !== this) {
+        while (elt && elt.parentNode !== this.designHost) {
           elt = elt.parentNode;
         }
       }
@@ -372,51 +382,17 @@
     editorElements: {input: 1, select: 1, textarea: 1},
 
     loadHtml: function(html) {
-      // TODO(sorvell): what should we bind to? for right now, we bind
-      // to 'this', but we should bind to some element that we're designing...
-      var template = document.createElement('template');
-      template.bindingDelegate = this.syntax;
-      template.innerHTML = html;
-      this.sanitizeContent(template.content);
       this.innerHTML = '';
-      // make imports go...
-      this.loadElementImports(template.content, function() {
-        this.appendChild(template.createInstance(this));
-        executeScriptsInScope(this);
-        this.meta.ensureMeta(this);
-        this.update();
+      this.makeDesignHost();
+      this.designHost.loadHtml(html, function() {
+        this.appendChild(this.designHost);
         this.notify();
       }.bind(this));
     },
 
-    sanitizeContent: function(element) {
-      // remove imports so that we don't have to keep track of them
-      var imports = element.querySelectorAll('link[rel=import]').array();
-      imports.forEach(function(i) {
-        i.remove();
-      });
-    },
-
-    loadElementImports: function(element, callback) {
-      var pending = 1;
-      var receive = function() {
-        pending--;
-        checkDone();
-      }
-      var checkDone = function() {
-        if (pending == 0 && callback) {
-          callback();
-        }
-      };
-      var n$ = element.querySelectorAll('*');
-      for (var i=0, l=n$.length, n, m; (i<l) && (n=n$[i]); i++) {
-        m = this.meta.byId(n.localName);
-        if (m && !m.importsLoaded) {
-          pending++;
-          m.loadImports(receive);
-        }
-      }
-      receive();
+    makeDesignHost: function() {
+      this.designHost = document.createElement('x-design-host');
+      this.designHost.meta = this.meta;
     },
 
     setupStyleElement: function() {
@@ -424,7 +400,7 @@
       if (!s) {
         s = document.createElement('style');
         s.textContent = ' ';
-        this.insertBefore(s, this.firstElementChild);
+        this.designHost.insertBefore(s, this.designHost.firstElementChild);
       }
       this.styleElement = s;
     },
@@ -451,8 +427,8 @@
       if (!rules[i]) {
         sheet.insertRule('#' + element.id + '{' + element.style.cssText + '}',
           i);
+        element.style.cssText = '';
       }
-      element.style.cssText = '';
       return rules[i];
     },
 
@@ -474,20 +450,6 @@
     }
 
   });
-
-  function executeScriptsInScope(scope) {
-    // make scripts go....
-    var s$ = scope.querySelectorAll('script:not([src])');
-    for (var i=0, l=s$.length, s; (i<l) && (s=s$[i]); i++) {
-      replaceAndExecuteScript(s);
-    }
-  }
-
-  function replaceAndExecuteScript(script) {
-    var newScript = document.createElement('script');
-    script.parentNode.replaceChild(newScript, script);
-    newScript.textContent = script.textContent;
-  }
 
   function cssTextFromStyle(style) {
     var sheet = style && style.sheet;

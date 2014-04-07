@@ -1,0 +1,169 @@
+<polymer-element name="x-design-host">
+<script>
+(function() {
+
+  Polymer('x-design-host', {
+    
+    name: 'my-element',
+
+    ready: function() {
+      this.model = {};
+      this.treeInfo = {name: this.name, id: ''};
+    },
+
+    dumpTag: function(serializer, indent, tab) {
+      var indented = indent + tab, attrs = '';
+      var attrs = this.dumpAttributes();
+      return indent + '<polymer-element' + attrs + '>\n\n' + 
+          indented + '<template>\n' +
+          serializer.dumpChildren(this,indented + tab) +
+          indented + '</template>\n\n' +
+          indented + '<sc' + 'ript>\n\n' +
+          indented + tab + this.dumpScript(indented + tab, tab) +
+          indented + '</sc' + 'ript>\n\n' +
+          indent + '</polymer-element>';
+    },
+
+    dumpAttributes: function() {
+      var attrs = '';
+      var a$ = this.polymerElement ? this.polymerElement.attributes : 
+          [{name: 'name', value: this.name}];
+      for (var i=0, a; (a=a$[i]); i++) {
+        attrs += ' ' + a.name + '="' + a.value + '"';
+      }
+      return attrs;
+    },
+
+    dumpScript: function(indent, tab) {
+      var s = 'Polymer(\'' + this.name + '\', {\n' + indent + tab;
+      var props = [];
+      Object.keys(this.model).forEach(function(k) {
+        if (serializeScriptBlacklist.indexOf(k) < 0) {
+          props.push(serializePropertyValue(k, this.model));
+        }
+      }, this);
+      s += props.join(',\n' + indent + tab);
+      s += '\n' + indent + '});' + '\n\n';
+      return s;
+    },
+
+    loadHtml: function(html, callback) {
+      var raw = document.createElement('div');
+      raw.innerHTML = html;
+      // remove imports
+      var imports = raw.querySelectorAll('link[rel=import]').array();
+      imports.forEach(function(i) {
+        i.remove();
+      });
+      // absorb polymer-element
+      this.polymerElement = raw.querySelector('polymer-element');
+      // absorb script
+      this.scriptElement = this.polymerElement.querySelector('script');
+      this.model = this.modelFromScript(this.scriptElement);
+      // absorb template
+      var template = this.polymerElement.querySelector('template');
+      if (template) {
+        template.bindingDelegate = this.syntax;
+        // make imports go...
+        this.loadElementImports(template.content, function() {
+          this.appendChild(template.createInstance(this.model));
+          this.meta.ensureMeta(this);
+          this.marshalNodeReferences(this);
+          this.model.$ = this.$;
+          callback && callback();
+        }.bind(this));
+      } else if (callback) {
+        callback();
+      }
+    },
+
+    loadElementImports: function(element, callback) {
+      var pending = 1;
+      var receive = function() {
+        pending--;
+        checkDone();
+      }
+      var checkDone = function() {
+        if (pending == 0 && callback) {
+          callback();
+        }
+      };
+      var n$ = element.querySelectorAll('*');
+      for (var i=0, l=n$.length, n, m; (i<l) && (n=n$[i]); i++) {
+        m = this.meta.byId(n.localName);
+        if (m && !m.importsLoaded) {
+          pending++;
+          m.loadImports(receive);
+        }
+      }
+      receive();
+    },
+
+    modelFromScript: function(script) {
+      var p = executePolymerScript(script);
+      return p || {};
+    },
+
+    _getInspectorProps: function() {
+      return this.model;
+    }
+
+  });
+
+  var serializeScriptBlacklist = ['$'];
+
+  function serializePropertyValue(name, obj) {
+    var value = obj[name], type = typeof value;
+    switch(type) {
+      case 'function':
+        value = value.toString();
+        break;
+      case 'string':
+        value = '\'' + value + '\'';
+        break;
+    }
+    return name + ': ' + value;
+  }
+
+  // this is not secure, it's just intended to make it harder to accidentally
+  // mess up the main document.
+  var frame = document.createElement('iframe');
+  frame.style.display = 'none';
+  document.body.appendChild(frame);
+  frame.src = '';
+
+  function executePolymerScript(script) {
+    if (!frame.contentWindow.Polymer) {
+      frame.contentWindow.Polymer = function(name, model) {
+        var model = typeof name === 'object' ? name : model;
+        frame.contentWindow.model = model;
+      }
+    }
+    try {
+      var code = script.textContent.trim();
+      frame.contentWindow.eval(code);
+    } catch(e) {
+      console.log(e);
+    }
+    var r = frame.contentWindow.model;
+    frame.contentWindow.model = null;
+    return r;
+  }
+
+  function executeScriptsInScope(scope) {
+    // make scripts go....
+    var s$ = scope.querySelectorAll('script:not([src])');
+    for (var i=0, l=s$.length, s; (i<l) && (s=s$[i]); i++) {
+      replaceAndExecuteScript(s);
+    }
+  }
+
+  function replaceAndExecuteScript(script) {
+    var newScript = document.createElement('script');
+    script.parentNode.replaceChild(newScript, script);
+    newScript.textContent = script.textContent;
+  }
+
+})();
+</script>
+</polymer-element>

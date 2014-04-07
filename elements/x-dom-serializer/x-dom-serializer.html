@@ -8,7 +8,7 @@
       attributesBlacklist: ['style', 'tabindex', 'role'],
       dumpTag: function(node, indent) {
         if (node.dumpTag) {
-          return node.dumpTag(this.dumpTab, indent, this.tab);
+          return node.dumpTag(this, indent, this.tab);
         }
         if (node.nodeType == Node.TEXT_NODE) {
           return this.dumpTextNode(node, indent);
@@ -110,7 +110,7 @@
       dumpElement: function(node, indent) {
         var html = '', indent = indent || '';
         if (!node.querySelector('link[rel=import]')) {
-          html+= this.dumpImports(node, indent);
+          html+= this.dumpImports(node, indent) + '\n';
         }
         html += this.dumpChildren(node, indent);
         //var name = ''; //node.elementAttributes.name || '';
@@ -229,7 +229,7 @@
             }
           }
           css.push('');
-          return css.join('\n');
+          return css.join('\n') + indent;
         }
         return '';
       },

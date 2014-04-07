@@ -109,6 +109,16 @@ function reflectObject(obj, meta) {
   return props;
 }
 
+function reflectObjectProperties(obj) {
+  var props = [];
+  if (obj) {
+    Object.keys(obj).forEach(function(name) {
+      props.push(reflectProperty(obj, name, {}));
+    });
+  }
+  return props;
+}
+
 function reflectStyles(element, meta) {
   if (element) {
     //return reflectObject(element.style, meta);
@@ -119,7 +129,8 @@ function reflectStyles(element, meta) {
 window.Reflection = {
   properties: reflectProperties,
   styles: reflectStyles,
-  object: reflectObject
+  object: reflectObject,
+  objectProperties: reflectObjectProperties
 };
 
 })();
