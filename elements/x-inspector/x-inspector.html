@@ -45,6 +45,8 @@ license that can be found in the LICENSE file.
   <template>
 
     <link rel="stylesheet" href="x-inspector.css">
+    
+    <core-layout flow="v"></core-layout>
 
     <div id="header" theme="polymer-ui-light-theme">
 
@@ -61,12 +63,19 @@ license that can be found in the LICENSE file.
 
     </div>
 
-    <div id="interior">
-      <template repeat="{{properties}}">
-        <x-property-inspector property="{{}}" hidden="{{meta.hidden}}"></x-property-inspector>
-      </template>
+    <core-selector id="tabs" selected="{{selected}}">
+      <span>Properties</span>
+      <span>Styles</span>
+    </core-selector>
+    
+    <core-pages id="interior" core-flex selected="{{selected}}">
+      <div>
+        <template repeat="{{properties}}">
+          <x-property-inspector property="{{}}" hidden="{{meta.hidden}}"></x-property-inspector>
+        </template>
+      </div>
       <x-style-inspector sourceElement="{{sourceElement}}"></x-style-inspector>
-    </div>
+    </core-pages>
 
     <x-meta id="meta"></x-meta>
 
@@ -74,6 +83,7 @@ license that can be found in the LICENSE file.
   <script>
 
     Polymer('x-inspector', {
+      selected: 0,
       sourceElement: null,
       properties: null,
       crumbs: [],

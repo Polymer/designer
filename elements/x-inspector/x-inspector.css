@@ -30,12 +30,29 @@ license that can be found in the LICENSE file.
   float: right;
 }
 
-#interior {
-  position: absolute;
-  top: 62px;
-  right: 0;
-  bottom: 0;
-  left: 0;
+#tabs {
+  padding: 10px 10px 0;
+  border-bottom: 1px solid #ccc;
+}
+
+#tabs > * {
+  display: inline-block;
+  height: 40px;
+  line-height: 40px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 3px 3px 0 0;
+}
+
+#tabs > .core-selected {
+  border-color: #ccc;
+  background-color: #eee;
+}
+
+#interior > * {
   padding: 8px;
   overflow-x: hidden;
   overflow-y: auto;
