@@ -13,7 +13,7 @@ license that can be found in the LICENSE file.
       if (element && element.bindings_) {
         var binding = element.bindings_[name];
         if (binding) {
-          return binding.path;
+          return binding.path || binding.path_;
         }
       }
     }
