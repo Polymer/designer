@@ -60,7 +60,12 @@
             v = '{{ ' + binding + ' }}';
           }
           // TODO(sorvell): should have a better way to get defaultValue.
-          if (!this.shouldSerializeProperty(v, node.__proto__[n])) {
+          var defaultValue;
+          // catch errors when accessing native prototype properties
+          try {
+            defaultValue = node.__proto__[n];
+          } catch(e) {}
+          if (!this.shouldSerializeProperty(v, defaultValue)) {
             return;
           }
           attributes[n.toLowerCase()] = v;

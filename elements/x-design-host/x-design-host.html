@@ -2,6 +2,8 @@
 <script>
 (function() {
 
+  // TODO(sorvell): create a proxy element with the element name and 
+  // use it as the model. This requires less customization for the tree.
   Polymer('x-design-host', {
     
     name: 'my-element',
@@ -63,6 +65,11 @@
       });
       // absorb polymer-element
       this.polymerElement = raw.querySelector('polymer-element');
+      if (!this.polymerElement) {
+        throw new Error('Must load a <polymer-element>');
+      }
+      this.name = this.polymerElement.getAttribute('name');
+      this.treeInfo.name = this.name;
       // absorb script
       this.scriptElement = this.polymerElement.querySelector('script');
       this.model = this.modelFromScript(this.scriptElement);

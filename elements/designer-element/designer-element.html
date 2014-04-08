@@ -9,6 +9,7 @@
 
 <link rel="import" href="../x-dom-serializer/x-dom-serializer.html">
 <link rel="import" href="../x-inspector/x-inspector.html">
+<link rel="import" href="../x-preview/x-preview.html">
 <link rel="import" href="../x-file-document/x-file-document.html">
 
 <polymer-element name="designer-element">
@@ -37,7 +38,8 @@
 
     <core-icon-button icon="left" on-tap="{{promoteElement}}"></core-icon-button>
     <core-icon-button icon="right" on-tap="{{demoteElement}}"></core-icon-button>
-
+    <div core-flex></div>
+    <core-icon-button icon="shortcut" on-click="{{previewAction}}"></core-icon-button>
   </core-toolbar>
 
   <core-pages core-flex selected="{{selected}}">
@@ -61,6 +63,7 @@
   </core-pages>
 
   <x-dom-serializer id="serializer"></x-dom-serializer>
+  <x-preview-window id="preview"></x-preview-window>
 
   <github-element id="github" token="{{githubToken}}" on-files-loaded="{{documentLoaded}}" on-files-saved="{{documentSaved}}" on-token-changed="{{tokenChangeHandler}}"></github-element>
 
@@ -270,6 +273,14 @@
 
     getGistUrl: function() {
       return 'https://gist.github.com/' + this.githubUser + '/' + this.fileId;
+    },
+
+    previewAction: function() {
+      var html = this.html;
+      // TODO(sorvell): need a better way to inject the element
+      var name = this.designer.$.canvas.designHost.name;
+      html += '\n\n<' + name + '></' + name + '>\n';
+      this.$.preview.open(html);
     }
 
   });
