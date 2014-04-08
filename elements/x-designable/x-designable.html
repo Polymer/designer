@@ -215,7 +215,6 @@
         }
       } else {
         this.unbindElementProperty(target, name);
-        target.removeAttribute(name);
       }
       if (path) {
         target.bind(name, new PathObserver(this.designHost.model, path));
@@ -228,6 +227,7 @@
       if (target.bindings_ && target.bindings_[name]) {
         target.bindings_[name].close();
         target.bindings_[name] = null;
+        //target.removeAttribute(name);
       }
     },
 
