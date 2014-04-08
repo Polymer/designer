@@ -11,6 +11,12 @@
       this.treeInfo = {name: this.name, id: ''};
     },
 
+    marshalNodeReferences: function(root) {
+      this.super(arguments);
+      this.model = this.model || {};
+      this.model.$ = this.$;
+    },
+
     dumpTag: function(serializer, indent, tab) {
       var indented = indent + tab, attrs = '';
       var attrs = this.dumpAttributes();
@@ -69,7 +75,6 @@
           this.appendChild(template.createInstance(this.model));
           this.meta.ensureMeta(this);
           this.marshalNodeReferences(this);
-          this.model.$ = this.$;
           callback && callback();
         }.bind(this));
       } else if (callback) {
