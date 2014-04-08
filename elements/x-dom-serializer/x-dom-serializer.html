@@ -53,19 +53,18 @@
           if (n == 'textContent') {
             return;
           }
-          if (node.publish && node.publish[n] === undefined) {
+          /*if (node.publish && node.publish[n] === undefined) {
             return;
-          }
+          }*/
           if (binding) {
             v = '{{ ' + binding + ' }}';
-          } else if (!((v || v === 0) && (typeof v === 'string' || typeof v === 'number' ||
-              typeof v === 'boolean'))) {
-            v = null;
           }
-          if (v != null) {
-            attributes[n.toLowerCase()] = v;
+          // TODO(sorvell): should have a better way to get defaultValue.
+          if (!this.shouldSerializeProperty(v, node.__proto__[n])) {
+            return;
           }
-        });
+          attributes[n.toLowerCase()] = v;
+        }, this);
         for (var i=0, a, n; (a = node.attributes[i]); i++) {
           n = a.name.toLowerCase();
           if (attributes[n] === undefined) {
@@ -74,6 +73,12 @@
         }
         this.filterAttributes(attributes);
         return attributes;
+      },
+      shouldSerializeProperty: function(value, defaultValue) {
+        return (value !== defaultValue)
+            && (value || value === 0) 
+            && (typeof value === 'string' || typeof value === 'number' ||
+              typeof value === 'boolean');
       },
       // special handling for certain attributes: style, class
       filterAttributes: function(attributes) {
