@@ -24,9 +24,11 @@ function reflectProperty(element, name, meta) {
       return;
     }
     var v = element[name];
-    if (((v !== null && v !== undefined) || Bindings.getBinding(element, name))
+    if (((v !== null
+        && v !== undefined
         && typeof v !== 'function'
-        && typeof v !== 'object'
+        && typeof v !== 'object')
+        || Bindings.getBinding(element, name))
         //&& element.propertyIsEnumerable(k)
         && !reflectProperty.blacklist[name]) {
       var prop = reflect(element, name, meta);
