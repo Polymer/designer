@@ -56,10 +56,11 @@
 
     deleteElement: function() {
       var e = this.selected;
-      if (e && e !== this) {
-        e.parentNode.removeChild(e);
+      if (e && e !== this && e !== this.designHost) {
+        var parent = e.parentNode;
+        parent.removeChild(e);
         forSubtree(e, this.removeElementRule.bind(this));
-        this.selected = null;
+        this.selected = parent;
       }
     },
 
@@ -256,6 +257,9 @@
         this.dragInfo.dropped = this.drop(this.dragInfo.element, e);
       } else {
         this.selected = e.target;
+        if (this.selected === this) {
+          this.selected = this.designHost;
+        }
       }
       this.dragInfo = null;
       //var focusNode = nodeIsEditor(this.selected) ? this.selected : this;
@@ -387,6 +391,7 @@
       this.designHost.loadHtml(html, function() {
         this.appendChild(this.designHost);
         this.notify();
+        this.selected = this.designHost;
       }.bind(this));
     },
 
