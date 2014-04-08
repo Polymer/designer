@@ -69,10 +69,11 @@
       // absorb template
       var template = this.polymerElement.querySelector('template');
       if (template) {
-        template.bindingDelegate = this.syntax;
         // make imports go...
         this.loadElementImports(template.content, function() {
-          this.appendChild(template.createInstance(this.model));
+          // TODO(sorvell): note, event handlers will work if we use a 
+          // raw PolymerExpressions here.
+          this.appendChild(template.createInstance(this.model, this.syntax));
           this.meta.ensureMeta(this);
           this.marshalNodeReferences(this);
           callback && callback();
