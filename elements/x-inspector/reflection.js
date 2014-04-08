@@ -23,8 +23,8 @@ function reflectProperty(element, name, meta) {
     if (element.publish && element.publish[name] === undefined) {
       return;
     }
-    var v = element[name], binding = Bindings.getBinding(element, name);
-    if ((binding || (v !== null && v !== undefined))
+    var v = element[name];
+    if (((v !== null && v !== undefined) || Bindings.getBinding(element, name))
         && typeof v !== 'function'
         && typeof v !== 'object'
         //&& element.propertyIsEnumerable(k)
