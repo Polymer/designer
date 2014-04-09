@@ -91,7 +91,7 @@ license that can be found in the LICENSE file.
 
 <polymer-element name="x-preview-iframe" extends="x-preview">
   <template>
-    <iframe id="output" style="width: 100%; height: 100%;"></iframe>
+    <iframe id="output" style="width: 100%; height: 100%; border: 0;"></iframe>
   </template>
   <script>
 
@@ -114,27 +114,27 @@ license that can be found in the LICENSE file.
 
   (function() {
 
-    var previewWindow;
-
     Polymer('x-preview-window', {
   
+      windowName: 'preview', 
+
       prepareWindow: function() {
-        if (previewWindow) {
-          previewWindow.close();
+        if (this.previewWindow) {
+          this.previewWindow.close();
         }
-        previewWindow = window.open('', '', null, false);
+        this.previewWindow = window.open(this.windowName, '', null, false);
       },
   
       open: function(source) {
         this.htmlContent = source;
         this.prepareWindow();
-        this.writeToDoc(previewWindow.document);
+        this.writeToDoc(this.previewWindow.document);
       },
   
       openSource: function(source) {
         this.htmlContent = source;
         this.prepareWindow();
-        this.writeSourceToDoc(previewWindow.document);
+        this.writeSourceToDoc(this.previewWindow.document);
       }
     });
 

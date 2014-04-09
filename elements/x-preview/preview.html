@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+  <title>Element Preview</title>
+
+  <script src="../../components/platform/platform.js"></script>
+  <link rel="import" href="x-gist-element-preview.html">
+
+  <style>
+
+    body, html {
+      margin: 0;
+      height: 100%;
+    }
+
+    x-gist-element-preview {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+    }
+
+  </style>
+
+</head>
+<body unresolved>
+
+  <x-gist-element-preview id="preview"></x-gist-element-preview>
+  <script>
+    addEventListener('polymer-ready', function() {
+      var fileId = window.location.hash.replace('#', '')
+      document.getElementById('preview').open(fileId);
+    })
+
+  </script>
+
+</body>
+</html>

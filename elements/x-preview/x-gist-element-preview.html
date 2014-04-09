@@ -1,0 +1,42 @@
+<!--
+Copyright 2013 The Polymer Authors. All rights reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+-->
+
+<link rel="import" href="x-preview.html">
+<link rel="import" href="x-github-info.html">
+<link rel="import" href="../../components/github-elements/github-elements.html">
+
+<polymer-element name="x-gist-element-preview" extends="x-preview-iframe">
+  <template>
+    <github-element id="github" token="{{token}}" on-files-loaded="{{documentLoaded}}" on-token-changed="{{tokenChangeHandler}}"></github-element>
+    <x-github-info id="info" token="{{token}}"></x-github-info>
+    <shadow></shadow>
+  </template>
+  <script>
+
+  (function() {
+
+    Polymer('x-gist-element-preview', {
+      
+      open: function(id) {
+        this.$.github.load(id);
+      },
+
+      documentLoaded: function(e, detail) {
+        var doc = detail && detail[this.$.info.fileName];
+        var re = /<polymer-element[^>]*name=(?:'|")([^'"]*)(?:'|")/;
+        var match = doc && doc.content && doc.content.match(re);
+        if (match) {
+          var name = match[1];
+          this.htmlContent = doc.content + '\n\n<' + name +'></' + name + '>';
+        }
+      }
+  
+    });
+
+  })();
+
+  </script>
+</polymer-element>
