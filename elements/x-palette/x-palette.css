@@ -1,14 +1,5 @@
-﻿:host {
+:host {
   position: relative;
-}
-
-#title {
-  height: 54px;
-  line-height: 54px;
-  font-size: 1.5px;
-  padding-left: 22px;
-  background-color: #E0E0E0;
-  border-bottom: 1px solid #E1E1E1;
 }
 
 #list {
@@ -18,7 +9,10 @@
   right: 0px;
   left: 0px;
   bottom: 0px;
+  padding: 10px 25px;
   overflow-y: auto;
+  font-size: 15px;
+  opacity: 0.9;
   -webkit-overflow-scrolling: touch;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -36,7 +30,6 @@
 .simple-item {
   height: 40px;
   line-height: 40px;
-  opacity: 0.7;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
