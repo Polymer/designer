@@ -9,7 +9,7 @@
 
 <link rel="import" href="../x-dom-serializer/x-dom-serializer.html">
 <link rel="import" href="../x-inspector/x-inspector.html">
-<link rel="import" href="../x-preview/x-preview.html">
+<link rel="import" href="../x-preview/x-github-info.html">
 <link rel="import" href="../x-file-document/x-file-document.html">
 
 <polymer-element name="designer-element">
@@ -63,8 +63,8 @@
   </core-pages>
 
   <x-dom-serializer id="serializer"></x-dom-serializer>
-  <x-preview-window id="preview"></x-preview-window>
 
+  <x-github-info id="githubInfo" token="{{githubToken}}"></x-github-info>
   <github-element id="github" token="{{githubToken}}" on-files-loaded="{{documentLoaded}}" on-files-saved="{{documentSaved}}" on-token-changed="{{tokenChangeHandler}}"></github-element>
 
 </template>
@@ -73,9 +73,6 @@
   Polymer('designer-element', {
     selected: 'design',
     remoteHtml: '',
-    fileName: 'designer.html',
-    githubUser: 'designer-polymer',
-    githubToken: '77777d8808da580cd6134b7390b5fd306c66d1d6',
 
     ready: function() {
       document.addEventListener('keydown', 
@@ -208,7 +205,7 @@
 
     saveAction: function() {
       var options = {};
-      options[this.fileName] = {content: this.html};
+      options[this.$.githubInfo.fileName] = {content: this.html};
       if (this.fileId) {
         this.$.github.update(this.fileId, 'designer', true, options);
       } else {
@@ -238,7 +235,7 @@
     },
 
     documentLoaded: function(event, detail) {
-      var doc = detail && detail[this.fileName];
+      var doc = detail && detail[this.$.githubInfo.fileName];
       if (doc) {
         this.remoteHtml = doc.content;
       }
@@ -272,15 +269,16 @@
     },
 
     getGistUrl: function() {
-      return 'https://gist.github.com/' + this.githubUser + '/' + this.fileId;
+      return 'https://gist.github.com/' + this.$.githubInfo.user + '/' + this.fileId;
     },
 
     previewAction: function() {
-      var html = this.html;
-      // TODO(sorvell): need a better way to inject the element
-      var name = this.designer.$.canvas.designHost.name;
-      html += '\n\n<' + name + '></' + name + '>\n';
-      this.$.preview.open(html);
+      if (this.fileId) {
+        if (this.previewWindow) {
+          this.previewWindow.close();
+        }
+        this.previewWindow = window.open('preview.html#' + this.fileId, 'preview');
+      }
     }
 
   });
