@@ -20,9 +20,14 @@
     },
 
     dumpTag: function(serializer, indent, tab) {
+      // convert to :host
+      if (this.__styleRule) {
+        var selectorText = this.__styleRule.selectorText;
+        this.__styleRule.selectorText = ':host';
+      }
       var indented = indent + tab, attrs = '';
       var attrs = this.dumpAttributes();
-      return indent + '<polymer-element' + attrs + '>\n\n' + 
+      var html = indent + '<polymer-element' + attrs + '>\n\n' + 
           indented + '<template>\n' +
           serializer.dumpChildren(this,indented + tab) +
           indented + '</template>\n\n' +
@@ -30,6 +35,10 @@
           indented + tab + this.dumpScript(indented + tab, tab) +
           indented + '</sc' + 'ript>\n\n' +
           indent + '</polymer-element>';
+      if (selectorText) {
+        this.__styleRule.selectorText = selectorText;
+      }
+      return html;
     },
 
     dumpAttributes: function() {
@@ -76,6 +85,12 @@
       // absorb template
       var template = this.polymerElement.querySelector('template');
       if (template) {
+        // absorb styles, convert :host style
+        var style = template.content.querySelector('style');
+        if (style) {
+          style.textContent = style.textContent.replace(/\:host/g, 
+              '#' + this.id);
+        }
         // make imports go...
         this.loadElementImports(template.content, function() {
           // TODO(sorvell): note, event handlers will work if we use a 

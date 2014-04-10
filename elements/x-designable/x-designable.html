@@ -30,8 +30,12 @@
 
     ready: function() {
       this.meta = document.createElement('x-meta');
+    },
+
+    attached: function() {
       this.makeDesignHost();
-      this.appendChild(this.designHost);
+      this.styleDesignHost();
+      this.selected = this.designHost;
     },
 
     // communication
@@ -289,7 +293,6 @@
         //
         this.drag(dragInfo);
         this.selected = elt;
-        //Platform.flush();
       }
     },
 
@@ -390,15 +393,32 @@
       this.innerHTML = '';
       this.makeDesignHost();
       this.designHost.loadHtml(html, function() {
-        this.appendChild(this.designHost);
         this.notify();
         this.selected = this.designHost;
       }.bind(this));
     },
 
     makeDesignHost: function() {
+      this.styleElement = null;
       this.designHost = document.createElement('x-design-host');
+      this.applyUniqueId(this.designHost);
       this.designHost.meta = this.meta;
+      this.appendChild(this.designHost);
+    },
+
+    styleDesignHost: function() {
+      var s = this.ruleForElement(this.designHost).style;
+      if (!s.position) {
+        s.position = 'absolute';
+      }
+      var size = '100%';
+      if (!s.width) {
+        s.width = size;
+      }
+      if (!s.height) {
+        s.height = size;
+      }
+      s.boxSizing = 'border-box';
     },
 
     setupStyleElement: function() {
