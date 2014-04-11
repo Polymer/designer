@@ -73,8 +73,12 @@ license that can be found in the LICENSE file.
         html += '<script src="../platform/platform.js"></s' + 'cript>\n';
         // style
         html += '<style>\n';
+        html += '  html { height: 100% }\n';
         html += '  body {\n';
         html += '    margin: 0;\n';
+        // transform causes body to be offsetParent, which means it must be sized
+        // body has transform to avoid the 'blinking bug'
+        html += '    height: 100%;\n';
         html += '    transform: translateZ(0);\n';
         html += '    -webkit-transform: translateZ(0);\n';
         html += '    font-size: 14px;\n';
