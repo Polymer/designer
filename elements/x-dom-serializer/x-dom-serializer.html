@@ -53,9 +53,6 @@
           if (n == 'textContent') {
             return;
           }
-          /*if (node.publish && node.publish[n] === undefined) {
-            return;
-          }*/
           if (binding) {
             v = '{{ ' + binding + ' }}';
           }
@@ -109,8 +106,9 @@
 
 <polymer-element name="x-dom-serializer" extends="x-serializer">
   <script>
+  (function() {
+
     Polymer('x-dom-serializer', {
-      //elementBlackList: ['style'],
       elementBlackList: [],
       propertyBlackList: null,
       ready: function() {
@@ -123,21 +121,6 @@
           html+= this.dumpImports(node, indent) + '\n';
         }
         html += this.dumpChildren(node, indent);
-        //var name = ''; //node.elementAttributes.name || '';
-        //
-        // resolve properties to attributes before dumping
-        //var proto = this.dumpProto(node, indent + this.tab + this.tab);
-        //var script = 'Polymer(\'' + name +'\', ' + proto + ');';
-        //html += indent + '<polymer-element' + this.dumpElementAttributes(node) +
-        //  '>\n' + indent + this.tab + '<template>\n';
-        //
-        //html += indent + this.dumpStyle(node, indent + this.tab + this.tab);
-        //
-        //html += indent + this.tab + '</template>\n' +
-          //indent + this.tab +'<script>\n' +
-          //indent + this.tab + this.tab + script + '\n' +
-          //indent + this.tab +'</s' + 'cript>\n'+
-          //indent + '</polymer-element>';
         return html;
       },
       dumpChildren: function(node, indent) {
@@ -188,44 +171,6 @@
         dump += '\n' + indent + '}';
         return dump;
       },
-      /*
-      dumpStyle: function(node, startIndent) {
-        var css = startIndent + '<style>\n';
-        var style = node.querySelector('style');
-        if (style && style.sheet) {
-          css += this.cssTextFromSheet(node, style.sheet, startIndent, this.tab)
-            || '';
-        }
-        var tab = this.tab;
-        function subtree(root, indent) {
-          var e = root.firstElementChild;
-          while (e) {
-            var parts = e.hasAttribute('style') ?
-              e.getAttribute('style').split(';') : null;
-            if (parts && e.id) {
-              css += indent + '#' + e.id + ' {\n';
-              parts.forEach(function(p) {
-                if (p) {
-                  p = p.trim();
-                  if (p === 'position: absolute') {
-                    p = p + ' !important';
-                  }
-                  css += indent + tab + p.trim() + ';\n';
-                }
-              });
-              css += indent + '}' + '\n';
-            }
-            if (e.firstElementChild) {
-              subtree(e, indent);
-            }
-            e = e.nextElementSibling;
-          }
-        }
-        subtree(node, (startIndent || '') + this.tab);
-        css += startIndent + '</style>\n';
-        return css;
-      },
-      */
       cssTextFromSheet: function(node, sheet, indent) {
         if (sheet) {
           var rules = sheet.cssRules;
@@ -260,33 +205,53 @@
         return css;
       },
       dumpImports: function(element, indent) {
-        var n$ = element.querySelectorAll('*');
-        var imports = [], metas=[];
-        for (var i=0, l=n$.length, n, m, p; (i<l) && (n=n$[i]); i++) {
-          m = n.meta;
-          if (m && metas.indexOf(m) < 0) {
-            metas.push(m);
-            p = m.getImports();
-            if (p) {
-              p = p.content.cloneNode(true);
-              imports = imports.concat(p.querySelectorAll('link[rel=import]').array());
-            }
-          }
-        }
-        var href = window.location.origin + window.location.pathname;
-        var d = document.createElement('div'), urls=[];
+        var imports = this.importsFromElement(element);
+        var d = document.createElement('div'), hrefs=[];
         for (var i=0, l=imports.length, n, h; (i<l) && (n=imports[i]); i++) {
-          h = n.href.replace(href, '').replace('components', '..');
-          if (urls.indexOf(h) < 0) {
-            urls.push(h);
-            n.setAttribute('href', h);
+          h = n.getAttribute('href');
+          if (hrefs.indexOf(h) < 0) {
+            hrefs.push(h);
             d.appendChild(n);
             d.appendChild(document.createTextNode('\n'));
           }
         }
         return d.innerHTML;
+      },
+      importsFromElement: function(element) {
+        var n$ = element.querySelectorAll('*');
+        var imports = [], metas=[];
+        for (var i=0, l=n$.length, n, m; (i<l) && (n=n$[i]); i++) {
+          m = n.meta;
+          if (m && metas.indexOf(m) < 0) {
+            metas.push(m);
+            imports = imports.concat(this.importsFromMeta(m));
+          }
+        }
+        return imports;
+      },
+      importsFromMeta: function(meta) {
+        var t = meta.getImports();
+        if (t) {
+          var c = t.content.cloneNode(true);
+          var imports = c.querySelectorAll('link[rel=import]').array();
+          for (var i=0, l=imports.length, p, h; (i<l) && (p=imports[i]); i++) {
+            // make serializable href
+            h = new URL(p.getAttribute('href'), t.ownerDocument.baseURI);
+            h = h.href.replace(basePath, '').replace('/components', '..');
+            p.setAttribute('href', h);
+          }
+          return imports;
+        }
+        return [];
       }
     });
+
+    var parts = document.location.pathname.split('/');
+    parts.pop();
+    var basePath = document.location.origin + parts.join('/');
+    console.log(basePath);
+
+  })();
   </script>
 </polymer-element>
 
