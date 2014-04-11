@@ -176,12 +176,16 @@
       return this.$.serializer.dumpElement(this.designer.$.canvas);
     },
 
+    get code() {
+      return this.$.code.mirror.getValue();
+    },
+
     designToCode: function() {
       this.$.code.mirror.setValue(this.html);
     },
 
     codeToDesign: function() {
-      this.pendingHtml = this.$.code.mirror.getValue();
+      this.pendingHtml = this.code;
       this.reloadDesigner();
     },
 
@@ -205,7 +209,8 @@
 
     saveAction: function() {
       var options = {};
-      options[this.$.githubInfo.fileName] = {content: this.html};
+      var content = this.selected === 'code' ? this.code : this.html;
+      options[this.$.githubInfo.fileName] = {content: content};
       if (this.fileId) {
         this.$.github.update(this.fileId, 'designer', true, options);
       } else {
