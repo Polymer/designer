@@ -78,6 +78,7 @@ license that can be found in the LICENSE file.
         html += '    margin: 0;\n';
         // transform causes body to be offsetParent, which means it must be sized
         // body has transform to avoid the 'blinking bug'
+        // https://code.google.com/p/chromium/issues/detail?id=332024
         html += '    height: 100%;\n';
         html += '    transform: translateZ(0);\n';
         html += '    -webkit-transform: translateZ(0);\n';
