@@ -14,7 +14,7 @@
   <core-layout></core-layout>
 
   <section id="tools">
-    <core-layout flow="v"></core-layout>
+    <core-layout vertical></core-layout>
     <x-palette core-flex id="palette" elements="{{elements}}" canvas="{{$.canvas}}" on-palette-drag="{{paletteDrag}}" on-palette-create-drag-object="{{paletteCreateDragObject}}"></x-palette>
     <polymer-ui-splitter direction="down"></polymer-ui-splitter>
     <x-tree id="tree" canvas="{{$.canvas}}" selected="{{selected}}"></x-tree>
