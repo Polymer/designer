@@ -1,7 +1,7 @@
 <link rel="import" href="../../components/polymer/polymer.html">
 <link rel="import" href="../x-design-host/x-design-host.html">
 
-<polymer-element name="x-designable" designer attributes="selected" on-keydown="{{keydown}}" on-pointerdown="{{pointerDown}}" on-pointerup="{{pointerUp}}" on-trackstart="{{trackStart}}" on-track="{{track}}" on-trackend="{{trackEnd}}">
+<polymer-element name="x-designable" designer attributes="selected" on-keydown="{{keydown}}" on-down="{{down}}" on-up="{{up}}" on-trackstart="{{trackStart}}" on-track="{{track}}" on-trackend="{{trackEnd}}">
 
 <template>
 
@@ -147,11 +147,15 @@
         rule.style.left = p.x + 'px';
         rule.style.top = p.y + 'px';
       };
+      var self = this;
+      dragInfo.up = function(e) {
+        self.up(e);
+      }
     },
 
     drop: function(element, event) {
       this.style.overflow = 'hidden';
-      var container = this.findContainer(element, event.target);
+      var container = this.findContainer(element, event.relatedTarget);
       if (container && this.canContain(container, element)) {
         // don't manipulate parentNode if not necessary
         var sameParent = (container === element.parentNode);
@@ -253,11 +257,11 @@
       }
     },
 
-    pointerDown: function(e) {
+    down: function(e) {
       //this.dragDisabled = e.altKey;
     },
 
-    pointerUp: function(e) {
+    up: function(e) {
       if (this.dragInfo && !this.dragInfo.dropped) {
         this.dragInfo.dropped = this.drop(this.dragInfo.element, e);
       } else {
@@ -335,6 +339,7 @@
         }
         container = container.parentNode;
       }
+      return this.designHost;
     },
 
     canContain: function(container, element) {

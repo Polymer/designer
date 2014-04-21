@@ -57,6 +57,7 @@
       trackEnd: function(event) {
         event.stopPropagation();
         if (this.drag) {
+          this.drag.up(event);
           if (!this.drag.dropped) {
             this.drop(this.drag);
           }
