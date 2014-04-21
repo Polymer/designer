@@ -40,13 +40,22 @@
       categories: null,
 
       trackStart: function(event) {
+        // our event
         event.stopPropagation();
+        // drag source is a tag
         var tag = event.target.getAttribute('tag');
         if (tag) {
-          this.drag = this.createDragObject(tag, event);
+          // construct drag info
+          this.drag = {
+            tag: tag,
+            origin: {left: event.pageX - 24, top: event.pageY - 24},
+          };
+          console.log('[%s]: trackStart', this.localName);
+          // let whoever cares hook the process
           this.fire('palette-drag', this.drag);
         }
       },
+
       track: function(event) {
         event.stopPropagation();
         if (this.drag && this.drag.drag) {
@@ -55,28 +64,24 @@
       },
 
       trackEnd: function(event) {
+        // our event
         event.stopPropagation();
+        // delegate dropping to the drag object
         if (this.drag) {
-          if (!this.drag.dropped) {
+          var dropped = false;
+          if (this.drag && this.drag.drop) {
+            dropped = this.drag.drop(event)
+          }
+          if (!dropped) {
             this.drop(this.drag);
           }
           this.drag = null;
         }
       },
+
       drop: function(drag) {
         // dropping here sends the item to the bitbucket
         drag.element.parentNode.removeChild(drag.element);
-      },
-
-      createDragObject: function(tag, event) {
-        var meta = this.$.meta.byId(tag);
-        var e = event || {};
-        //
-        var elt = this.fire('palette-create-drag-object', {tag: tag}).detail.element;
-        return {
-          origin: {left: e.pageX - 24, top: e.pageY - 24},
-          element: elt
-        };
       }
 
     });

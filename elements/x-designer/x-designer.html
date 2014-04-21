@@ -1,6 +1,6 @@
 <link rel="import" href="../../components/core-layout/core-layout.html">
 <link rel="import" href="../../components/polymer-ui-splitter/polymer-ui-splitter.html">
-<link rel="import" href="../x-designable/x-designable.html">
+<link rel="import" href="../x-design-canvas/x-design-canvas.html">
 <link rel="import" href="../x-palette/x-palette.html">
 <link rel="import" href="../x-tree/x-tree.html">
 
@@ -20,7 +20,7 @@
     <x-tree id="tree" canvas="{{$.canvas}}" selected="{{selected}}"></x-tree>
   </section>
 
-  <x-designable core-flex id="canvas" tabIndex="-1" selected="{{selected}}" on-design-change="{{designChange}}"></x-designable>
+  <x-design-canvas core-flex id="canvas" tabIndex="-1" selected="{{selected}}" on-design-change="{{designChange}}"></x-design-canvas>
 
 </template>
 <script>
@@ -34,25 +34,29 @@
       this.fire('designer-ready');
     },
 
-    paletteDrag: function(event, drag) {
-      this.$.canvas.drag(drag);
+    maximizedChanged: function() {
+      this.$.tools.classList.toggle('maximized', this.maximized);
+      this.$.canvas.classList.toggle('maximized', this.maximized);
+      this.$.canvas.dragDisabled = this.maximized;
     },
 
-    paletteCreateDragObject: function(event, detail) {
-      detail.element = this.createElement(detail.tag);
-      this.$.canvas.makeElementDraggable(detail.element);
+    // choreograph composed objects
+
+    paletteDrag: function(event, dragInfo) {
+      console.log('[%s]: paletteDrag', this.localName);
+      // locate meta data
+      var meta = this.$.meta.byId(dragInfo.tag);
+      dragInfo.element = meta.createElement();
+      this.$.canvas.addElement(dragInfo.element);
+      // let canvas hook the drag
+      this.$.canvas.drag(dragInfo)
+      // let canvas do hacky stuff :(
+      this.$.canvas.makeElementDraggable(dragInfo.element);
     },
 
     designChange: function() {
       this.$.canvas.update();
       this.$.tree.update();
-    },
-
-    createElement: function(tag) {
-      var meta = this.$.meta.byId(tag);
-      var element = meta.createElement();
-      this.$.canvas.addElement(element);
-      return element;
     },
 
     deleteElement: function() {
@@ -69,12 +73,6 @@
 
     selectParentElement: function() {
       this.$.canvas.selectParentElement();
-    },
-
-    maximizedChanged: function() {
-      this.$.tools.classList.toggle('maximized', this.maximized);
-      this.$.canvas.classList.toggle('maximized', this.maximized);
-      this.$.canvas.dragDisabled = this.maximized;
     },
 
     inspectTarget: function(event) {

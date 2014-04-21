@@ -1,107 +1,118 @@
 <link rel="import" href="../../components/polymer/polymer.html">
 
 <polymer-element name="x-tree" attributes="canvas selected">
-  <template>
-    <style>
-      :host {
-        position: relative;
-      }
-      #title {
-        height: 40px;
-        line-height: 40px;
-        background-color: #E0E0E0;
-        padding: 0 12px;
-        font-size: 16px;
-      }
-      #interior {
-        border: 1px solid silver;
-        position: absolute;
-        top: 40px;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        overflow: auto;
-        -webkit-overflow-scrolling: touch;
-        cursor: pointer;
-      }
-      #caption {
-        color: blue;
-      }
-      id {
-        font-style: italic;
-        color: #804C00;
-      }
-      #tree {
-        display: inline-block;
-        padding: 8px;
-      }
-      #tree div {
-        padding: 4px;
-        white-space: nowrap;
-      }
-      .selected {
-        background: rgba(72, 154, 254, 0.20);
-      }
-    </style>
-    <div id="title">Elements</div>
-    <div id="interior" touch-action="auto">
-      <div id="tree">
-        <template repeat="{{components}}">
-          <div class="{{selected}}" on-tap="{{selectAction}}" style="padding-left: {{indent}}px"><span>{{name}}<id>{{id}}</id><span id="caption">{{text}}</span></span></div>
-        </template>
-      </div>
+<template>
+
+  <style>
+    :host {
+      position: relative;
+    }
+    #title {
+      height: 40px;
+      line-height: 40px;
+      background-color: #E0E0E0;
+      padding: 0 12px;
+      font-size: 16px;
+    }
+    #interior {
+      border: 1px solid silver;
+      position: absolute;
+      top: 40px;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      cursor: pointer;
+    }
+    #caption {
+      color: blue;
+    }
+    id {
+      font-style: italic;
+      color: #804C00;
+    }
+    #tree {
+      display: inline-block;
+      padding: 8px;
+    }
+    #tree div {
+      padding: 4px;
+      white-space: nowrap;
+    }
+    .selected {
+      background: rgba(72, 154, 254, 0.20);
+    }
+  </style>
+
+  <div id="title">Elements</div>
+
+  <div id="interior" touch-action="auto">
+    <div id="tree">
+      <template repeat="{{components}}">
+        <div class="{{selected}}" on-tap="{{selectAction}}" style="padding-left: {{indent}}px"><span>{{name}}<id>{{id}}</id><span id="caption">{{text}}</span></span></div>
+      </template>
     </div>
-  </template>
-  <script>
-  (function() {
-    Polymer('x-tree', {
-      components: null,
-      canvas: null,
-      canvasChanged: function() {
-        this.update();
-      },
-      update: function() {
-        var selected = this.selected;
-        var tabsize = 32;
-        var components = this.components = [];
-        function subtree(root, indent) {
-          var e = root.firstElementChild;
-          while (e) {
-            if (elementBlackList.indexOf(e.localName) < 0) {
-              var text = e.children.length == 0 ? e.textContent.trim() : '';
-              if (text) {
-                if (text.length > 12) {
-                  text = text.slice(0, 12) + "...";
-                }
-                text = ' "' + text + '"';
+  </div>
+
+</template>
+<script>
+(function() {
+
+  Polymer('x-tree', {
+    components: null,
+    canvas: null,
+
+    canvasChanged: function() {
+      this.update();
+    },
+
+    update: function() {
+      var selected = this.selected;
+      var tabsize = 32;
+      var components = this.components = [];
+
+      function subtree(root, indent) {
+        var e = root.firstElementChild;
+        while (e) {
+          if (elementBlackList.indexOf(e.localName) < 0) {
+            var text = e.children.length == 0 ? e.textContent.trim() : '';
+            if (text) {
+              if (text.length > 12) {
+                text = text.slice(0, 12) + "...";
               }
-              var info = e.treeInfo || {name: e.localName, id: e.id}
-              components.push({
-                indent: indent,
-                name: info.name,
-                element: e,
-                id: info.id ? ' #' + info.id + '': '',
-                text: text,
-                selected: (e == selected) ? 'selected' : ''
-              });
-              if (!(e.meta && e.meta.hideSubtree)) {
-                subtree(e, indent + tabsize);
-              }
+              text = ' "' + text + '"';
             }
-            e = e.nextElementSibling;
+            var info = e.treeInfo || {name: e.localName, id: e.id}
+            components.push({
+              indent: indent,
+              name: info.name,
+              element: e,
+              id: info.id ? ' #' + info.id + '': '',
+              text: text,
+              selected: (e == selected) ? 'selected' : ''
+            });
+            if (!(e.meta && e.meta.hideSubtree)) {
+              subtree(e, indent + tabsize);
+            }
           }
-        }
-        subtree(this.canvas, 4);
-      },
-      selectAction: function(event, detail, sender) {
-        if (sender) {
-          this.selected = sender.templateInstance.model.element;
-          Platform.flush();
+          e = e.nextElementSibling;
         }
       }
-    });
-    
-    var elementBlackList = ['style'];
-  })();
-  </script>
+
+      subtree(this.canvas, 4);
+    },
+
+    selectAction: function(event, detail, sender) {
+      if (sender) {
+        this.selected = sender.templateInstance.model.element;
+      }
+    }
+
+  });
+
+  var elementBlackList = ['style'];
+
+})();
+</script>
 </polymer-element>
