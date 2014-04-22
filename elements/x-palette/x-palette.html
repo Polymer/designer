@@ -2,85 +2,70 @@
 <link rel="import" href="../../components/core-item/core-item.html">
 <link rel="import" href="../../components/core-menu/core-menu.html">
 <link rel="import" href="../../components/core-menu/core-submenu.html">
+<link rel="import" href="../../components/core-drag-drop/core-drag-drop.html">
 <link rel="import" href="../../components/x-meta/x-meta.html">
 
-<polymer-element name="x-palette" attributes="canvas drag">
+<polymer-element name="x-palette">
 
-  <template>
+<template>
 
-    <link rel="stylesheet" href="x-palette.css">
+  <link rel="stylesheet" href="x-palette.css">
 
-    <x-meta id="meta" categories="{{categories}}"></x-meta>
+  <x-meta id="meta" categories="{{categories}}"></x-meta>
 
-    <div id="list" on-trackstart="{{trackStart}}" on-track="{{track}}" on-trackend="{{trackEnd}}">
+  <div id="list">
 
-      <core-menu selectedClass="palette-selected">
+    <core-drag-drop on-drag-start="{{dragStart}}"></core-drag-drop>
 
-        <template repeat="{{categories}}">
+    <core-menu selectedClass="palette-selected">
 
-          <core-submenu class="group-item" label="{{name}}">
+      <template repeat="{{categories}}">
 
-            <template repeat="{{list}}">
-              <div class="simple-item" tag="{{id}}" loaded?="{{importsLoaded}}" ishidden?="{{isHidden}}">{{label}}</div>
-            </template>
+        <core-submenu class="group-item" label="{{name}}">
 
-          </core-submenu>
+          <template repeat="{{list}}">
+            <div class="simple-item" tag="{{id}}" loaded?="{{importsLoaded}}" ishidden?="{{isHidden}}">{{label}}</div>
+          </template>
 
-        </template>
+        </core-submenu>
 
-      </core-menu>
+      </template>
 
-    </div>
+    </core-menu>
 
-  </template>
+  </div>
 
-  <script>
-    Polymer('x-palette', {
+</template>
+<script>
 
-      categories: null,
+  Polymer('x-palette', {
 
-      trackStart: function(event) {
-        event.stopPropagation();
-        var tag = event.target.getAttribute('tag');
-        if (tag) {
-          this.drag = this.createDragObject(tag, event);
-          this.fire('palette-drag', this.drag);
-        }
-      },
-      track: function(event) {
-        event.stopPropagation();
-        if (this.drag && this.drag.drag) {
-          this.drag.drag(event);
-        }
-      },
+    categories: null,
 
-      trackEnd: function(event) {
-        event.stopPropagation();
-        if (this.drag) {
-          this.drag.up(event);
-          if (!this.drag.dropped) {
-            this.drop(this.drag);
-          }
-          this.drag = null;
-        }
-      },
-      drop: function(drag) {
-        // dropping here sends the item to the bitbucket
-        drag.element.parentNode.removeChild(drag.element);
-      },
+    dragStart: function(event, dragInfo) {
+      // decorate dragInfo
+      dragInfo.tag = dragInfo.event.target.getAttribute('tag');
+      dragInfo.origin = {left: dragInfo.event.pageX - 24,
+        top: dragInfo.event.pageY - 24};
+      // delegate to arbitrary ancestor
+      this.fire('palette-drag', dragInfo);
+      // multiplex drop
+      dragInfo.delegateDrop = dragInfo.drop;
+      dragInfo.drop = this.drop.bind(this);
+    },
 
-      createDragObject: function(tag, event) {
-        var meta = this.$.meta.byId(tag);
-        var e = event || {};
-        //
-        var elt = this.fire('palette-create-drag-object', {tag: tag}).detail.element;
-        return {
-          origin: {left: e.pageX - 24, top: e.pageY - 24},
-          element: elt
-        };
+    drop: function(dragInfo) {
+      var dropped = false;
+      if (dragInfo.delegateDrop) {
+        dropped = dragInfo.delegateDrop(dragInfo);
       }
+      if (!dropped && dragInfo.element) {
+        // dropping here sends the item to the bitbucket
+        dragInfo.element.remove();
+      }
+    }
 
-    });
-  </script>
+  });
 
+</script>
 </polymer-element>

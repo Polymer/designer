@@ -125,6 +125,10 @@
       }
     },
 
+    //
+    // turn abstract events into concrete actions
+    //
+
     designChange: function(event) {
       this.$.inspector.sourceElement = this.designer.selected;
       this.$.inspector.update();
@@ -156,6 +160,8 @@
         this.codeToDesign();
       }
     },
+
+    // 
 
     // TODO(sorvell): probably should factor this code setup to be elsewhere
     prepareCode: function() {

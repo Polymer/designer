@@ -1,18 +1,22 @@
-<link rel="import" href="../../components/polymer/polymer.html">
 <link rel="import" href="../x-design-host/x-design-host.html">
+<link rel="import" href="../../components/core-drag-drop/core-drag-drop.html">
 
-<polymer-element name="x-designable" designer attributes="selected" on-keydown="{{keydown}}" on-down="{{down}}" on-up="{{up}}" on-trackstart="{{trackStart}}" on-track="{{track}}" on-trackend="{{trackEnd}}">
+<polymer-element name="x-design-canvas" attributes="selected" designer>
 
 <template>
 
   <style>
+
     :host {
       position: relative;
       outline: none;
       background-image: url(grid.png);
       -webkit-user-select: none
     }
+
   </style>
+
+  <core-drag-drop></core-drag-drop>
 
   <content></content>
 
@@ -23,7 +27,13 @@
   // turn on binding reflection;
   Platform.enableBindingsReflection = true;
 
-  Polymer('x-designable', {
+  Polymer('x-design-canvas', {
+
+    eventDelegates: {
+      up: 'pointerUp',
+      keydown: 'keydown',
+      'drag-start': 'drag'
+    },
 
     grid: 10,
     selected: null,
@@ -39,11 +49,13 @@
     },
 
     // communication
+
     notify: function() {
       this.fire('design-change', this);
     },
 
     // state
+
     selectedChanged: function(old) {
       this.classFollows(this.selected, old, 'selected-element');
       if (this.selected) {
@@ -53,6 +65,7 @@
     },
 
     // commands
+
     addElement: function(element) {
       this.designHost.appendChild(element);
       this.decorateElement(element);
@@ -103,8 +116,44 @@
       }
     },
 
-    update: function() {
-      this.designHost.marshalNodeReferences(this.designHost);
+    // events
+
+    pointerUp: function(event) {
+      this.selected = (event.target === this) ? this.designHost : event.target;
+    },
+
+    keydown: function(event) {
+      switch(event.keyCode) {
+        // ESC
+        case 27:
+          this.selectParentElement();
+          break;
+        // backspace? delete?
+        case 8:
+        case 46:
+          if (!this.nodeIsEditor(event.target)) {
+            this.deleteElement();
+            event.preventDefault();
+          }
+          break;
+      }
+    },
+
+    drag: function(event, dragInfo) {
+      // generate dragInfo
+      dragInfo.element = this.findDraggableElement(dragInfo.event.target);
+      dragInfo.origin = dragInfo.element.getBoundingClientRect();
+      // delegate to drag API
+      this.dragStart(dragInfo);
+      // multiplex drop
+      dragInfo.delegateDrop = dragInfo.drop;
+      dragInfo.drop = function() {
+        if (!dragInfo.delegateDrop(dragInfo)) {
+          this.deleteElement();
+        }
+      }.bind(this);
+      // TODO(sjmiles): why select here?
+      this.selected = dragInfo.element;
     },
 
     //
@@ -115,85 +164,102 @@
     // implements the 'track' events but delegates the work to 
     // callbacks that 'drag' populates on the drag object (dragInfo).
     //
-    // drag-sources are x-pallete and x-designable
+    // drag-sources are x-palette and x-design-canvas
     //
-    drag: function(dragInfo) {
-      // TODO(sjmiles): store in instance variable?
-      this.dragInfo = dragInfo;
-      // drag avatar
+
+    dragStart: function(dragInfo) {
       // TODO(sjmiles): if this is an element from the design-canvas, it's immediately
       // pulled out of it's original context
       if (dragInfo.element.parentNode != this) {
+        // promote to top level
         this.appendChild(dragInfo.element);
       }
       //
-      // calculate a starting origin in the frame of 'this'
-      var local = this.getBoundingClientRect();
-      // TODO(sjmiles): why the conditional?
-      var origin = dragInfo.origin; // || dragInfo.element.getBoundingClientRect();
-      dragInfo.start = {x: origin.left - local.left, y: origin.top - local.top};
-      //console.log(origin, dragInfo.start, local);
+      // make the element draggable (e.g. absolutely positioned) in this context
       //
-      // contextualize utility method
+      this.setDraggableStyleRules(dragInfo.element);
+      //
+      // calculate a starting origin in the frame of 'this'
+      //
+      var local = this.getBoundingClientRect();
+      var origin = dragInfo.origin; 
+      dragInfo.start = {x: origin.left - local.left, y: origin.top - local.top};
+      //
+      // contextualize utilities
+      //
       var snap = this.snap.bind(this);
-      var ruleForElement = this.ruleForElement.bind(this);
-      // attach drag handler to the dragInfo
-      dragInfo.drag = function(event) {
-        var p = snap(
-          this.start.x + event.dx,
-          this.start.y + event.dy
-        );
-        var rule = ruleForElement(this.element);
+      var rule = this.ruleForElement(dragInfo.element);
+      var drop = this.drop.bind(this);
+      var scope = function(target) {
+        return this.scopedTarget(this, event.relatedTarget)
+      }.bind(this);
+      //
+      // attach handlers to the dragInfo
+      //
+      dragInfo.drag = function() {
+        //console.log('dragInfo.drag');
+        var p = snap(this.start.x + this.event.dx, this.start.y + this.event.dy);
         rule.style.left = p.x + 'px';
         rule.style.top = p.y + 'px';
       };
-      var self = this;
-      dragInfo.up = function(e) {
-        self.up(e);
-      }
+      dragInfo.drop = function() {
+        this.dropTarget = scope(this.event.relatedTarget);
+        return drop(this);
+      };
     },
 
-    drop: function(element, event) {
-      this.style.overflow = 'hidden';
-      var container = this.findContainer(element, event.relatedTarget);
-      if (container && this.canContain(container, element)) {
+    drop: function(dragInfo) {
+      // remove dragging affordances (e.g. absolutely positioned)
+      this.unsetDraggableStyleRules(dragInfo.element);
+      // TODO(sjmiles): restore clipping (ad hoc)
+      //this.style.overflow = 'hidden';
+      // locate drop target
+      var container = this.findContainer(dragInfo.element, dragInfo.dropTarget);
+      if (container && this.canContain(container, dragInfo.element)) {
         // don't manipulate parentNode if not necessary
-        var sameParent = (container === element.parentNode);
+        var sameParent = (container === dragInfo.element.parentNode);
         if (!sameParent) {
           // install element in container
-          container.appendChild(element);
+          container.appendChild(dragInfo.element);
         }
-        this.decorateElement(element);
-        // ideally we only notify one change on drop
-        // the selection changing will cause a notify
+        this.decorateElement(dragInfo.element);
+        // ideally we only notify once on drop.
+        // the selection changing will cause a notify.
         // if the selection is not changing, but we
-        // did change the hierarchy, notify manually
-        if (!sameParent && this.selected === element) {
+        // did change the hierarchy, notify manually.
+        if (!sameParent && this.selected === dragInfo.element) {
           this.notify();
         }
-        this.selected = element;
+        this.selected = dragInfo.element;
         return true;
       }
     },
 
+    // utility
+
+    update: function() {
+      this.designHost.marshalNodeReferences(this.designHost);
+    },
+
     decorateElement: function(element) {
       var s = this.ruleForElement(element).style;
-      s.pointerEvents = null;
-      s.transition = null;
-      s.webkitTransition = null;
+      //s.pointerEvents = null;
+      //s.transition = null;
+      //s.webkitTransition = null;
       // designer is absolutely positioned, ad-hoc
       s.position = 'absolute';
       if (element.parentNode !== this.designHost) {
         s.left = s.top = s.position = '';
       }
-      var self = this;
-      function decorate(element) {
-        self.applyUniqueId(element);
-        self.ruleForElement(element);
-      }
+      //
+      var decorate = function(element) {
+        this.applyUniqueId(element);
+        this.ruleForElement(element);
+      }.bind(this);
+      //
       Array.prototype.filter.call(element.children, function(c) {
-          return ['style'].indexOf(c.localName) < 0;
-        }).forEach(decorate);
+        return ['style'].indexOf(c.localName) < 0;
+      }).forEach(decorate);
     },
 
     // stuffs required for making binding to work, ad-hoc
@@ -212,7 +278,7 @@
       var scope = window.ShadowDOMPolyfill ? document.body : node;
       return query.call(scope, '#' + uId) ?
         this.makeUniqueId(node, id, suffix ? ++suffix : 1) :
-        uId;
+          uId;
     },
 
     applyPropertyBinding: function(target, name, path) {
@@ -241,92 +307,43 @@
       }
     },
 
-    // events
-    keydown: function(event) {
-      switch(event.keyCode) {
-        case 27:
-          this.selectParentElement();
-          break;
-        case 8:
-        case 46:
-          if (!this.nodeIsEditor(event.target)) {
-            this.deleteElement();
-            event.preventDefault();
-          }
-          break;
-      }
-    },
-
-    down: function(e) {
-      //this.dragDisabled = e.altKey;
-    },
-
-    up: function(e) {
-      if (this.dragInfo && !this.dragInfo.dropped) {
-        this.dragInfo.dropped = this.drop(this.dragInfo.element, e);
-      } else {
-        this.selected = e.target;
-        if (this.selected === this) {
-          this.selected = this.designHost;
-        }
-      }
-      this.dragInfo = null;
-      //var focusNode = nodeIsEditor(this.selected) ? this.selected : this;
-      //focusNode.focus();
-    },
-
-    trackStart: function(event) {
-      // it's nobody else's event
-      event.stopPropagation();
-      //console.dir(event);
-      // acquire target
-      if (this.dragDisabled) {
-        return;
-      }
-      var elt = this.findDraggableElement(event.target);
-      if (elt) {
-        var dragInfo = this.createDragObject(elt);
-        //
-        var px = event.pageX - dragInfo.origin.left;
-        if (px < 4 || px > dragInfo.origin.width -4) {
-          console.log(px);
-          return;
-        }
-        //
-        this.makeElementDraggable(elt);
-        //
-        this.drag(dragInfo);
-        this.selected = elt;
-      }
-    },
-
-    track: function(event) {
-      if (this.dragInfo && this.dragInfo.drag) {
-        this.dragInfo.drag(event);
-      }
-    },
-
-    trackEnd: function(event) {
-      if (this.dragInfo) {
-        event.stopPropagation();
-        //this.drop(this.dragInfo.element, event);
-        // TODO(sorvell): delete if we drag out of canvas area
-        // we'll need to refine this when dragging onto the tree becomes
-        // supported.
-        this.deleteElement();
-        this.dragInfo = null;
-      }
-    },
-
-    // utility
-    makeElementDraggable: function(element) {
+    setDraggableStyleRules: function(element) {
       var s = this.ruleForElement(element).style;
       s.position = 'absolute';
       s.pointerEvents = 'none';
       s.transition = 'none';
+      s.cursor = 'pointer';
       s.webkitTransition = 'none';
-      // show elements
-      this.style.overflow = null;
+    },
+
+    unsetDraggableStyleRules: function(element) {
+      var s = this.ruleForElement(element).style;
+      s.position = null;
+      s.pointerEvents = null;
+      s.transition = null;
+      s.cursor = null;
+      s.webkitTransition = null;
+    },
+
+    findScope: function(element) {
+      while (element.parentNode) {
+        element = element.parentNode;
+      }
+      return element.host || element;
+    },
+
+    scopedTarget: function(scopedElement, target) {
+      // find the scope containing scopedElement
+      var hostScope = this.findScope(scopedElement);
+      // find the nearest ancestor of target that's in hostScope
+      while (target) {
+        var targetScope = this.findScope(target);
+        if (targetScope === hostScope || targetScope === target) {
+          return target;
+        }
+        target = targetScope;
+      }
+      return target;
     },
 
     findContainer: function(element, container) {
@@ -339,7 +356,6 @@
         }
         container = container.parentNode;
       }
-      return this.designHost;
     },
 
     canContain: function(container, element) {
@@ -371,14 +387,6 @@
       }
       // return result
       return elt;
-    },
-
-    createDragObject: function(elt) {
-      var rect = elt.getBoundingClientRect();
-      return {
-        origin: rect,
-        element: elt
-      };
     },
 
     snap: function(inX, inY) {
@@ -503,7 +511,7 @@
       }
     }
   }
-    
+
 })();
 </script>
 
