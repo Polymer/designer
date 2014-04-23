@@ -9,13 +9,13 @@
 
   <link rel="stylesheet" href="x-designer.css">
 
-  <x-meta id="meta" categories="{{elements}}"></x-meta>
+  <x-meta id="meta" categories="{{categories}}"></x-meta>
 
   <core-layout></core-layout>
 
   <section id="tools">
     <core-layout vertical></core-layout>
-    <x-palette core-flex id="palette" elements="{{elements}}" canvas="{{$.canvas}}" on-palette-drag="{{paletteDrag}}" on-palette-create-drag-object="{{paletteCreateDragObject}}"></x-palette>
+    <x-palette core-flex id="palette" on-palette-drag="{{paletteDrag}}"></x-palette>
     <polymer-ui-splitter direction="down"></polymer-ui-splitter>
     <x-tree id="tree" canvas="{{$.canvas}}" selected="{{selected}}"></x-tree>
   </section>
