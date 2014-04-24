@@ -7,8 +7,6 @@
     "github-elements": "PolymerLabs/github-elements#master",
     "x-meta": "PolymerLabs/x-meta#master",
     "core-elements": "Polymer/core-elements#master",
-    "polymer-elements": "Polymer/polymer-elements#master",
-    "polymer-ui-elements": "Polymer/polymer-ui-elements#master",
     "more-elements": "Polymer/more-elements#master"
   }
 }
