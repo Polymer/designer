@@ -5,6 +5,7 @@
   bottom: 0;
   left: 0;
   outline: 0;
+  -webkit-user-select: none;
 }
 
 #canvas {

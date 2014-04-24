@@ -23,7 +23,16 @@
 
     <core-icon-button icon="maximize" on-tap="{{fullscreenAction}}"></core-icon-button>
 
-    <core-selector id="viewSelector" selected="{{selected}}">
+    <span style="padding-right: 16px;"></span>
+
+    <core-selector selected="{{paletteMode}}">
+      <core-icon-button icon="list" name="menu"></core-icon-button>
+      <core-icon-button icon="modules" name="grid"></core-icon-button>
+    </core-selector>
+
+    <span style="padding-right: 16px;"></span>
+
+    <core-selector selected="{{selected}}">
       <core-icon-button src="assets/design.png" name="design"></core-icon-button>
       <core-icon-button src="assets/code.png" name="code"></core-icon-button>
     </core-selector>
@@ -78,6 +87,7 @@
 
   Polymer('designer-element', {
     selected: 'design',
+    paletteMode: 'grid',
     remoteHtml: '',
 
     ready: function() {
@@ -174,6 +184,10 @@
       this.designer.selectParentElement();
     },
 
+    selectParentElement: function(event) {
+      this.designer.selectParentElement();
+    },
+
     selectedChanged: function() {
       if (this.selected == 'code') {
         this.designToCode();
@@ -183,6 +197,10 @@
         this.$.frame.style.display = 'none';
         this.codeToDesign();
       }
+    },
+
+    paletteModeChanged: function() {
+      this.designer.paletteMode = this.paletteMode;
     },
 
     // 

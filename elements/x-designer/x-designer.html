@@ -4,7 +4,7 @@
 <link rel="import" href="../x-palette/x-palette.html">
 <link rel="import" href="../x-tree/x-tree.html">
 
-<polymer-element name="x-designer" attributes="selected maximized">
+<polymer-element name="x-designer" attributes="selected maximized paletteMode metaUrls">
 <template>
 
   <link rel="stylesheet" href="x-designer.css">
@@ -15,7 +15,7 @@
 
   <section id="tools">
     <core-layout vertical></core-layout>
-    <x-palette core-flex id="palette" on-palette-drag="{{paletteDrag}}"></x-palette>
+    <x-palette core-flex id="palette" on-palette-drag="{{paletteDrag}}" mode="{{paletteMode}}"></x-palette>
     <polymer-ui-splitter direction="down"></polymer-ui-splitter>
     <x-tree id="tree" canvas="{{$.canvas}}" selected="{{selected}}"></x-tree>
   </section>
@@ -29,6 +29,7 @@
 
     maximized: false,
     selectedTab: 'design',
+    metaUrls: [],
 
     ready: function() {
       this.fire('designer-ready');
@@ -38,6 +39,12 @@
       this.$.tools.classList.toggle('maximized', this.maximized);
       this.$.canvas.classList.toggle('maximized', this.maximized);
       this.$.canvas.dragDisabled = this.maximized;
+    },
+
+    metaUrlsChanged: function() {
+      if (this.metaUrls) {
+        this.import(this.metaUrls);
+      }
     },
 
     //

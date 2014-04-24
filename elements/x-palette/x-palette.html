@@ -3,9 +3,10 @@
 <link rel="import" href="../../components/core-menu/core-menu.html">
 <link rel="import" href="../../components/core-menu/core-submenu.html">
 <link rel="import" href="../../components/core-drag-drop/core-drag-drop.html">
+<link rel="import" href="../../components/core-layout/core-layout.html">
 <link rel="import" href="../../components/x-meta/x-meta.html">
 
-<polymer-element name="x-palette">
+<polymer-element name="x-palette" attributes="mode">
 
 <template>
 
@@ -13,32 +14,47 @@
 
   <x-meta id="meta" categories="{{categories}}"></x-meta>
 
-  <div id="list">
+  <core-drag-drop on-drag-start="{{dragStart}}"></core-drag-drop>
 
-    <core-drag-drop on-drag-start="{{dragStart}}"></core-drag-drop>
+  <template if="{{mode == 'menu'}}">
+    <div id="list">
 
-    <core-menu selectedClass="palette-selected">
+      <core-menu selectedClass="palette-selected">
+        <template repeat="{{categories}}">
+          <core-submenu class="group-item" label="{{name}}">
 
+            <template repeat="{{list}}">
+              <div class="simple-item" tag="{{id}}" loaded?="{{importsLoaded}}" ishidden?="{{isHidden}}">{{label}}</div>
+            </template>
+
+          </core-submenu>
+        </template>
+      </core-menu>
+
+    </div>
+  </template>
+
+  <template if="{{mode == 'grid'}}">
+    <div id="grid">
       <template repeat="{{categories}}">
+        <template repeat="{{list}}">
 
-        <core-submenu class="group-item" label="{{name}}">
+          <div class="grid-item" tag="{{id}}">
+            <div style="height: 64px; line-height: 64px;"><img src="../../assets/{{id}}.png" onerror="this.src='../../assets/cog.svg';"></div>
+            <br>
+            <div>{{label}}</div>
+          </div>
 
-          <template repeat="{{list}}">
-            <div class="simple-item" tag="{{id}}" loaded?="{{importsLoaded}}" ishidden?="{{isHidden}}">{{label}}</div>
-          </template>
-
-        </core-submenu>
-
+        </template>
       </template>
-
-    </core-menu>
-
-  </div>
+    </div>
+  </template>
 
 </template>
 <script>
 
   Polymer('x-palette', {
+    mode: 'grid',
 
     dragStart: function(event, dragInfo) {
       // decorate dragInfo

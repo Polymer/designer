@@ -19,6 +19,23 @@
   -ms-user-select: none;
 }
 
+#grid {
+  background-color: #F2F2F2;
+  position: absolute;
+  top: 0;
+  right: 0px;
+  left: 0px;
+  bottom: 0px;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  font-size: 15px;
+  -webkit-overflow-scrolling: touch;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
 .group-item {
   font-weight: 500;
 }
@@ -35,6 +52,30 @@
   cursor: pointer;
   color: #000;
   white-space: nowrap;
+}
+
+.grid-item {
+  display: inline-block;
+  border: 1px dotted silver;
+  border-left: none;
+  border-top: none;
+  width: 106px;
+  height: 116px;
+  font-size: 11px;
+  cursor: pointer;
+  color: #000;
+  overflow: hidden;
+  text-align: center;
+  padding: 12px;
+  background-color: white;
+}
+
+.grid-item > * {
+  pointer-events: none;
+}
+
+img {
+  vertical-align: middle;
 }
 
 [ishidden] {
