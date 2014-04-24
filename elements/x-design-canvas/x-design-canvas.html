@@ -221,7 +221,7 @@
       var rule = this.ruleForElement(dragInfo.element);
       var drop = this.drop.bind(this);
       var scope = function(target) {
-        return this.scopedTarget(this, event.relatedTarget)
+        return this.scopedTarget(this, target)
       }.bind(this);
       //
       // attach handlers to the dragInfo
