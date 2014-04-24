@@ -142,6 +142,9 @@
     drag: function(event, dragInfo) {
       // generate dragInfo
       dragInfo.element = this.findDraggableElement(dragInfo.event.target);
+      if (!dragInfo.element) {
+        return;
+      }
       dragInfo.origin = dragInfo.element.getBoundingClientRect();
       // delegate to drag API
       this.dragStart(dragInfo);
@@ -382,7 +385,7 @@
         }
       }
       // don't drag designer itself
-      if (elt === this) {
+      if (elt === this || elt === this.designHost) {
         elt = null;
       }
       // return result
