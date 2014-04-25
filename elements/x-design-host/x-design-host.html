@@ -96,9 +96,11 @@
         }
         // make imports go...
         this.loadElementImports(template.content, function() {
-          // TODO(sorvell): note, event handlers will work if we use a 
-          // raw PolymerExpressions here.
-          this.appendChild(template.createInstance(this.model, this.syntax));
+          // TODO(sorvell): note, event handlers will work if we use 
+          // the element's syntax here (this.element.syntax).
+          // However we do not want events to function while we are designing,
+          // so, we use a custom delegate.
+          this.appendChild(template.createInstance(this.model, syntax));
           this.meta.ensureMeta(this);
           this.marshalNodeReferences(this);
           callback && callback();
@@ -194,6 +196,51 @@
     script.parentNode.replaceChild(newScript, script);
     newScript.textContent = script.textContent;
   }
+
+  // Use a custom syntax for designed elements
+  // We want to handle events specially such that they record as bindings
+  // but do no hookup. This is so that event handlers do not function
+  // while the user is designing.
+  var syntax = new PolymerExpressions();
+  var prepareBinding = syntax.prepareBinding;
+  syntax.prepareBinding = function(pathString, name, node) {
+    var path = Path.get(pathString);
+    return prepareEventBinding(path, name, node) ||
+           prepareBinding.call(syntax, pathString, name, node);
+  };
+
+  function prepareEventBinding(path, name, node) {
+    if (!hasEventPrefix(name)) {
+      return;
+    }
+
+    return function(model, node, oneTime) {
+      function bindingValue() {
+        return '{{ ' + path + ' }}';
+      }
+
+      var observer = {
+        open: bindingValue,
+        discardChanges: bindingValue,
+        close: nop,
+        path: path
+      };
+
+      if (node._recordBinding) {
+        node._recordBinding(observer);
+      }
+
+      return observer;
+    };
+  }
+
+  function nop() {};
+
+  function hasEventPrefix(n) {
+    return n && (n[0] === 'o') && (n[1] === 'n') && (n[2] === '-');
+  }
+
+
 
 })();
 </script>
