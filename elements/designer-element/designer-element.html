@@ -76,7 +76,7 @@
 
     ready: function() {
       document.addEventListener('keydown', 
-          this.KeydownAndPromptForUnload.bind(this, window));
+          this.keydown.bind(this, window));
       window.addEventListener('message', this.designWindowLoaded.bind(this));
       this.firstLoad = true;
     },
@@ -87,18 +87,28 @@
       designWindow.addEventListener('designer-ready', this.designerReady.bind(this));
       designWindow.addEventListener('design-change', this.designChange.bind(this));
       designWindow.document.addEventListener('keydown', 
-        this.KeydownAndPromptForUnload.bind(this, designWindow));
+        this.keydown.bind(this, designWindow));
     },
 
-    KeydownAndPromptForUnload: function(w, e) {
-      // backspace
-      if (e.keyCode == 8) {
-        w.onbeforeunload = function() {
-          return ' ';
-        }
-        setTimeout(function() {
-          w.onbeforeunload = null;
-        }, 0);
+    keydown: function(w, e) {
+      switch(e.keyCode) {
+        // backspace
+        case 8:
+          w.onbeforeunload = function() {
+            return ' ';
+          }
+          setTimeout(function() {
+            w.onbeforeunload = null;
+          }, 0);
+          break;
+        case 83:
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.saveAction();
+            return false;
+          }
+          break;
       }
     },
 
