@@ -5,7 +5,7 @@
   <script>
     Polymer('x-serializer', {
       tab: '  ',
-      attributesBlacklist: ['style', 'tabindex', 'role'],
+      attributesBlacklist: ['style', 'tabindex', 'role', 'classname'],
       dumpTag: function(node, indent) {
         if (node.dumpTag) {
           return node.dumpTag(this, indent, this.tab);

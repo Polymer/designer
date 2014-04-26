@@ -81,6 +81,7 @@ function reflectProperties(element) {
       more.push('textContent');
     }
     more.push('id');
+    more.push('className');
     var whitelist = {};
     //
     meta && Object.keys(meta).forEach(function(n) {
