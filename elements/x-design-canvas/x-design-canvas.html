@@ -130,6 +130,16 @@
       }
     },
 
+    maximizeElement: function() {
+      var r = this.ruleForElement(this.selected);
+      if (!r) {
+        return;
+      }
+      r.style.left = null;
+      r.style.top = null;
+      r.style.height = r.style.width = '100%';
+    },
+
     // events
 
     pointerUp: function(event) {
