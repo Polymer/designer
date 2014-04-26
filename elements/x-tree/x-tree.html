@@ -69,7 +69,7 @@
 
     update: function() {
       var selected = this.selected;
-      var tabsize = 32;
+      var tabsize = 12;
       var components = this.components = [];
 
       function subtree(root, indent) {
@@ -101,6 +101,14 @@
       }
 
       subtree(this.canvas, 4);
+
+      // scroll selected into view.
+      this.onMutation(this.$.tree, function() {
+        var e = this.$.tree.querySelector('.selected');
+        if (e) {
+          e.scrollIntoViewIfNeeded();
+        }
+      });
     },
 
     selectAction: function(event, detail, sender) {
