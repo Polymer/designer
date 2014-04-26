@@ -62,7 +62,10 @@
         this.ruleForElement(this.selected);
       }
       // focus to get keyboard events
-      this.focus();
+      var active = getScopeActiveElement(this);
+      if (active && !this.contains(active)) {
+        this.focus();
+      }
       this.notify();
     },
 
@@ -537,6 +540,13 @@
         element = element.nextElementSibling;
       }
     }
+  }
+
+  function getScopeActiveElement(node) {
+    while (node.parentNode) {
+      node = node.parentNode;
+    }
+    return node.activeElement || document.activeElement;
   }
 
 })();
