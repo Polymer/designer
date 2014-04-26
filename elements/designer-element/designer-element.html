@@ -38,6 +38,7 @@
 
     <core-icon-button icon="left" on-tap="{{promoteElement}}"></core-icon-button>
     <core-icon-button icon="right" on-tap="{{demoteElement}}"></core-icon-button>
+    <core-icon-button icon="up" on-tap="{{moveoutElement}}"></core-icon-button>
     <div core-flex></div>
     <core-icon-button icon="shortcut" on-click="{{previewAction}}"></core-icon-button>
   </core-toolbar>
@@ -154,6 +155,10 @@
 
     demoteElement: function(event) {
       this.designer.demoteElement();
+    },
+
+    moveoutElement: function(event) {
+      this.designer.moveoutElement();
     },
 
     selectParentElement: function(event) {

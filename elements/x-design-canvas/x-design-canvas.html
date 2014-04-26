@@ -107,6 +107,18 @@
       this.notify();
     },
 
+    moveoutElement: function() {
+      var e = this.selected;
+      if (e) {
+        var n = e.parentNode.parentNode;
+        if (!this.designHost.contains(n)) {
+          return;
+        }
+        n.appendChild(e);
+      }
+      this.notify();
+    },
+
     selectParentElement: function() {
       var e = this.selected;
       if (e && e.parentNode) {
