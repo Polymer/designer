@@ -283,13 +283,14 @@
       }
       //
       var decorate = function(element) {
+        if (element.localName === 'style') {
+          return;
+        }
         this.applyUniqueId(element);
         this.ruleForElement(element);
       }.bind(this);
       //
-      Array.prototype.filter.call(element.children, function(c) {
-        return ['style'].indexOf(c.localName) < 0;
-      }).forEach(decorate);
+      forSubtree(element, decorate);
     },
 
     // stuffs required for making binding to work, ad-hoc
