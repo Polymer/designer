@@ -67,7 +67,11 @@
   <x-dom-serializer id="serializer"></x-dom-serializer>
 
   <x-github-info id="githubInfo" token="{{githubToken}}"></x-github-info>
-  <github-element id="github" token="{{githubToken}}" on-files-loaded="{{documentLoaded}}" on-files-saved="{{documentSaved}}" on-token-changed="{{tokenChangeHandler}}"></github-element>
+  <github-element id="github" token="{{githubToken}}" on-files-loaded="{{documentLoaded}}" on-files-saved="{{documentSaved}}" on-files-updated="{{documentSaved}}" on-token-changed="{{tokenChangeHandler}}"></github-element>
+
+  <div id="toast"  class="{{ {showing: toastShowing } | tokenList }}">
+    <div>{{toast}}</div>
+  </div>
 
 </template>
 <script>
@@ -234,27 +238,56 @@
     },
 
     saveAction: function() {
+      this.toast = 'Saving...';
+      this.toastShowing = true;
+      this.save(function() {
+        this.toastShowing = false;
+      });
+    },
+
+    shareAction: function() {
+      // must open window immediately so that it opens in a tab, not a window
+      if (this.shareWindow) {
+        this.shareWindow.close();
+      }
+      this.shareWindow = window.open('', 'gist');
+      this.save(function() {
+        this.shareWindow.location.href = 'https://gist.github.com/' + 
+            this.$.githubInfo.user + '/' + this.fileId;
+      });
+    },
+
+    previewAction: function() {
+      if (this.previewWindow) {
+        this.previewWindow.close();
+      }
+      this.previewWindow = window.open('', 'preview');
+
+      this.save(function() {
+        this.previewWindow.location.href = 'preview.html#' + this.fileId;
+      })
+    },
+
+    save: function(callback) {
+      var cb;
+      if (callback) {
+        var self = this;
+        cb = function() {
+          callback.call(self);
+        }
+      }
       var options = {};
       var content = this.selected === 'code' ? this.code : this.html;
       options[this.$.githubInfo.fileName] = {content: content};
       if (this.fileId) {
-        this.$.github.update(this.fileId, 'designer', true, options);
+        this.$.github.update(this.fileId, 'designer', true, options, cb);
       } else {
-        this.$.github.save('designer', true, options);
+        this.$.github.save('designer', true, options, cb);
       }
     },
 
-    shareAction: function() {
-      this.sharing = true;
-      // must open window immediately so that it opens in a tab, not a window
-      this.shareWindow = window.open(this.getGistUrl());
-      this.saveAction();
-    },
-
-    share: function() {
-      if (this.fileId && this.shareWindow) {
-        this.shareWindow.location.href = this.getGistUrl();
-      }
+    documentSaved: function(event, detail) {
+      this.fileId = detail.id; 
     },
 
     loadRemoteContent: function() {
@@ -272,14 +305,6 @@
       }
     },
 
-    documentSaved: function(event, detail) {
-      this.fileId = detail.id; 
-      if (this.sharing) {
-        this.sharing = false;
-        this.share();
-      }
-    },
-
     remoteHtmlChanged: function() {
       //console.log(this.remoteHtml);
       this.loadHtml(this.remoteHtml);
@@ -291,25 +316,6 @@
 
     tokenChangeHandler: function() {
       this.$.github.cancel();
-      // make login work
-      /*
-      this.async(function() {
-        this.$.github.style.position = 'static';
-      });
-      */
-    },
-
-    getGistUrl: function() {
-      return 'https://gist.github.com/' + this.$.githubInfo.user + '/' + this.fileId;
-    },
-
-    previewAction: function() {
-      if (this.fileId) {
-        if (this.previewWindow) {
-          this.previewWindow.close();
-        }
-        this.previewWindow = window.open('preview.html#' + this.fileId, 'preview');
-      }
     }
 
   });

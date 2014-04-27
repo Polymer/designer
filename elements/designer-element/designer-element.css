@@ -26,3 +26,28 @@ iframe {
   background-color: #f2f2f2;
   border-bottom: 1px solid silver;
 }
+
+#toast {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.5s;
+  -webkit-transition: opacity 0.5s;
+}
+
+#toast > div {
+  display: inline-block;
+  font-size: 0.8rem;
+  background-color: #ffff66;
+  padding: 4px 8px;
+  border: solid silver;
+  border-width: 0 1px 1px 1px;
+  border-radius: 0 0 2px 2px;
+}
+
+#toast.showing {
+  opacity: 1;
+}
