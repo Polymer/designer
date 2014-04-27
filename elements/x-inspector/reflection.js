@@ -52,11 +52,18 @@ if (!window.designWindow) {
   designWindow = window;
 }
 
+var defaultMeta = {
+  id: {},
+  className: {kind: 'x-classname-editor'}
+}
+
 function reflectProperties(element) {
   var props = [];
   if (element) {
     var found = {};
     var meta = element.meta && element.meta.properties;
+    meta = Platform.mixin({}, defaultMeta, meta);
+
     var hep = designWindow.HTMLElement.prototype;
     var hiep = designWindow.HTMLInputElement.prototype;
     // TODO(sjmiles): beware alternate-window `p` that will != window.HTMLElement.prototype
@@ -80,8 +87,6 @@ function reflectProperties(element) {
     if (!element.firstElementChild) {
       more.push('textContent');
     }
-    more.push('id');
-    more.push('className');
     var whitelist = {};
     //
     meta && Object.keys(meta).forEach(function(n) {

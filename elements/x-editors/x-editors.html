@@ -315,3 +315,33 @@ license that can be found in the LICENSE file.
   </script>
 </polymer-element>
 
+<polymer-element name="x-classname-editor" extends="x-string-editor">
+  <script>
+  (function() {
+    Polymer('x-classname-editor', {
+      blackList: ['selected-element'],
+      valueChanged: function() {
+        this.blackListed = [];
+        var v = this.value || '';
+        for (var i=0, p; (p = this.blackList[i]); i++) {
+          if (v.indexOf(p) >= 0) {
+            v = v.replace(p, '');
+            this.blackListed.push(p);
+          }
+        }
+        this.workingValue = stripWhiteSpace(v);
+      },
+      format: function(value) {
+        value = value + ' ' + this.blackListed.join(' ');
+        return stripWhiteSpace(value);
+      }
+    });
+
+    function stripWhiteSpace(value) {
+      return (value || '').replace(/[\s]+/g, ' ').trim();
+    }
+
+  })();
+  </script>
+</polymer-element>
+
