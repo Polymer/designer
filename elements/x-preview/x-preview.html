@@ -67,7 +67,10 @@ license that can be found in the LICENSE file.
       makeOutputHTML: function(head, body) {
         var html = '<!DOCTYPE html>\n';
         html += '<head>\n';
-        html += '<title>Preview</title>\n'
+        html += '<title>Preview</title>\n';
+        html += '<meta name="viewport" content="width=device-width, ' + 
+            'initial-scale=1.0, maximum-scale=1.0">\n';
+        html += '<meta name="mobile-web-app-capable" content="yes">\n';
         html += head || '';
         // include base scripts
         html += '<script src="../platform/platform.js"></s' + 'cript>\n';
@@ -116,7 +119,8 @@ license that can be found in the LICENSE file.
     Polymer('x-preview-iframe', {
 
       htmlContentChanged: function() {
-        this.$.output.src = this.makeLink(this.outputPreviewHTML());
+        //this.$.output.src = this.makeLink(this.outputPreviewHTML());
+        this.writeToDoc(this.$.output.contentDocument);
       }
 
     });
