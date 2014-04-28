@@ -141,6 +141,9 @@
       r.style.position = 'absolute';
       r.style.left = r.style.top = '0px';
       r.style.height = r.style.width = '100%';
+      // fire a fake resize event so elements that listen to it
+      // can update their size
+      this.fire('resize', {}, window);
     },
 
     // events
