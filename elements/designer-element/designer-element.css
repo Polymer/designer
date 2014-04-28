@@ -51,3 +51,7 @@ iframe {
 #toast.showing {
   opacity: 1;
 }
+
+#code {
+  font-size: 16px;
+}
