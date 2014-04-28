@@ -15,15 +15,7 @@
         }
         var html = '';
         html += indent + '<' + node.localName;
-        var attributes = this.dumpAttributes(node);
-        Object.keys(attributes).forEach(function(k) {
-          var v = attributes[k];
-          if (v !== null && v !== undefined) {
-            // json properties can contain " so surround them with '
-            var sep = typeof v === 'string' && v.indexOf('"') >= 0 ? '\'' : '"';
-            html += ' ' + k + (v !== '' ? '=' + sep + v + sep: '');
-          }
-        })
+        html += this.dumpAttributes(node);
         html += '>';
         var end = {input: 1}[node.localName] ? '\n' : '</' + node.localName + '>\n';
         if (node.meta && node.meta.hideSubtree) {
@@ -46,6 +38,26 @@
         return html;
       },
       dumpAttributes: function(node) {
+        var html = '';
+        var attributes = this.calcAttributeValues(node);
+        Object.keys(attributes).forEach(function(k) {
+          var v = attributes[k];
+          if (v !== null && v !== undefined) {
+            var type = typeof v;
+            if (type === 'boolean') {
+              if (v) {
+                html += ' ' + k;
+              }
+            } else {
+              // json properties can contain " so surround them with '
+              var sep = type === 'string' && v.indexOf('"') >= 0 ? '\'' : '"';
+              html += ' ' + k + (v !== '' ? '=' + sep + v + sep: '');
+            }
+          }
+        });
+        return html;
+      },
+      calcAttributeValues: function(node) {
         var p$ = Reflection.properties(node);
         var attributes = {};
         p$.forEach(function(p) {
@@ -63,7 +75,7 @@
             defaultValue = node.__proto__[n];
           } catch(e) {}
           if (!this.shouldSerializeProperty(v, defaultValue)) {
-            return;
+            v = null;
           }
           attributes[n.toLowerCase()] = v;
         }, this);
