@@ -133,14 +133,22 @@
       }
     },
 
+    // 'fit' unless we're inside a core-layout and then 'flex'
     maximizeElement: function() {
-      var r = this.ruleForElement(this.selected);
-      if (!r) {
+      var e = this.selected;
+      if (!e) {
         return;
       }
-      r.style.position = 'absolute';
-      r.style.left = r.style.top = '0px';
-      r.style.height = r.style.width = '100%';
+      var r = this.ruleForElement(this.selected);
+      if (e.parentNode.localName === 'core-layout') {
+        r.style.position = null;
+        r.style.left = r.style.top = r.style.width = r.style.height = null;
+        e.className += ' core-flex';
+      } else {
+        r.style.position = 'absolute';
+        r.style.left = r.style.top = '0px';
+        r.style.height = r.style.width = '100%';
+      }
       // fire a fake resize event so elements that listen to it
       // can update their size
       this.fire('resize', {}, window);
