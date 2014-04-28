@@ -3,6 +3,7 @@
 
 <polymer-element name="x-serializer">
   <script>
+  (function() {
     Polymer('x-serializer', {
       tab: '  ',
       attributesBlacklist: ['style', 'tabindex', 'role', 'classname'],
@@ -102,9 +103,11 @@
           }
         }
         var v = attributes['class'];
-        v = v ? v.replace(/selected-element/g, '') : null;
-        if (v && (v.trim() == 'selected')) {
-          v = '';
+        if (v) {
+          for (var i=0, c; (c=blackListedClasses[i]); i++) {
+            v = v.replace(c, '');
+          }
+          v = v.trim();
         }
         attributes['class'] = v || null;
       },
@@ -113,6 +116,13 @@
         return binding ? '{{ ' + binding + ' }}' : node.textContent;
       }
     });
+
+    // TODO(sorvell): This is ad hoc. We need a way to know what classes
+    // should not be serialized.
+    var blackListedClasses = ['selected-element', 'core-selected', 
+        'core-light-theme', 'core-dark-theme'];
+
+  })();
   </script>
 </polymer-element>
 
