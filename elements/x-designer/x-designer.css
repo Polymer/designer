@@ -29,6 +29,7 @@
 #palette {
   -webkit-transition: left 0.4s;
   transition: left 0.4s;
+  border-right: 1px solid silver;
 }
 
 #tree {
