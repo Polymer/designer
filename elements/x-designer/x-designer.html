@@ -1,5 +1,5 @@
 <link rel="import" href="../../components/core-layout/core-layout.html">
-<link rel="import" href="../../components/polymer-ui-splitter/polymer-ui-splitter.html">
+<link rel="import" href="../../components/core-splitter/core-splitter.html">
 <link rel="import" href="../x-design-canvas/x-design-canvas.html">
 <link rel="import" href="../x-palette/x-palette.html">
 <link rel="import" href="../x-tree/x-tree.html">
@@ -16,7 +16,7 @@
   <section id="tools">
     <core-layout vertical></core-layout>
     <x-palette core-flex id="palette" on-palette-drag="{{paletteDrag}}" mode="{{paletteMode}}"></x-palette>
-    <polymer-ui-splitter direction="down"></polymer-ui-splitter>
+    <core-splitter direction="down"></core-splitter>
     <x-tree id="tree" canvas="{{$.canvas}}" selected="{{selected}}"></x-tree>
   </section>
 
