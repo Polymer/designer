@@ -55,3 +55,16 @@ iframe {
 #code {
   font-size: 16px;
 }
+
+core-icon-button {
+  fill: #656565;
+}
+
+/*
+ * some icons need to be rotated 90deg because that direction is missing
+ * TODO(dfreedm): Get proper icons from designers
+ * */
+core-icon-button.rotate {
+  transform: rotate(90deg);
+  -webkit-transform: rotate(90deg);
+}

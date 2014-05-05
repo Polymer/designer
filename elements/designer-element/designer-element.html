@@ -2,6 +2,10 @@
 <link rel="import" href="../../components/core-layout/core-layout.html">
 <link rel="import" href="../../components/core-pages/core-pages.html">
 <link rel="import" href="../../components/core-toolbar/core-toolbar.html">
+
+<link rel="import" href="../../components/core-icons/core-icons.html">
+<link rel="import" href="../../components/core-icons/iconsets/social-icons.html">
+
 <link rel="import" href="../../components/core-icon-button/core-icon-button.html">
 
 <link rel="import" href="../../components/code-mirror/code-mirror.html">
@@ -21,35 +25,35 @@
 
   <core-toolbar id="appbar" theme="core-light-theme">
 
-    <core-icon-button icon="maximize" on-tap="{{fullscreenAction}}"></core-icon-button>
+    <core-icon-button icon="{{maximized ? 'fullscreen-exit' : 'fullscreen'}}" on-tap="{{fullscreenAction}}"></core-icon-button>
 
     <span style="padding-right: 16px;"></span>
 
     <core-selector selected="{{paletteMode}}">
-      <core-icon-button icon="list" name="menu"></core-icon-button>
-      <core-icon-button icon="modules" name="grid"></core-icon-button>
+      <core-icon-button icon="view-list" name="menu"></core-icon-button>
+      <core-icon-button icon="view-module" name="grid"></core-icon-button>
     </core-selector>
 
     <span style="padding-right: 16px;"></span>
 
     <core-selector selected="{{selected}}">
-      <core-icon-button src="assets/design.png" name="design"></core-icon-button>
-      <core-icon-button src="assets/code.png" name="code"></core-icon-button>
+      <core-icon-button icon="visibility" name="design"></core-icon-button>
+      <core-icon-button icon="unfold-more" class="rotate" name="code"></core-icon-button>
     </core-selector>
 
     <span style="padding-right: 16px;"></span>
 
-    <core-icon-button src="assets/save.svg" on-tap="{{saveAction}}"></core-icon-button>
+    <core-icon-button icon="save" on-tap="{{saveAction}}"></core-icon-button>
     <!-- shareAction must be triggered from click to allow opening a tab (otherwise can only open a floating window) -->
-    <core-icon-button icon="shortcut" on-click="{{shareAction}}"></core-icon-button>
-    <core-icon-button src="assets/play.svg" on-click="{{previewAction}}"></core-icon-button>
+    <core-icon-button icon="social:share" on-click="{{shareAction}}"></core-icon-button>
+    <core-icon-button icon="launch" on-click="{{previewAction}}"></core-icon-button>
 
     <div core-flex></div>
 
-    <core-icon-button icon="left" on-tap="{{promoteElement}}"></core-icon-button>
-    <core-icon-button icon="right" on-tap="{{demoteElement}}"></core-icon-button>
-    <core-icon-button icon="up" on-tap="{{moveoutElement}}"></core-icon-button>
-    <core-icon-button icon="maximize" on-tap="{{maximizeElement}}"></core-icon-button>
+    <core-icon-button icon="arrow-back" on-tap="{{promoteElement}}"></core-icon-button>
+    <core-icon-button icon="arrow-forward" on-tap="{{demoteElement}}"></core-icon-button>
+    <core-icon-button icon="arrow-back" class="rotate" on-tap="{{moveoutElement}}"></core-icon-button>
+    <core-icon-button icon="fullscreen" on-tap="{{maximizeElement}}"></core-icon-button>
     
   </core-toolbar>
 
