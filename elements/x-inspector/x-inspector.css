@@ -72,3 +72,7 @@ g-icon-button[hidden=true] {
   padding: 0 !important;
   visibility: hidden !important;
 }
+
+core-icon-button {
+  fill: rgb(131, 131, 131);
+}

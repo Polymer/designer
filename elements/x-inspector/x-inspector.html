@@ -53,12 +53,12 @@ license that can be found in the LICENSE file.
 
       <div id="crumbList">
         <template repeat="{{crumbs}}">
-          <core-icon-button src="assets/ic_chevron_left_darkreg.png" on-click="{{selectParentElement}}" hidden="{{top}}"></core-icon-button>
+          <core-icon-button icon="chevron-left" on-click="{{selectParentElement}}" hidden="{{top}}"></core-icon-button>
           <b>{{name}}</b>
         </template>
       </div>
 
-      <core-icon-button class="fright" src="assets/ic_delete_darkreg.png" on-click="{{deleteElement}}"></core-icon-button>
+      <core-icon-button class="fright" icon="delete" on-click="{{deleteElement}}"></core-icon-button>
       <!--<core-icon-button class="fright" icon="right"></core-icon-button>
       <core-icon-button class="fright" icon="left"></core-icon-button>-->
 

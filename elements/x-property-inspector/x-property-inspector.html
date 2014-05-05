@@ -53,7 +53,7 @@ license that can be found in the LICENSE file.
     <div class="property-name">{{property.name}}:</div>
     <span id="container"><content></content></span>
     <div id="iconContainer" on-click="{{linkTap}}" nodisplay?="{{nobind}}">
-      <core-icon id="icon" src="assets/link_dark.png" size="16"></core-icon>
+      <core-icon id="icon" icon="link" size="16"></core-icon>
     </div>  
     <x-flip-out id="animOut" target="{{$.container}}" on-polymer-animation-end="{{animOutComplete}}"></x-flip-out>
     <x-flip-in id="animIn" target="{{$.container}}"></x-flip-in>
