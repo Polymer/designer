@@ -249,6 +249,13 @@
             imports = imports.concat(this.importsFromMeta(m));
           }
         }
+        // ensure we at least import polymer
+        if (!imports.length) {
+          var p = document.createElement('link');
+          p.rel = 'import';
+          p.setAttribute('href', '../components/polymer/polymer.html');
+          imports.push(p);
+        }
         return imports;
       },
       importsFromMeta: function(meta) {
