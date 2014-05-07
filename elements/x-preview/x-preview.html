@@ -54,7 +54,7 @@ license that can be found in the LICENSE file.
         path.pop();
         path = path.join('/');
         path += '/components/element/';
-        url = url.origin + path;
+        url = '//' + url.host + path;
         // put base href in head
         var h = '<base href="' + url + '">\n';
         return this.makeOutputHTML(h, this.htmlContent);
