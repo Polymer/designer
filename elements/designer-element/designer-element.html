@@ -260,6 +260,9 @@
     },
 
     saveAction: function() {
+      if (!this.ensureSignedIn(this.saveAction)) {
+        return;
+      }
       this.toast = 'Saving...';
       this.toastShowing = true;
       this.save(function() {
@@ -268,6 +271,9 @@
     },
 
     shareAction: function() {
+      if (!this.ensureSignedIn(this.shareAction)) {
+        return;
+      }
       // must open window immediately so that it opens in a tab, not a window
       if (this.shareWindow) {
         this.shareWindow.close();
@@ -275,11 +281,14 @@
       this.shareWindow = window.open('', 'gist');
       this.save(function() {
         this.shareWindow.location.href = 'https://gist.github.com/' + 
-            this.$.githubInfo.user + '/' + this.fileId;
+            this.fileId;
       });
     },
 
     previewAction: function() {
+      if (!this.ensureSignedIn(this.previewAction)) {
+        return;
+      }
       if (this.previewWindow) {
         this.previewWindow.close();
       }
@@ -328,7 +337,6 @@
     },
 
     remoteHtmlChanged: function() {
-      //console.log(this.remoteHtml);
       this.loadHtml(this.remoteHtml);
     },
 
@@ -336,8 +344,21 @@
       this.designer.loadHtml(html);
     },
 
-    tokenChangeHandler: function() {
-      this.$.github.cancel();
+    // support callback after logging in
+    ensureSignedIn: function(signInCallback) {
+      if (!this.$.github.token) {
+        this._signInCallback = signInCallback;
+        this.$.github.signIn();
+      } else {
+        return true;
+      }
+    },
+
+    tokenChangeHandler: function(e) {
+      if (this.$.github.token && this._signInCallback) {
+        this._signInCallback.call(this);
+        this._signInCallback = null;
+      }
     }
 
   });

@@ -10,8 +10,8 @@ license that can be found in the LICENSE file.
 
 <polymer-element name="x-gist-element-preview" extends="x-preview-iframe">
   <template>
-    <github-element id="github" token="{{token}}" on-files-loaded="{{documentLoaded}}" on-token-changed="{{tokenChangeHandler}}"></github-element>
-    <x-github-info id="info" token="{{token}}"></x-github-info>
+    <github-element id="github" on-files-loaded="{{documentLoaded}}"></github-element>
+    <x-github-info id="info"></x-github-info>
     <shadow></shadow>
   </template>
   <script>
