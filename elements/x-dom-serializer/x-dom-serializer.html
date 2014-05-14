@@ -228,13 +228,13 @@
       },
       dumpImports: function(element, indent) {
         var imports = this.importsFromElement(element);
-        var d = document.createElement('div'), hrefs=[];
+        var d = element.ownerDocument.createElement('div'), hrefs=[];
         for (var i=0, l=imports.length, n, h; (i<l) && (n=imports[i]); i++) {
           h = n.getAttribute('href');
           if (hrefs.indexOf(h) < 0) {
             hrefs.push(h);
             d.appendChild(n);
-            d.appendChild(document.createTextNode('\n'));
+            d.appendChild(element.ownerDocument.createTextNode('\n'));
           }
         }
         return d.innerHTML;
@@ -251,7 +251,7 @@
         }
         // ensure we at least import polymer
         if (!imports.length) {
-          var p = document.createElement('link');
+          var p = element.ownerDocument.createElement('link');
           p.rel = 'import';
           p.setAttribute('href', '../components/polymer/polymer.html');
           imports.push(p);
