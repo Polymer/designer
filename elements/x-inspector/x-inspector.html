@@ -53,7 +53,7 @@ license that can be found in the LICENSE file.
 
       <div id="crumbList">
         <template repeat="{{crumbs}}">
-          <core-icon-button icon="chevron-left" on-click="{{selectParentElement}}" hidden="{{top}}"></core-icon-button>
+          <core-icon-button icon="chevron-left" on-click="{{selectParentElement}}" hidden?="{{top}}"></core-icon-button>
           <b>{{name}}</b>
         </template>
       </div>
