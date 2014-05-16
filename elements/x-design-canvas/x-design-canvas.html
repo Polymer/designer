@@ -482,6 +482,10 @@
         s = document.createElement('style');
         s.textContent = ' ';
         this.designHost.insertBefore(s, this.designHost.firstElementChild);
+        // force polyfill rendering
+        if (window.ShadowDOMPolyfill) {
+          ShadowDOMPolyfill.renderAllPending();
+        }
       }
       this.styleElement = s;
     },
