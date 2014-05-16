@@ -91,7 +91,7 @@
 
   Polymer('designer-element', {
     selected: 'design',
-    paletteMode: 'grid',
+    paletteMode: 'menu',
     remoteHtml: '',
 
     ready: function() {
@@ -134,6 +134,7 @@
 
     designerReady: function(event) {
       this.designer = event.target;
+      this.paletteModeChanged();
       // crosses iframe boundary
       this.designer.import(window.metadata, this.importsLoaded.bind(this));
     },
