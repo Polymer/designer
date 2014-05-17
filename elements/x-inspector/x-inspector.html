@@ -123,7 +123,7 @@ license that can be found in the LICENSE file.
         var crumb = {};
         while (elt && !elt.hasAttribute('designer')) {
           crumb = {
-            name: elt.localName
+            name: (elt.treeInfo && elt.treeInfo.name) || elt.localName
           };
           crumbs.unshift(crumb);
           elt = elt.parentNode;
