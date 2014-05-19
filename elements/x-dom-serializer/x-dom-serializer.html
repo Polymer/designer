@@ -220,7 +220,7 @@
         }
         indent = indent || '';
         // format
-        var css = indent + rule.selectorText + ' {\n' +
+        var css = indent + rule.selectorText.replace('-host', ':host') + ' {\n' +
             rule.style.cssText.replace(/([^;]*);\s*:?/g, indent + this.tab + 
             '$1;\n') + 
             indent + '}';

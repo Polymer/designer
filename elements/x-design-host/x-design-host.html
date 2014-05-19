@@ -26,7 +26,8 @@
       // convert to :host
       if (this.__styleRule) {
         var selectorText = this.__styleRule.selectorText;
-        this.__styleRule.selectorText = ':host';
+        // use polyfill compatible selector / serializer normalizes this
+        this.__styleRule.selectorText = '-host';
       }
       var indented = indent + tab, attrs = '';
       var attrs = this.dumpAttributes();
