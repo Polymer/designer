@@ -335,7 +335,7 @@
         this.unbindElementProperty(target, name);
       }
       if (path) {
-        target.bind(name, new PathObserver(this.designHost.model, path));
+        target.bind(name.toLowerCase(), new PathObserver(this.designHost.model, path));
       }
     },
 
