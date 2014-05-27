@@ -46,6 +46,8 @@ iframe {
 
 #code {
   font-size: 16px;
+  /* ensure position absolute; necessary under SD polyfill */
+  position: absolute;
 }
 
 /*
