@@ -4,54 +4,6 @@ Use of this source code is governed by a BSD-style
 license that can be found in the LICENSE file.
 */
 
-:host {
-  Xborder: 1px solid silver;
-}
-
-#header {
-  background-color: #E0E0E0;
-  border-bottom: 1px solid silver;
-  padding: 4px;
-  height: 44px;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-#crumbList {
-  display: inline-block;
-  width: 60%;
-  vertical-align: middle;
-  overflow: hidden;
-  float: left;
-  font-size: 0.8em;
-}
-
-.fright {
-  float: right;
-}
-
-#tabs {
-  padding: 10px 10px 0;
-  border-bottom: 1px solid #ccc;
-}
-
-#tabs > * {
-  display: inline-block;
-  height: 40px;
-  line-height: 40px;
-  padding: 0 10px;
-  box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  border: 1px solid transparent;
-  border-bottom: 0;
-  border-radius: 3px 3px 0 0;
-}
-
-#tabs > .core-selected {
-  border-color: #ccc;
-  background-color: #eee;
-}
-
 #interior > * {
   padding: 8px;
   overflow-x: hidden;

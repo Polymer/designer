@@ -10,34 +10,9 @@
 
 #canvas {
   background-color: white;
-  -webkit-transition: left 0.4s;
-  transition: left 0.4s;
-  z-index: 1;
 }
 
-#tools {
-  width: 284px;
-  z-index: 1;
-  box-shadow: 5px 0 8px rgba(0, 0, 0, 0.16);
-  transition: width 0.3s;
-}
-
-#tools.maximized {
-  width: 0;
-}
-
-#palette {
-  -webkit-transition: left 0.4s;
-  transition: left 0.4s;
-  border-right: 1px solid silver;
-}
-
-#tree {
-  height: 300px;
-  overflow: hidden;
-}
-
-#canvas:not(.maximized) .selected-element {
-  outline: solid 10px rgba(72, 154, 254, 0.20);
-  outline-offset: -2px;
+#canvas .selected-element {
+  outline: solid 3px rgba(66, 87, 203, 0.8);
+  outline-offset: -3px;
 }

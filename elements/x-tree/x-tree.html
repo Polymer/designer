@@ -7,17 +7,9 @@
     :host {
       position: relative;
     }
-    #title {
-      height: 40px;
-      line-height: 40px;
-      background-color: #E0E0E0;
-      padding: 0 12px;
-      font-size: 16px;
-    }
     #interior {
-      border: 1px solid silver;
       position: absolute;
-      top: 40px;
+      top: 0px;
       right: 0;
       bottom: 0;
       left: 0;
@@ -45,8 +37,6 @@
     }
   </style>
 
-  <div id="title">Elements</div>
-
   <div id="interior" touch-action="auto">
     <div id="tree">
       <template repeat="{{components}}">
@@ -63,8 +53,8 @@
     components: null,
     canvas: null,
 
-    canvasChanged: function() {
-      this.update();
+    observe: {
+      'canvas selected': 'update'
     },
 
     update: function() {
@@ -114,6 +104,7 @@
     selectAction: function(event, detail, sender) {
       if (sender) {
         this.selected = sender.templateInstance.model.element;
+        this.fire('node-select', {selected: this.selected});
       }
     }
 

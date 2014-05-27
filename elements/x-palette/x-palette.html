@@ -4,16 +4,12 @@
 <link rel="import" href="../../components/core-menu/core-menu.html">
 <link rel="import" href="../../components/core-menu/core-submenu.html">
 <link rel="import" href="../../components/core-drag-drop/core-drag-drop.html">
-<link rel="import" href="../../components/core-layout/core-layout.html">
-<link rel="import" href="../../components/x-meta/x-meta.html">
 
-<polymer-element name="x-palette" attributes="mode">
+<polymer-element name="x-palette" attributes="mode categories">
 
 <template>
 
   <link rel="stylesheet" href="x-palette.css">
-
-  <x-meta id="meta" categories="{{categories}}"></x-meta>
 
   <core-drag-drop on-drag-start="{{dragStart}}"></core-drag-drop>
 
@@ -23,7 +19,8 @@
       <core-menu selectedClass="palette-selected">
         <template repeat="{{categories}}">
           <core-submenu class="group-item" label="{{name}}">
-
+            <span flex class="item-content"></span>
+            <core-icon class="item-content" icon="expand-more"></core-icon>
             <template repeat="{{list}}">
               <div class="simple-item" tag="{{id}}" loaded?="{{importsLoaded}}" ishidden?="{{isHidden}}">{{label}}</div>
             </template>

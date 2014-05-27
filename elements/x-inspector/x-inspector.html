@@ -12,132 +12,139 @@ license that can be found in the LICENSE file.
 <script src="reflection.js"></script>
 
 <polymer-element name="x-style-inspector" attributes="sourceElement">
-  <template>
-    <template repeat="{{properties}}">
-      <x-property-inspector property="{{}}" nobind></x-property-inspector>
-    </template>
-    <x-meta id="meta">
-      <property name="backgroundColor" kind="color"></property>
-      <property name="opacity" kind="range" min="0" max="1" step="0.1" defaultvalue="1"></property>
-      <property name="border"></property>
-      <property name="padding"></property>
-      <property name="margin"></property>
-      <property name="display"></property>
-      <property name="position" kind="select" options=" ,static,absolute,relative"></property>
-      <property name="left"></property>
-      <property name="top"></property>
-      <property name="width"></property>
-      <property name="height"></property>
-      <!-- <property name="test" kind="tk-compound-editor"></property> -->
-    </x-meta>
+<template>
+  <template repeat="{{properties}}">
+    <x-property-inspector property="{{}}" nobind></x-property-inspector>
   </template>
-  <script>
-    Polymer('x-style-inspector', {
-      properties: null,
-      sourceElementChanged: function() {
-        this.properties = Reflection.styles(this.sourceElement,
-          this.$.meta.properties);
-      }
-    });
-  </script>
+  <x-meta id="meta">
+    <property name="backgroundColor" kind="color"></property>
+    <property name="opacity" kind="range" min="0" max="1" step="0.1" defaultvalue="1"></property>
+    <property name="border"></property>
+    <property name="padding"></property>
+    <property name="margin"></property>
+    <property name="display"></property>
+    <property name="position" kind="select" options=" ,static,absolute,relative"></property>
+    <property name="left"></property>
+    <property name="top"></property>
+    <property name="width"></property>
+    <property name="height"></property>
+    <!-- <property name="test" kind="tk-compound-editor"></property> -->
+  </x-meta>
+</template>
+<script>
+  Polymer('x-style-inspector', {
+    properties: null,
+    sourceElementChanged: function() {
+      this.properties = Reflection.styles(this.sourceElement,
+        this.$.meta.properties);
+    }
+  });
+</script>
 </polymer-element>
 
-<polymer-element name="x-inspector" attributes="sourceElement">
-  <template>
+<polymer-element name="x-inspector" vertical layout attributes="sourceElement">
+<template>
 
-    <link rel="stylesheet" href="x-inspector.css">
-    
-    <core-layout vertical></core-layout>
+  <link rel="stylesheet" href="x-inspector.css">
+  
+  <div id="header" horizontal center layout>
 
-    <div id="header" theme="polymer-ui-light-theme">
-
-      <div id="crumbList">
-        <template repeat="{{crumbs}}">
-          <core-icon-button icon="chevron-left" on-click="{{selectParentElement}}" hidden?="{{top}}"></core-icon-button>
-          <b>{{name}}</b>
-        </template>
-      </div>
-
-      <core-icon-button class="fright" icon="delete" on-click="{{deleteElement}}"></core-icon-button>
-      <!--<core-icon-button class="fright" icon="right"></core-icon-button>
-      <core-icon-button class="fright" icon="left"></core-icon-button>-->
-
+    <!-- <div id="crumbList" flex>
+      <core-icon-button icon="chevron-left" on-click="{{selectParentElement}}" hidden?="{{!crumbName}}"></core-icon-button>
+      <b>{{crumbName}}</b>
     </div>
 
-    <core-selector id="tabs" selected="{{selected}}">
-      <span>Properties</span>
-      <span>Styles</span>
-    </core-selector>
-    
-    <core-pages id="interior" core-flex selected="{{selected}}">
-      <div>
-        <template repeat="{{properties}}">
-          <x-property-inspector property="{{}}" hidden?="{{meta.hidden}}"></x-property-inspector>
-        </template>
-      </div>
-      <x-style-inspector sourceElement="{{sourceElement}}"></x-style-inspector>
-    </core-pages>
+    <core-icon-button icon="delete" on-click="{{deleteElement}}"></core-icon-button> -->
 
-    <x-meta id="meta"></x-meta>
+    <!--<core-icon-button class="fright" icon="right"></core-icon-button>
+    <core-icon-button class="fright" icon="left"></core-icon-button>-->
 
-  </template>
-  <script>
+  </div>
 
-    Polymer('x-inspector', {
-      selected: 0,
-      sourceElement: null,
-      properties: null,
-      crumbs: [],
-      sourceElementChanged: function() {
-        this.update();
-      },
-      update: function() {
-        // meta-data attached here
-        if (this.sourceElement) {
-          if (this.sourceElement._getInspectorProps) {
-            var p$ = this.sourceElement._getInspectorProps();
-            this.properties = Reflection.objectProperties(p$);
-          } else {
-           this.properties = Reflection.properties(this.sourceElement);
-          }
-          this.crumbs = this.listCrumbs();
-        } else {
-          this.name = '';
-          this.properties = [];
-          this.crumbs = [];
-        }
-        // right-align crumbs
-        this.async(function() {
-          this.$.crumbList.scrollLeft = 1e4;
-        });
-      },
-      listCrumbs: function() {
-        var crumbs = [];
-        var elt = this.sourceElement;
-        if (elt.hasAttribute('designer')) {
-          return [{
-            name: 'component',
-            top: true
-          }]
-        }
-        var crumb = {};
-        while (elt && !elt.hasAttribute('designer')) {
-          crumb = {
-            name: (elt.treeInfo && elt.treeInfo.name) || elt.localName
-          };
-          crumbs.unshift(crumb);
-          elt = elt.parentNode;
-        }
-        return crumbs;
-      },
-      deleteElement: function() {
-        this.fire('delete-element');
-      },
-      selectParentElement: function() {
-        this.fire('parent-element');
+  <core-selector id="tabs" selected="{{selected}}">
+    <span>Properties</span>
+    <span>Styles</span>
+  </core-selector>
+  
+  <core-pages id="interior" flex selected="{{selected}}">
+    <div>
+      <template repeat="{{properties}}">
+        <x-property-inspector property="{{}}" hidden?="{{meta.hidden}}"></x-property-inspector>
+      </template>
+    </div>
+    <x-style-inspector sourceElement="{{sourceElement}}"></x-style-inspector>
+  </core-pages>
+
+  <x-meta id="meta"></x-meta>
+
+</template>
+<script>
+
+Polymer('x-inspector', {
+  
+  selected: 0,
+  sourceElement: null,
+  properties: null,
+
+  sourceElementChanged: function() {
+    this.update();
+  },
+
+  update: function() {
+    // meta-data attached here
+    if (this.sourceElement) {
+      if (this.sourceElement._getInspectorProps) {
+        var p$ = this.sourceElement._getInspectorProps();
+        this.properties = Reflection.objectProperties(p$);
+      } else {
+       this.properties = Reflection.properties(this.sourceElement);
       }
-    });
+      this.crumbName = this.makeCrumbName(this.sourceElement);
+    } else {
+      this.name = '';
+      this.properties = [];
+      this.crumbName = '';
+    }
+    // right-align crumbs
+    /*this.async(function() {
+      this.$.crumbList.scrollLeft = 1e4;
+    });*/
+  },
 
-  </script>
+  deleteElement: function() {
+    this.fire('delete-element');
+  },
+
+  selectParentElement: function() {
+    this.fire('parent-element');
+  },
+
+  makeCrumbName: function(element) {
+    return (element.treeInfo && element.treeInfo.name) || element.localName;
+  },
+
+  // crumb list is deprecated
+  listCrumbs: function() {
+    var crumbs = [];
+    var elt = this.sourceElement;
+    if (elt.hasAttribute('designer')) {
+      return [{
+        name: 'component',
+        top: true
+      }]
+    }
+    var crumb = {};
+    while (elt && !elt.hasAttribute('designer')) {
+      crumb = {
+        name: (elt.treeInfo && elt.treeInfo.name) || elt.localName
+      };
+      crumbs.unshift(crumb);
+      elt = elt.parentNode;
+    }
+    return crumbs;
+  }
+});
+
+</script>
 
 </polymer-element>

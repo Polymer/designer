@@ -1,20 +1,12 @@
+:host {
+  fill: #656565;
+  font-size: 15px;
+}
+
 iframe {
   width: 100%;
   height: 100%;
   border: none;
-}
-
-#inspector {
-  position: relative;
-  width: 350px;
-  border-left: 1px solid silver;
-  transition: width 0.3s;
-  box-shadow: -5px 0 8px rgba(0, 0, 0, 0.14);
-}
-
-#inspector.maximized {
-  width: 0;
-  border: 0;
 }
 
 #frameContainer {
@@ -56,10 +48,6 @@ iframe {
   font-size: 16px;
 }
 
-core-icon-button {
-  fill: #656565;
-}
-
 /*
  * some icons need to be rotated 90deg because that direction is missing
  * TODO(dfreedm): Get proper icons from designers
@@ -67,4 +55,94 @@ core-icon-button {
 core-icon-button.rotate {
   transform: rotate(90deg);
   -webkit-transform: rotate(90deg);
+}
+
+:host /deep/ #tabs {
+  padding: 10px 10px 0;
+  background-color: #f2f2f2;
+  color: #a9a9a9;
+  border-bottom: 1px solid #ccc;
+}
+
+:host /deep/ #tabs > * {
+  display: inline-block;
+  height: 40px;
+  line-height: 40px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  border-bottom: 0;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  cursor: default;
+}
+
+:host /deep/ #tabs > .core-selected {
+  color: #5d5d5d;
+  border-bottom: 1px solid #5d5d5d;
+}
+
+#tools {
+  /*position: relative;*/
+  /*transition: width 0.3s ease-in;*/
+  -webkit-transition: -webkit-transform 0.3s ease-in-out;
+  transition: transform 0.3s ease-in-out;
+  position: fixed;
+  overflow: hidden;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 350px;
+  border-left: 1px solid silver;
+  box-shadow: -5px 0 8px rgba(0, 0, 0, 0.14);
+  -webkit-user-select: none;
+}
+
+#tools.maximized {
+  -webkit-transform: translate3d(350px, 0, 0);
+  transform: translate3d(350px, 0, 0);
+  box-shadow: none;
+}
+
+.toolsPlaceholder {
+  width: 350px;
+  -webkit-transition: width 0.3s ease-in-out;
+  transition: width 0.3s ease-in-out;
+}
+
+.toolsPlaceholder.maximized {
+  width: 0;
+}
+
+.splitterContainer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.inspectorControls {
+  background-color: white;
+}
+
+.designTools {
+  background-color: #f2f2f2;
+}
+
+.designTools::shadow ::content > * {
+  margin: 0;
+}
+
+.designTools {
+  padding: 0 8px;
+}
+
+.paletteTree {
+  background-color: white;
+  height: 50%;
+}
+
+#tree {
+  overflow: hidden;
 }
