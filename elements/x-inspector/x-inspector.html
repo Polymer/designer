@@ -13,19 +13,30 @@ license that can be found in the LICENSE file.
 
 <polymer-element name="x-style-inspector" attributes="sourceElement">
 <template>
-  <template repeat="{{properties}}">
-    <x-property-inspector property="{{}}" nobind></x-property-inspector>
-  </template>
+  <style>
+    x-property-inspector {
+      width: 33%;
+    }
+
+    x-property-inspector.wide {
+      width: 66%;
+    }    
+  </style>
+  <div horizontal start wrap layout>
+    <template repeat="{{property in properties}}">
+      <x-property-inspector property="{{property}}" nobind class="{{ {wide: property.meta.wide} | tokenList }}"></x-property-inspector>
+    </template>
+  </div>
   <x-meta id="meta">
-    <property name="backgroundColor" kind="color"></property>
+    <property name="backgroundColor" label="bg color" kind="color"></property>
+    <property name="border" wide></property>
     <property name="opacity" kind="range" min="0" max="1" step="0.1" defaultvalue="1"></property>
-    <property name="border"></property>
     <property name="padding"></property>
     <property name="margin"></property>
-    <property name="display"></property>
     <property name="position" kind="select" options=" ,static,absolute,relative"></property>
     <property name="left"></property>
     <property name="top"></property>
+    <property name="display"></property>
     <property name="width"></property>
     <property name="height"></property>
     <!-- <property name="test" kind="tk-compound-editor"></property> -->
@@ -47,20 +58,6 @@ license that can be found in the LICENSE file.
 
   <link rel="stylesheet" href="x-inspector.css">
   
-  <div id="header" horizontal center layout>
-
-    <!-- <div id="crumbList" flex>
-      <core-icon-button icon="chevron-left" on-click="{{selectParentElement}}" hidden?="{{!crumbName}}"></core-icon-button>
-      <b>{{crumbName}}</b>
-    </div>
-
-    <core-icon-button icon="delete" on-click="{{deleteElement}}"></core-icon-button> -->
-
-    <!--<core-icon-button class="fright" icon="right"></core-icon-button>
-    <core-icon-button class="fright" icon="left"></core-icon-button>-->
-
-  </div>
-
   <core-selector id="tabs" selected="{{selected}}">
     <span>Properties</span>
     <span>Styles</span>
@@ -99,50 +96,11 @@ Polymer('x-inspector', {
       } else {
        this.properties = Reflection.properties(this.sourceElement);
       }
-      this.crumbName = this.makeCrumbName(this.sourceElement);
     } else {
-      this.name = '';
       this.properties = [];
-      this.crumbName = '';
     }
-    // right-align crumbs
-    /*this.async(function() {
-      this.$.crumbList.scrollLeft = 1e4;
-    });*/
-  },
-
-  deleteElement: function() {
-    this.fire('delete-element');
-  },
-
-  selectParentElement: function() {
-    this.fire('parent-element');
-  },
-
-  makeCrumbName: function(element) {
-    return (element.treeInfo && element.treeInfo.name) || element.localName;
-  },
-
-  // crumb list is deprecated
-  listCrumbs: function() {
-    var crumbs = [];
-    var elt = this.sourceElement;
-    if (elt.hasAttribute('designer')) {
-      return [{
-        name: 'component',
-        top: true
-      }]
-    }
-    var crumb = {};
-    while (elt && !elt.hasAttribute('designer')) {
-      crumb = {
-        name: (elt.treeInfo && elt.treeInfo.name) || elt.localName
-      };
-      crumbs.unshift(crumb);
-      elt = elt.parentNode;
-    }
-    return crumbs;
   }
+
 });
 
 </script>
