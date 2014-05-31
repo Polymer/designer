@@ -16,7 +16,7 @@
 <link rel="import" href="../x-palette/x-palette.html">
 <link rel="import" href="../x-tree/x-tree.html">
 <link rel="import" href="../x-preview/x-github-info.html">
-<link rel="import" href="../x-file-document/x-file-document.html">
+<link rel="import" href="../x-state/x-state.html">
 
 <polymer-element name="designer-element" vertical layout>
 <template>
@@ -25,15 +25,19 @@
 
   <core-toolbar id="appbar" class="narrow">
 
-    <core-icon-button icon="unfold-more" class="rotate {{ {selected: selected === 'code'} | tokenList }}" name="code" on-tap="{{codeToggleAction}}"></core-icon-button>
-    <core-icon-button icon="save" on-tap="{{saveAction}}"></core-icon-button>
+    <core-icon-button title="Toggle Code/Design" icon="unfold-more" class="rotate {{ {selected: selected === 'code'} | tokenList }}" name="code" on-tap="{{codeToggleAction}}"></core-icon-button>
+    <core-icon-button title="Save" icon="save" on-tap="{{saveAction}}"></core-icon-button>
     <!-- shareAction must be triggered from click to allow opening a tab (otherwise can only open a floating window) -->
-    <core-icon-button icon="social:share" on-click="{{shareAction}}"></core-icon-button>
-    <core-icon-button icon="launch" on-click="{{previewAction}}"></core-icon-button>
+    <core-icon-button title="Share Gist" icon="social:share" on-click="{{shareAction}}"></core-icon-button>
+    <core-icon-button title="Launch Preview" icon="launch" on-click="{{previewAction}}"></core-icon-button>
+
+    <span style="width: 16px;"></span>
+    <core-icon-button title="Undo" disabled?="{{!$.state.canBack}}" icon="rotate-left" on-tap="{{undoAction}}"></core-icon-button>
+    <core-icon-button title="Redo" disabled?="{{!$.state.canForward}}" icon="rotate-right" on-tap="{{redoAction}}"></core-icon-button>
 
     <div flex></div>
 
-    <core-icon-button icon="{{maximized ? 'fullscreen-exit' : 'fullscreen'}}" hidden?="{{selected == 'code'}}" on-tap="{{fullscreenAction}}"></core-icon-button>
+    <core-icon-button title="Toggle Fullwidth" icon="{{maximized ? 'fullscreen-exit' : 'fullscreen'}}" hidden?="{{selected == 'code'}}" on-tap="{{fullscreenAction}}"></core-icon-button>
     
   </core-toolbar>
 
@@ -54,11 +58,11 @@
           <div class="inspectorControls" flex vertical layout>
             <core-toolbar class="designTools narrow">
               <div id="selectedElement" flex>
-                <core-icon-button icon="chevron-left" on-click="{{selectParentElement}}" hidden?="{{!selectedName}}"></core-icon-button>
+                <core-icon-button title="Select Parent" icon="chevron-left" on-click="{{selectParentElement}}" hidden?="{{!selectedName}}"></core-icon-button>
                 {{selectedName}}
               </div>
               
-              <core-menu-button icon="more-vert" halign="right">
+              <core-menu-button title="More..." icon="more-vert" halign="right">
                 <style>
                   .core-selected {
                     font-weight: normal;
@@ -74,8 +78,8 @@
                 <core-item icon="arrow-forward" on-tap="{{demoteElement}}">Move Forward</core-item>
                 <core-item icon="fullscreen" on-tap="{{maximizeElement}}">Auto-size</core-item>
               </core-menu-button>
-              <core-icon-button icon="delete" on-click="{{deleteElement}}"></core-icon-button>
-              <core-icon-button icon="{{maximized ? 'fullscreen-exit' : 'fullscreen'}}" on-tap="{{fullscreenAction}}"></core-icon-button>
+              <core-icon-button title="Delete" icon="delete" on-click="{{deleteElement}}"></core-icon-button>
+              <core-icon-button title="Toggle Fullwidth" icon="{{maximized ? 'fullscreen-exit' : 'fullscreen'}}" on-tap="{{fullscreenAction}}"></core-icon-button>
             </core-toolbar>
             <x-inspector flex id="inspector" on-bind-property="{{applyPropertyBinding}}"></x-inspector>
           </div>
@@ -104,6 +108,7 @@
   </core-pages>
 
   <x-dom-serializer id="serializer"></x-dom-serializer>
+  <x-state id="state" on-state-change="{{undoStateChange}}"></x-state>
   <x-github-info id="githubInfo" token="{{githubToken}}"></x-github-info>
   <github-element id="github" token="{{githubToken}}" on-files-loaded="{{documentLoaded}}" on-files-saved="{{documentSaved}}" on-files-updated="{{documentSaved}}" on-token-changed="{{tokenChangeHandler}}"></github-element>
 
@@ -169,6 +174,7 @@
       this.$.inspector.sourceElement = this.designer.selected;
       this.$.tree.selected = this.designer.selected;
       this.selectedName = this.makeSelectedName(this.designer.selected);
+      this.recordChange();
     },
 
     makeSelectedName: function(element) {
@@ -199,7 +205,7 @@
     paletteDrag: function(event, dragInfo) {
       // allow dragging over iframe
       var frameStyle = this.$.frame.style;
-      frameStyle.pointerEvents = 'none'
+      frameStyle.pointerEvents = 'none';
       // adjust event frame of reference
       var rect = this._frameRect = this._frameRect || 
           this.$.frame.getBoundingClientRect();
@@ -309,9 +315,6 @@
     },
 
     codeToDesign: function() {
-      //this.$.frame.style.display = 'none';
-      //this.pendingHtml = this.code;
-      //this.reloadDesigner();
       this.loadHtml(this.code);
     },
 
@@ -431,6 +434,37 @@
       if (this.$.github.token && this._signInCallback) {
         this._signInCallback.call(this);
         this._signInCallback = null;
+      }
+    },
+
+    undoAction: function() {
+      this.$.state.back();
+    },
+
+    redoAction: function() {
+      this.$.state.forward();
+    },
+
+    undoStateChange: function(e, detail) {
+      console.log('undoStateChange')
+      this._preventStateChange = true;
+      this.loadHtml(detail.state);
+    },
+
+    recordChange: function() {
+      if (!this._preventStateChange) {
+        this.job('record-state', function() {
+          var n = this.html;
+          if (this._lastHtml !== n) {
+            this._lastHtml = n;
+            //console.log('recordChange, push');
+            this.$.state.push(n);
+          }
+        }, 100);
+      } else {
+        this.async(function() {
+          this._preventStateChange = false;
+        });
       }
     }
 

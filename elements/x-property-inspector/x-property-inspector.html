@@ -14,14 +14,14 @@ license that can be found in the LICENSE file.
       :host {
         display: block;
         white-space: nowrap;
-        margin-bottom: 1rem;
+        margin-bottom: 0.5rem;
       }
       .property-name {
         text-overflow: ellipsis;
         overflow: hidden;
         color: #919191;
-        font-weight: bold;
-        margin-bottom: 1em;
+        /*font-weight: bold;*/
+        margin-bottom: 0.5em;
       }
       #container {
         display: inline-block;
@@ -50,7 +50,7 @@ license that can be found in the LICENSE file.
         display: none !important;
       }
     </style>
-    <div class="property-name">{{property.name}}:</div>
+    <div class="property-name">{{property.meta.label || property.name}}</div>
     <span id="container"><content></content></span>
     <div id="iconContainer" on-click="{{linkTap}}" nodisplay?="{{nobind}}">
       <core-icon id="icon" icon="link" size="16"></core-icon>

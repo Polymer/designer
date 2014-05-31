@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<head>
+  <title>x-state</title>
+
+  <script src="components/platform/platform.js"></script>
+  <link rel="import" href="components/polymer/polymer.html">
+  <link rel="import" href="x-state.html">
+</head>
+<body>
+  
+  <template is="auto-binding">
+    <button on-tap="{{push}}">Push</button>
+    <button on-tap="{{back}}" disabled?="{{!$.state.canBack}}">Back</button>
+    <button on-tap="{{forward}}" disabled?="{{!$.state.canForward}}">Forward</button>
+    <x-state id="state" on-last-state="{{last}}" on-first-state="{{first}}" on-state-change="{{change}}"></x-state>
+    <div>{{state}}</div>
+  </template>
+  <script>
+    var scope = document.querySelector('template');
+    scope.count = 0;
+    scope.push = function() {
+      this.count++;
+      this.updateState();
+      this.$.state.push(scope.state);
+    }
+
+    scope.back = function() {
+      this.$.state.back();
+    }
+
+    scope.forward = function() {
+      this.$.state.forward();
+    }
+
+    scope.change = function(e, detail) {
+      this.state = detail.state;
+    }
+
+    scope.updateState = function() {
+      return this.state = (this.count + Math.random()).toFixed(3);
+    }
+
+    addEventListener('template-bound', function(e) {
+      scope.$.state.push(scope.updateState());
+    })
+  </script>
+
+</body>
+</html>
