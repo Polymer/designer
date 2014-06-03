@@ -210,8 +210,10 @@
       var rect = this._frameRect = this._frameRect || 
           this.$.frame.getBoundingClientRect();
       dragInfo.origin.top -= this._frameRect.top;
-      // get findTarget from frame window.
-      var findTarget = this.$.frame.contentWindow.PolymerGestures.findTarget;    
+      // get searchRoot from frame window.
+      var targetFinding = this.$.frame.contentWindow.PolymerGestures.targetFinding;
+      var searchRoot = targetFinding.searchRoot.bind(targetFinding, this.$.frame.contentDocument);
+      targetFinding = null;
       // forward event to designer
       this.designer.paletteDrag(event, dragInfo);
       // cleanup in drop
@@ -219,7 +221,7 @@
       dragInfo.drop = function() {
         frameStyle.pointerEvents = null;
         this.event.clientY -= rect.top;
-        this.event.relatedTarget = findTarget(this.event);
+        this.event.relatedTarget = searchRoot(this.event.clientX, this.event.clientY);
         return drop.apply(this, arguments);
       }
     },
