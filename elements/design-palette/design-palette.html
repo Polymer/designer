@@ -5,11 +5,11 @@
 <link rel="import" href="../../components/core-menu/core-submenu.html">
 <link rel="import" href="../../components/core-drag-drop/core-drag-drop.html">
 
-<polymer-element name="x-palette" attributes="mode categories">
+<polymer-element name="design-palette" attributes="mode categories">
 
 <template>
 
-  <link rel="stylesheet" href="x-palette.css">
+  <link rel="stylesheet" href="design-palette.css">
 
   <core-drag-drop on-drag-start="{{dragStart}}"></core-drag-drop>
 
@@ -51,33 +51,33 @@
 </template>
 <script>
 
-  Polymer('x-palette', {
-    mode: 'grid',
+Polymer({
+  mode: 'grid',
 
-    dragStart: function(event, dragInfo) {
-      // decorate dragInfo
-      dragInfo.tag = dragInfo.event.target.getAttribute('tag');
-      dragInfo.origin = {left: dragInfo.event.pageX - 24,
-        top: dragInfo.event.pageY - 24};
-      // delegate to arbitrary ancestor
-      this.fire('palette-drag', dragInfo);
-      // multiplex drop
-      dragInfo.delegateDrop = dragInfo.drop;
-      dragInfo.drop = this.drop.bind(this);
-    },
+  dragStart: function(event, dragInfo) {
+    // decorate dragInfo
+    dragInfo.tag = dragInfo.event.target.getAttribute('tag');
+    dragInfo.origin = {left: dragInfo.event.pageX - 24,
+      top: dragInfo.event.pageY - 24};
+    // delegate to arbitrary ancestor
+    this.fire('palette-drag', dragInfo);
+    // multiplex drop
+    dragInfo.delegateDrop = dragInfo.drop;
+    dragInfo.drop = this.drop.bind(this);
+  },
 
-    drop: function(dragInfo) {
-      var dropped = false;
-      if (dragInfo.delegateDrop) {
-        dropped = dragInfo.delegateDrop(dragInfo);
-      }
-      if (!dropped && dragInfo.element) {
-        // dropping here sends the item to the bitbucket
-        dragInfo.element.remove();
-      }
+  drop: function(dragInfo) {
+    var dropped = false;
+    if (dragInfo.delegateDrop) {
+      dropped = dragInfo.delegateDrop(dragInfo);
     }
+    if (!dropped && dragInfo.element) {
+      // dropping here sends the item to the bitbucket
+      dragInfo.element.remove();
+    }
+  }
 
-  });
+});
 
 </script>
 </polymer-element>

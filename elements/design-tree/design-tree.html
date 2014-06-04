@@ -1,0 +1,117 @@
+<link rel="import" href="../../components/polymer/polymer.html">
+
+<polymer-element name="design-tree" attributes="canvas selected">
+<template>
+
+  <style>
+    :host {
+      position: relative;
+    }
+    #interior {
+      position: absolute;
+      top: 0px;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      cursor: pointer;
+    }
+    #caption {
+      color: blue;
+    }
+    id {
+      font-style: italic;
+      color: #804C00;
+    }
+    #tree {
+      display: inline-block;
+      padding: 8px;
+    }
+    #tree div {
+      padding: 4px;
+      white-space: nowrap;
+    }
+    .selected {
+      background: rgba(72, 154, 254, 0.20);
+    }
+  </style>
+
+  <div id="interior" touch-action="auto">
+    <div id="tree">
+      <template repeat="{{components}}">
+        <div class="{{selected}}" on-tap="{{selectAction}}" style="padding-left: {{indent}}px"><span>{{name}}<id>{{id}}</id><span id="caption">{{text}}</span></span></div>
+      </template>
+    </div>
+  </div>
+
+</template>
+<script>
+(function() {
+
+Polymer({
+  components: null,
+  canvas: null,
+
+  observe: {
+    'canvas selected': 'update'
+  },
+
+  update: function() {
+    var selected = this.selected;
+    var tabsize = 12;
+    var components = this.components = [];
+
+    function subtree(root, indent) {
+      var e = root.firstElementChild;
+      while (e) {
+        if (elementBlackList.indexOf(e.localName) < 0) {
+          var text = e.children.length == 0 ? e.textContent.trim() : '';
+          if (text) {
+            if (text.length > 12) {
+              text = text.slice(0, 12) + "...";
+            }
+            text = ' "' + text + '"';
+          }
+          var info = e.treeInfo || {name: e.localName, id: e.id}
+          components.push({
+            indent: indent,
+            name: info.name,
+            element: e,
+            id: info.id ? ' #' + info.id + '': '',
+            text: text,
+            selected: (e == selected) ? 'selected' : ''
+          });
+          if (!(e.meta && e.meta.hideSubtree)) {
+            subtree(e, indent + tabsize);
+          }
+        }
+        e = e.nextElementSibling;
+      }
+    }
+
+    subtree(this.canvas, 4);
+
+    // scroll selected into view.
+    this.onMutation(this.$.tree, function() {
+      var e = this.$.tree.querySelector('.selected');
+      if (e) {
+        e.scrollIntoViewIfNeeded();
+      }
+    });
+  },
+
+  selectAction: function(event, detail, sender) {
+    if (sender) {
+      this.selected = sender.templateInstance.model.element;
+      this.fire('node-select', {selected: this.selected});
+    }
+  }
+
+});
+
+var elementBlackList = ['style'];
+
+})();
+</script>
+</polymer-element>

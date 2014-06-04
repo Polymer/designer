@@ -6,7 +6,7 @@
   <meta name="mobile-web-app-capable" content="yes">
 
   <script src="components/platform/platform.js"></script>
-  <link rel="import" href="elements/x-preview/x-gist-element-preview.html">
+  <link rel="import" href="elements/design-preview/design-gist-element-preview.html">
 
   <style>
 
@@ -15,7 +15,7 @@
       height: 100%;
     }
 
-    x-gist-element-preview {
+    design-gist-element-preview {
       position: absolute;
       top: 0;
       right: 0;
@@ -28,7 +28,7 @@
 </head>
 <body unresolved>
 
-  <x-gist-element-preview id="preview"></x-gist-element-preview>
+  <design-gist-element-preview id="preview"></design-gist-element-preview>
   <script>
     addEventListener('polymer-ready', function() {
       var fileId = window.location.hash.replace('#', '')

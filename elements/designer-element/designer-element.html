@@ -11,12 +11,12 @@
 <link rel="import" href="../../components/code-mirror/code-mirror.html">
 <link rel="import" href="../../components/github-elements/github-elements.html">
 
-<link rel="import" href="../x-dom-serializer/x-dom-serializer.html">
+<link rel="import" href="../dom-serializer/dom-serializer.html">
 <link rel="import" href="../../components/inspector-elements/element-inspector.html">
-<link rel="import" href="../x-palette/x-palette.html">
-<link rel="import" href="../x-tree/x-tree.html">
-<link rel="import" href="../x-preview/x-github-info.html">
-<link rel="import" href="../x-state/x-state.html">
+<link rel="import" href="../design-palette/design-palette.html">
+<link rel="import" href="../design-tree/design-tree.html">
+<link rel="import" href="../design-preview/design-github-info.html">
+<link rel="import" href="../design-state/design-state.html">
 
 <polymer-element name="designer-element" vertical layout>
 <template>
@@ -46,7 +46,7 @@
     <section name="design" horizontal layout>
    
       <div id="frameContainer" flex>
-        <iframe id="frame" src="designer.html"></iframe>
+        <iframe id="frame" src="frame.html"></iframe>
       </div>
 
       <!-- we want to constrain the design space so tools are not on top of it;
@@ -93,8 +93,8 @@
             </core-selector>
       
             <core-pages id="interior" flex valueAttr="id" selected="{{selectedTool}}">
-              <x-palette id="palette" on-palette-drag="{{paletteDrag}}" mode="{{paletteMode}}"></x-palette>
-              <x-tree id="tree" canvas="{{$.canvas}}" on-node-select="{{treeNodeSelected}}"></x-tree>
+              <design-palette id="palette" on-palette-drag="{{paletteDrag}}" mode="{{paletteMode}}"></design-palette>
+              <design-tree id="tree" canvas="{{$.canvas}}" on-node-select="{{treeNodeSelected}}"></design-tree>
             </core-pages>
           </div>
 
@@ -107,9 +107,9 @@
 
   </core-pages>
 
-  <x-dom-serializer id="serializer"></x-dom-serializer>
-  <x-state id="state" on-state-change="{{undoStateChange}}"></x-state>
-  <x-github-info id="githubInfo" token="{{githubToken}}"></x-github-info>
+  <dom-serializer id="serializer"></dom-serializer>
+  <design-state id="state" on-state-change="{{undoStateChange}}"></design-state>
+  <design-github-info id="githubInfo" token="{{githubToken}}"></design-github-info>
   <github-element id="github" token="{{githubToken}}" on-files-loaded="{{documentLoaded}}" on-files-saved="{{documentSaved}}" on-files-updated="{{documentSaved}}" on-token-changed="{{tokenChangeHandler}}"></github-element>
 
   <div id="toast"  class="{{ {showing: toastShowing } | tokenList }}">
@@ -119,358 +119,358 @@
 </template>
 <script>
 
-  Polymer('designer-element', {
-    selected: 'design',
-    paletteMode: 'menu',
-    selectedTool: 'palette',
-    remoteHtml: '',
+Polymer({
+  selected: 'design',
+  paletteMode: 'menu',
+  selectedTool: 'palette',
+  remoteHtml: '',
 
-    ready: function() {
-      document.addEventListener('keydown', 
-          this.keydown.bind(this, window));
-      window.addEventListener('message', this.designWindowLoaded.bind(this));
-      this.firstLoad = true;
-    },
+  ready: function() {
+    document.addEventListener('keydown', 
+        this.keydown.bind(this, window));
+    window.addEventListener('message', this.designWindowLoaded.bind(this));
+    this.firstLoad = true;
+  },
 
-    designWindowLoaded: function() {
-      this.$.frame.style.display = null;
-      window.designWindow = this.$.frame.contentWindow;
-      designWindow.addEventListener('designer-ready', this.designerReady.bind(this));
-      designWindow.addEventListener('design-change', this.designChange.bind(this));
-      designWindow.document.addEventListener('keydown', 
-        this.keydown.bind(this, designWindow));
-    },
+  designWindowLoaded: function() {
+    this.$.frame.style.display = null;
+    window.designWindow = this.$.frame.contentWindow;
+    designWindow.addEventListener('designer-ready', this.designerReady.bind(this));
+    designWindow.addEventListener('design-change', this.designChange.bind(this));
+    designWindow.document.addEventListener('keydown', 
+      this.keydown.bind(this, designWindow));
+  },
 
-    keydown: function(w, e) {
-      switch(e.keyCode) {
-        // backspace
-        case 8:
-          w.onbeforeunload = function() {
-            return ' ';
-          }
-          setTimeout(function() {
-            w.onbeforeunload = null;
-          }, 0);
-          break;
-        case 83:
-          if (e.ctrlKey || e.metaKey) {
-            e.preventDefault();
-            e.stopPropagation();
-            this.saveAction();
-            return false;
-          }
-          break;
-      }
-    },
-
-    designerReady: function(event) {
-      this.designer = event.target;
-      this.$.tree.canvas = this.designer.$.canvas;
-      this.$.palette.categories = this.designer.categories;
-      this.designer.import(window.metadata, this.importsLoaded.bind(this));
-    },
-
-     designChange: function(event) {
-      this.$.inspector.inspected = this.designer.selected;
-      this.$.tree.selected = this.designer.selected;
-      this.selectedName = this.makeSelectedName(this.designer.selected);
-      this.recordChange();
-    },
-
-    makeSelectedName: function(element) {
-      if (element) {
-        return (element.treeInfo && element.treeInfo.name) || element.localName;
-      }
-    },
-
-    importsLoaded: function() {
-      if (this.firstLoad) {
-        this.firstLoad = false;
-        this.loadRemoteContent();
-        return;
-      }
-      if (this.pendingHtml) {
-        this.loadHtml(this.pendingHtml);
-        this.pendingHtml = null;
-      } else {
-        var tag = Platform.flags.element;
-        if (tag) {
-          this.designer.createElement(tag);
+  keydown: function(w, e) {
+    switch(e.keyCode) {
+      // backspace
+      case 8:
+        w.onbeforeunload = function() {
+          return ' ';
         }
-      }
-    },
-
-    // TODO(sorvell): forward drag to iframe; not yet a thing of beauty;
-    // review with dfreedm
-    paletteDrag: function(event, dragInfo) {
-      // allow dragging over iframe
-      var frameStyle = this.$.frame.style;
-      frameStyle.pointerEvents = 'none';
-      // adjust event frame of reference
-      var rect = this._frameRect = this._frameRect || 
-          this.$.frame.getBoundingClientRect();
-      dragInfo.origin.top -= this._frameRect.top;
-      // get searchRoot from frame window.
-      var targetFinding = this.$.frame.contentWindow.PolymerGestures.targetFinding;
-      var searchRoot = targetFinding.searchRoot.bind(targetFinding, this.$.frame.contentDocument);
-      targetFinding = null;
-      // forward event to designer
-      this.designer.paletteDrag(event, dragInfo);
-      // cleanup in drop
-      var drop = dragInfo.drop;
-      dragInfo.drop = function() {
-        frameStyle.pointerEvents = null;
-        this.event.clientY -= rect.top;
-        this.event.relatedTarget = searchRoot(this.event.clientX, this.event.clientY);
-        return drop.apply(this, arguments);
-      }
-    },
-
-    //
-    // turn abstract events into concrete actions
-    //
-
-    treeNodeSelected: function(event) {
-      this.designer.selected = event.target.selected;
-    },
-
-    deleteElement: function(event) {
-      this.designer.deleteElement();
-    },
-
-    promoteElement: function(event) {
-      this.designer.promoteElement();
-    },
-
-    demoteElement: function(event) {
-      this.designer.demoteElement();
-    },
-
-    moveoutElement: function(event) {
-      this.designer.moveoutElement();
-    },
-
-    maximizeElement: function(event) {
-      this.designer.maximizeElement();
-    },
-
-    selectParentElement: function(event) {
-      this.designer.selectParentElement();
-    },
-
-    selectedChanged: function() {
-      if (this.selected == 'code') {
-        this.designToCode();
-      } else {
-        this.codeToDesign();
-      }
-    },
-
-    inspectTarget: function(event) {
-      var t = event.target;
-      if (t) {
-        if (t === this.$.canvas) {
-          this.selected = null;
-        } else {
-          // don't allow selection within a node with meta.hideSubtree
-          var n = t;
-          while (n) {
-            if (n.meta && n.meta.hideSubtree) {
-              t = n;
-              break;
-            }
-            n = n.parentNode;
-          }
-          this.selected = t;
+        setTimeout(function() {
+          w.onbeforeunload = null;
+        }, 0);
+        break;
+      case 83:
+        if (e.ctrlKey || e.metaKey) {
+          e.preventDefault();
+          e.stopPropagation();
+          this.saveAction();
+          return false;
         }
-        Platform.flush();
-      }
-    },
+        break;
+    }
+  },
 
-    // TODO(sorvell): probably should factor this code setup to be elsewhere
-    prepareCode: function() {
-      this.$.code.focus();
-      // fold style tag
-      var cm = this.$.code.mirror;
-      var c = cm.getSearchCursor('<style>');
-      if (c.find()) {
-        var l = c.pos.from.line;
-        cm.setSelection({line: l})
-        cm.foldCode(l);
-        cm.execCommand('goLineDown');
-        cm.execCommand('goLineStartSmart');
-      }
-    },
+  designerReady: function(event) {
+    this.designer = event.target;
+    this.$.tree.canvas = this.designer.$.canvas;
+    this.$.palette.categories = this.designer.categories;
+    this.designer.import(window.metadata, this.importsLoaded.bind(this));
+  },
 
-    get html() {
-      return this.$.serializer.dumpElement(this.designer.$.canvas);
-    },
+   designChange: function(event) {
+    this.$.inspector.inspected = this.designer.selected;
+    this.$.tree.selected = this.designer.selected;
+    this.selectedName = this.makeSelectedName(this.designer.selected);
+    this.recordChange();
+  },
 
-    get code() {
-      return this.$.code.mirror.getValue();
-    },
+  makeSelectedName: function(element) {
+    if (element) {
+      return (element.treeInfo && element.treeInfo.name) || element.localName;
+    }
+  },
 
-    designToCode: function() {
-      this.$.code.mirror.setValue(this.html);
-      this.$.code.refresh();
-      this.async('prepareCode');
-    },
-
-    codeToDesign: function() {
-      this.loadHtml(this.code);
-    },
-
-    reloadDesigner: function() {
-      designWindow.location.reload();
-    },
-
-    fullscreenAction: function() {
-      this.maximized = !this.maximized;
-    },
-
-    applyPropertyBinding: function(event, detail) {
-      this.designer.applyPropertyBinding(
-          detail.obj, detail.name, detail.path);  
-    },
-
-    codeToggleAction: function() {
-      this.selected = this.selected === 'design' ? 'code' : 'design';
-    },
-
-    saveAction: function() {
-      if (!this.ensureSignedIn(this.saveAction)) {
-        return;
-      }
-      this.toast = 'Saving...';
-      this.toastShowing = true;
-      this.save(function() {
-        this.toastShowing = false;
-      });
-    },
-
-    shareAction: function() {
-      if (!this.ensureSignedIn(this.shareAction)) {
-        return;
-      }
-      // must open window immediately so that it opens in a tab, not a window
-      if (this.shareWindow) {
-        this.shareWindow.close();
-      }
-      this.shareWindow = window.open('', 'gist');
-      this.save(function() {
-        this.shareWindow.location.href = 'https://gist.github.com/' + 
-            this.fileId;
-      });
-    },
-
-    previewAction: function() {
-      if (!this.ensureSignedIn(this.previewAction)) {
-        return;
-      }
-      if (this.previewWindow) {
-        this.previewWindow.close();
-      }
-      this.previewWindow = window.open('', 'preview');
-
-      this.save(function() {
-        this.previewWindow.location.href = 'preview.html#' + this.fileId;
-      })
-    },
-
-    save: function(callback) {
-      var cb;
-      if (callback) {
-        var self = this;
-        cb = function() {
-          callback.call(self);
-        }
-      }
-      var options = {};
-      var content = this.selected === 'code' ? this.code : this.html;
-      options[this.$.githubInfo.fileName] = {content: content};
-      if (this.fileId) {
-        this.$.github.update(this.fileId, 'designer', true, options, cb);
-      } else {
-        this.$.github.save('designer', true, options, cb);
-      }
-    },
-
-    documentSaved: function(event, detail) {
-      this.fileId = detail.id; 
-    },
-
-    loadRemoteContent: function() {
-      var id = window.location.hash.replace('#', '');
-      if (id) {
-        this.fileId = id;
-        this.$.github.load(id);
-      }
-    },
-
-    documentLoaded: function(event, detail) {
-      var doc = detail && detail[this.$.githubInfo.fileName];
-      if (doc) {
-        this.remoteHtml = doc.content;
-      }
-    },
-
-    remoteHtmlChanged: function() {
-      this.loadHtml(this.remoteHtml);
-    },
-
-    loadHtml: function(html) {
-      this.designer.loadHtml(html);
-    },
-
-    // support callback after logging in
-    ensureSignedIn: function(signInCallback) {
-      if (!this.$.github.token) {
-        this._signInCallback = signInCallback;
-        this.$.github.signIn();
-      } else {
-        return true;
-      }
-    },
-
-    tokenChangeHandler: function(e) {
-      if (this.$.github.token && this._signInCallback) {
-        this._signInCallback.call(this);
-        this._signInCallback = null;
-      }
-    },
-
-    undoAction: function() {
-      this.$.state.back();
-    },
-
-    redoAction: function() {
-      this.$.state.forward();
-    },
-
-    undoStateChange: function(e, detail) {
-      console.log('undoStateChange')
-      this._preventStateChange = true;
-      this.loadHtml(detail.state);
-    },
-
-    recordChange: function() {
-      if (!this._preventStateChange) {
-        this.job('record-state', function() {
-          var n = this.html;
-          if (this._lastHtml !== n) {
-            this._lastHtml = n;
-            //console.log('recordChange, push');
-            this.$.state.push(n);
-          }
-        }, 100);
-      } else {
-        this.async(function() {
-          this._preventStateChange = false;
-        });
+  importsLoaded: function() {
+    if (this.firstLoad) {
+      this.firstLoad = false;
+      this.loadRemoteContent();
+      return;
+    }
+    if (this.pendingHtml) {
+      this.loadHtml(this.pendingHtml);
+      this.pendingHtml = null;
+    } else {
+      var tag = Platform.flags.element;
+      if (tag) {
+        this.designer.createElement(tag);
       }
     }
+  },
 
-  });
+  // TODO(sorvell): forward drag to iframe; not yet a thing of beauty;
+  // review with dfreedm
+  paletteDrag: function(event, dragInfo) {
+    // allow dragging over iframe
+    var frameStyle = this.$.frame.style;
+    frameStyle.pointerEvents = 'none';
+    // adjust event frame of reference
+    var rect = this._frameRect = this._frameRect || 
+        this.$.frame.getBoundingClientRect();
+    dragInfo.origin.top -= this._frameRect.top;
+    // get searchRoot from frame window.
+    var targetFinding = this.$.frame.contentWindow.PolymerGestures.targetFinding;
+    var searchRoot = targetFinding.searchRoot.bind(targetFinding, this.$.frame.contentDocument);
+    targetFinding = null;
+    // forward event to designer
+    this.designer.paletteDrag(event, dragInfo);
+    // cleanup in drop
+    var drop = dragInfo.drop;
+    dragInfo.drop = function() {
+      frameStyle.pointerEvents = null;
+      this.event.clientY -= rect.top;
+      this.event.relatedTarget = searchRoot(this.event.clientX, this.event.clientY);
+      return drop.apply(this, arguments);
+    }
+  },
+
+  //
+  // turn abstract events into concrete actions
+  //
+
+  treeNodeSelected: function(event) {
+    this.designer.selected = event.target.selected;
+  },
+
+  deleteElement: function(event) {
+    this.designer.deleteElement();
+  },
+
+  promoteElement: function(event) {
+    this.designer.promoteElement();
+  },
+
+  demoteElement: function(event) {
+    this.designer.demoteElement();
+  },
+
+  moveoutElement: function(event) {
+    this.designer.moveoutElement();
+  },
+
+  maximizeElement: function(event) {
+    this.designer.maximizeElement();
+  },
+
+  selectParentElement: function(event) {
+    this.designer.selectParentElement();
+  },
+
+  selectedChanged: function() {
+    if (this.selected == 'code') {
+      this.designToCode();
+    } else {
+      this.codeToDesign();
+    }
+  },
+
+  inspectTarget: function(event) {
+    var t = event.target;
+    if (t) {
+      if (t === this.$.canvas) {
+        this.selected = null;
+      } else {
+        // don't allow selection within a node with meta.hideSubtree
+        var n = t;
+        while (n) {
+          if (n.meta && n.meta.hideSubtree) {
+            t = n;
+            break;
+          }
+          n = n.parentNode;
+        }
+        this.selected = t;
+      }
+      Platform.flush();
+    }
+  },
+
+  // TODO(sorvell): probably should factor this code setup to be elsewhere
+  prepareCode: function() {
+    this.$.code.focus();
+    // fold style tag
+    var cm = this.$.code.mirror;
+    var c = cm.getSearchCursor('<style>');
+    if (c.find()) {
+      var l = c.pos.from.line;
+      cm.setSelection({line: l})
+      cm.foldCode(l);
+      cm.execCommand('goLineDown');
+      cm.execCommand('goLineStartSmart');
+    }
+  },
+
+  get html() {
+    return this.$.serializer.dumpElement(this.designer.$.canvas);
+  },
+
+  get code() {
+    return this.$.code.mirror.getValue();
+  },
+
+  designToCode: function() {
+    this.$.code.mirror.setValue(this.html);
+    this.$.code.refresh();
+    this.async('prepareCode');
+  },
+
+  codeToDesign: function() {
+    this.loadHtml(this.code);
+  },
+
+  reloadDesigner: function() {
+    designWindow.location.reload();
+  },
+
+  fullscreenAction: function() {
+    this.maximized = !this.maximized;
+  },
+
+  applyPropertyBinding: function(event, detail) {
+    this.designer.applyPropertyBinding(
+        detail.obj, detail.name, detail.path);  
+  },
+
+  codeToggleAction: function() {
+    this.selected = this.selected === 'design' ? 'code' : 'design';
+  },
+
+  saveAction: function() {
+    if (!this.ensureSignedIn(this.saveAction)) {
+      return;
+    }
+    this.toast = 'Saving...';
+    this.toastShowing = true;
+    this.save(function() {
+      this.toastShowing = false;
+    });
+  },
+
+  shareAction: function() {
+    if (!this.ensureSignedIn(this.shareAction)) {
+      return;
+    }
+    // must open window immediately so that it opens in a tab, not a window
+    if (this.shareWindow) {
+      this.shareWindow.close();
+    }
+    this.shareWindow = window.open('', 'gist');
+    this.save(function() {
+      this.shareWindow.location.href = 'https://gist.github.com/' + 
+          this.fileId;
+    });
+  },
+
+  previewAction: function() {
+    if (!this.ensureSignedIn(this.previewAction)) {
+      return;
+    }
+    if (this.previewWindow) {
+      this.previewWindow.close();
+    }
+    this.previewWindow = window.open('', 'preview');
+
+    this.save(function() {
+      this.previewWindow.location.href = 'preview.html#' + this.fileId;
+    })
+  },
+
+  save: function(callback) {
+    var cb;
+    if (callback) {
+      var self = this;
+      cb = function() {
+        callback.call(self);
+      }
+    }
+    var options = {};
+    var content = this.selected === 'code' ? this.code : this.html;
+    options[this.$.githubInfo.fileName] = {content: content};
+    if (this.fileId) {
+      this.$.github.update(this.fileId, 'designer', true, options, cb);
+    } else {
+      this.$.github.save('designer', true, options, cb);
+    }
+  },
+
+  documentSaved: function(event, detail) {
+    this.fileId = detail.id; 
+  },
+
+  loadRemoteContent: function() {
+    var id = window.location.hash.replace('#', '');
+    if (id) {
+      this.fileId = id;
+      this.$.github.load(id);
+    }
+  },
+
+  documentLoaded: function(event, detail) {
+    var doc = detail && detail[this.$.githubInfo.fileName];
+    if (doc) {
+      this.remoteHtml = doc.content;
+    }
+  },
+
+  remoteHtmlChanged: function() {
+    this.loadHtml(this.remoteHtml);
+  },
+
+  loadHtml: function(html) {
+    this.designer.loadHtml(html);
+  },
+
+  // support callback after logging in
+  ensureSignedIn: function(signInCallback) {
+    if (!this.$.github.token) {
+      this._signInCallback = signInCallback;
+      this.$.github.signIn();
+    } else {
+      return true;
+    }
+  },
+
+  tokenChangeHandler: function(e) {
+    if (this.$.github.token && this._signInCallback) {
+      this._signInCallback.call(this);
+      this._signInCallback = null;
+    }
+  },
+
+  undoAction: function() {
+    this.$.state.back();
+  },
+
+  redoAction: function() {
+    this.$.state.forward();
+  },
+
+  undoStateChange: function(e, detail) {
+    console.log('undoStateChange')
+    this._preventStateChange = true;
+    this.loadHtml(detail.state);
+  },
+
+  recordChange: function() {
+    if (!this._preventStateChange) {
+      this.job('record-state', function() {
+        var n = this.html;
+        if (this._lastHtml !== n) {
+          this._lastHtml = n;
+          //console.log('recordChange, push');
+          this.$.state.push(n);
+        }
+      }, 100);
+    } else {
+      this.async(function() {
+        this._preventStateChange = false;
+      });
+    }
+  }
+
+});
 
 </script>
 </polymer-element>

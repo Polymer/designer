@@ -1,0 +1,80 @@
+<link rel="import" href="../../components/core-icons/core-icons.html">
+<link rel="import" href="../design-canvas/design-canvas.html">
+<link rel="import" href="../../components/x-meta/x-meta.html">
+
+<polymer-element name="design-frame" horizontal layout attributes="selected">
+<template>
+
+  <link rel="stylesheet" href="design-frame.css">
+  <x-meta id="meta" categories="{{categories}}"></x-meta>
+  <design-canvas flex id="canvas" tabIndex="-1" selected="{{selected}}" on-design-change="{{designChange}}"></design-canvas>
+
+</template>
+<script>
+
+Polymer({
+
+  ready: function() {
+    this.fire('designer-ready');
+  },
+
+  //
+  // choreograph composed objects
+  //
+
+  paletteDrag: function(event, dragInfo) {
+    // locate meta data
+    var meta = this.$.meta.byId(dragInfo.tag);
+    dragInfo.element = meta.createElement();
+    // let canvas hook the drag
+    this.$.canvas.dragStart(dragInfo);
+  },
+
+  designChange: function() {
+    this.$.canvas.update();
+  },
+
+  deleteElement: function() {
+    this.$.canvas.deleteElement();
+  },
+
+  promoteElement: function() {
+    this.$.canvas.promoteElement();
+  },
+
+  demoteElement: function() {
+    this.$.canvas.demoteElement();
+  },
+
+  moveoutElement: function() {
+    this.$.canvas.moveoutElement();
+  },
+
+  maximizeElement: function() {
+    this.$.canvas.maximizeElement();
+  },
+
+  selectParentElement: function() {
+    this.$.canvas.selectParentElement();
+  },
+
+  loadHtml: function(html) {
+    this.$.canvas.loadHtml(html);
+  },
+
+  applyPropertyBinding: function(obj, name, path) {
+    this.$.canvas.applyPropertyBinding(obj, name, path);
+  },
+
+  'import': function(urls, callback) {
+    var imports = urls.map(function(u) {
+      return '../' + u;
+    }, this);
+    Polymer.import(imports, callback);
+  }
+
+});
+
+</script>
+
+</polymer-element>
