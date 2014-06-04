@@ -12,7 +12,7 @@
 <link rel="import" href="../../components/github-elements/github-elements.html">
 
 <link rel="import" href="../x-dom-serializer/x-dom-serializer.html">
-<link rel="import" href="../x-inspector/x-inspector.html">
+<link rel="import" href="../../components/inspector-elements/element-inspector.html">
 <link rel="import" href="../x-palette/x-palette.html">
 <link rel="import" href="../x-tree/x-tree.html">
 <link rel="import" href="../x-preview/x-github-info.html">
@@ -81,7 +81,7 @@
               <core-icon-button title="Delete" icon="delete" on-click="{{deleteElement}}"></core-icon-button>
               <core-icon-button title="Toggle Fullwidth" icon="{{maximized ? 'fullscreen-exit' : 'fullscreen'}}" on-tap="{{fullscreenAction}}"></core-icon-button>
             </core-toolbar>
-            <x-inspector flex id="inspector" on-bind-property="{{applyPropertyBinding}}"></x-inspector>
+            <element-inspector flex id="inspector" on-bind-property="{{applyPropertyBinding}}"></element-inspector>
           </div>
           
           <core-splitter direction="down"></core-splitter>
@@ -171,7 +171,7 @@
     },
 
      designChange: function(event) {
-      this.$.inspector.sourceElement = this.designer.selected;
+      this.$.inspector.inspected = this.designer.selected;
       this.$.tree.selected = this.designer.selected;
       this.selectedName = this.makeSelectedName(this.designer.selected);
       this.recordChange();
