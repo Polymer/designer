@@ -25,7 +25,7 @@
 
   <core-toolbar id="appbar" class="narrow">
 
-    <core-icon-button title="Toggle Code/Design" icon="unfold-more" class="rotate {{ {selected: selected === 'code'} | tokenList }}" name="code" on-tap="{{codeToggleAction}}"></core-icon-button>
+    <core-icon-button title="Show {{ selected === 'code' ? 'Design' : 'Code' }}" icon="{{ selected === 'code' ? 'drive-drawing' : 'unfold-more' }}" class="rotate" name="code" on-tap="{{codeToggleAction}}"></core-icon-button>
     <core-icon-button title="Save" icon="save" on-tap="{{saveAction}}"></core-icon-button>
     <!-- shareAction must be triggered from click to allow opening a tab (otherwise can only open a floating window) -->
     <core-icon-button title="Share Gist" icon="social:share" on-click="{{shareAction}}"></core-icon-button>
