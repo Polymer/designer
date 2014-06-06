@@ -19,6 +19,20 @@ iframe {
   border-bottom: 1px solid silver;
 }
 
+:host #appbar > .design-controls {
+  margin: 0;
+}
+
+.design-controls > * {
+  margin: 0 8px;
+}
+
+.separator {
+  border-left: #656565 solid 1px;
+  opacity: 0.8;
+  height: 24px;
+}
+
 #toast {
   pointer-events: none;
   position: absolute;
@@ -85,8 +99,6 @@ core-icon-button.rotate {
 }
 
 #tools {
-  /*position: relative;*/
-  /*transition: width 0.3s ease-in;*/
   -webkit-transition: -webkit-transform 0.3s ease-in-out;
   transition: transform 0.3s ease-in-out;
   position: fixed;
@@ -96,7 +108,6 @@ core-icon-button.rotate {
   right: 0;
   width: 350px;
   border-left: 1px solid silver;
-  box-shadow: -5px 0 8px rgba(0, 0, 0, 0.14);
   -webkit-user-select: none;
 }
 
