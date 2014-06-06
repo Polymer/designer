@@ -174,8 +174,10 @@ Polymer({
   },
 
    designChange: function(event) {
-    this.$.inspector.inspected = this.designer.selected;
+    this.$.inspector.selected = this.designer.selected;
     this.$.tree.selected = this.designer.selected;
+    this.$.inspector.forceUpdate();
+    this.$.tree.forceUpdate();
     this.selectedName = this.makeSelectedName(this.designer.selected);
     this.recordChange();
   },

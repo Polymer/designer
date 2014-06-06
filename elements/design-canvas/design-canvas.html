@@ -35,6 +35,11 @@ Polymer({
     'drag-start': 'drag'
   },
 
+  observe: {
+    'dragInfo.dropTarget': 'updateDropTarget'
+  },
+
+  resizeNubSize: 10,
   grid: 10,
   selected: null,
 
@@ -164,7 +169,12 @@ Polymer({
     switch(event.keyCode) {
       // ESC
       case 27:
-        this.selectParentElement();
+        // context handling for esc based on drag state
+        if (this.dragInfo) {
+          this.selectParentDropHint();
+        } else {
+          this.selectParentElement();          
+        }
         break;
       // backspace? delete?
       case 8:
@@ -184,6 +194,11 @@ Polymer({
       return;
     }
     dragInfo.origin = dragInfo.element.getBoundingClientRect();
+    // delegate to size API
+    if (this.dragShouldSize(dragInfo.event, dragInfo.origin)) {
+      this.sizeStart(dragInfo);
+      return;
+    }
     // delegate to drag API
     this.dragStart(dragInfo);
     // multiplex drop
@@ -195,6 +210,34 @@ Polymer({
     }.bind(this);
     // TODO(sjmiles): why select here?
     this.selected = dragInfo.element;
+  },
+
+  dragShouldSize: function(event, rect) {
+    return (Math.abs(rect.right - event.clientX) < this.resizeNubSize) &&
+      (Math.abs(rect.bottom - event.clientY) < this.resizeNubSize);
+  },
+
+  sizeStart: function(dragInfo) {
+    this.classList.add('sizing');
+    this.selected = dragInfo.element;
+    //
+    // contextualize utilities
+    //
+    var snap = this.snap.bind(this);
+    var rule = this.ruleForElement(dragInfo.element);
+    //
+    // attach handlers to the dragInfo
+    //
+    dragInfo.drag = function() {
+      var p = snap(this.origin.width + this.event.dx, this.origin.height + this.event.dy);
+      rule.style.width = p.x + 'px';
+      rule.style.height = p.y + 'px';
+    };
+    var canvas = this;
+    dragInfo.drop = function() {
+      canvas.classList.remove('sizing');
+      canvas.notify();
+    };
   },
 
   //
@@ -209,6 +252,7 @@ Polymer({
   //
 
   dragStart: function(dragInfo) {
+    this.dragInfo = dragInfo;
     // TODO(sjmiles): if this is an element from the design-canvas, it's immediately
     // pulled out of it's original context
     if (dragInfo.element.parentNode != this) {
@@ -231,6 +275,7 @@ Polymer({
     var snap = this.snap.bind(this);
     var rule = this.ruleForElement(dragInfo.element);
     var drop = this.drop.bind(this);
+    var dropHint = this.dropHint.bind(this);
     var scope = function(target) {
       return this.scopedTarget(this, target)
     }.bind(this);
@@ -242,14 +287,17 @@ Polymer({
       var p = snap(this.start.x + this.event.dx, this.start.y + this.event.dy);
       rule.style.left = p.x + 'px';
       rule.style.top = p.y + 'px';
+      dropHint(this);
     };
     dragInfo.drop = function() {
-      this.dropTarget = scope(this.event.relatedTarget);
+      this.dropTarget = this.dropTarget || scope(this.event.relatedTarget);
+      this.dropTarget.classList.remove('drop-target');
       return drop(this);
     };
   },
 
   drop: function(dragInfo) {
+    this.dragInfo = null;
     // remove dragging affordances (e.g. absolutely positioned)
     this.unsetDraggableStyleRules(dragInfo.element);
     // TODO(sjmiles): restore clipping (ad hoc)
@@ -273,6 +321,39 @@ Polymer({
       }
       this.selected = dragInfo.element;
       return true;
+    }
+  },
+
+  dropHint: function(dragInfo) {
+    this.job('hint-job', function() {
+      var event = {
+        clientX: dragInfo.event.clientX,
+        clientY: dragInfo.event.clientY,
+        target: dragInfo.dropTarget
+      }
+      dragInfo.dropTarget = PolymerGestures.targetFinding.findTarget(event);
+    });
+  },
+
+  selectParentDropHint: function() {
+    console.log('selectParentDropHint');
+    var hint = this.dragInfo && this.dragInfo.dropTarget;
+    if (hint) {
+      var parent = this.findContainer(this.dragInfo.element, hint.parentNode);
+      if (parent) {
+        this.dragInfo.dropTarget = parent;
+      }
+    }
+    console.log(this.dragInfo.dropTarget);
+  },
+
+  updateDropTarget: function(old) {
+    if (old) {
+      old.classList.remove('drop-target');
+    }
+    var target = this.dragInfo && this.dragInfo.dropTarget;
+    if (target) {
+      target.classList.add('drop-target');
     }
   },
 
