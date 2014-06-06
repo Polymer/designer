@@ -14,6 +14,20 @@
       -webkit-user-select: none
     }
 
+    polyfill-next-selector { content: '.drag-element'; }
+    ::content .drag-element {
+      position: absolute;
+      pointer-events: none !important;
+      transition: none;
+      -webkit-transition: none;
+      cursor: pointer;
+    }
+
+    polyfill-next-selector { content: '.drag-element *'; }
+    ::content .drag-element * {
+      pointer-events: none !important;
+    }
+
   </style>
 
   <core-drag-drop></core-drag-drop>
@@ -286,7 +300,6 @@ Polymer({
     // attach handlers to the dragInfo
     //
     dragInfo.drag = function() {
-      //console.log('dragInfo.drag');
       var p = snap(this.start.x + this.event.dx, this.start.y + this.event.dy);
       rule.style.left = p.x + 'px';
       rule.style.top = p.y + 'px';
@@ -299,9 +312,6 @@ Polymer({
   },
 
   drop: function(dragInfo) {
-    if (this.dropTarget) {
-      this.dropTarget.classList.remove('drop-target');
-    }
     this.dragInfo = null;
     // remove dragging affordances (e.g. absolutely positioned)
     this.unsetDraggableStyleRules(dragInfo.element);
@@ -373,9 +383,6 @@ Polymer({
 
   decorateElement: function(element) {
     var s = this.ruleForElement(element).style;
-    //s.pointerEvents = null;
-    //s.transition = null;
-    //s.webkitTransition = null;
     // designer is absolutely positioned, ad-hoc
     s.position = 'absolute';
     if (element.parentNode !== this.designHost) {
@@ -439,21 +446,11 @@ Polymer({
   },
 
   setDraggableStyleRules: function(element) {
-    var s = this.ruleForElement(element).style;
-    s.position = 'absolute';
-    s.pointerEvents = 'none';
-    s.transition = 'none';
-    s.cursor = 'pointer';
-    s.webkitTransition = 'none';
+    element.classList.add('drag-element');
   },
 
   unsetDraggableStyleRules: function(element) {
-    var s = this.ruleForElement(element).style;
-    s.position = null;
-    s.pointerEvents = null;
-    s.transition = null;
-    s.cursor = null;
-    s.webkitTransition = null;
+    element.classList.remove('drag-element');
   },
 
   findScope: function(element) {

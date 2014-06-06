@@ -1,14 +1,5 @@
-:host {
-  position: relative;
-}
-
 #list {
   background-color: white;
-  position: absolute;
-  top: 0;
-  right: 0px;
-  left: 0px;
-  bottom: 0px;
   padding: 0 10px;
   overflow-y: auto;
   font-size: 15px;
@@ -21,11 +12,6 @@
 
 #grid {
   background-color: #F2F2F2;
-  position: absolute;
-  top: 0;
-  right: 0px;
-  left: 0px;
-  bottom: 0px;
   padding: 0;
   overflow-x: hidden;
   overflow-y: auto;

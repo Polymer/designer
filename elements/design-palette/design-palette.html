@@ -5,7 +5,7 @@
 <link rel="import" href="../../components/core-menu/core-submenu.html">
 <link rel="import" href="../../components/core-drag-drop/core-drag-drop.html">
 
-<polymer-element name="design-palette" attributes="mode categories">
+<polymer-element name="design-palette" vertical layout attributes="mode categories">
 
 <template>
 
@@ -14,7 +14,7 @@
   <core-drag-drop on-drag-start="{{dragStart}}"></core-drag-drop>
 
   <template if="{{mode == 'menu'}}">
-    <div id="list">
+    <div flex id="list">
 
       <core-menu selectedClass="palette-selected">
         <template repeat="{{categories}}">
@@ -33,7 +33,7 @@
   </template>
 
   <template if="{{mode == 'grid'}}">
-    <div id="grid">
+    <div flex id="grid">
       <template repeat="{{categories}}">
         <template repeat="{{list}}">
 
