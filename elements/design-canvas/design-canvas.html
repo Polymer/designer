@@ -346,7 +346,6 @@ Polymer({
   },
 
   selectParentDropHint: function() {
-    console.log('selectParentDropHint');
     var hint = this.dragInfo && this.dragInfo.dropTarget;
     if (hint) {
       var parent = this.findContainer(this.dragInfo.element, hint.parentNode);
@@ -354,7 +353,6 @@ Polymer({
         this.dragInfo.dropTarget = parent;
       }
     }
-    console.log(this.dragInfo.dropTarget);
   },
 
   updateDropTarget: function(old) {
