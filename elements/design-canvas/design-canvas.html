@@ -252,6 +252,9 @@ Polymer({
   //
 
   dragStart: function(dragInfo) {
+    // ensure focused so that when dragging from palette, keys (e.g. esc for
+    // drop to parent) go here
+    this.focus();
     this.dragInfo = dragInfo;
     // TODO(sjmiles): if this is an element from the design-canvas, it's immediately
     // pulled out of it's original context
