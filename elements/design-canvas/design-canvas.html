@@ -291,12 +291,14 @@ Polymer({
     };
     dragInfo.drop = function() {
       this.dropTarget = this.dropTarget || scope(this.event.relatedTarget);
-      this.dropTarget.classList.remove('drop-target');
       return drop(this);
     };
   },
 
   drop: function(dragInfo) {
+    if (this.dropTarget) {
+      this.dropTarget.classList.remove('drop-target');
+    }
     this.dragInfo = null;
     // remove dragging affordances (e.g. absolutely positioned)
     this.unsetDraggableStyleRules(dragInfo.element);

@@ -221,6 +221,13 @@ Polymer({
     targetFinding = null;
     // forward event to designer
     this.designer.paletteDrag(event, dragInfo);
+    // cleanup coordinates
+    var drag = dragInfo.drag;
+    dragInfo.drag = function() {
+      this.event.clientY -= rect.top;
+      return drag.apply(this, arguments);
+    }
+
     // cleanup in drop
     var drop = dragInfo.drop;
     dragInfo.drop = function() {

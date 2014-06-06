@@ -36,6 +36,10 @@
   -ms-user-select: none;
 }
 
+core-submenu::shadow #submenu {
+  margin-left: 24px;
+}
+
 .group-item {
   font-weight: 500;
 }
