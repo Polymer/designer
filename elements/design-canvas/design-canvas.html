@@ -326,12 +326,17 @@ Polymer({
 
   dropHint: function(dragInfo) {
     this.job('hint-job', function() {
+      if (!this.dragInfo) {
+        return;
+      }
       var event = {
         clientX: dragInfo.event.clientX,
         clientY: dragInfo.event.clientY,
         target: dragInfo.dropTarget
       }
-      dragInfo.dropTarget = PolymerGestures.targetFinding.findTarget(event);
+      var target = PolymerGestures.targetFinding.findTarget(event);
+      target = this.scopedTarget(this, target);
+      dragInfo.dropTarget = this.findContainer(this.dragInfo.element, target);
     });
   },
 
