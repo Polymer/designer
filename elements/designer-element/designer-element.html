@@ -231,7 +231,7 @@ Polymer({
     // cleanup in drop
     var drop = dragInfo.drop;
     dragInfo.drop = function() {
-      frameStyle.pointerEvents = null;
+      frameStyle.pointerEvents = '';
       this.event.clientY -= rect.top;
       this.event.relatedTarget = searchRoot(this.event.clientX, this.event.clientY);
       return drop.apply(this, arguments);

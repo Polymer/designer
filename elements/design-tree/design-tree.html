@@ -100,7 +100,7 @@ Polymer({
     // scroll selected into view.
     this.onMutation(this.$.tree, function() {
       var e = this.$.tree.querySelector('.selected');
-      if (e) {
+      if (e && e.scrollIntoViewIfNeeded) {
         e.scrollIntoViewIfNeeded();
       }
     });
