@@ -2,12 +2,12 @@
   "name": "designer",
   "private": true,
   "dependencies": {
-    "platform": "Polymer/platform#master",
-    "code-mirror": "PolymerLabs/code-mirror#master",
-    "github-elements": "PolymerLabs/github-elements#master",
-    "x-meta": "PolymerLabs/x-meta#master",
-    "inspector-elements": "PolymerLabs/inspector-elements#master",
-    "core-elements": "Polymer/core-elements#master",
-    "more-elements": "Polymer/more-elements#master"
+    "platform": "Polymer/platform#>=0.3.0 <1.0.0",
+    "code-mirror": "PolymerLabs/code-mirror#>=0.3.0 <1.0.0",
+    "github-elements": "PolymerLabs/github-elements#>=0.3.0 <1.0.0",
+    "x-meta": "PolymerLabs/x-meta#>=0.3.0 <1.0.0",
+    "inspector-elements": "PolymerLabs/inspector-elements#>=0.3.0 <1.0.0",
+    "core-elements": "Polymer/core-elements#>=0.3.0 <1.0.0",
+    "more-elements": "Polymer/more-elements#>=0.3.0 <1.0.0"
   }
 }
