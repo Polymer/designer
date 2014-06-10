@@ -287,7 +287,7 @@ Polymer({
         // don't allow selection within a node with meta.hideSubtree
         var n = t;
         while (n) {
-          if (n.meta && n.meta.hideSubtree) {
+          if (n._designMeta && n._designMeta.hideSubtree) {
             t = n;
             break;
           }

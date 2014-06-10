@@ -87,7 +87,7 @@ Polymer({
             text: text,
             selected: (e == selected) ? 'selected' : ''
           });
-          if (!(e.meta && e.meta.hideSubtree)) {
+          if (!(e._designMeta && e._designMeta.hideSubtree)) {
             subtree(e, indent + tabsize);
           }
         }

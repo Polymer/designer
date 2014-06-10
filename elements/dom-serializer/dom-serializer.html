@@ -22,7 +22,7 @@ Polymer({
     html += this.dumpAttributes(node);
     html += '>';
     var end = {input: 1}[node.localName] ? '\n' : '</' + node.localName + '>\n';
-    if (node.meta && node.meta.hideSubtree) {
+    if (node._designMeta && node._designMeta.hideSubtree) {
       html += end;
     } else {
       var root = node.content || node;
@@ -264,7 +264,7 @@ Polymer({
     var n$ = element.querySelectorAll('*');
     var imports = [], metas=[];
     for (var i=0, l=n$.length, n, m; (i<l) && (n=n$[i]); i++) {
-      m = n.meta;
+      m = n._designMeta;
       if (m && metas.indexOf(m) < 0) {
         metas.push(m);
         imports = imports.concat(this.importsFromMeta(m));
@@ -281,7 +281,7 @@ Polymer({
   },
 
   importsFromMeta: function(meta) {
-    var t = meta.getImports();
+    var t = meta && meta.getImports && meta.getImports();
     if (t) {
       var c = t.content.cloneNode(true);
       var imports = c.querySelectorAll('link[rel=import]').array();
