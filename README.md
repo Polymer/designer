@@ -35,7 +35,7 @@ You may notice a few 404s in the console. You can safely ignore these files, the
 The `metadata.html` file instructs the designer on how to work with your compontent. The `metadata.html` consists of an `x-meta` tag that contains:
 
 - A `template` for your element
-- `property` elements for generating [property editors](#property-editors) in the Properties panel
+- **Optional** `property` elements for generating [property editors](#property-editors) in the Properties panel
 - A `template`for your element's HTML import.
 
 ``` html
