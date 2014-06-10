@@ -34,8 +34,8 @@ You may notice a few 404s in the console. You can safely ignore these files, the
 
 The `metadata.html` file instructs the designer on how to work with your compontent. The `metadata.html` consists of an `x-meta` tag that contains:
 
-- A `template` for your element
-- **Optional** `property` elements for generating [property editors](#property-editors) in the Properties panel
+- A `template` for your element. The contents of this template are what the user will be dragging onto the stage, so it can be used to stub out a good default.
+- **Optional** `property` elements for generating [property editors](#property-editors) in the Properties panel.
 - A `template`for your element's HTML import.
 
 ``` html
@@ -68,6 +68,8 @@ Attribute     | Type        | Required?   | Description
 `isContainer` | *Boolean*   | `false`     | Indicates if your element can contain other elements
 
 ### Property Editors
+
+Every element will generate property editors for all of its published properties (anything appearing in the `attributes` attribute or the `publish` object). The default behavior is to generate string editors, but using a `property` element, you may hint to the designer that it should display a more specific editor. Below is a list of all of the currently supported editor types with examples.
 
 #### String
 
