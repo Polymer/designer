@@ -5,7 +5,7 @@ designer
 
 1. Clone the repo and `cd` in
 2. Run `git fetch --tags` to get all releases
-3. Run `git checkout [LATEST TAG]`, ex: `git checkout 0.3.1`
+3. Run `git checkout [LATEST TAG]`, ex: `git checkout 0.3.2`
 4. From the root of the project run `bower install`
 5. Start a local server
 6. Navigate to http://localhost:[YOUR SERVER PORT]
@@ -36,7 +36,7 @@ You may notice a few 404s in the console. You can safely ignore these files, the
 
 The `metadata.html` file instructs the designer on how to work with your compontent. The `metadata.html` consists of an `x-meta` tag that contains:
 
-- A `template` for your element. The contents of this template are what the user will be dragging onto the stage, so it can be used to stub out a good default.
+- A `template` for your element. The contents of this template are what the user will be dragging onto the stage, so it can be used to stub out a version of your element with default attribute values and inline styles.
 - **Optional** `property` elements for generating [property editors](#property-editors) in the Properties panel.
 - A `template`for your element's HTML import.
 
@@ -45,7 +45,7 @@ The `metadata.html` file instructs the designer on how to work with your compont
 <x-meta id="google-map" label="Google Map" group="Google Web Components">
 
   <template>
-    <google-map style="width: 400px; height: 400px; display: block;"></google-map>
+    <google-map zoom="18" style="width: 400px; height: 400px; display: block;"></google-map>
   </template>
   
   <property name="mapType"
