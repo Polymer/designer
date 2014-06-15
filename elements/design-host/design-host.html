@@ -99,7 +99,7 @@ Polymer({
         // However we do not want events to function while we are designing,
         // so, we use a custom delegate.
         this.appendChild(template.createInstance(this.model, syntax));
-        this.meta.ensureMeta(this);
+        this._designMeta.ensureMeta(this);
         this.marshalNodeReferences(this);
         callback && callback();
       }.bind(this));
@@ -121,7 +121,7 @@ Polymer({
     };
     var n$ = element.querySelectorAll('*');
     for (var i=0, l=n$.length, n, m; (i<l) && (n=n$[i]); i++) {
-      m = this.meta.byId(n.localName);
+      m = this._designMeta.byId(n.localName);
       if (m && !m.importsLoaded) {
         pending++;
         m.loadImports(receive);

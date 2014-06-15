@@ -87,7 +87,7 @@ Polymer({
             text: text,
             selected: (e == selected) ? 'selected' : ''
           });
-          if (!(e.meta && e.meta.hideSubtree)) {
+          if (!(e._designMeta && e._designMeta.hideSubtree)) {
             subtree(e, indent + tabsize);
           }
         }
@@ -100,7 +100,7 @@ Polymer({
     // scroll selected into view.
     this.onMutation(this.$.tree, function() {
       var e = this.$.tree.querySelector('.selected');
-      if (e) {
+      if (e && e.scrollIntoViewIfNeeded) {
         e.scrollIntoViewIfNeeded();
       }
     });

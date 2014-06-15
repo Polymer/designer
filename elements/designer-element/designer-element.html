@@ -231,7 +231,7 @@ Polymer({
     // cleanup in drop
     var drop = dragInfo.drop;
     dragInfo.drop = function() {
-      frameStyle.pointerEvents = null;
+      frameStyle.pointerEvents = '';
       this.event.clientY -= rect.top;
       this.event.relatedTarget = searchRoot(this.event.clientX, this.event.clientY);
       return drop.apply(this, arguments);
@@ -287,7 +287,7 @@ Polymer({
         // don't allow selection within a node with meta.hideSubtree
         var n = t;
         while (n) {
-          if (n.meta && n.meta.hideSubtree) {
+          if (n._designMeta && n._designMeta.hideSubtree) {
             t = n;
             break;
           }
