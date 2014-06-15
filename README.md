@@ -47,6 +47,10 @@ The `metadata.html` file instructs the designer on how to work with your compont
   <template>
     <google-map zoom="18" style="width: 400px; height: 400px; display: block;"></google-map>
   </template>
+
+  <property name="zoom"
+            kind="number">
+  </property>
   
   <property name="mapType"
             kind="select"
@@ -71,7 +75,9 @@ Attribute     | Type        | Required?   | Description
 
 ### Property Editors
 
-Every element will generate property editors for all of its published properties (anything appearing in the `attributes` attribute or the `publish` object). The default behavior is to generate string editors, but using a `property` element, you may hint to the designer that it should display a more specific editor. Below is a list of all of the currently supported editor types with examples.
+Every element will generate property editors for all of its published properties (anything appearing in the `attributes` attribute or the `publish` object), and any attributes defined in its `metadata.html` template.
+
+The default behavior is to generate string editors for these properties. By using a `property` element, you may hint to the designer that it should display a more specific editor. Below is a list of all of the currently supported editor types with examples.
 
 #### String
 
