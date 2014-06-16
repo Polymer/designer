@@ -119,9 +119,10 @@ Polymer({
         callback();
       }
     };
+    this._designMeta.ensureMeta(element);
     var n$ = element.querySelectorAll('*');
     for (var i=0, l=n$.length, n, m; (i<l) && (n=n$[i]); i++) {
-      m = this._designMeta.byId(n.localName);
+      m = n._designMeta;
       if (m && !m.importsLoaded) {
         pending++;
         m.loadImports(receive);
