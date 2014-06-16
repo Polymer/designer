@@ -57,7 +57,7 @@ Polymer({
     var props = [];
     Object.keys(this.model).forEach(function(k) {
       if (serializeScriptBlacklist.indexOf(k) < 0) {
-        props.push(serializePropertyValue(k, this.model));
+        props.push(serializePropertyValue(k, this.model, indent, tab));
       }
     }, this);
     s += props.join(',\n' + indent + tab);
@@ -143,7 +143,7 @@ Polymer({
 
 var serializeScriptBlacklist = ['$'];
 
-function serializePropertyValue(name, obj) {
+function serializePropertyValue(name, obj, indent, tab) {
   var value = obj[name], type = typeof value;
   switch(type) {
     case 'function':
@@ -151,6 +151,10 @@ function serializePropertyValue(name, obj) {
       break;
     case 'string':
       value = '\'' + value + '\'';
+      break;
+    case 'object': 
+      value = JSON.stringify(value, null, tab);
+      value = value.replace(/\n/g, '\n' + indent + tab);
       break;
   }
   return name + ': ' + value;
