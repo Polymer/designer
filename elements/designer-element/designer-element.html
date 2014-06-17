@@ -39,7 +39,7 @@
       <core-icon-button title="Undo" disabled?="{{!$.state.canBack}}" icon="rotate-left" on-tap="{{undoAction}}"></core-icon-button>
       <core-icon-button title="Redo" disabled?="{{!$.state.canForward}}" icon="rotate-right" on-tap="{{redoAction}}"></core-icon-button>
       <span class="separator" hidden?="{{selected == 'code'}}"></span>
-      <core-icon-button title="Toggle Fullwidth" icon="{{maximized ? 'fullscreen-exit' : 'fullscreen'}}" on-tap="{{fullscreenAction}}"></core-icon-button>
+      <core-icon-button title="Toggle Fullwidth" icon="drawer" class="{{ {selected: maximized} | tokenList}}" on-tap="{{fullscreenAction}}"></core-icon-button>
     </div>
 
   </core-toolbar>
