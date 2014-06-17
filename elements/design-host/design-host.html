@@ -143,6 +143,7 @@ Polymer({
 });
 
 var serializeScriptBlacklist = ['$'];
+var MAX_SERIALIZE_ARRAY_LENGTH = 5;
 
 function serializePropertyValue(name, obj, indent, tab) {
   var value = obj[name], type = typeof value;
@@ -154,8 +155,12 @@ function serializePropertyValue(name, obj, indent, tab) {
       value = '\'' + value + '\'';
       break;
     case 'object': 
-      value = JSON.stringify(value, null, tab);
-      value = value.replace(/\n/g, '\n' + indent + tab);
+      if (Array.isArray(value) && value.length > MAX_SERIALIZE_ARRAY_LENGTH) {
+        value = null;
+      } else {
+        value = JSON.stringify(value, null, tab);
+        value = value.replace(/\n/g, '\n' + indent + tab);
+      }
       break;
   }
   return name + ': ' + value;
