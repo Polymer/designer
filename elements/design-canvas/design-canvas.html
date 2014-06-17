@@ -176,7 +176,19 @@ Polymer({
   // events
 
   pointerUp: function(event) {
-    this.selected = (event.target === this) ? this.designHost : event.target;
+    var element = this.findSelectableElement(event.target);
+    this.selected = (element === this) ? this.designHost : element;
+  },
+
+  findSelectableElement: function(node) {
+    var target = node;
+    while (node && node !== this) {
+      if (node._designMeta && node._designMeta.hideSubtree) {
+        return node;
+      }
+      node = node.parentNode;
+    }
+    return target;
   },
 
   keydown: function(event) {
@@ -636,6 +648,9 @@ function cssTextFromStyle(style) {
 function forSubtree(element, callback) {
   if (callback) {
     callback(element);
+    if (element._designMeta && element._designMeta.hideSubtree) {
+      return;
+    }
     var element = element.firstElementChild;
     while (element) {
       forSubtree(element, callback);
