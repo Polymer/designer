@@ -67,10 +67,7 @@ Polymer({
   },
 
   'import': function(urls, callback) {
-    var imports = urls.map(function(u) {
-      return '../' + u;
-    }, this);
-    Polymer.import(imports, callback);
+    Polymer.import(urls, callback);
   }
 
 });

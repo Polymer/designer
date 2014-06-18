@@ -2,13 +2,14 @@
 <html>
 <head>
   <title>Polymer Designer</title>
-
-  <script src="../../components/platform/platform.js"></script>
+  <!-- normalize url to be same as designer -->
+  <base href="../../">
+  <script src="components/platform/platform.js"></script>
   <script>
     window.parent.postMessage('designer-loading', location.href);
   </script>
 
-  <link rel="import" href="../design-frame/design-frame.html">
+  <link rel="import" href="elements/design-frame/design-frame.html">
 
   <style>
 
