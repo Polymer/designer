@@ -19,7 +19,7 @@ Polymer({
     }
     var html = '';
     html += indent + '<' + node.localName;
-    html += this.dumpAttributes(node);
+    html += this.dumpAttributes(node, indent);
     html += '>';
     var end = {input: 1}[node.localName] ? '\n' : '</' + node.localName + '>\n';
     if (node._designMeta && node._designMeta.hideSubtree) {
@@ -42,9 +42,9 @@ Polymer({
     return html;
   },
 
-  dumpAttributes: function(node) {
+  dumpAttributes: function(node, indent) {
     var html = '';
-    var attributes = this.calcAttributeValues(node);
+    var attributes = this.calcAttributeValues(node, indent);
     Object.keys(attributes).forEach(function(k) {
       var v = attributes[k];
       if (v !== null && v !== undefined) {
@@ -63,7 +63,7 @@ Polymer({
     return html;
   },
 
-  calcAttributeValues: function(node) {
+  calcAttributeValues: function(node, indent) {
     var p$ = Reflection.properties(node);
     var attributes = {};
     p$.forEach(function(p) {
@@ -80,10 +80,11 @@ Polymer({
       try {
         defaultValue = node.__proto__[n];
       } catch(e) {}
-      if (!this.shouldSerializeProperty(v, defaultValue)) {
+      if (!this.shouldSerializeProperty(v, defaultValue, p.meta)) {
         v = null;
       }
-      attributes[n.toLowerCase()] = v;
+      attributes[n.toLowerCase()] = v === null ? v : 
+          this.serializeAttributeValue(v, indent);
     }, this);
     for (var i=0, a, n; (a = node.attributes[i]); i++) {
       n = a.name.toLowerCase();
@@ -95,11 +96,23 @@ Polymer({
     return attributes;
   },
 
-  shouldSerializeProperty: function(value, defaultValue) {
-    return (value !== defaultValue)
-        && (value || value === 0) 
-        && (typeof value === 'string' || typeof value === 'number' ||
-          typeof value === 'boolean');
+  shouldSerializeProperty: function(value, defaultValue, meta) {
+    // must be valued
+    var valued = (value !== defaultValue) && (value || value === 0);
+    if (!valued) {
+      return;
+    }
+    // must be proper type
+    return (typeof value === 'string' || typeof value === 'number' ||
+        typeof value === 'boolean') || (typeof value === 'object' && 
+        meta && meta.kind === 'json');
+  },
+
+  serializeAttributeValue: function(value, indent) {
+    if (typeof value === 'object') {
+      value = JSON.stringify(value);
+    }
+    return value;
   },
 
   // special handling for certain attributes: style, class
@@ -287,8 +300,7 @@ Polymer({
       var imports = c.querySelectorAll('link[rel=import]').array();
       for (var i=0, l=imports.length, p, h; (i<l) && (p=imports[i]); i++) {
         // make serializable href
-        h = new URL(p.getAttribute('href'), t.ownerDocument.baseURI);
-        h = h.href.replace(basePath, '').replace('/components', '..');
+        h = p.getAttribute('href').replace('components', '..');
         p.setAttribute('href', h);
       }
       return imports;
