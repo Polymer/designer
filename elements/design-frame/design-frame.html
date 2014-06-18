@@ -67,7 +67,12 @@ Polymer({
   },
 
   'import': function(urls, callback) {
-    Polymer.import(urls, callback);
+    /* normalize metadata imports to our expectation that the design space
+    is inside a component folder */
+    var imports = urls.map(function(u) {
+      return u.replace('components/', '../');
+    });
+    Polymer.import(imports, callback);
   }
 
 });
