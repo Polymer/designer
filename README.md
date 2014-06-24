@@ -7,7 +7,7 @@ designer
 2. Run `git fetch --tags` to get all releases
 3. Run `git checkout [LATEST TAG]`, ex: `git checkout 0.3.2`
 4. From the root of the project run `bower install`
-5. Start a local server
+5. Start a local server, ex: `python -m SimpleHTTPServer`
 6. Navigate to http://localhost:[YOUR SERVER PORT]
 
 ## Things to know
