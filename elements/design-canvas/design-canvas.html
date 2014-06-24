@@ -101,7 +101,7 @@ Polymer({
       var parent = e.parentNode;
       parent.removeChild(e);
       forSubtree(e, this.removeElementRule.bind(this));
-      this.selected = parent;
+      this.selected = parent === this ? this.designHost : parent;
     }
   },
 
