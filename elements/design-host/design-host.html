@@ -66,7 +66,8 @@ Polymer({
   },
 
   loadHtml: function(html, callback) {
-    var raw = document.createElement('div');
+    // use a template to ensure the polymer-element does not upgrade
+    var raw = document.createElement('template');
     raw.innerHTML = html;
     // remove imports
     var imports = raw.querySelectorAll('link[rel=import]').array();
@@ -74,7 +75,7 @@ Polymer({
       i.remove();
     });
     // absorb polymer-element
-    this.polymerElement = raw.querySelector('polymer-element');
+    this.polymerElement = raw.content.querySelector('polymer-element');
     if (!this.polymerElement) {
       throw new Error('Must load a <polymer-element>');
     }
@@ -86,6 +87,8 @@ Polymer({
     // absorb template
     var template = this.polymerElement.querySelector('template');
     if (template) {
+      // ensure template is owned by document so that its contents upgrade
+      document.adoptNode(template);
       // absorb styles, convert :host style
       var style = template.content.querySelector('style');
       if (style) {
