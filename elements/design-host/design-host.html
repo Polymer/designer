@@ -57,7 +57,10 @@ Polymer({
     var props = [];
     Object.keys(this.model).forEach(function(k) {
       if (serializeScriptBlacklist.indexOf(k) < 0) {
-        props.push(serializePropertyValue(k, this.model, indent, tab));
+        var propString = serializePropertyValue(k, this.model, indent, tab);
+        if (propString) {
+          props.push(propString);
+        }
       }
     }, this);
     s += props.join(',\n' + indent + tab);
@@ -146,7 +149,7 @@ Polymer({
 });
 
 var serializeScriptBlacklist = ['$'];
-var MAX_SERIALIZE_ARRAY_LENGTH = 5;
+var MAX_SERIALIZE_LENGTH = 5;
 
 function serializePropertyValue(name, obj, indent, tab) {
   var value = obj[name], type = typeof value;
@@ -158,11 +161,17 @@ function serializePropertyValue(name, obj, indent, tab) {
       value = '\'' + value + '\'';
       break;
     case 'object': 
-      if (Array.isArray(value) && value.length > MAX_SERIALIZE_ARRAY_LENGTH) {
+      var length = value ? (Array.isArray(value) ? value.length : 
+          Object.keys(value).length) : 0;
+      if (length > MAX_SERIALIZE_LENGTH) {
         value = null;
       } else {
-        value = JSON.stringify(value, null, tab);
-        value = value.replace(/\n/g, '\n' + indent + tab);
+        try {
+          value = JSON.stringify(value, null, tab);
+          value = value.replace(/\n/g, '\n' + indent + tab);
+        } catch(e) {
+          value = null;
+        }
       }
       break;
   }
