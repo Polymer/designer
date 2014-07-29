@@ -57,6 +57,8 @@ The `metadata.html` file instructs the designer on how to work with your compont
             options="roadmap,satellite,hybrid,terrain">
   </property>
 
+  <!-- Make sure you put your element import last! -->
+  <!-- https://github.com/Polymer/designer/issues/59 -->
   <template id="imports">
     <link rel="import" href="google-map.html">
   </template>
