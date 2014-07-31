@@ -9,6 +9,8 @@
     "inspector-elements": "PolymerLabs/inspector-elements#master",
     "core-elements": "Polymer/core-elements#master",
     "paper-elements": "Polymer/paper-elements#master",
+    "paper-calculator": "Polymer/paper-calculator#master",
+    "topeka-elements": "Polymer/topeka-elements#master",
     "more-elements": "Polymer/more-elements#master"
   }
 }
