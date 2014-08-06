@@ -7,7 +7,7 @@
 
   <link rel="stylesheet" href="design-frame.css">
   <x-meta id="meta" categories="{{categories}}"></x-meta>
-  <design-canvas flex id="canvas" tabIndex="-1" selected="{{selected}}" on-design-change="{{designChange}}"></design-canvas>
+  <design-canvas flex id="designCanvas" tabIndex="-1" selected="{{selected}}" on-design-change="{{designChange}}"></design-canvas>
 
 </template>
 <script>
@@ -27,43 +27,43 @@ Polymer({
     var meta = this.$.meta.byId(dragInfo.tag);
     dragInfo.element = meta.createElement();
     // let canvas hook the drag
-    this.$.canvas.dragStart(dragInfo);
+    this.$.designCanvas.dragStart(dragInfo);
   },
 
   designChange: function() {
-    this.$.canvas.update();
+    this.$.designCanvas.update();
   },
 
   deleteElement: function() {
-    this.$.canvas.deleteElement();
+    this.$.designCanvas.deleteElement();
   },
 
   promoteElement: function() {
-    this.$.canvas.promoteElement();
+    this.$.designCanvas.promoteElement();
   },
 
   demoteElement: function() {
-    this.$.canvas.demoteElement();
+    this.$.designCanvas.demoteElement();
   },
 
   moveoutElement: function() {
-    this.$.canvas.moveoutElement();
+    this.$.designCanvas.moveoutElement();
   },
 
   maximizeElement: function() {
-    this.$.canvas.maximizeElement();
+    this.$.designCanvas.maximizeElement();
   },
 
   selectParentElement: function() {
-    this.$.canvas.selectParentElement();
+    this.$.designCanvas.selectParentElement();
   },
 
   loadHtml: function(html) {
-    this.$.canvas.loadHtml(html);
+    this.$.designCanvas.loadHtml(html);
   },
 
   applyPropertyBinding: function(obj, name, path) {
-    this.$.canvas.applyPropertyBinding(obj, name, path);
+    this.$.designCanvas.applyPropertyBinding(obj, name, path);
   },
 
   'import': function(urls, callback) {

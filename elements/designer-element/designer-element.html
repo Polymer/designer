@@ -97,7 +97,7 @@
       
             <core-pages id="interior" flex valueAttr="id" selected="{{selectedTool}}">
               <design-palette id="palette" on-palette-drag="{{paletteDrag}}" mode="{{paletteMode}}"></design-palette>
-              <design-tree id="tree" canvas="{{$.canvas}}" on-node-select="{{treeNodeSelected}}"></design-tree>
+              <design-tree id="tree" on-node-select="{{treeNodeSelected}}"></design-tree>
             </core-pages>
           </div>
 
@@ -168,7 +168,7 @@ Polymer({
 
   designerReady: function(event) {
     this.designer = event.target;
-    this.$.tree.canvas = this.designer.$.canvas;
+    this.$.tree.canvas = this.designer.$.designCanvas;
     this.$.palette.categories = this.designer.categories;
     this.designer.import(window.metadata, this.importsLoaded.bind(this));
   },
@@ -281,7 +281,7 @@ Polymer({
   inspectTarget: function(event) {
     var t = event.target;
     if (t) {
-      if (t === this.$.canvas) {
+      if (t === this.designer.$.designCanvas) {
         this.selected = null;
       } else {
         // don't allow selection within a node with meta.hideSubtree
@@ -315,7 +315,7 @@ Polymer({
   },
 
   get html() {
-    return this.$.serializer.dumpElement(this.designer.$.canvas);
+    return this.$.serializer.dumpElement(this.designer.$.designCanvas);
   },
 
   get code() {

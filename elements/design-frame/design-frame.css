@@ -8,16 +8,16 @@
   -webkit-user-select: none;
 }
 
-#canvas {
+#designCanvas {
   background-color: white;
 }
 
-#canvas .selected-element {
+#designCanvas .selected-element {
   outline: solid 3px rgba(66, 87, 203, 0.8);
   outline-offset: -3px;
 }
 
-#canvas *::after {
+#designCanvas *::after {
   position: absolute;
   content: ' ';
   bottom: 0;
@@ -27,11 +27,11 @@
   cursor: se-resize;
 }
 
-#canvas.sizing {
+#designCanvas.sizing {
   cursor: se-resize;  
 }
 
-#canvas .drop-target {
+#designCanvas .drop-target {
   outline: dotted 2px black;
   outline-offset: -2px;
 }
