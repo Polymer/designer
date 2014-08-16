@@ -422,13 +422,9 @@ Polymer({
 
   makeUniqueId: function(node, id, suffix) {
     var uId = id + (suffix || '');
-    // TODO(sorvell): why the polyfill intrusion?
-    var query = window.ShadowDOMPolyfill ? node.impl.querySelector :
-      node.querySelector;
-    var scope = window.ShadowDOMPolyfill ? document.body : node;
-    return query.call(scope, '#' + uId) ?
+    return this.querySelector('#' + uId) ?
       this.makeUniqueId(node, id, suffix ? ++suffix : 1) :
-        uId;
+        uId;    
   },
 
   applyPropertyBinding: function(target, name, path) {
