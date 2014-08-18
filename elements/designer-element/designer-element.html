@@ -131,7 +131,7 @@ Polymer({
   ready: function() {
     document.addEventListener('keydown', 
         this.keydown.bind(this, window));
-    window.addEventListener('message', this.designWindowLoaded.bind(this));
+    window.designWindowLoaded = this.designWindowLoaded.bind(this);
     this.firstLoad = true;
   },
 

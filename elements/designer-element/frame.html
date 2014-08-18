@@ -6,7 +6,9 @@
   <base href="../../components/element/">
   <script src="../platform/platform.js"></script>
   <script>
-    window.parent.postMessage('designer-loading', location.href);
+    if (window.top.designWindowLoaded) {
+      top.designWindowLoaded();
+    }
   </script>
 
   <link rel="import" href="../../elements/design-frame/design-frame.html">
