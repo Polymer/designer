@@ -78,6 +78,7 @@ core-icon-button.rotate {
   background-color: #f2f2f2;
   color: #a9a9a9;
   border-bottom: 1px solid #ccc;
+  display: block;
 }
 
 :host /deep/ #tabs > * {

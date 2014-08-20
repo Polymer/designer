@@ -10,6 +10,7 @@
     :host {
       position: relative;
       outline: none;
+      display: block;
       background-image: url(grid.png);
       -webkit-user-select: none
     }
@@ -70,6 +71,8 @@ Polymer({
   // communication
 
   notifyChange: function() {
+    // force polyfill rendering.
+    this.offsetHeight;
     this.fire('design-change', this);
   },
 
