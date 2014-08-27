@@ -5,14 +5,16 @@ designer
 
 1. Clone the repo and `cd` in
 2. Run `git fetch --tags` to get all releases
-3. Run `git checkout [LATEST TAG]`, ex: `git checkout 0.3.2`
+3. Run `git checkout [LATEST TAG]`, ex: `git checkout 0.3.5`
 4. From the root of the project run `bower install`
 5. Start a local server, ex: `python -m SimpleHTTPServer`
 6. Navigate to http://localhost:[YOUR SERVER PORT]
 
 ## Things to know
 
-You may notice a few 404s in the console. You can safely ignore these files, they're not required for the designer to work.
+### Bower Resolutions
+
+When you run `bower install` it may ask you to pick a version of a particular dependency. Because the designer is still very bleeding edge and we're constnatly fixing bugs, we often recommend you choose the `master` option if it's presented. You can preserve this resolution by proceeding it with a bang "!" symbol. Long term we hope to eleminate the need for this action by making sure all dependenices in designer work with the current tag and do not require resolutions.
 
 ## Adding your own components to designer
 
