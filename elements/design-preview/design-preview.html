@@ -66,7 +66,6 @@ Polymer({
 
   makeOutputHTML: function(head, body) {
     var html = '<!DOCTYPE html>\n';
-    html += '<head>\n';
     html += '<title>Preview</title>\n';
     html += '<meta name="viewport" content="width=device-width, ' + 
         'initial-scale=1.0, maximum-scale=1.0">\n';
@@ -90,10 +89,8 @@ Polymer({
     html += '    -webkit-tap-highlight-color: rgba(0,0,0,0);\n';
     html += '  }\n';
     html += '</style>\n';
-    html += '</head>\n<body>\n';
     // include content
     html += body || '';
-    html += '\n</body>\n</html>';
     return html;
   }
 
