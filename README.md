@@ -14,7 +14,7 @@ designer
 
 ### Bower Resolutions
 
-When you run `bower install` it may ask you to pick a version of a particular dependency. Because the designer is still very bleeding edge and we're constnatly fixing bugs, we often recommend you choose the `master` option if it's presented. You can preserve this resolution by proceeding it with a bang "!" symbol. Long term we hope to eleminate the need for this action by making sure all dependenices in designer work with the current tag and do not require resolutions.
+When you run `bower install` it may ask you to pick a version of a particular dependency. Because the designer is still very bleeding edge and we're constantly fixing bugs, we often recommend you choose the `master` option if it's presented. You can preserve this resolution by preceding it with a bang "!" symbol. Long term we hope to eliminate the need for this action by making sure all dependencies in designer work with the current tag and do not require resolutions.
 
 ## Adding your own components to designer
 
@@ -36,7 +36,7 @@ When you run `bower install` it may ask you to pick a version of a particular de
 
 ### metadata.html
 
-The `metadata.html` file instructs the designer on how to work with your compontent. The `metadata.html` consists of an `x-meta` tag that contains:
+The `metadata.html` file instructs the designer on how to work with your component. The `metadata.html` consists of an `x-meta` tag that contains:
 
 - A `template` for your element. The contents of this template are what the user will be dragging onto the stage, so it can be used to stub out a version of your element with default attribute values and inline styles.
 - **Optional** `property` elements for generating [property editors](#property-editors) in the Properties panel.
