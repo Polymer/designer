@@ -63,7 +63,7 @@ Polymer({
   },
 
   dumpScript: function(indent, tab) {
-    var s = 'Polymer(\'' + this.name + '\', {\n' + indent + tab;
+    var s = 'Polymer({\n' + indent + tab;
     var props = [];
     Object.keys(this.model).forEach(function(k) {
       if (serializeScriptBlacklist.indexOf(k) < 0) {

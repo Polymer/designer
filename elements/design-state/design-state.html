@@ -17,7 +17,7 @@ Polymer({
   canBack: false,
   canForward: false,
   created: function() {
-    this.stack = [];
+    this.reset();
   },
 
   push: function(state) {
@@ -72,6 +72,11 @@ Polymer({
 
   isAtFirst: function() {
     return (this.cursor === 0) 
+  },
+
+  reset: function() {
+    this.stack = [];
+    this.cursor = 0;
   }
 
 });

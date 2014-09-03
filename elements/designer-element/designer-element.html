@@ -138,6 +138,7 @@ Polymer({
   remoteHtml: '',
 
   ready: function() {
+    window.onbeforeunload = this.warnUnload.bind(this);
     document.addEventListener('keydown', 
         this.keydown.bind(this, window));
     window.designWindowLoaded = this.designWindowLoaded.bind(this);
@@ -155,15 +156,7 @@ Polymer({
 
   keydown: function(w, e) {
     switch(e.keyCode) {
-      // backspace
-      case 8:
-        w.onbeforeunload = function() {
-          return ' ';
-        }
-        setTimeout(function() {
-          w.onbeforeunload = null;
-        }, 0);
-        break;
+      // save
       case 83:
         if (e.ctrlKey || e.metaKey) {
           e.preventDefault();
@@ -395,29 +388,38 @@ Polymer({
 
     this.save(function() {
       this.previewWindow.location.href = 'preview.html#' + this.fileId;
-    })
+    });
   },
 
   save: function(callback) {
-    var cb;
-    if (callback) {
-      var self = this;
-      cb = function() {
+    var self = this;
+    var saveCb = function() {
+      if (callback) {
         callback.call(self);
       }
-    }
+    };
+    var updateCb = function(response) {
+      // update fails if gist is some other user's
+      // if this happens perform a save.
+      if (response && response.error === 404) {
+        self.fileId = null;
+        self.save(callback);
+      } else {
+        saveCb();
+      }
+    };
     var options = {};
-    var content = this.selected === 'code' ? this.code : this.html;
-    options[this.$.githubInfo.fileName] = {content: content};
+    options[this.$.githubInfo.fileName] = {content: this.getContent()};
     if (this.fileId) {
-      this.$.github.update(this.fileId, 'designer', true, options, cb);
+      this.$.github.update(this.fileId, 'designer', true, options, updateCb);
     } else {
-      this.$.github.save('designer', true, options, cb);
+      this.$.github.save('designer', true, options, saveCb);
     }
   },
 
   documentSaved: function(event, detail) {
     this.fileId = detail.id; 
+    this._savedHtml = this.getContent();
   },
 
   loadRemoteContent: function() {
@@ -437,6 +439,8 @@ Polymer({
 
   remoteHtmlChanged: function() {
     this.loadHtml(this.remoteHtml);
+    this._savedHtml = this.remoteHtml;
+    this.$.state.reset();
   },
 
   loadHtml: function(html) {
@@ -487,6 +491,20 @@ Polymer({
       this.async(function() {
         this._preventStateChange = false;
       });
+    }
+  },
+
+  getContent: function() {
+    return this.selected === 'code' ? this.code : this.html;
+  },
+
+  isDirty: function() {
+    return (this._savedHtml !== this.getContent());
+  },
+
+  warnUnload: function() {
+    if (this.isDirty()) {
+      return 'Unsaved changes detected.';
     }
   }
 
