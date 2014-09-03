@@ -17,7 +17,7 @@
 <link rel="import" href="../../components/core-item/core-item.html">
 <link rel="import" href="../../components/core-splitter/core-splitter.html">
 
-<link rel="import" href="../../components/code-mirror/code-mirror.html">
+
 <link rel="import" href="../../components/github-elements/github-elements.html">
 
 <link rel="import" href="../dom-serializer/dom-serializer.html">
@@ -26,6 +26,7 @@
 <link rel="import" href="../design-tree/design-tree.html">
 <link rel="import" href="../design-preview/design-github-info.html">
 <link rel="import" href="../design-state/design-state.html">
+<link rel="import" href="../design-code/design-code.html">
 
 <polymer-element name="designer-element" vertical layout>
 <template>
@@ -115,7 +116,7 @@
 
     </section>
 
-    <code-mirror id="code" name="code"></code-mirror>
+    <design-code id="code" name="code"></design-code>
 
   </core-pages>
 
@@ -301,37 +302,20 @@ Polymer({
     }
   },
 
-  // TODO(sorvell): probably should factor this code setup to be elsewhere
-  prepareCode: function() {
-    this.$.code.focus();
-    // fold style tag
-    var cm = this.$.code.mirror;
-    var c = cm.getSearchCursor('<style>');
-    if (c.find()) {
-      var l = c.pos.from.line;
-      cm.setSelection({line: l})
-      cm.foldCode(l);
-      cm.execCommand('goLineDown');
-      cm.execCommand('goLineStartSmart');
-    }
-  },
-
   get html() {
     return this.$.serializer.dumpElement(this.designer.$.designCanvas);
   },
 
   get code() {
-    return this.$.code.mirror.getValue();
+    return this.$.code.getValue();
   },
 
   designToCode: function() {
-    this.$.code.mirror.setValue(this.html);
-    this.$.code.refresh();
-    this.async('prepareCode');
+    this.$.code.beginEditing(this.html);
   },
 
   codeToDesign: function() {
-    this.loadHtml(this.code);
+    this.loadHtml(this.$.code.finishEditing());
   },
 
   reloadDesigner: function() {
