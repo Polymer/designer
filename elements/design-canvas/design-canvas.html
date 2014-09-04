@@ -102,11 +102,6 @@ Polymer({
 
   // commands
 
-  addElement: function(element) {
-    this.designHost.appendChild(element);
-    this.decorateElement(element);
-  },
-
   deleteElement: function() {
     var e = this.selected;
     if (e && e !== this && e !== this.designHost) {
@@ -339,8 +334,6 @@ Polymer({
     this.dragInfo = null;
     // remove dragging affordances (e.g. absolutely positioned)
     this.unsetDraggableStyleRules(dragInfo.element);
-    // TODO(sjmiles): restore clipping (ad hoc)
-    //this.style.overflow = 'hidden';
     // locate drop target
     var container = this.findContainer(dragInfo.element, dragInfo.dropTarget);
     if (container && this.canContain(container, dragInfo.element)) {
@@ -410,7 +403,14 @@ Polymer({
     // designer is absolutely positioned, ad-hoc
     s.position = 'absolute';
     if (element.parentNode !== this.designHost) {
-      s.left = s.top = s.position = '';
+      // allow abs positioning if parent has no `layout` attribute
+      if (!element.parentNode.hasAttribute('layout')) {
+        var r = element.parentNode.getBoundingClientRect();
+        s.left = (element.offsetLeft - r.left) + 'px';
+        s.top = (element.offsetTop - r.top) + 'px';
+      } else {
+        s.left = s.top = s.position = '';
+      }
     }
     //
     var decorate = function(element) {
