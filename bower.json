@@ -2,7 +2,7 @@
   "name": "designer",
   "private": true,
   "dependencies": {
-    "platform": "Polymer/platform#master",
+    "webcomponentsjs": "Polymer/webcomponentsjs#master",
     "code-mirror": "PolymerLabs/code-mirror#master",
     "github-elements": "PolymerLabs/github-elements#master",
     "x-meta": "PolymerLabs/x-meta#master",
