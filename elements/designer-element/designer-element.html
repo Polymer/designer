@@ -15,6 +15,8 @@
 <link rel="import" href="../../components/core-icons/social-icons.html">
 <link rel="import" href="../../components/core-icon-button/core-icon-button.html">
 <link rel="import" href="../../components/core-menu-button/core-menu-button.html">
+<link rel="import" href="../../components/core-dropdown/core-dropdown.html">
+<link rel="import" href="../../components/core-menu/core-menu.html">
 <link rel="import" href="../../components/core-item/core-item.html">
 <link rel="import" href="../../components/core-splitter/core-splitter.html">
 
@@ -78,7 +80,7 @@
 
               <core-icon-button icon="fullscreen" on-tap="{{maximizeElement}}" title="Auto-size"></core-icon-button>
               
-              <core-menu-button title="More..." icon="more-vert" halign="right">
+              <core-menu-button>
                 <style>
                   .core-selected {
                     font-weight: normal;
@@ -89,10 +91,15 @@
                     -webkit-transform: rotate(90deg);
                   }
                 </style>
-                <core-item icon="arrow-back" class="rotate" label="Move Up" on-tap="{{moveoutElement}}"></core-item>
-                <core-item icon="arrow-back" label="Move Back" on-tap="{{promoteElement}}"></core-item>
-                <core-item icon="arrow-forward" label="Move Forward" on-tap="{{demoteElement}}"></core-item>
-                <core-item icon="delete" label="Delete" on-tap="{{deleteElement}}"></core-item>
+                <core-icon-button icon="more-vert" title="More..."></core-icon-button>
+                <core-dropdown class="dropdown" halign="right">
+                  <core-menu>
+                    <core-item icon="arrow-back" class="rotate" label="Move Up" on-tap="{{moveoutElement}}"></core-item>
+                    <core-item icon="arrow-back" label="Move Back" on-tap="{{promoteElement}}"></core-item>
+                    <core-item icon="arrow-forward" label="Move Forward" on-tap="{{demoteElement}}"></core-item>
+                    <core-item icon="delete" label="Delete" on-tap="{{deleteElement}}"></core-item>
+                  </core-menu>
+                </core-dropdown>
               </core-menu-button>
             </core-toolbar>
             <element-inspector flex id="inspector" on-bind-property="{{applyPropertyBinding}}"></element-inspector>

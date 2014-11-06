@@ -138,6 +138,11 @@ core-icon-button.rotate {
   width: 0;
 }
 
+core-dropdown {
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
 .splitterContainer {
   position: absolute;
   top: 0;
