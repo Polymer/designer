@@ -1,0 +1,36 @@
+application: polymer-designer
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: yes
+
+handlers:
+- url: /
+  mime_type: text/html
+  static_files: build.html
+  upload: build.html
+
+- url: /build.js
+  mime_type: application/javascript
+  static_files: build.js
+  upload: build.js
+
+- url: /preview.html
+  mime_type: text/html
+  static_files: preview.html
+  upload: preview.html
+
+- url: /components/(.*)
+  static_files: components/\1
+  upload: components/.*
+
+- url: /elements/(.*)
+  static_files: elements/\1
+  upload: elements/.*
+
+- url: /assets/(.*)
+  static_files: assets/\1
+  upload: assets/.*
+
+skip_files:
+- ^(.*/)?node_modules/.*
