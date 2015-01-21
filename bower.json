@@ -2,15 +2,16 @@
   "name": "designer",
   "private": true,
   "dependencies": {
-    "webcomponentsjs": "Polymer/webcomponentsjs#^0.5.0",
-    "code-mirror": "PolymerLabs/code-mirror#^0.5.0",
-    "github-elements": "PolymerLabs/github-elements#^0.5.0",
-    "x-meta": "PolymerLabs/x-meta#^0.5.0",
-    "inspector-elements": "PolymerLabs/inspector-elements#^0.5.0",
-    "core-elements": "Polymer/core-elements#^0.5.0",
-    "paper-elements": "Polymer/paper-elements#^0.5.0",
-    "paper-calculator": "Polymer/paper-calculator#^0.5.0",
-    "topeka-elements": "Polymer/topeka-elements#^0.5.0",
-    "more-elements": "Polymer/more-elements#^0.5.0"
-  }
+    "webcomponentsjs": "Polymer/webcomponentsjs#^0.5",
+    "code-mirror": "PolymerLabs/code-mirror#^0.5",
+    "github-elements": "PolymerLabs/github-elements#^0.5",
+    "x-meta": "PolymerLabs/x-meta#^0.5",
+    "inspector-elements": "PolymerLabs/inspector-elements#^0.5",
+    "core-elements": "Polymer/core-elements#^0.5",
+    "paper-elements": "Polymer/paper-elements#^0.5",
+    "paper-calculator": "Polymer/paper-calculator#^0.5",
+    "topeka-elements": "Polymer/topeka-elements#^0.5",
+    "more-elements": "Polymer/more-elements#^0.5"
+  },
+  "version": "0.5.3"
 }
