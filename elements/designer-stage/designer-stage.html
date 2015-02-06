@@ -1,0 +1,168 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../../neoprene/components/x-elements/x-template/x-template.html">
+<link rel="import" href="../designer-selection/designer-selection.html">
+
+<dom-module id="designer-stage">
+
+  <style>
+    designer-stage {
+      display: block;
+      box-sizing: border-box;
+    }
+    designer-stage > iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      box-sizing: border-box;
+      background: gray;
+    }
+    designer-stage > #glass {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 100;
+    }
+    designer-stage > designer-selection {
+      position: absolute;
+      z-index: 101;
+    }
+  </style>
+
+  <template>
+    <designer-selection id="selection"></designer-selection>
+    <div id="glass" on-mousedown="_onMouseDown"></div>
+    <!-- 
+      Note: src is main document relative, and only works in the demo
+      because it's in the same directory as this file. Need to solve this.
+    -->
+    <iframe id="frame" src="frame.html" sandbox="allow-scripts"></iframe>
+  </template>
+
+</dom-module>
+
+<script>
+  Polymer({
+    is: 'designer-stage',
+
+    created: function() {
+      this.token = null;
+    },
+
+    ready: function() {
+      window.addEventListener('message', this._onMessage.bind(this));
+      this.$.selection.addEventListener('designer-selection-resize', 
+          this._onSelectionResize.bind(this));
+      var frame = this.$.frame;
+      var token = this.token = this._generateToken();
+      frame.addEventListener('load', function() {
+        frame.contentWindow.postMessage({
+          message_type: 'setToken',
+          token: token
+        }, '*');
+      });
+      frame.addEventListener('load', function(e) {
+        if (e.type == 'load') {
+          console.log("<designer-stage> error loading frame contents");
+        }
+      });
+    },
+
+    _generateToken: function() {
+      var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      var token = '';
+      for (var i = 0; i < 16; i++) {
+        token += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+      }
+      return token;
+    },
+
+    _onMessage: function(e) {
+      if (e.data.token != this.token) {
+        throw new Error('Invalid message token', token);
+      }
+
+      switch (e.data.message_type) {
+        case 'updateSelector':
+          this._updateSelector(e);
+          break;
+        case 'seletedElement':
+          this._selectedElement(e);
+          break;
+      }
+    },
+
+    _updateSelector: function(e) {
+      var bounds = e.data.bounds;
+      var style = this.$.selection.style;
+      if (bounds == null) {
+        style.display = 'none';
+      } else {
+        style.display = 'block';
+        style.top = bounds.top;
+        style.left = bounds.left;
+        style.width = bounds.width;
+        style.height = bounds.height;
+      }
+    },
+
+    _selectedElement: function(e) {
+      var data = e.data;
+      var bounds = data.bounds;
+      var selection = this.$.selection;
+      var style = selection.style;
+      if (data.position == 'static') {
+        selection.directions = ResizeDirection.width_height;
+      } else if (data.position == 'absolute') {
+        selection.directions = ResizeDirection.all_directions;
+      }
+      // TODO: factor out common code with _updateSelector.
+      // Possibly implement message batching or extension.
+      if (bounds == null) {
+        style.display = 'none';
+      } else {
+        style.display = 'block';
+        style.top = bounds.top;
+        style.left = bounds.left;
+        style.width = bounds.width;
+        style.height = bounds.height;
+      }
+    },
+
+    _onSelectionResize: function(e) {
+      var frame = this.$.frame;
+
+      frame.contentWindow.postMessage({
+        message_type: 'resizeElement',
+        bounds: e.detail
+      }, '*');
+
+    },
+
+    _onMouseDown: function(e) {
+      var frame = this.$.frame;
+
+      // TODO: transate coordinates to stage relative, here and within
+      // frame.html as needed.
+      frame.contentWindow.postMessage({
+        message_type: 'selectElement',
+        x: e.clientX,
+        y: e.clientY
+      }, "*");
+    }
+
+  });
+</script>
