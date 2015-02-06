@@ -30,6 +30,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         box-sizing: border-box;
       }
     </style>
+    <script src="FrameManager.js"></script>
+    <script>new FrameManager().listen();</script>
   </head>
   <body>
     <!-- 
@@ -41,81 +43,5 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div class="static"></div>
     <div id="foo" style="top: 100px; left: 100px; height: 100px;width: 400px;">Hello Designer</div>
     <div id="foo" style="top: 300px; left: 100px; height: 100px;width: 400px;">Hello Designer</div>
-    <script>
-      (function() {
-        currentElement = null;
-        token = null;
-
-        window.addEventListener("message", function(e) {
-          switch (e.data.message_type) {
-            case 'setToken':
-              setToken(e);
-              break;
-            case 'selectElement':
-              selectElement(e);
-              break;
-            case 'resizeElement':
-              resizeElement(e);
-              break;
-          }
-        });
-
-        function setToken(e) {
-          if (token != null) {
-            throw new Error('token already set');
-          }
-          token = e.data.token;
-        }
-
-        function sendUpdateSelector(receiver, bounds) {
-          receiver.postMessage({
-            message_type: 'updateSelector',
-            token: token,
-            bounds: {
-              left: bounds.left,
-              top: bounds.top,
-              width: bounds.width,
-              height: bounds.height
-            }
-          }, '*');
-        }
-
-        function sendSelectedElement(receiver, element) {
-          var style = window.getComputedStyle(element);
-          var bounds = element.getBoundingClientRect();
-          receiver.postMessage({
-            message_type: 'seletedElement',
-            token: token,
-            tagName: element.tagName,
-            display: style.display,
-            position: style.position,
-            bounds: {
-              left: bounds.left,
-              top: bounds.top,
-              width: bounds.width,
-              height: bounds.height
-            }
-          }, '*');
-        }
-
-        function selectElement(e) {
-          var data = e.data;
-          currentElement = document.elementFromPoint(data.x, data.y);
-          var bounds = currentElement.getBoundingClientRect();
-          sendSelectedElement(e.source, currentElement);
-        }
-
-        function resizeElement(e) {
-          if (currentElement != null) {
-            var bounds = e.data.bounds;
-            currentElement.style.top = bounds.top + 'px';
-            currentElement.style.left = bounds.left + 'px';
-            currentElement.style.height = bounds.height + 'px';
-            currentElement.style.width = bounds.width + 'px';
-            sendUpdateSelector(e.source, bounds);
-          }
-        }
-      })();
-    </script>
   </body>
 </html>

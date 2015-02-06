@@ -70,7 +70,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       var token = this.token = this._generateToken();
       frame.addEventListener('load', function() {
         frame.contentWindow.postMessage({
-          message_type: 'setToken',
+          messageType: 'handshake',
           token: token
         }, '*');
       });
@@ -95,17 +95,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         throw new Error('Invalid message token', token);
       }
 
-      switch (e.data.message_type) {
-        case 'updateSelector':
-          this._updateSelector(e);
+      switch (e.data.messageType) {
+        case 'updateSelection':
+          this._updateSelection(e);
           break;
-        case 'seletedElement':
+        case 'selectedElement':
           this._selectedElement(e);
           break;
       }
     },
 
-    _updateSelector: function(e) {
+    _updateSelection: function(e) {
       var bounds = e.data.bounds;
       var style = this.$.selection.style;
       if (bounds == null) {
@@ -129,7 +129,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       } else if (data.position == 'absolute') {
         selection.directions = ResizeDirection.all_directions;
       }
-      // TODO: factor out common code with _updateSelector.
+      // TODO: factor out common code with _updateSelection.
       // Possibly implement message batching or extension.
       if (bounds == null) {
         style.display = 'none';
@@ -146,7 +146,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       var frame = this.$.frame;
 
       frame.contentWindow.postMessage({
-        message_type: 'resizeElement',
+        messageType: 'resizeElement',
         bounds: e.detail
       }, '*');
 
@@ -158,7 +158,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       // TODO: transate coordinates to stage relative, here and within
       // frame.html as needed.
       frame.contentWindow.postMessage({
-        message_type: 'selectElement',
+        messageType: 'selectElement',
         x: e.clientX,
         y: e.clientY
       }, "*");
