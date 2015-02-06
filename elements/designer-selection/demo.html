@@ -1,0 +1,28 @@
+<html>
+  <head>
+    <link rel="import" href="designer-selection.html">
+    <style>
+      designer-selection {
+        position: absolute;
+        top: 100px;
+        left: 100px;
+        width: 200px;
+        height: 200px;
+      }
+    </style>
+  </head>
+  <body>
+    <designer-selection></designer-selection>
+    <script>
+      var selection = document.querySelector('designer-selection');
+      selection.addEventListener('designer-selection-resize', function(event) {
+        var detail = event.detail;
+        var style = selection.style;
+        style.left = detail.left;
+        style.top = detail.top;
+        style.width = detail.width;
+        style.height = detail.height;
+      });
+    </script>
+  </body>
+</html>
