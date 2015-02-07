@@ -43,7 +43,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </style>
 
   <template>
-    <designer-selection id="selection"></designer-selection>
+    <designer-selection id="selection" on-click="_onSelectionClick"></designer-selection>
     <div id="glass" on-mousedown="_onMouseDown"></div>
     <!-- 
       Note: src is main document relative, and only works in the demo
@@ -143,9 +143,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     },
 
     _onSelectionResize: function(e) {
-      var frame = this.$.frame;
-
-      frame.contentWindow.postMessage({
+      this.$.frame.contentWindow.postMessage({
         messageType: 'resizeElement',
         bounds: e.detail
       }, '*');
@@ -153,16 +151,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     },
 
     _onMouseDown: function(e) {
-      var frame = this.$.frame;
-
       // TODO: transate coordinates to stage relative, here and within
       // frame.html as needed.
-      frame.contentWindow.postMessage({
+      this._sendSelectElement(e.clientX, e.clientY);
+    },
+
+    _onSelectionClick: function(e) {
+      this._sendSelectElement(e.clientX, e.clientY);
+    },
+
+    _sendSelectElement: function(x, y) {
+      this.$.frame.contentWindow.postMessage({
         messageType: 'selectElement',
-        x: e.clientX,
-        y: e.clientY
+        x: x,
+        y: y
       }, "*");
-    }
+    },
 
   });
 </script>
