@@ -125,7 +125,17 @@
           }
           var deltaX = e.clientX - this._offsetX;
           var deltaY = e.clientY - this._offsetY;
-          this._onMove(deltaX, deltaY);
+          var newBounds = this._onMove(deltaX, deltaY);
+
+          this.dispatchEvent(new CustomEvent('designer-selection-resize', {
+            detail: {
+              bounds: newBounds,
+              cursor: {
+                x: e.clientX,
+                y: e.clientY,
+              },
+            }
+          }));
         },
 
         // called for mousedown on the main bounding box div
@@ -137,13 +147,12 @@
 
         // [x], and [y] are relative to the offset passed to _startDrag
         _boundsMove: function(x, y) {
-          var event = new CustomEvent('designer-selection-resize', 
-              {detail: {
-                left: x, 
-                top: y, 
-                width: this.offsetWidth, 
-                height: this.offsetHeight}});
-          this.dispatchEvent(event);
+          return {
+            left: x, 
+            top: y, 
+            width: this.offsetWidth, 
+            height: this.offsetHeight,
+          };
         },
 
         // called for mousedown on one of the resize handle divs
@@ -182,14 +191,12 @@
           var newLeft = direction.resizesLeft() ? x : this.offsetLeft;
           var newTop = direction.resizesTop() ? y : this.offsetTop;
 
-          var event = new CustomEvent('designer-selection-resize', 
-              {detail: {
-                left: newLeft, 
-                top: newTop,
-                width: newWidth, 
-                height: newHeight}});
-          this.dispatchEvent(event);
-
+          return {
+            left: newLeft, 
+            top: newTop,
+            width: newWidth, 
+            height: newHeight,
+          };
         },
 
         _startDrag: function(onMove, offsetX, offsetY) {

@@ -66,6 +66,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       window.addEventListener('message', this._onMessage.bind(this));
       this.$.selection.addEventListener('designer-selection-resize', 
           this._onSelectionResize.bind(this));
+
       var frame = this.$.frame;
       var token = this.token = this._generateToken();
       frame.addEventListener('load', function() {
@@ -74,6 +75,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           token: token
         }, '*');
       });
+
       frame.addEventListener('load', function(e) {
         if (e.type == 'load') {
           console.log("<designer-stage> error loading frame contents");
@@ -99,38 +101,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         case 'updateSelection':
           this._updateSelection(e);
           break;
-        case 'selectedElement':
-          this._selectedElement(e);
-          break;
+        default:
+          throw new Error('<designer-stage> Unknown message type: ' + 
+              e.data.message_type);
       }
     },
 
     _updateSelection: function(e) {
-      var bounds = e.data.bounds;
-      var style = this.$.selection.style;
-      if (bounds == null) {
-        style.display = 'none';
-      } else {
-        style.display = 'block';
-        style.top = bounds.top;
-        style.left = bounds.left;
-        style.width = bounds.width;
-        style.height = bounds.height;
-      }
-    },
-
-    _selectedElement: function(e) {
       var data = e.data;
       var bounds = data.bounds;
       var selection = this.$.selection;
       var style = selection.style;
-      if (data.position == 'static') {
-        selection.directions = ResizeDirection.width_height;
-      } else if (data.position == 'absolute') {
-        selection.directions = ResizeDirection.all_directions;
+
+      // Set the valid resize handles
+      if (data.elementInfo) {
+        var position = data.elementInfo.position;
+        if (position == 'static') {
+          selection.directions = ResizeDirection.WIDTH_HEIGHT;
+        } else if (position == 'absolute') {
+          selection.directions = ResizeDirection.ALL_DIRECTIONS;
+        }
       }
-      // TODO: factor out common code with _updateSelection.
-      // Possibly implement message batching or extension.
+
       if (bounds == null) {
         style.display = 'none';
       } else {
@@ -139,15 +131,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         style.left = bounds.left;
         style.width = bounds.width;
         style.height = bounds.height;
+      }
+
+      // TODO: Update any hover-overs
+      if (data.hover != null) {
+        // console.log('hover', data.hover);
       }
     },
 
     _onSelectionResize: function(e) {
       this.$.frame.contentWindow.postMessage({
-        messageType: 'resizeElement',
-        bounds: e.detail
+        messageType: 'selectionChange',
+        bounds: e.detail.bounds,
+        cursor: e.detail.cursor,
       }, '*');
-
     },
 
     _onMouseDown: function(e) {
