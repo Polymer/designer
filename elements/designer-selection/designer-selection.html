@@ -89,17 +89,10 @@
         is: 'designer-selection',
 
         created: function() {
-          this._onMove = null;
-          this._dragging = false;
-          this._offsetX = null;
-          this._offsetY = null;
-          this._onMouseMove_bound = this._onMouseMove.bind(this);
-          this._onMouseUp_bound = this._onMouseUp.bind(this);
-          this._resizeDirection = null;
         },
 
         ready: function() {
-          this.directions = ResizeDirection.all_directions;
+          this.directions = ResizeDirection.ALL_DIRECTIONS;
         },
 
         listeners: {
@@ -114,42 +107,25 @@
           }
         },
 
-        _onMouseUp: function(e) {
-          this._stopDrag();
-        },
-
-        _onMouseMove: function(e) {
-          if (this._onMove == null) {
-            throw new Error('<designer-selection> expected _onMove to ' + 
-                'be non-null');
-          }
-          var deltaX = e.clientX - this._offsetX;
-          var deltaY = e.clientY - this._offsetY;
-          this._onMove(deltaX, deltaY);
-        },
-
         // called for mousedown on the main bounding box div
         _boundsDown: function(e) {
           this.$.bounds.style.cursor = 'move';
-          this._startDrag(this._boundsMove, e.clientX - this.offsetLeft, 
-              e.clientY - this.offsetTop);
-        },
-
-        // [x], and [y] are relative to the offset passed to _startDrag
-        _boundsMove: function(x, y) {
-          var event = new CustomEvent('designer-selection-resize', 
-              {detail: {
-                left: x, 
-                top: y, 
-                width: this.offsetWidth, 
-                height: this.offsetHeight}});
-          this.dispatchEvent(event);
+          this._startDrag((function(x, y) {
+            return {
+              left: x, 
+              top: y, 
+              width: this.offsetWidth, 
+              height: this.offsetHeight,
+            };
+          }).bind(this),
+          e.clientX - this.offsetLeft, 
+          e.clientY - this.offsetTop);
         },
 
         // called for mousedown on one of the resize handle divs
         _resizeHandleDown: function(e) {
           var handle = e.target;
-          var direction = this._resizeDirection = ResizeDirection[handle.id];
+          var direction = ResizeDirection[handle.id];
 
           var boundsBounds = this.$.bounds.getBoundingClientRect();
           var handleBounds = handle.getBoundingClientRect();
@@ -162,54 +138,63 @@
               ? 0
               : boundsBounds.top + (e.clientY - handleBounds.top);
 
-          this._startDrag(this._resizeHandleMove, offsetLeft, offsetTop);
-        },
+          var offsetRight = this.offsetLeft + this.offsetWidth;
+          var offsetBottom = this.offsetTop + this.offsetHeight;
 
-        _resizeHandleMove: function(x, y) {
-          var direction = this._resizeDirection;
+          this._startDrag((function(x, y) {
+            var newWidth =
+                direction.resizesLeft() ? offsetRight - x :
+                direction.resizesRight() ? x : 
+                this.offsetWidth;
 
-          // TODO: remember the right offset, rather than recalc each move
-          var newWidth =
-              direction.resizesLeft() ? this.offsetWidth + this.offsetLeft - x :
-              direction.resizesRight() ? x : 
-              this.offsetWidth;
+            var newHeight =
+                direction.resizesTop() ? offsetBottom - y :
+                direction.resizesBottom() ? y : 
+                this.offsetHeight;
 
-          var newHeight =
-              direction.resizesTop() ? this.offsetHeight + this.offsetTop - y :
-              direction.resizesBottom() ? y : 
-              this.offsetHeight;
+            var newLeft = direction.resizesLeft() ? x : this.offsetLeft;
+            var newTop = direction.resizesTop() ? y : this.offsetTop;
 
-          var newLeft = direction.resizesLeft() ? x : this.offsetLeft;
-          var newTop = direction.resizesTop() ? y : this.offsetTop;
-
-          var event = new CustomEvent('designer-selection-resize', 
-              {detail: {
-                left: newLeft, 
-                top: newTop,
-                width: newWidth, 
-                height: newHeight}});
-          this.dispatchEvent(event);
-
+            return {
+              left: newLeft, 
+              top: newTop,
+              width: newWidth, 
+              height: newHeight,
+            };
+          }).bind(this),
+          offsetLeft, offsetTop);
         },
 
         _startDrag: function(onMove, offsetX, offsetY) {
-          this._dragging = true;
-          this._onMove = onMove;
-          this._offsetX = offsetX;
-          this._offsetY = offsetY;
-          window.addEventListener('mouseup', this._onMouseUp_bound);
-          window.addEventListener('mousemove', this._onMouseMove_bound);
-        },
+          var onMouseMove = (function(e) {
+            var deltaX = e.clientX - offsetX;
+            var deltaY = e.clientY - offsetY;
+            var newBounds = onMove(deltaX, deltaY);
 
-        _stopDrag: function() {
-          this._dragging = false;
-          this._onMove = null;
-          this._offsetX = null;
-          this._offsetY = null;
-          window.removeEventListener('mouseup', this._onMouseUp_bound);
-          window.removeEventListener('mousemove', this._onMouseMove_bound);
-          this.$.bounds.style.cursor = 'auto';
-        }
+            this.dispatchEvent(new CustomEvent('designer-selection-resize', {
+              detail: {
+                bounds: newBounds,
+                cursor: {
+                  x: e.clientX,
+                  y: e.clientY,
+                },
+              }
+            }));
+          }).bind(this);
+
+          var onMouseUp = (function(e) {
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', onMouseUp);
+            document.removeEventListener('contextmenu', onMouseUp);
+            this.$.bounds.style.cursor = 'auto';
+          }).bind(this);
+
+          window.addEventListener('mousemove', onMouseMove);
+          window.addEventListener('mouseup', onMouseUp);
+          // Note document instead of window: 
+          // http://www.quirksmode.org/dom/events/contextmenu.html
+          document.addEventListener('contextmenu', onMouseUp);
+        },
       });
     </script>
   </body>
