@@ -14,7 +14,7 @@
   this.currentElement = null;
   this.handlers = {
     'selectElement': this._onSelectElement.bind(this),
-    'resizeElement': this._onResizeElement.bind(this),
+    'selectionChange': this._onSelectionChange.bind(this),
   };
 }
 
@@ -47,47 +47,56 @@ FrameManager.prototype._onHandshake = function(event) {
  * Sends an 'updateSelection' message to the stage which updates the stages
  * selection component to match the new bounds of the selected component.
  */
-FrameManager.prototype.sendUpdateSelection = function(bounds) {
-  this.ownerWindow.postMessage({
+FrameManager.prototype.sendUpdateSelection = function(element, options) {
+  options = options || {};
+  var newSelection = options.newSelection;
+  var hoverElement = options.hoverElement;
+
+  var data = {
     messageType: 'updateSelection',
     token: this.token,
-    bounds: {
-      left: bounds.left,
-      top: bounds.top,
-      width: bounds.width,
-      height: bounds.height
-    }
-  }, '*');
-};
+  };
 
-/**
- * Sends an 'selectedElement' message to the stage which sets up the stages
- * selection component move and resize the selected component.
- */
-FrameManager.prototype.sendSelectedElement = function(element) {
-  var style = window.getComputedStyle(element);
   var bounds = element.getBoundingClientRect();
-  this.ownerWindow.postMessage({
-    messageType: 'selectedElement',
-    token: this.token,
-    tagName: element.tagName,
-    display: style.display,
-    position: style.position,
-    bounds: {
-      left: bounds.left,
-      top: bounds.top,
-      width: bounds.width,
-      height: bounds.height
-    }
-  }, '*');
+  data.bounds = {
+    left: bounds.left,
+    top: bounds.top,
+    width: bounds.width,
+    height: bounds.height,
+  };
+
+  if (newSelection) {
+    var style = window.getComputedStyle(element);
+    data.elementInfo = {
+      tagName: element.tagName,
+      display: style.display,
+      position: style.position,
+    };
+  }
+
+  if (hoverElement) {
+    var hoverBounds = hoverElement.getBoundingClientRect();
+    data.hover = {
+      left: hoverBounds.left,
+      top: hoverBounds.top,
+      width: hoverBounds.width,
+      height: hoverBounds.height,
+    };
+  }
+
+  this.ownerWindow.postMessage(data, '*');
 };
 
 FrameManager.prototype._onSelectElement = function(message) {
   this.selectElement(message.x, message.y);
-  this.sendSelectedElement(this.currentElement);
+  this.sendUpdateSelection(this.currentElement, {newSelection: true});
 };
 
 FrameManager.prototype.selectElement = function(x, y) {
+  this.currentElement = this.getElementAt(x, y);
+};
+
+FrameManager.prototype.getElementAt = function(x, y) {
   var el = document.elementFromPoint(x, y);
   var lastLightCandidate = el;
   while (el != null) {
@@ -105,12 +114,18 @@ FrameManager.prototype.selectElement = function(x, y) {
     }
     el = el.parentNode;
   }
-  this.currentElement = lastLightCandidate;
+  return lastLightCandidate;
 };
 
-FrameManager.prototype._onResizeElement = function(message) {
-  var newBounds = this.resizeElement(message.bounds);
-  this.sendUpdateSelection(newBounds);
+FrameManager.prototype._onSelectionChange = function(message) {
+  this.resizeElement(message.bounds);
+  // TODO: This isn't quite right, we need to exclude the current element
+  // when looking for a hover element. We need either 
+  // 1) Document.elementsFromPoint() (being added to Chrome, in progress)
+  // 2) Remove the current element, then call document.elementFromPoint()
+  // 3) Custom hit testing
+  var hoverElement = this.getElementAt(message.cursor.x, message.cursor.y);
+  this.sendUpdateSelection(this.currentElement, {hoverElement: hoverElement});
 };
 
 FrameManager.prototype.resizeElement = function(bounds) {
@@ -121,6 +136,5 @@ FrameManager.prototype.resizeElement = function(bounds) {
     style.left = bounds.left + 'px';
     style.height = bounds.height + 'px';
     style.width = bounds.width + 'px';
-    return bounds;
   }
 };

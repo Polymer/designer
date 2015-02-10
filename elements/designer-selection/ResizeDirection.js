@@ -52,6 +52,6 @@ ResizeDirection.prototype.resizesBottom = function() {
   var bottom_left = ResizeDirection.bottom_left = new ResizeDirection('bottom_left', 0.0, 1.0);
   var bottom_right = ResizeDirection.bottom_right = new ResizeDirection('bottom_right', 1.0, 1.0);
 
-  ResizeDirection.all_directions = [top, left, bottom, right, top_left, top_right, bottom_left, bottom_right];      
-  ResizeDirection.width_height = [bottom, right, bottom_right];      
+  ResizeDirection.ALL_DIRECTIONS = [top, left, bottom, right, top_left, top_right, bottom_left, bottom_right];      
+  ResizeDirection.WIDTH_HEIGHT = [bottom, right, bottom_right];      
 })();
