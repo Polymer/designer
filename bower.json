@@ -4,6 +4,7 @@
   "dependencies": {
     "webcomponentsjs": "webcomponents/webcomponentsjs#0.5.4",
     "polymer": "Polymer/polymer#0.8-preview",
+    "core-asset": "PolymerLabs/core-asset",
     "neoprene": "PolymerLabs/neoprene",
     "mocha": "mochajs/mocha#^2.1.0",
     "chai": "chaijs/chai#^1.10.0"
