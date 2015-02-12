@@ -7,8 +7,9 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../../core-asset/core-asset.html">
 <link rel="import" href="../../../neoprene/components/x-elements/x-template/x-template.html">
+<link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../designer-selection/designer-selection.html">
 
 <dom-module id="designer-stage">
@@ -17,6 +18,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     designer-stage {
       display: block;
       box-sizing: border-box;
+      position: relative;
     }
     designer-stage > iframe {
       position: absolute;
@@ -45,18 +47,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <designer-selection id="selection" on-click="_onSelectionClick"></designer-selection>
     <div id="glass" on-mousedown="_onMouseDown"></div>
-    <!-- 
-      Note: src is main document relative, and only works in the demo
-      because it's in the same directory as this file. Need to solve this.
-    -->
-    <iframe id="frame" src="frame.html" sandbox="allow-scripts"></iframe>
+    <iframe id="frame" sandbox="allow-scripts"></iframe>
   </template>
+
+  <core-asset id="frame-manager" href="../designer-stage/FrameManager.js"></core-asset>
 
 </dom-module>
 
 <script>
   Polymer({
     is: 'designer-stage',
+
+    publish: {
+      'src': String
+    },
 
     created: function() {
       this.token = null;
@@ -81,6 +85,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           console.log("<designer-stage> error loading frame contents");
         }
       });
+    },
+
+    setDocument: function(content) {
+      var module = document.createElement('dom-module');
+      var frameManagerAsset = module.import('designer-stage', '#frame-manager');
+
+      var loadFrame = (function() {
+        // create an HTML document from the content
+        var doc = document.implementation.createHTMLDocument();
+        doc.documentElement.innerHTML = content;
+
+        // insert a script tag with the FrameManager.js source
+        var frameManagerSource = 
+            '(function() {\n' + 
+            frameManagerAsset.content + 
+            '\nnew FrameManager().listen();\n' + 
+            '})();\n';
+        var frameManagerScript = doc.createElement('script');
+        frameManagerScript.textContent = frameManagerSource;
+        doc.head.insertBefore(frameManagerScript, doc.head.firstChild);
+
+        // set the iframe src to the new document
+        var dataUrl = 'data:text/html;base64,' + window.btoa(doc.documentElement.innerHTML);
+        this.$.frame.src = dataUrl;
+      }).bind(this);
+
+      if (frameManagerAsset.loaded) {
+        loadFrame();
+      } else {
+        frameManagerAsset.addEventListener('content-loaded', loadFrame);
+      }
     },
 
     _generateToken: function() {
