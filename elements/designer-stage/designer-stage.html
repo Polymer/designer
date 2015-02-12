@@ -156,10 +156,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       // Set the valid resize handles
       if (data.elementInfo) {
         var position = data.elementInfo.position;
-        if (position == 'static') {
+        if (position == 'static' || position == 'relative') {
           selection.directions = ResizeDirection.WIDTH_HEIGHT;
         } else if (position == 'absolute') {
           selection.directions = ResizeDirection.ALL_DIRECTIONS;
+        } else {
+          console.log("can't handle position", data.position);
+          selection.directions = [];
         }
       }
 
