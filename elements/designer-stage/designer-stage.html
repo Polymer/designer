@@ -191,8 +191,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     },
 
     _onMouseDown: function(e) {
-      // TODO: transate coordinates to stage relative, here and within
-      // frame.html as needed.
       this._sendSelectElement(e.clientX, e.clientY);
     },
 
@@ -200,7 +198,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       this._sendSelectElement(e.clientX, e.clientY);
     },
 
-    _sendSelectElement: function(x, y) {
+    _sendSelectElement: function(clientX, clientY) {
+      var bounds = this.getBoundingClientRect();
+      var x = clientX - bounds.left;
+      var y = clientY - bounds.top;
       this.$.frame.contentWindow.postMessage({
         messageType: 'selectElement',
         x: x,
