@@ -80,7 +80,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }, '*');
       });
 
-      frame.addEventListener('load', function(e) {
+      frame.addEventListener('error', function(e) {
         if (e.type == 'load') {
           console.log("<designer-stage> error loading frame contents");
         }
