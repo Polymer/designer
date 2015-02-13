@@ -49,164 +49,199 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <iframe id="frame" sandbox="allow-scripts"></iframe>
   </template>
 
-  <core-asset id="frame-manager" href="../designer-stage/FrameManager.js"></core-asset>
+  <!-- TODO: use a build step to assemble the JS bundle -->
+  <core-asset id="frame-manager-js" href="FrameManager.js"></core-asset>
+  <core-asset id="path-js" href="../../src/path.js"></core-asset>
 
 </dom-module>
 
 <script>
-  Polymer({
-    is: 'designer-stage',
+  (function() {
+    Polymer({
+      is: 'designer-stage',
 
-    publish: {
-      'src': String
-    },
+      created: function() {
+        this.token = null;
+      },
 
-    created: function() {
-      this.token = null;
-    },
+      ready: function() {
+        window.addEventListener('message', this._onMessage.bind(this));
+        this.$.selection.addEventListener('designer-selection-resize', 
+            this._onSelectionResize.bind(this));
 
-    ready: function() {
-      window.addEventListener('message', this._onMessage.bind(this));
-      this.$.selection.addEventListener('designer-selection-resize', 
-          this._onSelectionResize.bind(this));
+        var frame = this.$.frame;
+        var token = this.token = this._generateToken();
+        frame.addEventListener('load', function() {
+          frame.contentWindow.postMessage({
+            messageType: 'handshake',
+            token: token
+          }, '*');
+        });
 
-      var frame = this.$.frame;
-      var token = this.token = this._generateToken();
-      frame.addEventListener('load', function() {
-        frame.contentWindow.postMessage({
-          messageType: 'handshake',
-          token: token
-        }, '*');
-      });
+        frame.addEventListener('error', function(e) {
+          if (e.type == 'load') {
+            console.log("<designer-stage> error loading frame contents");
+          }
+        });
+      },
 
-      frame.addEventListener('error', function(e) {
-        if (e.type == 'load') {
-          console.log("<designer-stage> error loading frame contents");
+      setDocument: function(content) {
+        var module = document.createElement('dom-module');
+        var frameManagerAsset = module.import('designer-stage', '#frame-manager-js');
+        var pathAsset = module.import('designer-stage', '#path-js');
+
+        return Promise.all([frameManagerAsset.load(), pathAsset.load()])
+          .then((function(results) {
+
+            // create an HTML document from the content
+            var doc = document.implementation.createHTMLDocument();
+            doc.documentElement.innerHTML = content;
+
+            // insert a script tag with the FrameManager.js source
+            var frameManagerSource = `
+                (function() {
+                  ${modulateSource}
+                  ${pathAsset.content}
+                  ${frameManagerAsset.content}
+                  using(['FrameManager'], function(fm) {
+                    new fm.FrameManager().listen();
+                  });
+                })();`;
+
+            var frameScript = doc.createElement('script');
+            frameScript.textContent = frameManagerSource;
+            doc.head.insertBefore(frameScript, doc.head.firstChild);
+
+            // data: URIs need a base for relative URLs
+            var base = doc.createElement('base');
+            base.setAttribute('href', this.baseURI);
+            doc.head.insertBefore(base, doc.head.firstChild);
+
+            // set the iframe src to the new document
+            var docBlob = new Blob([doc.documentElement.innerHTML], 
+                {type: 'text/html'});
+            this.$.frame.src = URL.createObjectURL(docBlob);
+          }).bind(this));
+      },
+
+      _generateToken: function() {
+        var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        var token = '';
+        for (var i = 0; i < 16; i++) {
+          token += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
         }
-      });
-    },
+        return token;
+      },
 
-    setDocument: function(content) {
-      var module = document.createElement('dom-module');
-      var frameManagerAsset = module.import('designer-stage', '#frame-manager');
+      _onMessage: function(e) {
+        if (e.data.token != this.token) {
+          throw new Error('Invalid message token', token);
+        }
 
-      var loadFrame = (function() {
-        // create an HTML document from the content
-        var doc = document.implementation.createHTMLDocument();
-        doc.documentElement.innerHTML = content;
+        switch (e.data.messageType) {
+          case 'updateSelection':
+            this._updateSelection(e);
+            break;
+          default:
+            throw new Error('<designer-stage> Unknown message type: ' + 
+                e.data.messageType);
+        }
+      },
 
-        // insert a script tag with the FrameManager.js source
-        var frameManagerSource = 
-            '(function() {\n' + 
-            frameManagerAsset.content + 
-            '\nnew FrameManager().listen();\n' + 
-            '})();\n';
-        var frameManagerScript = doc.createElement('script');
-        frameManagerScript.textContent = frameManagerSource;
-        doc.head.insertBefore(frameManagerScript, doc.head.firstChild);
+      _updateSelection: function(e) {
+        var data = e.data;
+        var bounds = data.bounds;
+        var selection = this.$.selection;
+        var style = selection.style;
 
-        // data: URIs need a base for relative URLs
-        var base = doc.createElement('base');
-        base.setAttribute('href', this.baseURI);
-        doc.head.insertBefore(base, doc.head.firstChild);
+        // Set the valid resize handles
+        if (data.elementInfo) {
+          var position = data.elementInfo.position;
+          if (position == 'static' || position == 'relative') {
+            selection.directions = ResizeDirection.WIDTH_HEIGHT;
+          } else if (position == 'absolute') {
+            selection.directions = ResizeDirection.ALL_DIRECTIONS;
+          } else {
+            console.warn("can't handle position", data.position);
+            selection.directions = [];
+          }
+        }
 
-        // set the iframe src to the new document
-        var dataUrl = 'data:text/html;base64,' + window.btoa(doc.documentElement.innerHTML);
-        this.$.frame.src = dataUrl;
-      }).bind(this);
-
-      if (frameManagerAsset.loaded) {
-        loadFrame();
-      } else {
-        frameManagerAsset.addEventListener('content-loaded', loadFrame);
-      }
-    },
-
-    _generateToken: function() {
-      var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-      var token = '';
-      for (var i = 0; i < 16; i++) {
-        token += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-      }
-      return token;
-    },
-
-    _onMessage: function(e) {
-      if (e.data.token != this.token) {
-        throw new Error('Invalid message token', token);
-      }
-
-      switch (e.data.messageType) {
-        case 'updateSelection':
-          this._updateSelection(e);
-          break;
-        default:
-          throw new Error('<designer-stage> Unknown message type: ' + 
-              e.data.message_type);
-      }
-    },
-
-    _updateSelection: function(e) {
-      var data = e.data;
-      var bounds = data.bounds;
-      var selection = this.$.selection;
-      var style = selection.style;
-
-      // Set the valid resize handles
-      if (data.elementInfo) {
-        var position = data.elementInfo.position;
-        if (position == 'static' || position == 'relative') {
-          selection.directions = ResizeDirection.WIDTH_HEIGHT;
-        } else if (position == 'absolute') {
-          selection.directions = ResizeDirection.ALL_DIRECTIONS;
+        if (bounds == null) {
+          style.display = 'none';
         } else {
-          console.log("can't handle position", data.position);
-          selection.directions = [];
+          style.display = 'block';
+          style.top = bounds.top;
+          style.left = bounds.left;
+          style.width = bounds.width;
+          style.height = bounds.height;
         }
-      }
 
-      if (bounds == null) {
-        style.display = 'none';
-      } else {
-        style.display = 'block';
-        style.top = bounds.top;
-        style.left = bounds.left;
-        style.width = bounds.width;
-        style.height = bounds.height;
-      }
+        // TODO: Update any hover-overs
+        if (data.hover != null) {
+          // console.log('hover', data.hover);
+        }
+      },
 
-      // TODO: Update any hover-overs
-      if (data.hover != null) {
-        // console.log('hover', data.hover);
-      }
-    },
+      _onSelectionResize: function(e) {
+        this.$.frame.contentWindow.postMessage({
+          messageType: 'selectionChange',
+          bounds: e.detail.bounds,
+          cursor: e.detail.cursor,
+        }, '*');
+      },
 
-    _onSelectionResize: function(e) {
-      this.$.frame.contentWindow.postMessage({
-        messageType: 'selectionChange',
-        bounds: e.detail.bounds,
-        cursor: e.detail.cursor,
-      }, '*');
-    },
+      _onMouseDown: function(e) {
+        this._sendSelectElement(e.clientX, e.clientY);
+      },
 
-    _onMouseDown: function(e) {
-      this._sendSelectElement(e.clientX, e.clientY);
-    },
+      _onSelectionClick: function(e) {
+        this._sendSelectElement(e.clientX, e.clientY);
+      },
 
-    _onSelectionClick: function(e) {
-      this._sendSelectElement(e.clientX, e.clientY);
-    },
+      _sendSelectElement: function(clientX, clientY) {
+        var bounds = this.getBoundingClientRect();
+        var x = clientX - bounds.left;
+        var y = clientY - bounds.top;
+        this.$.frame.contentWindow.postMessage({
+          messageType: 'selectElement',
+          x: x,
+          y: y
+        }, "*");
+      },
 
-    _sendSelectElement: function(clientX, clientY) {
-      var bounds = this.getBoundingClientRect();
-      var x = clientX - bounds.left;
-      var y = clientY - bounds.top;
-      this.$.frame.contentWindow.postMessage({
-        messageType: 'selectElement',
-        x: x,
-        y: y
-      }, "*");
-    },
+    });
 
-  });
+    // Copied from https://github.com/Polymer/polymer/blob/0.8-preview/src/lib/module.html
+    // with slight modifications
+    var modulateSource = `
+        function _withDependencies(task, depends) {
+          depends = depends || [];
+          if (!depends.map) {
+            depends = [depends];
+          }
+          return task.apply(this, depends.map(marshal));
+        }
+        function modulate(name, dependsOrFactory, moduleFactory) {
+          var module = null;
+          switch (arguments.length) {
+            case 0:
+              return;
+            case 2:
+              module = dependsOrFactory.apply(this);
+              break;
+            default:
+              module = _withDependencies(moduleFactory, dependsOrFactory);
+              break;
+          }
+          _modules[name] = module;
+        };
+        function marshal(name) {
+          return _modules[name];
+        }
+        var _modules = {};
+        var using = function(depends, task) {
+          _withDependencies(task, depends);
+        };`;
+  })();
 </script>
