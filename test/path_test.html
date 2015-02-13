@@ -1,0 +1,117 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<!doctype html>
+<html>
+  <head>
+    <title>path.js Test</title>
+    <meta charset="UTF-8">
+    <script src="../../mocha/mocha.js"></script>
+    <script src="../../chai/chai.js"></script>
+    <link rel="stylesheet" href="../../mocha/mocha.css"/>
+    <link rel="import" href="../../polymer/polymer.html"/>
+    <script src="../src/path.js"></script>
+  </head>
+  <body>
+    <div id="mocha"></div>
+
+    <!-- This test is very sensitive to text nodes! -->
+    <div id="A">
+      <div id="B"></div>
+    </div>
+
+    <script>
+using('Path', function(path) {
+  mocha.setup('tdd');
+  // mocha.checkLeaks();
+
+  var assert = chai.assert;
+
+  suite('path', function() {
+    document.normalize();
+
+    var testDoc = document.implementation.createHTMLDocument('test');
+    testDoc.body.innerHTML = "<div id='A'><div id='B'></div></div>";
+    testDoc.normalize();
+
+    suite('getNodePath', function() {
+
+      test('returns the right path for a top-level element', function() {
+        var node = document.querySelector('#A');
+        assert.equal(path.getNodePath(node), 'BODY:2/DIV:5');
+      });
+
+      test('returns the right path for a nested element', function() {
+        var node = document.querySelector('#B');
+        assert.equal(path.getNodePath(node), 'BODY:2/DIV:5/DIV:1');
+      });
+
+      test('returns the right path for the first text node in an element', function() {
+        var node = document.querySelector('#A').firstChild;
+        assert.equal(path.getNodePath(node), 'BODY:2/DIV:5/#text:0');
+      });
+
+      test('returns the right path for the last text node in an element', function() {
+        var node = document.querySelector('#A').lastChild;
+        assert.equal(path.getNodePath(node), 'BODY:2/DIV:5/#text:2');
+      });
+
+      test('works in a non-main Document', function() {
+        var node = testDoc.querySelector('#B');
+        assert.equal(path.getNodePath(node, testDoc), 'BODY:1/DIV:0/DIV:0');
+      });
+
+    });
+
+    suite('getNodeFromPath', function() {
+      test('returns the node for a path to a top-level element', function() {
+        var node = document.querySelector('#A');
+        assert.equal(path.getNodeFromPath('BODY:2/DIV:5'), node);
+      });
+
+      test('returns the node for a path to a nested element', function() {
+        var node = document.querySelector('#B');
+        assert.equal(path.getNodeFromPath('BODY:2/DIV:5/DIV:1'), node);
+      });
+
+      test('returns the node for a path to the first text node in an element', function() {
+        var node = document.querySelector('#A').firstChild;
+        assert.equal(path.getNodeFromPath('BODY:2/DIV:5/#text:0'), node);
+      });
+
+      test('returns the node for a path to the last text node in an element', function() {
+        var node = document.querySelector('#A').lastChild;
+        assert.equal(path.getNodeFromPath('BODY:2/DIV:5/#text:2'), node);
+      });
+
+      test('throws if the node has the wrong name', function() {
+        assert.throws(function () {
+          // The 6th child of body is a DIV
+          path.getNodeFromPath('BODY:2/SPAN:5');
+        });
+      });
+
+      test('throws if an index is out of bounds', function() {
+        var node = document.querySelector('#A');
+        assert.throws(function () {
+          path.getNodeFromPath('BODY:3');
+        }, RangeError);
+      });
+
+    });
+
+
+  });
+
+  mocha.run();
+
+});
+    </script>
+  </body>
+</html>
