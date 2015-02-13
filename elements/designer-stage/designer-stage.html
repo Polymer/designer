@@ -49,9 +49,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <iframe id="frame" sandbox="allow-scripts"></iframe>
   </template>
 
-  <!-- TODO: use a build step to assemble the JS bundle -->
-  <core-asset id="frame-manager-js" href="FrameManager.js"></core-asset>
-  <core-asset id="path-js" href="../../src/path.js"></core-asset>
+  <core-asset id="frame-script" href="frame.js"></core-asset>
 
 </dom-module>
 
@@ -87,30 +85,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       setDocument: function(content) {
         var module = document.createElement('dom-module');
-        var frameManagerAsset = module.import('designer-stage', '#frame-manager-js');
-        var pathAsset = module.import('designer-stage', '#path-js');
+        var frameScriptAsset = module.import('designer-stage', '#frame-script');
 
-        return Promise.all([frameManagerAsset.load(), pathAsset.load()])
-          .then((function(results) {
+        frameScriptAsset.load()
+          .then((function(frameScript) {
 
             // create an HTML document from the content
             var doc = document.implementation.createHTMLDocument();
             doc.documentElement.innerHTML = content;
 
-            // insert a script tag with the FrameManager.js source
-            var frameManagerSource = `
-                (function() {
-                  ${modulateSource}
-                  ${pathAsset.content}
-                  ${frameManagerAsset.content}
-                  using(['FrameManager'], function(fm) {
-                    new fm.FrameManager().listen();
-                  });
-                })();`;
-
-            var frameScript = doc.createElement('script');
-            frameScript.textContent = frameManagerSource;
-            doc.head.insertBefore(frameScript, doc.head.firstChild);
+            // insert a script tag with the frame.js source
+            var frameScriptElement = doc.createElement('script');
+            frameScriptElement.textContent = frameScript;
+            doc.head.insertBefore(frameScriptElement, doc.head.firstChild);
 
             // data: URIs need a base for relative URLs
             var base = doc.createElement('base');
@@ -212,36 +199,5 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     });
 
-    // Copied from https://github.com/Polymer/polymer/blob/0.8-preview/src/lib/module.html
-    // with slight modifications
-    var modulateSource = `
-        function _withDependencies(task, depends) {
-          depends = depends || [];
-          if (!depends.map) {
-            depends = [depends];
-          }
-          return task.apply(this, depends.map(marshal));
-        }
-        function modulate(name, dependsOrFactory, moduleFactory) {
-          var module = null;
-          switch (arguments.length) {
-            case 0:
-              return;
-            case 2:
-              module = dependsOrFactory.apply(this);
-              break;
-            default:
-              module = _withDependencies(moduleFactory, dependsOrFactory);
-              break;
-          }
-          _modules[name] = module;
-        };
-        function marshal(name) {
-          return _modules[name];
-        }
-        var _modules = {};
-        var using = function(depends, task) {
-          _withDependencies(task, depends);
-        };`;
   })();
 </script>

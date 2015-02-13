@@ -8,7 +8,9 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-modulate('FrameManager', ['Path'], function(path) {
+modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier'],
+    function(pathLib, commands, commandApplier) {
+
   function FrameManager() {
     this.token = null;
     this.ownerWindow = null;
@@ -17,6 +19,7 @@ modulate('FrameManager', ['Path'], function(path) {
       'selectElement': this._onSelectElement.bind(this),
       'selectionChange': this._onSelectionChange.bind(this),
     };
+    this.commandApplier = new commandApplier.DomCommandApplier(document);
   }
 
   FrameManager.prototype.listen = function(wnd) {
@@ -58,7 +61,7 @@ modulate('FrameManager', ['Path'], function(path) {
     var data = {
       messageType: 'updateSelection',
       token: this.token,
-      path: path.getNodePath(element),
+      pathLib: pathLib.getNodePath(element),
     };
 
     var bounds = element.getBoundingClientRect();
@@ -137,11 +140,20 @@ modulate('FrameManager', ['Path'], function(path) {
     if (this.currentElement != null) {
       throw new Error('current element is null');
     }
-    var style = this.currentElement.style;
-    style.top = bounds.top + 'px';
-    style.left = bounds.left + 'px';
-    style.height = bounds.height + 'px';
-    style.width = bounds.width + 'px';
+    // Setting the style attribute isn't ideal for this operation - we'd
+    // rather set style properties on the element's style, but setAttribtue
+    // is a rather easy command to implement, so we'l use it for now
+    // TODO: Send all commands to the editor as well so that it can apply
+    // them to it's document model
+    var element = this.currentElement;
+    var path = pathLib.getNodePath(element);
+    var command = commands.setAttribute(path, 'style',
+      element.getAttribute('style'),
+      `top: ${bounds.top}px; ` + 
+      `left: ${bounds.left}px; ` +
+      `height: ${bounds.height}px; ` +
+      `width: ${bounds.width}px;`);
+    this.commandApplier.apply(command);
   };
 
   return {
