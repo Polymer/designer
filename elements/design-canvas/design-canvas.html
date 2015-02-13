@@ -263,8 +263,10 @@ Polymer({
     //
     dragInfo.drag = function() {
       var p = snap(this.origin.width + this.event.dx, this.origin.height + this.event.dy);
-      rule.style.width = p.x + 'px';
-      rule.style.height = p.y + 'px';
+      // Workaround IE10 disconnected cssrule
+      var s = rule.parentStyleSheet ? rule.style : unwrap(rule.style);
+      s.width = p.x + 'px';
+      s.height = p.y + 'px';
     };
     var canvas = this;
     dragInfo.drop = function() {
@@ -320,8 +322,10 @@ Polymer({
     //
     dragInfo.drag = function() {
       var p = snap(this.start.x + this.event.dx, this.start.y + this.event.dy);
-      rule.style.left = p.x + 'px';
-      rule.style.top = p.y + 'px';
+      // Workaround IE10 disconnected cssrule
+      var s = rule.parentStyleSheet ? rule.style : unwrap(rule.style);
+      s.left = p.x + 'px';
+      s.top = p.y + 'px';
       dropHint(this);
     };
     dragInfo.drop = function() {
