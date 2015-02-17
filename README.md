@@ -173,3 +173,8 @@ Attribute     | Type        | Description
 ``` html
 <property name="total" kind="range" min="1.0" max="5.0" step="0.1" defaultValue="3.5"></property>
 ```
+
+### Deploying the project
+
+- `./deploy.sh`
+- profit!
