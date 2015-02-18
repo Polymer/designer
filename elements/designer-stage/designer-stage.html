@@ -124,49 +124,48 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (e.data.token != this.token) {
           throw new Error('Invalid message token', token);
         }
-
-        switch (e.data.messageType) {
-          case 'updateSelection':
-            this._updateSelection(e);
-            break;
-          default:
-            throw new Error('<designer-stage> Unknown message type: ' + 
-                e.data.messageType);
+        var messages = e.data.messages;
+        for (var i = 0; i < messages.length; i++) {
+          var message = messages[i];
+          switch (message.messageType) {
+            case 'selectionBoundsChange':
+              this._onSelectionBoundsChange(message);
+              break;
+            case 'newSelection':
+              this._onNewSelection(message);
+              break;
+            case 'hoverElement':
+              // TODO: render the hover
+              break;
+            case 'comand':
+              // TODO: render the hover
+              break;
+            default:
+              console.warn('<designer-stage> Unknown message type: ', 
+                  message.messageType);
+          }
         }
       },
 
-      _updateSelection: function(e) {
-        var data = e.data;
-        var bounds = data.bounds;
-        var selection = this.$.selection;
-        var style = selection.style;
+      _onSelectionBoundsChange: function(message) {
+        var style = this.$.selection.style;
+        style.display = 'block';
+        style.top = message.top;
+        style.left = message.left;
+        style.width = message.width;
+        style.height = message.height;
+      },
 
+      _onNewSelection: function(message) {
         // Set the valid resize handles
-        if (data.elementInfo) {
-          var position = data.elementInfo.position;
-          if (position == 'static' || position == 'relative') {
-            selection.directions = ResizeDirection.WIDTH_HEIGHT;
-          } else if (position == 'absolute') {
-            selection.directions = ResizeDirection.ALL_DIRECTIONS;
-          } else {
-            console.warn("can't handle position", data.position);
-            selection.directions = [];
-          }
-        }
-
-        if (bounds == null) {
-          style.display = 'none';
+        var position = message.position;
+        if (position == 'static' || position == 'relative') {
+          selection.directions = ResizeDirection.WIDTH_HEIGHT;
+        } else if (position == 'absolute') {
+          selection.directions = ResizeDirection.ALL_DIRECTIONS;
         } else {
-          style.display = 'block';
-          style.top = bounds.top;
-          style.left = bounds.left;
-          style.width = bounds.width;
-          style.height = bounds.height;
-        }
-
-        // TODO: Update any hover-overs
-        if (data.hover != null) {
-          // console.log('hover', data.hover);
+          console.warn("can't handle position", data.position);
+          selection.directions = [];
         }
       },
 
@@ -179,10 +178,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onMouseDown: function(e) {
+        console.log('_onMouseDown');
         this._sendSelectElement(e.clientX, e.clientY);
       },
 
       _onSelectionClick: function(e) {
+        console.log('_onSelectionClick');
         this._sendSelectElement(e.clientX, e.clientY);
       },
 

@@ -21,6 +21,7 @@ modulate('Commands', function() {
 
     setAttribute: function(path, attribute, oldValue, newValue) {
       return {
+        messageType: 'command',
         commandType: 'setAttribute',
         path: path,
         attribute: attribute,
@@ -29,21 +30,23 @@ modulate('Commands', function() {
       };
     },
 
-    selectElement: function(x, y) {
-      return {
-        commandType: 'selectElement',
-        x: x,
-        y: y,
-      };
-    },
+    // selectElement: function(x, y) {
+    //   return {
+    //     messageType: 'command',
+    //     commandType: 'selectElement',
+    //     x: x,
+    //     y: y,
+    //   };
+    // },
 
-    selectionMove: function(bounds, cursor) {
-      return {
-        commandType: 'selectionMove',
-        bounds: bounds,
-        cursor: cursor,
-      };
-    },
+    // selectionMove: function(bounds, cursor) {
+    //   return {
+    //     messageType: 'command',
+    //     commandType: 'selectionMove',
+    //     bounds: bounds,
+    //     cursor: cursor,
+    //   };
+    // },
 
     /**
      * [path] and [selector] are used to find the CSS declaration to edit,
@@ -54,6 +57,7 @@ modulate('Commands', function() {
      */
     setCssProperties: function(path, selector, properties) {
       return {
+        messageType: 'command',
         commandType: 'setCssProperties',
         path: path,
         selector: selector,
