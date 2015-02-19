@@ -9,7 +9,7 @@
  */
 
 modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier'],
-    function(pathLib, commands, commandApplier) {
+    function(pathLib, commands, DomCommandApplier) {
 
   function FrameManager() {
     this.token = null;
@@ -19,7 +19,7 @@ modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier'],
       'selectElement': this._onSelectElement.bind(this),
       'selectionChange': this._onSelectionChange.bind(this),
     };
-    this.commandApplier = new commandApplier.DomCommandApplier(document);
+    this.commandApplier = new DomCommandApplier(document);
   }
 
   FrameManager.prototype.listen = function(wnd) {

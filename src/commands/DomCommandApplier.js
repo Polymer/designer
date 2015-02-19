@@ -9,9 +9,8 @@
  */
 
 modulate('DomCommandApplier', ['CommandApplier', 'Path'],
-    function(commandApplierLib, pathLib) {
+    function(CommandApplier, pathLib) {
 
-  var CommandApplier = commandApplierLib.CommandApplier;
   var getNodeFromPath = pathLib.getNodeFromPath;
 
   var commandHandlers = {
@@ -50,7 +49,5 @@ modulate('DomCommandApplier', ['CommandApplier', 'Path'],
   DomCommandApplier.prototype.constructor = DomCommandApplier;
 
   // exports
-  return {
-    DomCommandApplier: DomCommandApplier,
-  };
+  return DomCommandApplier;
 });

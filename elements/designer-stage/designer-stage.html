@@ -69,45 +69,67 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         var frame = this.$.frame;
         var token = this.token = this._generateToken();
-        frame.addEventListener('load', function() {
-          frame.contentWindow.postMessage({
-            messageType: 'handshake',
-            token: token
-          }, '*');
-        });
-
-        frame.addEventListener('error', function(e) {
-          if (e.type == 'load') {
-            console.log("<designer-stage> error loading frame contents");
-          }
-        });
       },
 
+      /**
+       * 
+       * 
+       * @returns {Promise<Document>} The modified document with an injected
+       * <script> tag for the message handler.
+       */
       setDocument: function(content) {
         var module = document.createElement('dom-module');
         var frameScriptAsset = module.import('designer-stage', '#frame-script');
 
-        frameScriptAsset.load()
+        return frameScriptAsset.load()
           .then((function(frameScript) {
+            // Return a new Promise so we can resolve/reject on load/error
+            // events from the frame
+            return new Promise((function(resolve, reject) {
+              var frame = this.$.frame;
 
-            // create an HTML document from the content
-            var doc = document.implementation.createHTMLDocument();
-            doc.documentElement.innerHTML = content;
+              // create an HTML document from the content
+              var doc = document.implementation.createHTMLDocument();
+              doc.documentElement.innerHTML = content;
 
-            // insert a script tag with the frame.js source
-            var frameScriptElement = doc.createElement('script');
-            frameScriptElement.textContent = frameScript;
-            doc.head.insertBefore(frameScriptElement, doc.head.firstChild);
+              // insert a script tag with the frame.js source
+              var frameScriptElement = doc.createElement('script');
+              frameScriptElement.textContent = frameScript;
+              doc.head.insertBefore(frameScriptElement, doc.head.firstChild);
 
-            // data: URIs need a base for relative URLs
-            var base = doc.createElement('base');
-            base.setAttribute('href', this.baseURI);
-            doc.head.insertBefore(base, doc.head.firstChild);
+              // data: URIs need a base for relative URLs
+              var base = doc.createElement('base');
+              base.setAttribute('href', this.baseURI);
+              doc.head.insertBefore(base, doc.head.firstChild);
 
-            // set the iframe src to the new document
-            var docBlob = new Blob([doc.documentElement.innerHTML], 
-                {type: 'text/html'});
-            this.$.frame.src = URL.createObjectURL(docBlob);
+              // set the iframe src to the new document
+              var docBlob = new Blob([doc.documentElement.innerHTML], 
+                  {type: 'text/html'});
+              frame.src = URL.createObjectURL(docBlob);
+
+              // listen to load and error events from the frame
+              var onFrameLoad = (function() {
+                frame.contentWindow.postMessage({
+                  messageType: 'handshake',
+                  token: this.token
+                }, '*');
+                frame.removeEventListener(onFrameLoad);
+                frame.removeEventListener(onFrameError);
+                resolve(doc);
+              }).bind(this);
+              frame.addEventListener('load', onFrameLoad);
+
+              var onFrameError = (function(e) {
+                if (e.type == 'load') {
+                  console.log("<designer-stage> error loading frame contents");
+                }
+                frame.removeEventListener(onFrameLoad);
+                frame.removeEventListener(onFrameError);
+                reject("<designer-stage> error loading frame contents");
+              }).bind(this);
+              frame.addEventListener('error', onFrameError);
+
+            }).bind(this));
           }).bind(this));
       },
 
@@ -137,14 +159,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             case 'hoverElement':
               // TODO: render the hover
               break;
-            case 'comand':
-              // TODO: render the hover
+            case 'command':
+              this._onCommand(message);
               break;
             default:
               console.warn('<designer-stage> Unknown message type: ', 
                   message.messageType);
           }
         }
+      },
+
+      _onCommand: function(message) {
+        this.dispatchEvent(new CustomEvent('designer-command', {
+          detail: message,
+        }));
       },
 
       _onSelectionBoundsChange: function(message) {
