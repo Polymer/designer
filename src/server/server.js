@@ -66,7 +66,7 @@ function buildFrameScript() {
   // files must be in dependency order
   var paths = [
     'elements/designer-stage/modulate.js',
-    'src/path.js',
+    'src/path/path.js',
     'src/commands/commands.js',
     'src/commands/CommandApplier.js',
     'src/commands/DomCommandApplier.js',

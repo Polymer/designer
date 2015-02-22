@@ -10,64 +10,71 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!doctype html>
 <html>
   <head>
-    <title>DomCommandApplier Test</title>
+    <title>ParsedHtmlCommandApplier Test</title>
     <meta charset="UTF-8">
     <script src="../../../mocha/mocha.js"></script>
     <script src="../../../chai/chai.js"></script>
     <link rel="stylesheet" href="../../../mocha/mocha.css"/>
     <link rel="import" href="../../../polymer/polymer.html"/>
     <link rel="import" href="../../src/commands/commands.html"/>
+    <link rel="import" href="../../src/parse5/parse5.html"/>
   </head>
   <body>
     <div id="mocha"></div>
 
     <script>
-using(['DomCommandApplier', 'Commands', 'Path'], 
-    function(DomCommandApplier, commands, pathlib) {
+using(['ParsedHtmlCommandApplier', 'Commands', 'Path', 'Parse5', 'parse5_utils'], 
+    function(ParsedHtmlCommandApplier, commands, pathlib, Parse5, parse5_utils) {
 
   mocha.setup('tdd');
   // mocha.checkLeaks();
 
   var assert = chai.assert;
+  var parser = new Parse5.Parser(null, {locationInfo: true});
 
-  suite('DomCommandApplier', function() {
+  suite('ParsedHtmlCommandApplier', function() {
     var testDoc;
     var commandApplier;
 
     suite('setAttribute comand', function() {
 
       setup(function() {
-        testDoc = document.implementation.createHTMLDocument('test');
-        testDoc.body.innerHTML = "<div id='A' class='test'><div id='B'></div></div>";
-        commandApplier = new DomCommandApplier(testDoc);
+        var testDocText = "<!DOCTYPE html><div id='A' class='test'><div id='B'></div></div>";
+        testDoc = parser.parse(testDocText);
+        console.log('testDoc', testDoc);
+        commandApplier = new ParsedHtmlCommandApplier(testDoc);
       });
 
       test('applies a new attribute', function() {
-        var node = testDoc.querySelector('#A');
+        //         doc html          body          div#a
+        var divA = testDoc.childNodes[1].childNodes[1].childNodes[0];
         var command = commands.setAttribute(
-            pathlib.getNodePath(node, testDoc),
+            pathlib.getNodePath(divA, testDoc),
             'foo',
             null,
             'bar');
         commandApplier.apply(command);
-        assert.equal(node.getAttribute('foo'), 'bar');
+        assert.equal(parse5_utils.getAttribute(divA, 'foo'), 'bar');
       });
 
       test('applies a new value to an existing attribute', function() {
-        var node = testDoc.querySelector('#A');
+        //         doc html          body          div#a
+        var divA = testDoc.childNodes[1].childNodes[1].childNodes[0];
+        console.log(divA, divA.attrs['class']);
         var command = commands.setAttribute(
-            pathlib.getNodePath(node, testDoc),
+            pathlib.getNodePath(divA, testDoc),
             'class',
             'test',
             'test2');
         commandApplier.apply(command);
-        assert.equal(node.getAttribute('class'), 'test2');
+        assert.equal(parse5_utils.getAttribute(divA, 'class'), 'test2');
       });
 
       test('fails to apply a new value if the old value is wrong', function() {
-        var node = testDoc.querySelector('#A');
+        //         doc html          body          div#a
+        var divA = testDoc.childNodes[1].childNodes[1].childNodes[0];
         var command = commands.setAttribute(
-            pathlib.getNodePath(node, testDoc),
+            pathlib.getNodePath(divA, testDoc),
             'class',
             'test1',
             'test2');
@@ -77,9 +84,10 @@ using(['DomCommandApplier', 'Commands', 'Path'],
       });
 
       test('fails to apply a new value if the old value is null', function() {
-        var node = testDoc.querySelector('#A');
+        //         doc html          body          div#a
+        var divA = testDoc.childNodes[1].childNodes[1].childNodes[0];
         var command = commands.setAttribute(
-            pathlib.getNodePath(node, testDoc),
+            pathlib.getNodePath(divA, testDoc),
             'foo',
             'bar',
             'bar2');
@@ -89,14 +97,15 @@ using(['DomCommandApplier', 'Commands', 'Path'],
       });
 
       test('undoes a new value to an existing attribute', function() {
-        var node = testDoc.querySelector('#A');
+        //         doc html          body          div#a
+        var divA = testDoc.childNodes[1].childNodes[1].childNodes[0];
         var command = commands.setAttribute(
-            pathlib.getNodePath(node, testDoc),
+            pathlib.getNodePath(divA, testDoc),
             'class',
             'test-1',
             'test');
         commandApplier.undo(command);
-        assert.equal(node.getAttribute('class'), 'test-1');
+        assert.equal(parse5_utils.getAttribute(divA, 'class'), 'test-1');
       });
 
     });

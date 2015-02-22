@@ -11,6 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../core-asset/core-asset.html">
 <link rel="import" href="../designer-stage/designer-stage.html">
 <link rel="import" href="../../src/commands/commands.html">
+<link rel="import" href="../../src/parse5/parse5.html">
 
 <dom-module id="designer-playground">
 
@@ -68,21 +69,36 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <script>
 
   (function(global) {
-    using(['DomCommandApplier'], function(DomCommandApplier) {
+    using(['DomCommandApplier', 'ParsedHtmlCommandApplier', 'Parse5'],
+        function(DomCommandApplier, ParsedHtmlCommandApplier, Parse5) {
 
-      global.DesignerPlayground = Polymer({
+      var parser = new Parse5.Parser(null, {locationInfo: true});
+      var serializer = new Parse5.Serializer();
+
+      Polymer({
         is: 'designer-playground',
 
-        created: function() {
-          this.document = null;
-          this.domCommandApplier = null;
+        configure: function() {
+          return {
+            textDocument: null,
+            domDocument: null,
+            parsedDocument; null,
+            domCommandApplier: null,
+            parsedCommandApplier: null,
+          };
         },
 
         ready: function() {
           this.$.stage.addEventListener('designer-command', (function(e) {
             var command = e.detail;
+
             this.domCommandApplier.apply(command);
-            this.$.html.textContent = this.document.documentElement.outerHTML;
+            this.parsedCommandApplier.apply(command);
+
+            if (this.parsedDocument != null) {
+              this.$.html.textContent =
+                  serializer.serialize(this.parsedDocument);
+            }
           }).bind(this));
         },
 
@@ -90,15 +106,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           if (e.target.tagName == 'A') {
             var module = document.createElement('dom-module');
             var demoName = e.target.dataset.demo;
-            var demoAsset = module.import('designer-playground', '#' + demoName);
+            var demoAsset = module.import(this.is, '#' + demoName);
 
             demoAsset.load()
               .then(this.$.stage.setDocument.bind(this.$.stage))
-              .then((function(doc) {
-                this.document = doc;
-                doc.querySelector('script').textContent = '';
-                this.domCommandApplier = new DomCommandApplier(doc);
-                this.$.html.textContent = doc.documentElement.outerHTML;
+              .then((function(result) {
+                this.domDocument = result.document;
+                this.parsedDocument = parser.parse(result.content);
+
+                this.domCommandApplier = new DomCommandApplier(this.domDocument);
+                this.parsedCommandApplier = new ParsedHtmlCommandApplier(this.parsedDocument);
+                this.$.html.textContent = serializer.serialize(this.parsedDocument);
+
               }).bind(this));
           }
         }

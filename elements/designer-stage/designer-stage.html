@@ -115,7 +115,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }, '*');
                 frame.removeEventListener(onFrameLoad);
                 frame.removeEventListener(onFrameError);
-                resolve(doc);
+                resolve({document: doc, content: content});
               }).bind(this);
               frame.addEventListener('load', onFrameLoad);
 
