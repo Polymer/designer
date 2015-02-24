@@ -82,7 +82,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.$.stage.addEventListener('designer-command', (function(e) {
             var command = e.detail;
             this.domCommandApplier.apply(command);
-            console.log('command', command, this.document);
             this.$.html.textContent = this.document.documentElement.outerHTML;
           }).bind(this));
         },

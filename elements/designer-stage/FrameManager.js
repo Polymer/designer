@@ -84,7 +84,6 @@ modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier'],
   };
 
   FrameManager.prototype._onSelectElement = function(message) {
-    console.log('FrameManager _onSelectElement');
     this.selectElement(message.x, message.y);
     this.sendMessages([
       this.updateBoundsMessage(this.currentElement),
@@ -93,7 +92,6 @@ modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier'],
 
   FrameManager.prototype.selectElement = function(x, y) {
     this.currentElement = this.getElementAt(x, y);
-    console.log('FrameManager selectElement', this.currentElement);
   };
 
   FrameManager.prototype.getElementAt = function(x, y) {

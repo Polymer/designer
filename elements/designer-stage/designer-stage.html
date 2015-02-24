@@ -121,7 +121,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
               var onFrameError = (function(e) {
                 if (e.type == 'load') {
-                  console.log("<designer-stage> error loading frame contents");
+                  console.warn("<designer-stage> error loading frame contents");
                 }
                 frame.removeEventListener(onFrameLoad);
                 frame.removeEventListener(onFrameError);
@@ -206,12 +206,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onMouseDown: function(e) {
-        console.log('_onMouseDown');
         this._sendSelectElement(e.clientX, e.clientY);
       },
 
       _onSelectionClick: function(e) {
-        console.log('_onSelectionClick');
         this._sendSelectElement(e.clientX, e.clientY);
       },
 
