@@ -9,7 +9,7 @@
  */
 
 modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier'],
-    function(pathLib, commands, commandApplier) {
+    function(pathLib, commands, DomCommandApplier) {
 
   function FrameManager() {
     this.token = null;
@@ -19,7 +19,7 @@ modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier'],
       'selectElement': this._onSelectElement.bind(this),
       'selectionChange': this._onSelectionChange.bind(this),
     };
-    this.commandApplier = new commandApplier.DomCommandApplier(document);
+    this.commandApplier = new DomCommandApplier(document);
   }
 
   FrameManager.prototype.listen = function(wnd) {
@@ -47,60 +47,53 @@ modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier'],
     this.token = event.data.token;
   };
 
-  /**
-   * Sends an 'updateSelection' message to the stage which updates the stages
-   * selection component to match the new bounds of the selected component.
-   */
-  FrameManager.prototype.sendUpdateSelection = function(element, options) {
-    options = options || {};
-    var newSelection = options.newSelection;
-    var hoverElement = options.hoverElement;
-
-    document.normalize();
-
-    var data = {
-      messageType: 'updateSelection',
-      token: this.token,
-      pathLib: pathLib.getNodePath(element),
-    };
-
+  FrameManager.prototype.updateBoundsMessage = function(element) {
     var bounds = element.getBoundingClientRect();
-    data.bounds = {
+    return {
+      messageType: 'selectionBoundsChange',
       left: bounds.left,
       top: bounds.top,
       width: bounds.width,
       height: bounds.height,
     };
+  };
 
-    if (newSelection) {
-      var style = window.getComputedStyle(element);
-      data.elementInfo = {
-        tagName: element.tagName,
-        display: style.display,
-        position: style.position,
-      };
-    }
+  FrameManager.prototype.newSelectionMessage = function(element) {
+    var style = window.getComputedStyle(element);
+    return {
+      messageType: 'newSelection',
+      tagName: element.tagName,
+      display: style.display,
+      position: style.position,
+    };
+  };
 
-    if (hoverElement) {
-      var hoverBounds = hoverElement.getBoundingClientRect();
-      data.hover = {
-        left: hoverBounds.left,
-        top: hoverBounds.top,
-        width: hoverBounds.width,
-        height: hoverBounds.height,
-      };
-    }
+  FrameManager.prototype.updateHoverMessage = function(element) {
+    var bounds = element.getBoundingClientRect();
+    return {
+      messageType: 'hoverElement',
+      left: bounds.left,
+      top: bounds.top,
+      width: bounds.width,
+      height: bounds.height,
+    };
+  };
 
-    this.ownerWindow.postMessage(data, '*');
+  FrameManager.prototype.sendMessages = function(messages) {
+    this.ownerWindow.postMessage({token: this.token, messages: messages}, '*');
   };
 
   FrameManager.prototype._onSelectElement = function(message) {
+    console.log('FrameManager _onSelectElement');
     this.selectElement(message.x, message.y);
-    this.sendUpdateSelection(this.currentElement, {newSelection: true});
+    this.sendMessages([
+      this.updateBoundsMessage(this.currentElement),
+      this.newSelectionMessage(this.currentElement)]);
   };
 
   FrameManager.prototype.selectElement = function(x, y) {
     this.currentElement = this.getElementAt(x, y);
+    console.log('FrameManager selectElement', this.currentElement);
   };
 
   FrameManager.prototype.getElementAt = function(x, y) {
@@ -125,19 +118,23 @@ modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier'],
   };
 
   FrameManager.prototype._onSelectionChange = function(message) {
-    this.resizeElement(message.bounds);
+    var command = this.resizeElement(message.bounds);
     // TODO: This isn't quite right, we need to exclude the current element
     // when looking for a hover element. We need either 
     // 1) Document.elementsFromPoint() (being added to Chrome, in progress)
     // 2) Remove the current element, then call document.elementFromPoint()
     // 3) Custom hit testing
     var hoverElement = this.getElementAt(message.cursor.x, message.cursor.y);
-    this.sendUpdateSelection(this.currentElement, {hoverElement: hoverElement});
+    this.sendMessages([
+      this.updateBoundsMessage(this.currentElement),
+      this.updateHoverMessage(hoverElement),
+      command]);
+    // this.sendUpdateSelection(this.currentElement, {hoverElement: hoverElement});
   };
 
   FrameManager.prototype.resizeElement = function(bounds) {
     // TODO: explicitly support more display/position modes than block/absolute
-    if (this.currentElement != null) {
+    if (this.currentElement == null) {
       throw new Error('current element is null');
     }
     // Setting the style attribute isn't ideal for this operation - we'd
@@ -154,6 +151,7 @@ modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier'],
       `height: ${bounds.height}px; ` +
       `width: ${bounds.width}px;`);
     this.commandApplier.apply(command);
+    return command;
   };
 
   return {

@@ -21,27 +21,12 @@ modulate('Commands', function() {
 
     setAttribute: function(path, attribute, oldValue, newValue) {
       return {
+        messageType: 'command',
         commandType: 'setAttribute',
         path: path,
         attribute: attribute,
         oldValue: oldValue,
         newValue: newValue,
-      };
-    },
-
-    selectElement: function(x, y) {
-      return {
-        commandType: 'selectElement',
-        x: x,
-        y: y,
-      };
-    },
-
-    selectionMove: function(bounds, cursor) {
-      return {
-        commandType: 'selectionMove',
-        bounds: bounds,
-        cursor: cursor,
       };
     },
 
@@ -54,6 +39,7 @@ modulate('Commands', function() {
      */
     setCssProperties: function(path, selector, properties) {
       return {
+        messageType: 'command',
         commandType: 'setCssProperties',
         path: path,
         selector: selector,

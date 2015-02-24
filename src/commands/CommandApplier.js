@@ -43,8 +43,6 @@ modulate('CommandApplier', function() {
   };
 
   // exports
-  return {
-    CommandApplier: CommandApplier,
-  };
+  return CommandApplier;
 
 });

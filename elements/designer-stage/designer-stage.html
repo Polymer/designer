@@ -69,45 +69,67 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         var frame = this.$.frame;
         var token = this.token = this._generateToken();
-        frame.addEventListener('load', function() {
-          frame.contentWindow.postMessage({
-            messageType: 'handshake',
-            token: token
-          }, '*');
-        });
-
-        frame.addEventListener('error', function(e) {
-          if (e.type == 'load') {
-            console.log("<designer-stage> error loading frame contents");
-          }
-        });
       },
 
+      /**
+       * 
+       * 
+       * @returns {Promise<Document>} The modified document with an injected
+       * <script> tag for the message handler.
+       */
       setDocument: function(content) {
         var module = document.createElement('dom-module');
         var frameScriptAsset = module.import('designer-stage', '#frame-script');
 
-        frameScriptAsset.load()
+        return frameScriptAsset.load()
           .then((function(frameScript) {
+            // Return a new Promise so we can resolve/reject on load/error
+            // events from the frame
+            return new Promise((function(resolve, reject) {
+              var frame = this.$.frame;
 
-            // create an HTML document from the content
-            var doc = document.implementation.createHTMLDocument();
-            doc.documentElement.innerHTML = content;
+              // create an HTML document from the content
+              var doc = document.implementation.createHTMLDocument();
+              doc.documentElement.innerHTML = content;
 
-            // insert a script tag with the frame.js source
-            var frameScriptElement = doc.createElement('script');
-            frameScriptElement.textContent = frameScript;
-            doc.head.insertBefore(frameScriptElement, doc.head.firstChild);
+              // insert a script tag with the frame.js source
+              var frameScriptElement = doc.createElement('script');
+              frameScriptElement.textContent = frameScript;
+              doc.head.insertBefore(frameScriptElement, doc.head.firstChild);
 
-            // data: URIs need a base for relative URLs
-            var base = doc.createElement('base');
-            base.setAttribute('href', this.baseURI);
-            doc.head.insertBefore(base, doc.head.firstChild);
+              // data: URIs need a base for relative URLs
+              var base = doc.createElement('base');
+              base.setAttribute('href', this.baseURI);
+              doc.head.insertBefore(base, doc.head.firstChild);
 
-            // set the iframe src to the new document
-            var docBlob = new Blob([doc.documentElement.innerHTML], 
-                {type: 'text/html'});
-            this.$.frame.src = URL.createObjectURL(docBlob);
+              // set the iframe src to the new document
+              var docBlob = new Blob([doc.documentElement.innerHTML], 
+                  {type: 'text/html'});
+              frame.src = URL.createObjectURL(docBlob);
+
+              // listen to load and error events from the frame
+              var onFrameLoad = (function() {
+                frame.contentWindow.postMessage({
+                  messageType: 'handshake',
+                  token: this.token
+                }, '*');
+                frame.removeEventListener(onFrameLoad);
+                frame.removeEventListener(onFrameError);
+                resolve(doc);
+              }).bind(this);
+              frame.addEventListener('load', onFrameLoad);
+
+              var onFrameError = (function(e) {
+                if (e.type == 'load') {
+                  console.log("<designer-stage> error loading frame contents");
+                }
+                frame.removeEventListener(onFrameLoad);
+                frame.removeEventListener(onFrameError);
+                reject("<designer-stage> error loading frame contents");
+              }).bind(this);
+              frame.addEventListener('error', onFrameError);
+
+            }).bind(this));
           }).bind(this));
       },
 
@@ -124,49 +146,54 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (e.data.token != this.token) {
           throw new Error('Invalid message token', token);
         }
-
-        switch (e.data.messageType) {
-          case 'updateSelection':
-            this._updateSelection(e);
-            break;
-          default:
-            throw new Error('<designer-stage> Unknown message type: ' + 
-                e.data.messageType);
+        var messages = e.data.messages;
+        for (var i = 0; i < messages.length; i++) {
+          var message = messages[i];
+          switch (message.messageType) {
+            case 'selectionBoundsChange':
+              this._onSelectionBoundsChange(message);
+              break;
+            case 'newSelection':
+              this._onNewSelection(message);
+              break;
+            case 'hoverElement':
+              // TODO: render the hover
+              break;
+            case 'command':
+              this._onCommand(message);
+              break;
+            default:
+              console.warn('<designer-stage> Unknown message type: ', 
+                  message.messageType);
+          }
         }
       },
 
-      _updateSelection: function(e) {
-        var data = e.data;
-        var bounds = data.bounds;
-        var selection = this.$.selection;
-        var style = selection.style;
+      _onCommand: function(message) {
+        this.dispatchEvent(new CustomEvent('designer-command', {
+          detail: message,
+        }));
+      },
 
+      _onSelectionBoundsChange: function(message) {
+        var style = this.$.selection.style;
+        style.display = 'block';
+        style.top = message.top;
+        style.left = message.left;
+        style.width = message.width;
+        style.height = message.height;
+      },
+
+      _onNewSelection: function(message) {
         // Set the valid resize handles
-        if (data.elementInfo) {
-          var position = data.elementInfo.position;
-          if (position == 'static' || position == 'relative') {
-            selection.directions = ResizeDirection.WIDTH_HEIGHT;
-          } else if (position == 'absolute') {
-            selection.directions = ResizeDirection.ALL_DIRECTIONS;
-          } else {
-            console.warn("can't handle position", data.position);
-            selection.directions = [];
-          }
-        }
-
-        if (bounds == null) {
-          style.display = 'none';
+        var position = message.position;
+        if (position == 'static' || position == 'relative') {
+          selection.directions = ResizeDirection.WIDTH_HEIGHT;
+        } else if (position == 'absolute') {
+          selection.directions = ResizeDirection.ALL_DIRECTIONS;
         } else {
-          style.display = 'block';
-          style.top = bounds.top;
-          style.left = bounds.left;
-          style.width = bounds.width;
-          style.height = bounds.height;
-        }
-
-        // TODO: Update any hover-overs
-        if (data.hover != null) {
-          // console.log('hover', data.hover);
+          console.warn("can't handle position", data.position);
+          selection.directions = [];
         }
       },
 
@@ -179,10 +206,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onMouseDown: function(e) {
+        console.log('_onMouseDown');
         this._sendSelectElement(e.clientX, e.clientY);
       },
 
       _onSelectionClick: function(e) {
+        console.log('_onSelectionClick');
         this._sendSelectElement(e.clientX, e.clientY);
       },
 
