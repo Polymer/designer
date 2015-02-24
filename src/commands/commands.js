@@ -19,6 +19,11 @@ modulate('Commands', function() {
   // exports
   return {
 
+    InsertPosition: {
+      before: 'before',
+      after: 'after',
+    },
+
     setAttribute: function(path, attribute, oldValue, newValue) {
       return {
         messageType: 'command',
@@ -45,6 +50,17 @@ modulate('Commands', function() {
         selector: selector,
         properties: properties,
       };
-    }
+    },
+
+    moveElement: function(path, targetPath, position) {
+      return {
+        messageType: 'command',
+        commandType: 'moveElement',
+        path: path,
+        targetPath: targetPath,
+        position: position,
+      };
+    },
+    
   };
 });
