@@ -89,7 +89,6 @@ modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier'],
     this.sendMessages([
       this.updateBoundsMessage(this.currentElement),
       this.newSelectionMessage(this.currentElement)]);
-    // this.sendUpdateSelection(this.currentElement, {newSelection: true});
   };
 
   FrameManager.prototype.selectElement = function(x, y) {

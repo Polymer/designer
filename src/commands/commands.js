@@ -30,24 +30,6 @@ modulate('Commands', function() {
       };
     },
 
-    // selectElement: function(x, y) {
-    //   return {
-    //     messageType: 'command',
-    //     commandType: 'selectElement',
-    //     x: x,
-    //     y: y,
-    //   };
-    // },
-
-    // selectionMove: function(bounds, cursor) {
-    //   return {
-    //     messageType: 'command',
-    //     commandType: 'selectionMove',
-    //     bounds: bounds,
-    //     cursor: cursor,
-    //   };
-    // },
-
     /**
      * [path] and [selector] are used to find the CSS declaration to edit,
      * which may be:
