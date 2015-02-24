@@ -124,12 +124,15 @@ modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier'],
     // 1) Document.elementsFromPoint() (being added to Chrome, in progress)
     // 2) Remove the current element, then call document.elementFromPoint()
     // 3) Custom hit testing
-    var hoverElement = this.getElementAt(message.cursor.x, message.cursor.y);
-    this.sendMessages([
+    var messages = [
       this.updateBoundsMessage(this.currentElement),
-      this.updateHoverMessage(hoverElement),
-      command]);
-    // this.sendUpdateSelection(this.currentElement, {hoverElement: hoverElement});
+      command,
+    ];
+    var hoverElement = this.getElementAt(message.cursor.x, message.cursor.y);
+    if (hoverElement != null) {
+      messages.push(this.updateHoverMessage(hoverElement));
+    }
+    this.sendMessages(messages);
   };
 
   FrameManager.prototype.resizeElement = function(bounds) {
