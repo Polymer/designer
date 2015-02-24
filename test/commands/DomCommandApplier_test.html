@@ -1,0 +1,112 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<!doctype html>
+<html>
+  <head>
+    <title>DomCommandApplier Test</title>
+    <meta charset="UTF-8">
+    <script src="../../../mocha/mocha.js"></script>
+    <script src="../../../chai/chai.js"></script>
+    <link rel="stylesheet" href="../../../mocha/mocha.css"/>
+    <link rel="import" href="../../../polymer/polymer.html"/>
+    <link rel="import" href="../../src/commands/commands.html"/>
+  </head>
+  <body>
+    <div id="mocha"></div>
+
+    <script>
+using(['DomCommandApplier', 'Commands', 'Path'], 
+    function(domCommandApplier, commands, pathlib) {
+
+  mocha.setup('tdd');
+  // mocha.checkLeaks();
+
+  var assert = chai.assert;
+  var DomCommandApplier = domCommandApplier.DomCommandApplier;
+
+  suite('DomCommandApplier', function() {
+    var testDoc;
+    var commandApplier;
+
+    suite('setAttribute comand', function() {
+
+      setup(function() {
+        testDoc = document.implementation.createHTMLDocument('test');
+        testDoc.body.innerHTML = "<div id='A' class='test'><div id='B'></div></div>";
+        commandApplier = new DomCommandApplier(testDoc);
+      });
+
+      test('applies a new attribute', function() {
+        var node = testDoc.querySelector('#A');
+        var command = commands.setAttribute(
+            pathlib.getNodePath(node, testDoc),
+            'foo',
+            null,
+            'bar');
+        commandApplier.apply(command);
+        assert.equal(node.getAttribute('foo'), 'bar');
+      });
+
+      test('applies a new value to an existing attribute', function() {
+        var node = testDoc.querySelector('#A');
+        var command = commands.setAttribute(
+            pathlib.getNodePath(node, testDoc),
+            'class',
+            'test',
+            'test2');
+        commandApplier.apply(command);
+        assert.equal(node.getAttribute('class'), 'test2');
+      });
+
+      test('fails to apply a new value if the old value is wrong', function() {
+        var node = testDoc.querySelector('#A');
+        var command = commands.setAttribute(
+            pathlib.getNodePath(node, testDoc),
+            'class',
+            'test1',
+            'test2');
+        assert.throws(function() {
+          commandApplier.apply(command);
+        });
+      });
+
+      test('fails to apply a new value if the old value is null', function() {
+        var node = testDoc.querySelector('#A');
+        var command = commands.setAttribute(
+            pathlib.getNodePath(node, testDoc),
+            'foo',
+            'bar',
+            'bar2');
+        assert.throws(function() {
+          commandApplier.apply(command);
+        });
+      });
+
+      test('undoes a new value to an existing attribute', function() {
+        var node = testDoc.querySelector('#A');
+        var command = commands.setAttribute(
+            pathlib.getNodePath(node, testDoc),
+            'class',
+            'test-1',
+            'test');
+        commandApplier.undo(command);
+        assert.equal(node.getAttribute('class'), 'test-1');
+      });
+
+    });
+
+  });
+
+  mocha.run();
+
+});
+    </script>
+  </body>
+</html>
