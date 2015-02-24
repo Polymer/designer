@@ -10,6 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../../../core-asset/core-asset.html">
 <link rel="import" href="../designer-stage/designer-stage.html">
+<link rel="import" href="../../src/commands/commands.html">
 
 <dom-module id="designer-playground">
 
@@ -18,9 +19,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       display: flex;
       box-sizing: border-box;
     }
-    designer-playground > designer-stage {
+    designer-playground > #main {
+      display: flex;
+      flex-direction: column;
       flex: 1;
-      box-sizing: border-box;
     }
     designer-playground > nav {
       flex: 0 0 240px;
@@ -36,6 +38,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       text-decoration: underline;
       cursor: hand;
     }
+    designer-playground > #main > designer-stage {
+      flex: 1;
+    }
+    designer-playground > #main > #html {
+      flex: 0 0 400px;
+      border: solid 1px #888;
+      margin: 0;
+      overflow: auto;
+    }
   </style>
 
   <core-asset id="demo-doc-1" href="demo-doc-1.html"></core-asset>
@@ -46,7 +57,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <a data-demo="demo-doc-1">Demo 1</a>
       <a data-demo="demo-doc-2">Demo 2</a>
     </nav>
-    <designer-stage id="stage"></designer-selection>
+    <div id="main">
+      <designer-stage id="stage"></designer-stage>
+      <pre id="html"></pre>
+    </div>
   </template>
 
 </dom-module>
@@ -54,33 +68,42 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <script>
 
   (function(global) {
+    using(['DomCommandApplier'], function(DomCommandApplier) {
 
-    global.DesignerPlayground = Polymer({
-      is: 'designer-playground',
+      global.DesignerPlayground = Polymer({
+        is: 'designer-playground',
 
-      created: function() {
-      },
+        created: function() {
+          this.document = null;
+          this.domCommandApplier = null;
+        },
 
-      ready: function() {
-      },
+        ready: function() {
+          this.$.stage.addEventListener('designer-command', (function(e) {
+            var command = e.detail;
+            this.domCommandApplier.apply(command);
+            console.log('command', command, this.document);
+            this.$.html.textContent = this.document.documentElement.outerHTML;
+          }).bind(this));
+        },
 
-      _navOnClick: function(e) {
-        if (e.target.tagName == 'A') {
-          var module = document.createElement('dom-module');
-          var demoName = e.target.dataset.demo;
-          var demoAsset = module.import('designer-playground', '#' + demoName);
+        _navOnClick: function(e) {
+          if (e.target.tagName == 'A') {
+            var module = document.createElement('dom-module');
+            var demoName = e.target.dataset.demo;
+            var demoAsset = module.import('designer-playground', '#' + demoName);
 
-          var loadDemo = (function() {
-            this.$.stage.setDocument(demoAsset.content);
-          }).bind(this);
-
-          if (demoAsset.loaded) {
-            loadDemo();
-          } else {
-            demoAsset.addEventListener('content-loaded', loadDemo);
+            demoAsset.load()
+              .then(this.$.stage.setDocument.bind(this.$.stage))
+              .then((function(doc) {
+                this.document = doc;
+                doc.querySelector('script').textContent = '';
+                this.domCommandApplier = new DomCommandApplier(doc);
+                this.$.html.textContent = doc.documentElement.outerHTML;
+              }).bind(this));
           }
         }
-      }
+      });
     });
   })(window);
 
