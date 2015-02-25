@@ -8,6 +8,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../../core-ajax/core-request.html">
 <link rel="import" href="../../../core-asset/core-asset.html">
 <link rel="import" href="../designer-stage/designer-stage.html">
 <link rel="import" href="../../src/commands/commands.html">
@@ -29,13 +30,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       flex: 0 0 240px;
       z-index: 100;
     }
-    designer-playground > nav > a {
+    designer-playground > nav > #files > a {
       display: block;
       color: black;
       text-decoration: none;
       padding: 8px;
     }
-    designer-playground > nav > a:hover {
+    designer-playground > nav > #files > a:hover {
       text-decoration: underline;
       cursor: hand;
     }
@@ -55,8 +56,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <template>
     <nav on-click="_navOnClick">
-      <a data-demo="demo-doc-1">Demo 1</a>
-      <a data-demo="demo-doc-2">Demo 2</a>
+      <div id="files">
+        <a data-demo="demo-doc-1">Demo 1</a>
+        <a data-demo="demo-doc-2">Demo 2</a>
+      </div>
+      <div id="packages">
+        <button on-click="_installPackageClick">Bower Install</button>
+      </div>
     </nav>
     <div id="main">
       <designer-stage id="stage"></designer-stage>
@@ -120,7 +126,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
               }).bind(this));
           }
-        }
+        },
+
+        _installPackageClick: function(e) {
+          var request = document.createElement('core-request');
+          request.send({
+            url: '/api/bowerInstall',
+            method: "POST",
+            headers: {},
+            async: true,
+          });
+        },
       });
     });
   })(window);

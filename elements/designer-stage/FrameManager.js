@@ -18,6 +18,7 @@ modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier'],
     this.handlers = {
       'selectElement': this._onSelectElement.bind(this),
       'selectionChange': this._onSelectionChange.bind(this),
+      'command': this._onCommand.bind(this),
     };
     this.commandApplier = new DomCommandApplier(document);
   }
@@ -47,6 +48,25 @@ modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier'],
     this.token = event.data.token;
   };
 
+  FrameManager.prototype._onCommand = function(message) {
+    if (message.commandType == 'moveElement') {
+      var el = pathLib.getNodeFromPath(message.path);
+      if (el !== this.currentElement) {
+        console.warn('Received command to edit an element other than '
+            + ' the current element: ', el);
+      }
+      var target = pathLib.getNodeFromPath(message.targetPath);
+      var container = target.parentNode;
+      if (message.position == commands.InsertPosition.before) {
+        container.insertBefore(el, target);
+      } else if (message.position == commands.InsertPosition.after) {
+        target = target.nextSibling;
+        container.insertBefore(el, target);
+      }
+      this.sendMessages([this.updateBoundsMessage(this.currentElement)]);
+    }
+  };
+
   FrameManager.prototype.updateBoundsMessage = function(element) {
     var bounds = element.getBoundingClientRect();
     return {
@@ -62,6 +82,7 @@ modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier'],
     var style = window.getComputedStyle(element);
     return {
       messageType: 'newSelection',
+      path: pathLib.getNodePath(element),
       tagName: element.tagName,
       display: style.display,
       position: style.position,
@@ -69,14 +90,23 @@ modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier'],
   };
 
   FrameManager.prototype.updateHoverMessage = function(element) {
-    var bounds = element.getBoundingClientRect();
-    return {
+    var message = {
       messageType: 'hoverElement',
-      left: bounds.left,
-      top: bounds.top,
-      width: bounds.width,
-      height: bounds.height,
     };
+    if (element != null) {
+      var bounds = element.getBoundingClientRect();
+      var style = window.getComputedStyle(element);
+
+      message.left = bounds.left;
+      message.top = bounds.top;
+      message.width = bounds.width;
+      message.height = bounds.height;
+      message.path = pathLib.getNodePath(element);
+      message.tagName = element.tagName;
+      message.display = style.display;
+      message.position = style.position;
+    }
+    return message;
   };
 
   FrameManager.prototype.sendMessages = function(messages) {
@@ -115,19 +145,35 @@ modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier'],
     return lastLightCandidate;
   };
 
+  function isDescendant(element, target) {
+    while (element.parentNode) {
+      if (element.parentNode == target) {
+        return true;
+      }
+      element = element.parentNode;
+    }
+  }
+
   FrameManager.prototype._onSelectionChange = function(message) {
     var command = this.resizeElement(message.bounds);
-    // TODO: This isn't quite right, we need to exclude the current element
-    // when looking for a hover element. We need either 
-    // 1) Document.elementsFromPoint() (being added to Chrome, in progress)
-    // 2) Remove the current element, then call document.elementFromPoint()
-    // 3) Custom hit testing
     var messages = [
       this.updateBoundsMessage(this.currentElement),
       command,
     ];
-    var hoverElement = this.getElementAt(message.cursor.x, message.cursor.y);
-    if (hoverElement != null) {
+    if (document.elementsFromPoint) {
+      var hoverElements = document.elementsFromPoint(message.cursor.x, message.cursor.y);
+      var hoverElement = null;
+      // elementsFromPoint() is z-ordered. We want the first result that
+      // is not currentElement, a ancestor or descendant
+      for (var i = 0; i < hoverElements.length; i++) {
+        var e = hoverElements[i];
+        if (!(e === this.currentElement ||
+              isDescendant(e, this.currentElement) ||
+              isDescendant(this.currentElement, e))) {
+          hoverElement = e;
+          break;
+        }
+      }
       messages.push(this.updateHoverMessage(hoverElement));
     }
     this.sendMessages(messages);

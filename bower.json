@@ -1,12 +1,14 @@
 {
-  "name": "designer2",
+  "name": "polymer-designer",
   "private": true,
   "dependencies": {
-    "webcomponentsjs": "webcomponents/webcomponentsjs#0.5.4",
-    "polymer": "Polymer/polymer#0.8-preview",
+    "chai": "chaijs/chai#^1.10.0",
+    "core-ajax": "Polymer/core-ajax#0.8-preview",
     "core-asset": "PolymerLabs/core-asset",
     "mocha": "mochajs/mocha#^2.1.0",
-    "chai": "chaijs/chai#^1.10.0"
+    "neoprene": "PolymerLabs/neoprene",
+    "polymer": "Polymer/polymer#0.8-preview",
+    "webcomponentsjs": "webcomponents/webcomponentsjs"
   },
   "version": "0.8.0"
 }
