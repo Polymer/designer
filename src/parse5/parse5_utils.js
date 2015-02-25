@@ -9,29 +9,30 @@
  */
 
  modulate('parse5_utils', function() {
-  function getAttributeIndex(el, name) {
-    for (var i = 0; i < el.attrs.length; i++) {
-      if (el.attrs[i].name === name) {
+
+  function getAttributeIndex(element, name) {
+    for (var i = 0; i < element.attrs.length; i++) {
+      if (element.attrs[i].name === name) {
         return i;
       }
     }
     return null;
   }
 
-  function getAttribute(el, name) {
-    var i = getAttributeIndex(el, name);
-    if (i) {
-      return el.attrs[i].value;
+  function getAttribute(element, name) {
+    var i = getAttributeIndex(element, name);
+    if (i != null) {
+      return element.attrs[i].value;
     }
     return null;
   }
 
-  function setAttribute(el, name, value) {
-    var i = getAttributeIndex(el, name);
-    if (i) {
-      el.attrs[i].value = value;
+  function setAttribute(element, name, value) {
+    var i = getAttributeIndex(element, name);
+    if (i != null) {
+      element.attrs[i].value = value;
     } else {
-      el.attrs.push({name: name, value: value});
+      element.attrs.push({name: name, value: value});
     }
   }
 
