@@ -14,16 +14,23 @@
       }
       .static {
         height: 100px;
-        background: blue;
         border: solid 1px black;
         box-sizing: border-box;
+      }
+      .a {
+        background: blue;
+        width: 400px;
+      }
+      .b {
+        background: green;
       }
     </style>
   </head>
   <body>
-    <div class="static"></div>
-    <div class="static"></div>
-    <div id="foo" style="top: 100px; left: 100px; height: 100px;width: 400px;">Hello Designer</div>
-    <div id="foo" style="top: 300px; left: 100px; height: 100px;width: 400px;">Hello Designer</div>
+    <div class="static a"></div>
+    <div class="static b"></div>
+    <button>Button</button>
+    <div id="foo" style="top: 100px; left: 100px; height: 100px;width: 400px;">Hello Designer A</div>
+    <div id="foo" style="top: 300px; left: 100px; height: 100px;width: 400px;">Hello Designer B</div>
   </body>
 </html>
