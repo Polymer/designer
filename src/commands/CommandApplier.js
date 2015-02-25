@@ -13,11 +13,11 @@ modulate('CommandApplier', function() {
   /**
    * Applies commands to documents, including embedded and linked
    * stylesheets.
-   * 
+   *
    * @abstract
    */
   function CommandApplier(doc) {
-    this.doc = doc;      
+    this.doc = doc;
   }
 
   CommandApplier.prototype = {
@@ -27,7 +27,7 @@ modulate('CommandApplier', function() {
       if (handler.canApply(this.doc, command)) {
         handler.apply(this.doc, command);
       } else {
-        throw new Error("Can't apply command " + command);
+        console.error("Can't apply command ", command);
       }
     },
 
@@ -36,7 +36,7 @@ modulate('CommandApplier', function() {
       if (handler.canUndo(this.doc, command)) {
         handler.undo(this.doc, command);
       } else {
-        throw new Error("Can't undo command " + command);
+        console.error("Can't undo command ", command);
       }
     },
 

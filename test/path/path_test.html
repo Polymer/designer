@@ -1,0 +1,140 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<!doctype html>
+<html>
+  <head>
+    <title>path.js Test</title>
+    <meta charset="UTF-8">
+    <script src="../../../mocha/mocha.js"></script>
+    <script src="../../../chai/chai.js"></script>
+    <link rel="stylesheet" href="../../../mocha/mocha.css"/>
+    <link rel="import" href="../../../polymer/polymer.html"/>
+    <link rel="import" href="../../src/path/path.html"/>
+    <link rel="import" href="../../src/parse5/parse5.html"/>
+  </head>
+  <body>
+    <div id="mocha"></div>
+
+    <!-- This test is very sensitive to text nodes! -->
+    <div id="A">
+      <div id="B"></div>
+    </div>
+
+    <script>
+using(['Path', 'Parse5'], function(path, Parse5) {
+  mocha.setup('tdd');
+  // mocha.checkLeaks();
+
+  var assert = chai.assert;
+  var parser = new Parse5.Parser();
+  var serializer = new Parse5.Serializer();
+
+  suite('path', function() {
+
+    // We must include the doctype so that 
+    //   1) parse5 is in standards mode
+    //   2) The DOM trees are the same (browser inserts doctype node)
+    var docText = "<!DOCTYPE html><div id='A'>a1<div id='B'>b1</div>a2</div>";
+    var domDoc = document.implementation.createHTMLDocument();
+    domDoc.body.innerHTML = docText;
+    var parsedDoc = parser.parse(docText);
+
+    // Sanity check that the parsed docs are the same
+    assert.equal(
+        '<!DOCTYPE html>'+domDoc.documentElement.outerHTML, 
+        serializer.serialize(parsedDoc));
+
+    function doTests(documentType, doc) {
+
+      //             html          body          div#a
+      var divA = doc.childNodes[1].childNodes[1].childNodes[0];
+      var divB = divA.childNodes[1];
+      var divAText1 = divA.childNodes[0];
+      var divAText2 = divA.childNodes[2];
+
+      suite('getNodePath on ' + documentType, function() {
+
+          test('returns the right path for a top-level element', function() {
+            assert.equal(path.getNodePath(divA, doc), 'BODY:1/DIV:0');
+          });
+
+          test('returns the right path for a nested element', function() {
+            assert.equal(path.getNodePath(divB, doc), 'BODY:1/DIV:0/DIV:1');
+          });
+
+          test('returns the right path for the first text node in an element',
+              function() {
+            assert.equal(
+                path.getNodePath(divAText1, doc),
+                'BODY:1/DIV:0/#TEXT:0');
+          });
+
+          test('returns the right path for the last text node in an element',
+              function() {
+            assert.equal(
+                path.getNodePath(divAText2, doc),
+                'BODY:1/DIV:0/#TEXT:2');
+          });
+
+      });
+
+      suite('getNodeFromPath on ' + documentType, function() {
+
+        test('returns the node for a path to a top-level element', function() {
+          console.log(doc);
+          assert.equal(path.getNodeFromPath('BODY:1/DIV:0', doc), divA);
+        });
+
+        test('returns the node for a path to a nested element', function() {
+          assert.equal(path.getNodeFromPath('BODY:1/DIV:0/DIV:1', doc), divB);
+        });
+
+        test('returns the node for a path to the first text node in an element',
+            function() {
+          assert.equal(
+              path.getNodeFromPath('BODY:1/DIV:0/#TEXT:0', doc),
+              divAText1);
+        });
+
+        test('returns the node for a path to the last text node in an element',
+            function() {
+          assert.equal(
+              path.getNodeFromPath('BODY:1/DIV:0/#TEXT:2', doc),
+              divAText2);
+        });
+
+        test('throws if the node has the wrong name', function() {
+          assert.throws(function () {
+            // The 1th child of body is a DIV
+            path.getNodeFromPath('BODY:1/SPAN:0', doc);
+          });
+        });
+
+        test('throws if an index is out of bounds', function() {
+          assert.throws(function () {
+            path.getNodeFromPath('BODY:3', doc);
+          }, RangeError);
+        });
+
+      });
+
+    }
+
+    doTests('DOM', domDoc);
+    doTests('Parse5', parsedDoc);
+
+  });
+
+  mocha.run();
+
+});
+    </script>
+  </body>
+</html>

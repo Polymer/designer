@@ -9,6 +9,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../../../core-asset/core-asset.html">
 <link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../src/commands/commands.html">
 <link rel="import" href="../designer-selection/designer-selection.html">
 
 <dom-module id="designer-stage">
@@ -39,12 +40,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
     designer-stage > designer-selection {
       position: absolute;
-      z-index: 101;
+      z-index: 102;
     }
+    designer-stage > #hover {
+      position: absolute;
+      /* z-index must be > 100 because iframes are z-index 100 o_O */
+      z-index: 101;
+      display: none;
+      opacity: 0.5;
+      background: #c66;
+      box-sizing: border-box;
+    }
+    designer-stage > #hover.insert-above {
+      border-top: solid 4px black;
+    }
+    designer-stage > #hover.insert-below {
+      border-bottom: solid 4px black;
+    }
+
   </style>
 
   <template>
     <designer-selection id="selection" on-click="_onSelectionClick"></designer-selection>
+    <div id="hover"></div>
     <div id="glass" on-mousedown="_onMouseDown"></div>
     <iframe id="frame" sandbox="allow-scripts"></iframe>
   </template>
@@ -54,12 +72,48 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </dom-module>
 
 <script>
-  (function() {
+  using(['Commands'], function(commands) {
+    /**
+     * `<designer-stage>` is a WYSIWYG editing surface and container for
+     * an HTML document.    
+     *
+     * @typedef {{
+     *   path: string,
+     *   tagName: string,
+     *   display: string,
+     *   position: string,
+     * }} CurrentElementInfo
+     */
     Polymer({
       is: 'designer-stage',
 
-      created: function() {
-        this.token = null;
+      configure: function() {
+        return {
+          /**
+           * @type {string}
+           */        
+          token: null,
+
+          /**
+           * @type {CurrentElementInfo}
+           */
+          currentElementInfo: null,
+
+          /**
+           * @type {{x: number, y: number}}
+           */        
+          currentMousePosition: null,
+
+          /**
+           * @type {string}
+           */        
+          insertPosition: null,
+
+          /**
+           * @type {string}
+           */        
+          hoverPath: null,
+        };
       },
 
       ready: function() {
@@ -67,13 +121,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.selection.addEventListener('designer-selection-resize', 
             this._onSelectionResize.bind(this));
 
+        window.addEventListener('mouseup', this._onMouseUp.bind(this));
+
         var frame = this.$.frame;
         var token = this.token = this._generateToken();
       },
 
       /**
-       * 
-       * 
        * @returns {Promise<Document>} The modified document with an injected
        * <script> tag for the message handler.
        */
@@ -115,7 +169,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }, '*');
                 frame.removeEventListener(onFrameLoad);
                 frame.removeEventListener(onFrameError);
-                resolve(doc);
+                resolve({document: doc, content: content});
               }).bind(this);
               frame.addEventListener('load', onFrameLoad);
 
@@ -157,7 +211,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               this._onNewSelection(message);
               break;
             case 'hoverElement':
-              // TODO: render the hover
+              this._onHoverElement(message);
               break;
             case 'command':
               this._onCommand(message);
@@ -195,18 +249,87 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           console.warn("can't handle position", data.position);
           selection.directions = [];
         }
+        this.currentElementInfo = {
+          path: message.path,
+          tagName: message.tagName,
+          display: message.display,
+          position: message.position,
+        };
+      },
+
+      _onHoverElement: function(message) {
+        var hover = this.$.hover;
+        var hoverStyle = hover.style;
+
+        if (message.path == null) {
+          this._hideHover();
+          return;
+        } else {
+          hoverStyle.display = 'block';
+          hoverStyle.top = message.top;
+          hoverStyle.left = message.left;
+          hoverStyle.width = message.width;
+          hoverStyle.height = message.height;
+        }
+
+        if (this.currentElementInfo && 
+            this.currentElementInfo.position == 'static') {
+          var verticalMid = message.top + message.height / 2;
+          var insertAbove = this.currentMousePosition.y < verticalMid;
+          var insertBelow = this.currentMousePosition.y > verticalMid;
+
+          if (insertAbove) {
+            hover.classList.add('insert-above');
+            this.insertPosition = commands.InsertPosition.before;
+            this.hoverPath = message.path;
+          } else {
+            hover.classList.remove('insert-above');
+          }
+          if (insertBelow) {
+            hover.classList.add('insert-below');
+            this.insertPosition = commands.InsertPosition.after;
+            this.hoverPath = message.path;
+          } else {
+            hover.classList.remove('insert-below');
+          }
+        }
+      },
+
+      _hideHover: function() {
+        var hover = this.$.hover;
+        var hoverStyle = hover.style;
+        hoverStyle.display = 'none';
+        this.insertPosition = null;
+        this.hoverPath = null;
       },
 
       _onSelectionResize: function(e) {
+        // TODO: store this in the selection?
+        // Rationale: we're alredy storing the bounds state there
+        this.currentMousePosition = {
+          x: e.detail.cursor.x - this.offsetLeft,
+          y: e.detail.cursor.y - this.offsetTop,          
+        };
         this.$.frame.contentWindow.postMessage({
           messageType: 'selectionChange',
           bounds: e.detail.bounds,
-          cursor: e.detail.cursor,
+          cursor: this.currentMousePosition,
         }, '*');
       },
 
       _onMouseDown: function(e) {
         this._sendSelectElement(e.clientX, e.clientY);
+      },
+
+      _onMouseUp: function(e) {
+        if (this.hoverPath != null && this.insertPosition != null) {
+          this.$.frame.contentWindow.postMessage(
+            commands.moveElement(
+              this.currentElementInfo.path,
+              this.hoverPath,
+              this.insertPosition), "*");
+        }
+        this._hideHover();
       },
 
       _onSelectionClick: function(e) {
@@ -226,5 +349,5 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     });
 
-  })();
+  });
 </script>

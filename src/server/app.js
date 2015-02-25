@@ -15,51 +15,32 @@ var path = require('path');
 var parseUrl = require('url').parse;
 var send = require('send');
 
-function startServer() {
-  console.log('Starting Polymer Designer Server on port 8080');
-  var app = express();
-  var server = http.createServer(app);
-  // TODO: allow port to be set with flag, fallback to other ports
-  var port = 8080;
+var bowerComponentDir = 'bower_components';
+var app = express();
 
-  app.use(function(request, response, next) {
-    console.log(request.method, request.url);
-    next();
-  });
+app.get('/', function (req, res) {
+  send(req, path.join(__dirname, 'index.html')).pipe(res);
+});
 
-  app.use('/api', require('./api'));
-
-  app.use('/', require('./app'));
-
-  app.get('/component/*', function (req, res) {
+app.get('/components/*', function (req, res) {
 
     var url = parseUrl(req.url, true);
 
-    var bowerFile = fs.readFileSync('bower.json');
-    var bowerJson = JSON.parse(bowerFile);
-    var bowerPackageName = bowerJson.name;
-    var bowerComponentDir = 'bower_components';
-
-    // Serve designer2 files from . and other components from bower_components
+    // Serve designer2 files from the polymer-designer package
+    // and other components from bower_components
     var splitPath = url.pathname.split(path.sep).slice(2);
-    splitPath = splitPath[0] == bowerPackageName
+    splitPath = splitPath[0] == 'polymer-designer'
        ? splitPath.slice(1)
        : [bowerComponentDir].concat(splitPath);
     var filePath = splitPath.join(path.sep);
 
-    // The designer-stage frame has a null origin, so we need to
-    // allow cross-origin requests for imports to work
-    res.append('Access-Control-Allow-Origin', '*');
-
     if (filePath == 'elements/designer-stage/frame.js') {
+      // dynamically build frame.js for edit-refresh goodness
       res.send(buildFrameScript());
     } else {
       send(req, filePath).pipe(res);
     }
   });
-
-  server = app.listen(port);
-}
 
 /**
  * Dynamically build the frame.js script so that we have edit-refresh
@@ -88,6 +69,4 @@ function buildFrameScript() {
   return frameScript;
 }
 
-module.exports = {
-  startServer: startServer
-};
+module.exports = app;
