@@ -24,6 +24,9 @@ modulate('CommandApplier', function() {
 
     apply: function(command) {
       var handler = this.handlers[command.commandType];
+      if (handler == null) {
+        throw new Error('Unknown command type: ' + command.commandType);
+      }
       if (handler.canApply(this.doc, command)) {
         handler.apply(this.doc, command);
       } else {

@@ -49,22 +49,10 @@ modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier', 'dom-utils'],
   };
 
   FrameManager.prototype._onCommand = function(message) {
-    if (message.commandType == 'moveElement') {
-      var el = pathLib.getNodeFromPath(message.path);
-      if (el !== this.currentElement) {
-        console.warn('Received command to edit an element other than '
-            + ' the current element: ', el);
-      }
-      var target = pathLib.getNodeFromPath(message.targetPath);
-      var container = target.parentNode;
-      if (message.position == commands.InsertPosition.before) {
-        container.insertBefore(el, target);
-      } else if (message.position == commands.InsertPosition.after) {
-        target = target.nextSibling;
-        container.insertBefore(el, target);
-      }
-      this.sendMessages([this.updateBoundsMessage(this.currentElement)]);
-    }
+    this.commandApplier.apply(message);
+    // TODO: how can we tell what non-doc side effects, like the following
+    // need to be propagated?
+    this.sendMessages([this.updateBoundsMessage(this.currentElement)]);
   };
 
   FrameManager.prototype.updateBoundsMessage = function(element) {
@@ -184,7 +172,7 @@ modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier', 'dom-utils'],
     var path = pathLib.getNodePath(element);
     var command = commands.setAttribute(path, 'style',
       element.getAttribute('style'),
-      `top: ${bounds.top}px; ` + 
+      `top: ${bounds.top}px; ` +
       `left: ${bounds.left}px; ` +
       `height: ${bounds.height}px; ` +
       `width: ${bounds.width}px;`);

@@ -9,8 +9,8 @@
  */
 
 modulate('ParsedHtmlCommandApplier',
-    ['CommandApplier', 'Path', 'parse5_utils'],
-    function(CommandApplier, pathLib, parse5_utils) {
+    ['CommandApplier', 'Path', 'parse5_utils', 'Commands'],
+    function(CommandApplier, pathLib, parse5_utils, commands) {
 
   var getNodeFromPath = pathLib.getNodeFromPath;
 
@@ -34,6 +34,46 @@ modulate('ParsedHtmlCommandApplier',
       undo: function(doc, command) {
         var node = getNodeFromPath(command.path, doc);
         parse5_utils.setAttribute(node, command.attribute, command.oldValue);
+      },
+    },
+
+    'moveElement': {
+      canApply: function(doc, command) {
+        var el = pathLib.getNodeFromPath(command.path, doc);
+        var target = pathLib.getNodeFromPath(command.targetPath, doc);
+        return el != null && target != null &&
+            (command.position === commands.InsertPosition.before ||
+             command.position === commands.InsertPosition.after);
+      },
+
+      apply: function(doc, command) {
+        var el = pathLib.getNodeFromPath(command.path, doc);
+        var target = pathLib.getNodeFromPath(command.targetPath, doc);
+
+        var container = el.parentNode;
+        var targetContainer = target.parentNode;
+
+        var index = container.childNodes.indexOf(el);
+        var targetIndex = targetContainer.childNodes.indexOf(el);
+
+        // remove from old position
+        container.childNodes.splice(index, 1);
+
+        // add in new position
+        if (targetContainer === container) {
+          targetIndex--;
+        }
+
+        if (command.position === commands.InsertPosition.before) {
+          targetContainer.childNodes.splice(targetIndex, 0, el);
+        } else if (command.position === commands.InsertPosition.after) {
+          targetContainer.childNodes.splice(targetIndex + 1, 0, el);
+        }
+
+      },
+
+      canUndo: function(doc, command) {
+        return false;
       },
     },
   };

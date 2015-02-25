@@ -8,8 +8,8 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-modulate('DomCommandApplier', ['CommandApplier', 'Path'],
-    function(CommandApplier, pathLib) {
+modulate('DomCommandApplier', ['CommandApplier', 'Path', 'Commands'],
+    function(CommandApplier, pathLib, commands) {
 
   var getNodeFromPath = pathLib.getNodeFromPath;
 
@@ -17,7 +17,11 @@ modulate('DomCommandApplier', ['CommandApplier', 'Path'],
     'setAttribute': {
       canApply: function(doc, command) {
         var node = getNodeFromPath(command.path, doc);
-        return node.getAttribute(command.attribute) === command.oldValue;
+        var r = node.getAttribute(command.attribute) === command.oldValue;
+        if (r === false) {
+          console.log("no apply", command.attribute, node.getAttribute(command.attribute), command.oldValue);
+        }
+        return r;
       },
 
       apply: function(doc, command) {
@@ -33,6 +37,32 @@ modulate('DomCommandApplier', ['CommandApplier', 'Path'],
       undo: function(doc, command) {
         var node = getNodeFromPath(command.path, doc);
         node.setAttribute(command.attribute, command.oldValue);
+      },
+    },
+
+    'moveElement': {
+      canApply: function(doc, command) {
+        var el = pathLib.getNodeFromPath(command.path, doc);
+        var target = pathLib.getNodeFromPath(command.targetPath, doc);
+        return el != null && target != null &&
+            (command.position == commands.InsertPosition.before ||
+             command.position == commands.InsertPosition.after);
+      },
+
+      apply: function(doc, command) {
+        var el = pathLib.getNodeFromPath(command.path, doc);
+        var target = pathLib.getNodeFromPath(command.targetPath, doc);
+        var container = target.parentNode;
+        if (command.position == commands.InsertPosition.before) {
+          container.insertBefore(el, target);
+        } else if (command.position == commands.InsertPosition.after) {
+          target = target.nextSibling;
+          container.insertBefore(el, target);
+        }
+      },
+
+      canUndo: function(doc, command) {
+        return false;
       },
     },
   };
