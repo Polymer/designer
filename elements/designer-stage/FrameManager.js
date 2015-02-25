@@ -8,8 +8,8 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier'],
-    function(pathLib, commands, DomCommandApplier) {
+modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier', 'dom-utils'],
+    function(pathLib, commands, DomCommandApplier, domUtils) {
 
   function FrameManager() {
     this.token = null;
@@ -145,15 +145,6 @@ modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier'],
     return lastLightCandidate;
   };
 
-  function isDescendant(element, target) {
-    while (element.parentNode) {
-      if (element.parentNode == target) {
-        return true;
-      }
-      element = element.parentNode;
-    }
-  }
-
   FrameManager.prototype._onSelectionChange = function(message) {
     var command = this.resizeElement(message.bounds);
     var messages = [
@@ -168,8 +159,8 @@ modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier'],
       for (var i = 0; i < hoverElements.length; i++) {
         var e = hoverElements[i];
         if (!(e === this.currentElement ||
-              isDescendant(e, this.currentElement) ||
-              isDescendant(this.currentElement, e))) {
+              domUtils.isDescendant(e, this.currentElement) ||
+              domUtils.isDescendant(this.currentElement, e))) {
           hoverElement = e;
           break;
         }

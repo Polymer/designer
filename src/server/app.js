@@ -50,6 +50,7 @@ function buildFrameScript() {
   // files must be in dependency order
   var paths = [
     'elements/designer-stage/modulate.js',
+    'src/dom-utils/dom-utils.js',
     'src/path/path.js',
     'src/commands/commands.js',
     'src/commands/CommandApplier.js',
@@ -61,7 +62,7 @@ function buildFrameScript() {
   });
 
   var frameScript = '(function() {\n' +
-    files.join('\n') + 
+    files.join('\n') +
     'using(["FrameManager"], function(fm) {\n' +
     '  new fm.FrameManager().listen();\n' +
     '});\n' +

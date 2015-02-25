@@ -8,7 +8,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
- modulate('Path', ['Parse5'], function(Parse5) {
+ modulate('Path', ['Parse5', 'dom-utils'], function(Parse5, domUtils) {
 
   /**
    * Returns the path to [node] in [doc]. A path is a slash-separated list
@@ -37,7 +37,7 @@
     var doc = doc || document;
     var segments = path.split('/');
 
-    var node = getDocumentElement(doc);
+    var node = domUtils.getDocumentElement(doc);
     var i = 0;
     while (i < segments.length && node) {
       var children = node.childNodes;
@@ -55,18 +55,6 @@
       i++;
     }
     return node;
-  }
-
-  function getDocumentElement(doc) {
-    return doc.documentElement ||
-        (function() {
-          for (var i = 0; i < doc.childNodes.length; i++) {
-            var n = doc.childNodes[i];
-            if (n.nodeName.toUpperCase() == 'HTML') {
-              return n;
-            }
-          }
-        })();
   }
 
   return {
