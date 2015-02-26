@@ -64,7 +64,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <designer-selection id="selection" on-click="_onSelectionClick"></designer-selection>
     <div id="hover"></div>
     <div id="glass" on-mousedown="_onMouseDown"></div>
-    <iframe id="frame" sandbox="allow-scripts"></iframe>
   </template>
 
   <core-asset id="frame-script" href="frame.js"></core-asset>
@@ -123,7 +122,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         window.addEventListener('mouseup', this._onMouseUp.bind(this));
 
-        var frame = this.$.frame;
         var token = this.token = this._generateToken();
       },
 
@@ -140,7 +138,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             // Return a new Promise so we can resolve/reject on load/error
             // events from the frame
             return new Promise((function(resolve, reject) {
-              var frame = this.$.frame;
+              var frame = this._getFrame();
+              if (frame != null) {
+                this.localDom.removeChild(frame);
+              }
+              frame = document.createElement('iframe');
+              frame.setAttribute('id', 'frame');
+              frame.setAttribute('sandbox', 'allow-scripts');
+              this.localDom.appendChild(frame);
 
               // create an HTML document from the content
               var doc = document.implementation.createHTMLDocument();
@@ -187,8 +192,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }).bind(this));
       },
 
+      _getFrame: function() {
+        return this.localDom.querySelector('iframe');
+      },
+
       dispatchCommand: function(command) {
-        this.$.frame.contentWindow.postMessage(command, "*");
+        this._getFrame().contentWindow.postMessage(command, "*");
         this.dispatchEvent(new CustomEvent('designer-command', {
           detail: command,
         }));
@@ -323,7 +332,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           x: e.detail.cursor.x - this.offsetLeft,
           y: e.detail.cursor.y - this.offsetTop,
         };
-        this.$.frame.contentWindow.postMessage({
+        this._getFrame().contentWindow.postMessage({
           messageType: 'selectionChange',
           bounds: e.detail.bounds,
           cursor: this.currentMousePosition,
@@ -353,7 +362,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var bounds = this.getBoundingClientRect();
         var x = clientX - bounds.left;
         var y = clientY - bounds.top;
-        this.$.frame.contentWindow.postMessage({
+        this._getFrame().contentWindow.postMessage({
           messageType: 'selectElement',
           x: x,
           y: y
