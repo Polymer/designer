@@ -76,71 +76,69 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script>
 
-  (function(global) {
-    using(['DomCommandApplier', 'ParsedHtmlCommandApplier', 'Parse5'],
-        function(DomCommandApplier, ParsedHtmlCommandApplier, Parse5) {
+  using(['DomCommandApplier', 'ParsedHtmlCommandApplier', 'Parse5'],
+      function(DomCommandApplier, ParsedHtmlCommandApplier, Parse5) {
 
-      var parser = new Parse5.Parser(null, {locationInfo: true});
-      var serializer = new Parse5.Serializer();
+    var parser = new Parse5.Parser(null, {locationInfo: true});
+    var serializer = new Parse5.Serializer();
 
-      Polymer({
-        is: 'designer-playground',
+    Polymer({
+      is: 'designer-playground',
 
-        configure: function() {
-          return {
-            textDocument: null,
-            domDocument: null,
-            parsedDocument: null,
-            domCommandApplier: null,
-            parsedCommandApplier: null,
-          };
-        },
+      configure: function() {
+        return {
+          textDocument: null,
+          domDocument: null,
+          parsedDocument: null,
+          domCommandApplier: null,
+          parsedCommandApplier: null,
+        };
+      },
 
-        ready: function() {
-          this.$.stage.addEventListener('designer-command', (function(e) {
-            var command = e.detail;
+      ready: function() {
+        this.$.stage.addEventListener('designer-command', (function(e) {
+          var command = e.detail;
 
-            this.domCommandApplier.apply(command);
-            this.parsedCommandApplier.apply(command);
+          this.domCommandApplier.apply(command);
+          this.parsedCommandApplier.apply(command);
 
-            if (this.parsedDocument != null) {
-              this.$.html.textContent =
-                  serializer.serialize(this.parsedDocument);
-            }
-          }).bind(this));
-        },
-
-        _navOnClick: function(e) {
-          if (e.target.tagName == 'A') {
-            var module = document.createElement('dom-module');
-            var demoName = e.target.dataset.demo;
-            var demoAsset = module.import(this.is, '#' + demoName);
-
-            demoAsset.load()
-              .then(this.$.stage.setDocument.bind(this.$.stage))
-              .then((function(result) {
-                this.domDocument = result.document;
-                this.parsedDocument = parser.parse(result.content);
-
-                this.domCommandApplier = new DomCommandApplier(this.domDocument);
-                this.parsedCommandApplier = new ParsedHtmlCommandApplier(this.parsedDocument);
-                this.$.html.textContent = serializer.serialize(this.parsedDocument);
-
-              }).bind(this));
+          if (this.parsedDocument != null) {
+            this.$.html.textContent =
+                serializer.serialize(this.parsedDocument);
           }
-        },
+        }).bind(this));
+      },
 
-        _installPackageClick: function(e) {
-          var request = document.createElement('core-request');
-          request.send({
-            url: '/api/bowerInstall',
-            method: "POST",
-            headers: {},
-            async: true,
-          });
-        },
-      });
+      _navOnClick: function(e) {
+        if (e.target.tagName == 'A') {
+          var module = document.createElement('dom-module');
+          var demoName = e.target.dataset.demo;
+          var demoAsset = module.import(this.is, '#' + demoName);
+
+          demoAsset.load()
+            .then(this.$.stage.setDocument.bind(this.$.stage))
+            .then((function(result) {
+              this.domDocument = result.document;
+              this.parsedDocument = parser.parse(result.content);
+
+              this.domCommandApplier = new DomCommandApplier(this.domDocument);
+              this.parsedCommandApplier = new ParsedHtmlCommandApplier(this.parsedDocument);
+              this.$.html.textContent = serializer.serialize(this.parsedDocument);
+
+            }).bind(this));
+        }
+      },
+
+      _installPackageClick: function(e) {
+        var request = document.createElement('core-request');
+        request.send({
+          url: '/api/bowerInstall',
+          method: "POST",
+          headers: {},
+          async: true,
+        });
+      },
     });
-  })(window);
+  });
 
 </script>
