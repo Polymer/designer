@@ -16,7 +16,8 @@ modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier', 'dom-utils'],
     this.ownerWindow = null;
     this.currentElement = null;
     this.handlers = {
-      'selectElement': this._onSelectElement.bind(this),
+      'selectElementAtPoint': this._onSelectElementAtPoint.bind(this),
+      'selectElementAtPath': this._onSelectElementAtPath.bind(this),
       'selectionChange': this._onSelectionChange.bind(this),
       'command': this._onCommand.bind(this),
     };
@@ -101,8 +102,15 @@ modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier', 'dom-utils'],
     this.ownerWindow.postMessage({token: this.token, messages: messages}, '*');
   };
 
-  FrameManager.prototype._onSelectElement = function(message) {
+  FrameManager.prototype._onSelectElementAtPoint = function(message) {
     this.selectElement(message.x, message.y);
+    this.sendMessages([
+      this.updateBoundsMessage(this.currentElement),
+      this.newSelectionMessage(this.currentElement)]);
+  };
+
+  FrameManager.prototype._onSelectElementAtPath = function(message) {
+    this.currentElement = pathLib.getNodeFromPath(message.path);
     this.sendMessages([
       this.updateBoundsMessage(this.currentElement),
       this.newSelectionMessage(this.currentElement)]);

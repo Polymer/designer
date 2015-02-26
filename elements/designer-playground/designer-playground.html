@@ -7,12 +7,13 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../../../core-ajax/core-request.html">
 <link rel="import" href="../../../core-asset/core-asset.html">
-<link rel="import" href="../designer-stage/designer-stage.html">
+<link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../../src/commands/commands.html">
 <link rel="import" href="../../src/parse5/parse5.html">
+<link rel="import" href="../designer-breadcrumb/designer-breadcrumb.html">
+<link rel="import" href="../designer-stage/designer-stage.html">
 
 <dom-module id="designer-playground">
 
@@ -69,9 +70,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div id="packages">
         <button on-click="_installPackageClick">Bower Install</button>
       </div>
+      <div>{{currentElementInfo.path}}</div>
     </nav>
     <div id="main">
-      <designer-stage id="stage"></designer-stage>
+      <designer-breadcrumb node="{{currentNode}}"></designer-breadcrumb>
+      <designer-stage id="stage" current-element-info="{{currentElementInfo}}"></designer-stage>
       <pre id="html"></pre>
     </div>
   </template>
@@ -80,8 +83,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script>
 
-  using(['DomCommandApplier', 'ParsedHtmlCommandApplier', 'Parse5'],
-      function(DomCommandApplier, ParsedHtmlCommandApplier, Parse5) {
+  using(['DomCommandApplier', 'ParsedHtmlCommandApplier', 'Parse5', 'Path'],
+      function(DomCommandApplier, ParsedHtmlCommandApplier, Parse5, pathLib) {
 
     var parser = new Parse5.Parser(null, {locationInfo: true});
     var serializer = new Parse5.Serializer();
@@ -89,8 +92,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     Polymer({
       is: 'designer-playground',
 
+      published: {
+        currentElementInfo: {
+          type: Object,
+          notify: true,
+        },
+        currentNode: {
+          type: Object,
+          notify: true,
+        }
+      },
+
+      bind: {
+        'currentElementInfo.path': 'pathChanged',
+        'currentNode': 'currentNodeChanged',
+      },
+
+      pathChanged: function() {
+        if (this.currentElementInfo != null) {
+          var path = this.currentElementInfo.path;
+          var node = pathLib.getNodeFromPath(path, this.domDocument);
+          this.currentNode = node;
+        }
+      },
+
+      currentNodeChanged: function() {
+        var path = pathLib.getNodePath(this.currentNode, this.domDocument);
+        this.$.stage.selectNode(path);
+      },
+
       configure: function() {
         return {
+          currentElementInfo: null,
+          currentNode: null,
           textDocument: null,
           domDocument: null,
           parsedDocument: null,

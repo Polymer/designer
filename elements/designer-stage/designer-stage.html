@@ -86,6 +86,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     Polymer({
       is: 'designer-stage',
 
+      published: {
+        'currentElementInfo': {
+          type: Object,
+          notify: true,
+        },
+      },
+
       configure: function() {
         return {
           /**
@@ -203,6 +210,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             }).bind(this));
           }).bind(this));
+      },
+
+      selectNode: function(path) {
+        this._sendSelectElementAtPath(path);
       },
 
       _getFrame: function() {
@@ -353,7 +364,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onMouseDown: function(e) {
-        this._sendSelectElement(e.clientX, e.clientY);
+        this._sendSelectElementAtPoint(e.clientX, e.clientY);
       },
 
       _onMouseUp: function(e) {
@@ -368,17 +379,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onSelectionClick: function(e) {
-        this._sendSelectElement(e.clientX, e.clientY);
+        this._sendSelectElementAtPoint(e.clientX, e.clientY);
       },
 
-      _sendSelectElement: function(clientX, clientY) {
+      _sendSelectElementAtPoint: function(clientX, clientY) {
         var bounds = this.getBoundingClientRect();
         var x = clientX - bounds.left;
         var y = clientY - bounds.top;
         this._getFrame().contentWindow.postMessage({
-          messageType: 'selectElement',
+          messageType: 'selectElementAtPoint',
           x: x,
           y: y
+        }, "*");
+      },
+
+      _sendSelectElementAtPath: function(path) {
+        var frame = this._getFrame();
+        if (frame == null) return;
+        frame.contentWindow.postMessage({
+          messageType: 'selectElementAtPath',
+          path: path,
         }, "*");
       },
 
