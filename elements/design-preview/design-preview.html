@@ -9,7 +9,7 @@ license that can be found in the LICENSE file.
 Polymer({
 
   htmlContent: '',
-  
+
   writeToDoc: function(doc) {
     doc.open('text/html', '');
     doc.write(this.outputPreviewHTML());
@@ -67,7 +67,7 @@ Polymer({
   makeOutputHTML: function(head, body) {
     var html = '<!DOCTYPE html>\n';
     html += '<title>Preview</title>\n';
-    html += '<meta name="viewport" content="width=device-width, ' + 
+    html += '<meta name="viewport" content="width=device-width, ' +
         'initial-scale=1.0, maximum-scale=1.0">\n';
     html += '<meta name="mobile-web-app-capable" content="yes">\n';
     html += head || '';
@@ -103,7 +103,7 @@ Polymer({
 <template>
   <style>
     #output {
-      display: block; 
+      display: block;
       width: 100%;
       height: 100%;
       border: 0;
@@ -131,7 +131,7 @@ Polymer({
 
 Polymer({
 
-  windowName: 'preview', 
+  windowName: 'preview',
 
   prepareWindow: function() {
     if (this.previewWindow) {
