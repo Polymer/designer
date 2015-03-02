@@ -149,6 +149,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
               // create an HTML document from the content
               var doc = document.implementation.createHTMLDocument();
+
               doc.documentElement.innerHTML = content;
 
               // insert a script tag with the frame.js source
@@ -248,10 +249,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _onSelectionBoundsChange: function(message) {
         var style = this.$.selection.style;
         style.display = 'block';
-        style.top = message.top;
-        style.left = message.left;
-        style.width = message.width;
-        style.height = message.height;
+        style.top = message.top + 'px';
+        style.left = message.left + 'px';
+        style.width = message.width + 'px';
+        style.height = message.height + 'px';
       },
 
       _onNewSelection: function(message) {
