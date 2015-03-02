@@ -69,6 +69,7 @@ function buildFrameScript() {
   // files must be in dependency order
   var paths = [
     'elements/designer-stage/modulate.js',
+    'src/dom-utils/dom-utils.js',
     'src/path/path.js',
     'src/commands/commands.js',
     'src/commands/CommandApplier.js',
@@ -76,11 +77,11 @@ function buildFrameScript() {
     'elements/designer-stage/FrameManager.js',
   ];
   var files = paths.map(function(p) {
-    return fs.readFileSync(p, {encoding: 'utf-8'})
+    return fs.readFileSync(p, {encoding: 'utf-8'});
   });
 
   var frameScript = '(function() {\n' +
-    files.join('\n') + 
+    files.join('\n') +
     'using(["FrameManager"], function(fm) {\n' +
     '  new fm.FrameManager().listen();\n' +
     '});\n' +
