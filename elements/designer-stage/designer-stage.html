@@ -123,6 +123,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         window.addEventListener('mouseup', this._onMouseUp.bind(this));
 
         var token = this.token = this._generateToken();
+        this._reset();
+      },
+
+      _reset: function() {
+        this.currentElementInfo = null;
+        this.currentMousePosition = null;
+        this.insertPosition = null;
+        this.hoverPath = null;
+        this._hideHover();
+        this.$.selection.style.display = 'none';
       },
 
       /**
@@ -132,6 +142,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       setDocument: function(content) {
         var module = document.createElement('dom-module');
         var frameScriptAsset = module.import('designer-stage', '#frame-script');
+
+        this._reset();
 
         return frameScriptAsset.load()
           .then((function(frameScript) {
