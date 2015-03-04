@@ -1,6 +1,12 @@
 # designer2
 A UI Designer for Polymer
 
+## Developing
+
+    bower install
+    npm install
+    npm start
+
 ## Building
 
 We use browserify to make parse5 available in the browser. When updating
