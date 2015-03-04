@@ -11,6 +11,9 @@
   "bin": {
     "polyserve": "bin/polyserve"
   },
+  "scripts": {
+    "start": "./bin/polyserve"
+  },
   "dependencies": {
     "bower": "^1.3.12",
     "bower-logger": "^0.2.2",
