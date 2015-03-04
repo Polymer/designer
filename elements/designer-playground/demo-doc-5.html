@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      body {
+        position: relative;
+        margin: 0;
+        padding: 0;
+        background: #ddd;
+      }
+      #foo {
+        position: absolute;
+        border: solid 1px #888;
+        background: white;
+        box-sizing: border-box;
+        text-align: center;
+        padding: 16px;
+      }
+      .static {
+        height: 100px;
+        border: solid 1px black;
+        box-sizing: border-box;
+      }
+      .a {
+        background: blue;
+        width: 400px;
+      }
+      .b {
+        background: green;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="foo" style="top: 100px; left: 100px; height: 100px;width: 400px;">One</div>
+    <div id="foo" style="top: 300px; left: 100px; height: 100px;width: 400px;">Two</div>
+  </body>
+</html>
