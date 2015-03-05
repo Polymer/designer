@@ -5,6 +5,7 @@
     "chai": "chaijs/chai#^1.10.0",
     "core-ajax": "Polymer/core-ajax#0.8-preview",
     "core-asset": "PolymerLabs/core-asset",
+    "font-roboto": "Polymer/font-roboto",
     "mocha": "mochajs/mocha#^2.1.0",
     "polymer": "Polymer/polymer#0.8-preview",
     "paper-tabs": "Polymer/paper-tabs#0.8-preview",
