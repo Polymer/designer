@@ -9,6 +9,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../../../core-ajax/core-request.html">
 <link rel="import" href="../../../core-asset/core-asset.html">
+<link rel="import" href="../../../core-toolbar/core-toolbar.html">
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../../src/commands/commands.html">
 <link rel="import" href="../../src/parse5/parse5.html">
@@ -20,35 +21,57 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <style>
     designer-playground {
       display: flex;
+      flex-direction: column;
       box-sizing: border-box;
     }
     designer-playground > #main {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       flex: 1;
     }
-    designer-playground > nav {
+    designer-playground > core-toolbar {
+      background: #424242;
+      color: white;
+    }
+    designer-playground > core-toolbar img.d-logo {
+      width: 64px;
+      height: 64px;
+    }
+    designer-playground > core-toolbar h2.d-logo {
+      opacity: 0.87;
+      font-weight: normal;
+    }
+    designer-playground > #main > nav {
+      background: #424242;
+      color: white;
       flex: 0 0 240px;
       z-index: 100;
     }
-    designer-playground > nav > #files > a {
+    designer-playground > #main > nav > #files > a {
       display: block;
-      color: black;
+      color: currentColor;
       text-decoration: none;
       padding: 8px;
     }
-    designer-playground > nav > #files > a:hover {
+    designer-playground > #main > nav > #files > a:hover {
       text-decoration: underline;
       cursor: pointer;
     }
-    designer-playground > #main > designer-stage {
+    designer-playground > #main > #doc {
+      display: flex;
+      flex-direction: column;
       flex: 1;
     }
-    designer-playground > #main > #html {
+    designer-playground > #main > #doc > designer-stage {
+      flex: 1;
+    }
+    designer-playground > #main > #doc > #html {
       flex: 0 0 400px;
       border: solid 1px #888;
       margin: 0;
       overflow: auto;
+      background: #212121;
+      color: white;
     }
   </style>
 
@@ -59,24 +82,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <core-asset id="demo-doc-5" href="demo-doc-5.html"></core-asset>
 
   <template>
-    <nav on-click="_navOnClick">
-      <div id="files">
-        <a data-demo="demo-doc-1">Demo 1</a>
-        <a data-demo="demo-doc-2">inline</a>
-        <a data-demo="demo-doc-3">inline-block</a>
-        <a data-demo="demo-doc-4">block</a>
-        <a data-demo="demo-doc-5">absolute</a>
-      </div>
-      <div id="packages">
-        <button on-click="_installPackageClick">Bower Install</button>
-      </div>
-      <div>{{currentElementInfo.path}}</div>
-    </nav>
+    <core-toolbar><img class="d-logo" src="PolymerLabs.png"> <h2 class="d-logo">Designer</h2></core-toolbar>
     <div id="main">
-      <designer-breadcrumb node="{{currentNode}}"></designer-breadcrumb>
-      <designer-stage id="stage" current-element-info="{{currentElementInfo}}"></designer-stage>
-      <pre id="html"></pre>
-    </div>
+      <nav on-click="_navOnClick">
+        <div id="files">
+          <a data-demo="demo-doc-1">Demo 1</a>
+          <a data-demo="demo-doc-2">inline</a>
+          <a data-demo="demo-doc-3">inline-block</a>
+          <a data-demo="demo-doc-4">block</a>
+          <a data-demo="demo-doc-5">absolute</a>
+        </div>
+        <div id="packages">
+          <button on-click="_installPackageClick">Bower Install</button>
+        </div>
+        <div>{{currentElementInfo.path}}</div>
+      </nav>
+      <div id="doc">
+        <designer-breadcrumb node="{{currentNode}}"></designer-breadcrumb>
+        <designer-stage id="stage" current-element-info="{{currentElementInfo}}"></designer-stage>
+        <pre id="html"></pre>
+      </div>
+    <div>
   </template>
 
 </dom-module>
