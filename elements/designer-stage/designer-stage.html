@@ -312,10 +312,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           return;
         } else {
           hoverStyle.display = 'block';
-          hoverStyle.top = message.top;
-          hoverStyle.left = message.left;
-          hoverStyle.width = message.width;
-          hoverStyle.height = message.height;
+          hoverStyle.top = message.top + 'px';
+          hoverStyle.left = message.left + 'px';
+          hoverStyle.width = message.width + 'px';
+          hoverStyle.height = message.height + 'px';
         }
 
         if (this.currentElementInfo &&
