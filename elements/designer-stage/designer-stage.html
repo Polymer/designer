@@ -71,9 +71,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </dom-module>
 
 <script>
-  console.log('B');
   using(['Commands'], function(commands) {
-    console.log('BB');
+    'use strict';
+
     /**
      * `<designer-stage>` is a WYSIWYG editing surface and container for
      * an HTML document.
@@ -126,7 +126,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      ready: function() {
+      ready() {
         window.addEventListener('message', this._onMessage.bind(this));
         this.$.selection.addEventListener('designer-selection-resize',
             this._onSelectionResize.bind(this));
@@ -137,7 +137,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._reset();
       },
 
-      _reset: function() {
+      _reset() {
         this.currentElementInfo = null;
         this.currentMousePosition = null;
         this.insertPosition = null;
@@ -150,7 +150,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        * @returns {Promise<Document>} The modified document with an injected
        * <script> tag for the message handler.
        */
-      setDocument: function(content) {
+      setDocument(content) {
         var module = document.createElement('dom-module');
         var frameScriptAsset = module.import('designer-stage', '#frame-script');
 
@@ -216,22 +216,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }).bind(this));
       },
 
-      selectNode: function(path) {
+      selectNode(path) {
         this._sendSelectElementAtPath(path);
       },
 
-      _getFrame: function() {
+      _getFrame() {
         return Polymer.dom.querySelector('iframe', this);
       },
 
-      dispatchCommand: function(command) {
+      dispatchCommand(command) {
         this._getFrame().contentWindow.postMessage(command, "*");
         this.dispatchEvent(new CustomEvent('designer-command', {
           detail: command,
         }));
       },
 
-      _generateToken: function() {
+      _generateToken() {
         var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         var token = '';
         for (var i = 0; i < 16; i++) {
@@ -240,7 +240,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return token;
       },
 
-      _onMessage: function(e) {
+      _onMessage(e) {
         if (e.data.token != this.token) {
           throw new Error('Invalid message token', token);
         }
@@ -267,13 +267,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      _onCommand: function(message) {
+      _onCommand(message) {
         this.dispatchEvent(new CustomEvent('designer-command', {
           detail: message,
         }));
       },
 
-      _onSelectionBoundsChange: function(message) {
+      _onSelectionBoundsChange(message) {
         var style = this.$.selection.style;
         style.display = 'block';
         style.top = message.top + 'px';
@@ -282,7 +282,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         style.height = message.height + 'px';
       },
 
-      _onNewSelection: function(message) {
+      _onNewSelection(message) {
         // Set the valid resize handles
         var position = message.position;
         var display = message.display;
@@ -307,7 +307,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         };
       },
 
-      _onHoverElement: function(message) {
+      _onHoverElement(message) {
         var hover = this.$.hover;
         var hoverStyle = hover.style;
 
@@ -345,7 +345,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      _hideHover: function() {
+      _hideHover() {
         var hover = this.$.hover;
         var hoverStyle = hover.style;
         hoverStyle.display = 'none';
@@ -353,7 +353,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.hoverPath = null;
       },
 
-      _onSelectionResize: function(e) {
+      _onSelectionResize(e) {
         // TODO: store this in the selection?
         // Rationale: we're alredy storing the bounds state there
         this.currentMousePosition = {
@@ -367,11 +367,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }, '*');
       },
 
-      _onMouseDown: function(e) {
+      _onMouseDown(e) {
         this._sendSelectElementAtPoint(e.clientX, e.clientY);
       },
 
-      _onMouseUp: function(e) {
+      _onMouseUp(e) {
         if (this.hoverPath != null && this.insertPosition != null) {
           this.dispatchCommand(
             commands.moveElement(
@@ -382,11 +382,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._hideHover();
       },
 
-      _onSelectionClick: function(e) {
+      _onSelectionClick(e) {
         this._sendSelectElementAtPoint(e.clientX, e.clientY);
       },
 
-      _sendSelectElementAtPoint: function(clientX, clientY) {
+      _sendSelectElementAtPoint(clientX, clientY) {
         var bounds = this.getBoundingClientRect();
         var x = clientX - bounds.left;
         var y = clientY - bounds.top;
@@ -397,7 +397,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }, "*");
       },
 
-      _sendSelectElementAtPath: function(path) {
+      _sendSelectElementAtPath(path) {
         var frame = this._getFrame();
         if (frame == null) return;
         frame.contentWindow.postMessage({
