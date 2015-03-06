@@ -111,6 +111,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   using(['DomCommandApplier', 'ParsedHtmlCommandApplier', 'Parse5', 'Path'],
       function(DomCommandApplier, ParsedHtmlCommandApplier, Parse5, pathLib) {
+    'use strict';
 
     var parser = new Parse5.Parser(null, {locationInfo: true});
     var serializer = new Parse5.Serializer();
@@ -134,7 +135,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'currentElementInfo.path': 'pathChanged',
       },
 
-      pathChanged: function() {
+      pathChanged() {
         if (this.currentElementInfo != null) {
           var path = this.currentElementInfo.path;
           var node = pathLib.getNodeFromPath(path, this.domDocument);
@@ -142,12 +143,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      currentNodeChanged: function() {
+      currentNodeChanged() {
         var path = pathLib.getNodePath(this.currentNode, this.domDocument);
         this.$.stage.selectNode(path);
       },
 
-      configure: function() {
+      configure() {
         return {
           currentElementInfo: null,
           currentNode: null,
@@ -159,7 +160,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         };
       },
 
-      ready: function() {
+      ready() {
         this.$.stage.addEventListener('designer-command', (function(e) {
           var command = e.detail;
 
@@ -173,7 +174,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }).bind(this));
       },
 
-      _navOnClick: function(e) {
+      _navOnClick(e) {
         if (e.target.tagName == 'A') {
           var module = document.createElement('dom-module');
           var demoName = e.target.dataset.demo;
@@ -193,7 +194,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      _installPackageClick: function(e) {
+      _installPackageClick(e) {
         var request = document.createElement('core-request');
         request.send({
           url: '/api/bowerInstall',

@@ -33,7 +33,9 @@ HTML file directly via a `/component/` URL, such as
 ## Browser Support
 
 Designer uses some very new browser APIs like `Document.elementsFromPoint`
-that are only available in Chrome Canary.
+that are only available in Chrome Canary, as well as some ECMAScript 6 features
+like classes, enhanced object literals, template strings, etc., that are
+available in Chrome Canary or very recent and preview versions of Firefox or IE.
 
 We will work to build rough polyfills and/or use vendor prefixed
 versions like `msElementsFromPoint`. Until then, Designer requires

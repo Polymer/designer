@@ -84,116 +84,119 @@
     </dom-module>
 
     <script type="text/javascript">
+      (function() {
+        'use strict';
 
-      Polymer({
-        is: 'designer-selection',
+        Polymer({
+          is: 'designer-selection',
 
-        ready: function() {
-          this.directions = ResizeDirection.ALL_DIRECTIONS;
-        },
+          ready() {
+            this.directions = ResizeDirection.ALL_DIRECTIONS;
+          },
 
-        listeners: {
-          'mousedown': '_onMouseDown'
-        },
+          listeners: {
+            'mousedown': '_onMouseDown'
+          },
 
-        _onMouseDown: function(e) {
-          if (e.target.id == 'bounds') {
-            this._boundsDown(e);
-          } else {
-            this._resizeHandleDown(e);
-          }
-        },
+          _onMouseDown(e) {
+            if (e.target.id == 'bounds') {
+              this._boundsDown(e);
+            } else {
+              this._resizeHandleDown(e);
+            }
+          },
 
-        // called for mousedown on the main bounding box div
-        _boundsDown: function(e) {
-          this.$.bounds.style.cursor = 'move';
-          this._startDrag((function(x, y) {
-            return {
-              left: x,
-              top: y,
-              width: this.offsetWidth,
-              height: this.offsetHeight,
-            };
-          }).bind(this),
-          e.clientX - this.offsetLeft,
-          e.clientY - this.offsetTop);
-        },
+          // called for mousedown on the main bounding box div
+          _boundsDown(e) {
+            this.$.bounds.style.cursor = 'move';
+            this._startDrag((function(x, y) {
+              return {
+                left: x,
+                top: y,
+                width: this.offsetWidth,
+                height: this.offsetHeight,
+              };
+            }).bind(this),
+            e.clientX - this.offsetLeft,
+            e.clientY - this.offsetTop);
+          },
 
-        // called for mousedown on one of the resize handle divs
-        _resizeHandleDown: function(e) {
-          var handle = e.target;
-          var direction = ResizeDirection[handle.id];
+          // called for mousedown on one of the resize handle divs
+          _resizeHandleDown(e) {
+            var handle = e.target;
+            var direction = ResizeDirection[handle.id];
 
-          var boundsBounds = this.$.bounds.getBoundingClientRect();
-          var handleBounds = handle.getBoundingClientRect();
+            var boundsBounds = this.$.bounds.getBoundingClientRect();
+            var handleBounds = handle.getBoundingClientRect();
 
-          var offsetLeft = direction.resizesLeft()
-              ? 0
-              : boundsBounds.left + (e.clientX - handleBounds.left);
+            var offsetLeft = direction.resizesLeft()
+                ? 0
+                : boundsBounds.left + (e.clientX - handleBounds.left);
 
-          var offsetTop = direction.resizesTop()
-              ? 0
-              : boundsBounds.top + (e.clientY - handleBounds.top);
+            var offsetTop = direction.resizesTop()
+                ? 0
+                : boundsBounds.top + (e.clientY - handleBounds.top);
 
-          var offsetRight = this.offsetLeft + this.offsetWidth;
-          var offsetBottom = this.offsetTop + this.offsetHeight;
+            var offsetRight = this.offsetLeft + this.offsetWidth;
+            var offsetBottom = this.offsetTop + this.offsetHeight;
 
-          this._startDrag((function(x, y) {
-            var newWidth =
-                direction.resizesLeft() ? offsetRight - x :
-                direction.resizesRight() ? x :
-                this.offsetWidth;
+            this._startDrag((function(x, y) {
+              var newWidth =
+                  direction.resizesLeft() ? offsetRight - x :
+                  direction.resizesRight() ? x :
+                  this.offsetWidth;
 
-            var newHeight =
-                direction.resizesTop() ? offsetBottom - y :
-                direction.resizesBottom() ? y :
-                this.offsetHeight;
+              var newHeight =
+                  direction.resizesTop() ? offsetBottom - y :
+                  direction.resizesBottom() ? y :
+                  this.offsetHeight;
 
-            var newLeft = direction.resizesLeft() ? x : this.offsetLeft;
-            var newTop = direction.resizesTop() ? y : this.offsetTop;
+              var newLeft = direction.resizesLeft() ? x : this.offsetLeft;
+              var newTop = direction.resizesTop() ? y : this.offsetTop;
 
-            return {
-              left: newLeft,
-              top: newTop,
-              width: newWidth,
-              height: newHeight,
-            };
-          }).bind(this),
-          offsetLeft, offsetTop);
-        },
+              return {
+                left: newLeft,
+                top: newTop,
+                width: newWidth,
+                height: newHeight,
+              };
+            }).bind(this),
+            offsetLeft, offsetTop);
+          },
 
-        _startDrag: function(onMove, offsetX, offsetY) {
-          var onMouseMove = (function(e) {
-            var deltaX = e.clientX - offsetX;
-            var deltaY = e.clientY - offsetY;
-            var newBounds = onMove(deltaX, deltaY);
+          _startDrag(onMove, offsetX, offsetY) {
+            var onMouseMove = (function(e) {
+              var deltaX = e.clientX - offsetX;
+              var deltaY = e.clientY - offsetY;
+              var newBounds = onMove(deltaX, deltaY);
 
-            this.dispatchEvent(new CustomEvent('designer-selection-resize', {
-              detail: {
-                bounds: newBounds,
-                cursor: {
-                  // This is purposefully the client coordinates
-                  x: e.clientX,
-                  y: e.clientY,
-                },
-              }
-            }));
-          }).bind(this);
+              this.dispatchEvent(new CustomEvent('designer-selection-resize', {
+                detail: {
+                  bounds: newBounds,
+                  cursor: {
+                    // This is purposefully the client coordinates
+                    x: e.clientX,
+                    y: e.clientY,
+                  },
+                }
+              }));
+            }).bind(this);
 
-          var onMouseUp = (function(e) {
-            window.removeEventListener('mousemove', onMouseMove);
-            window.removeEventListener('mouseup', onMouseUp);
-            document.removeEventListener('contextmenu', onMouseUp);
-            this.$.bounds.style.cursor = 'auto';
-          }).bind(this);
+            var onMouseUp = (function(e) {
+              window.removeEventListener('mousemove', onMouseMove);
+              window.removeEventListener('mouseup', onMouseUp);
+              document.removeEventListener('contextmenu', onMouseUp);
+              this.$.bounds.style.cursor = 'auto';
+            }).bind(this);
 
-          window.addEventListener('mousemove', onMouseMove);
-          window.addEventListener('mouseup', onMouseUp);
-          // Note document instead of window:
-          // http://www.quirksmode.org/dom/events/contextmenu.html
-          document.addEventListener('contextmenu', onMouseUp);
-        },
-      });
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
+            // Note document instead of window:
+            // http://www.quirksmode.org/dom/events/contextmenu.html
+            document.addEventListener('contextmenu', onMouseUp);
+          },
+        });
+      })();
     </script>
   </body>
 </html>
