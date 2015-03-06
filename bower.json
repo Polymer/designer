@@ -17,5 +17,10 @@
     "core-meta": "Polymer/core-meta#0.8-preview",
     "core-toolbar": "Polymer/core-toolbar#0.8-preview"
   },
-  "version": "0.8.0"
+  "version": "0.8.0",
+  "resolutions": {
+    "webcomponentsjs": "master",
+    "layout": "master",
+    "polymer": "0.8-preview"
+  }
 }

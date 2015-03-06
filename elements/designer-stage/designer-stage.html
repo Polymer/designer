@@ -15,12 +15,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="designer-stage">
 
   <style>
-    designer-stage {
+    :host {
       display: block;
       box-sizing: border-box;
       position: relative;
     }
-    designer-stage > iframe {
+    iframe {
       position: absolute;
       top: 0;
       left: 0;
@@ -30,7 +30,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       box-sizing: border-box;
       background: gray;
     }
-    designer-stage > #glass {
+    #glass {
       position: absolute;
       top: 0;
       left: 0;
@@ -38,11 +38,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       height: 100%;
       z-index: 100;
     }
-    designer-stage > designer-selection {
+    designer-selection {
       position: absolute;
       z-index: 102;
     }
-    designer-stage > #hover {
+    #hover {
       position: absolute;
       /* z-index must be > 100 because iframes are z-index 100 o_O */
       z-index: 101;
@@ -51,10 +51,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       background: #c66;
       box-sizing: border-box;
     }
-    designer-stage > #hover.insert-above {
+    #hover.insert-above {
       border-top: solid 4px black;
     }
-    designer-stage > #hover.insert-below {
+    #hover.insert-below {
       border-bottom: solid 4px black;
     }
 
@@ -71,7 +71,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </dom-module>
 
 <script>
+  console.log('B');
   using(['Commands'], function(commands) {
+    console.log('BB');
     /**
      * `<designer-stage>` is a WYSIWYG editing surface and container for
      * an HTML document.
@@ -86,40 +88,42 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     Polymer({
       is: 'designer-stage',
 
-      published: {
-        'currentElementInfo': {
+      properties: {
+
+        /**
+         * @type {CurrentElementInfo}
+         */
+        currentElementInfo: {
           type: Object,
           notify: true,
+          value: null,
         },
-      },
 
-      configure: function() {
-        return {
-          /**
-           * @type {string}
-           */
-          token: null,
+        /**
+         * @type {string}
+         */
+        token: {
+          type: String,
+          value: null,
+        },
 
-          /**
-           * @type {CurrentElementInfo}
-           */
-          currentElementInfo: null,
+        /**
+         * @type {{x: number, y: number}}
+         */
+        currentMousePosition: {
+          type: Object,
+          value: null,
+        },
 
-          /**
-           * @type {{x: number, y: number}}
-           */
-          currentMousePosition: null,
+        insertPosition: {
+          type: String,
+          value: null,
+        },
 
-          /**
-           * @type {string}
-           */
-          insertPosition: null,
-
-          /**
-           * @type {string}
-           */
-          hoverPath: null,
-        };
+        hoverPath: {
+          type: String,
+          value: null,
+        }
       },
 
       ready: function() {
@@ -159,12 +163,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             return new Promise((function(resolve, reject) {
               var frame = this._getFrame();
               if (frame != null) {
-                this.localDom.removeChild(frame);
+                Polymer.dom.removeChild(frame, this);
               }
               frame = document.createElement('iframe');
               frame.setAttribute('id', 'frame');
               frame.setAttribute('sandbox', 'allow-scripts');
-              this.localDom.appendChild(frame);
+              Polymer.dom.appendChild(frame, this);
 
               // create an HTML document from the content
               var doc = document.implementation.createHTMLDocument();
@@ -217,7 +221,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _getFrame: function() {
-        return this.localDom.querySelector('iframe');
+        return Polymer.dom.querySelector('iframe', this);
       },
 
       dispatchCommand: function(command) {
