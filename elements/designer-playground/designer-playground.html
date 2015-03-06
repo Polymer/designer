@@ -19,53 +19,54 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="designer-playground">
 
   <style>
-    designer-playground {
+    :host {
       display: flex;
       flex-direction: column;
       box-sizing: border-box;
     }
-    designer-playground > #main {
+    #main {
       display: flex;
       flex-direction: row;
       flex: 1;
     }
-    designer-playground > core-toolbar {
+    core-toolbar {
       background: #424242;
       color: white;
     }
-    designer-playground > core-toolbar img.d-logo {
+    core-toolbar img.d-logo {
       width: 64px;
       height: 64px;
     }
-    designer-playground > core-toolbar h2.d-logo {
+    core-toolbar h2.d-logo {
       opacity: 0.87;
       font-weight: normal;
+      display: inline;
     }
-    designer-playground > #main > nav {
+    #main > nav {
       background: #424242;
       color: white;
       flex: 0 0 240px;
       z-index: 100;
     }
-    designer-playground > #main > nav > #files > a {
+    #main > nav > #files > a {
       display: block;
       color: currentColor;
       text-decoration: none;
       padding: 8px;
     }
-    designer-playground > #main > nav > #files > a:hover {
+    #main > nav > #files > a:hover {
       text-decoration: underline;
       cursor: pointer;
     }
-    designer-playground > #main > #doc {
+    #main > #doc {
       display: flex;
       flex-direction: column;
       flex: 1;
     }
-    designer-playground > #main > #doc > designer-stage {
+    #main > #doc > designer-stage {
       flex: 1;
     }
-    designer-playground > #main > #doc > #html {
+    #main > #doc > #html {
       flex: 0 0 400px;
       border: solid 1px #888;
       margin: 0;
@@ -95,7 +96,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <div id="packages">
           <button on-click="_installPackageClick">Bower Install</button>
         </div>
-        <div>{{currentElementInfo.path}}</div>
       </nav>
       <div id="doc">
         <designer-breadcrumb node="{{currentNode}}"></designer-breadcrumb>
@@ -118,7 +118,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     Polymer({
       is: 'designer-playground',
 
-      published: {
+      properties: {
         currentElementInfo: {
           type: Object,
           notify: true,
@@ -126,12 +126,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         currentNode: {
           type: Object,
           notify: true,
+          observer: 'currentNodeChanged',
         }
       },
 
-      bind: {
+      observers: {
         'currentElementInfo.path': 'pathChanged',
-        'currentNode': 'currentNodeChanged',
       },
 
       pathChanged: function() {

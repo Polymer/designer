@@ -15,7 +15,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="designer-breadcrumb">
 
   <style>
-    designer-breadcrumb {
+    :host {
       display: flex;
       box-sizing: border-box;
       height: 32px;
@@ -24,7 +24,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       color: #fff;
     }
 
-    designer-breadcrumb > paper-tabs {
+    paper-tabs {
       height: 32px;
     }
 
@@ -47,29 +47,25 @@ using(['dom-utils'], function(domUtils) {
   Polymer({
     is: 'designer-breadcrumb',
 
-    published: {
-      'node': {
+    properties: {
+      node: {
         type: Object,
         notify: true,
+        value: null,
+        observer: 'nodeChanged',
       },
-      'selectedIndex': {
+      selectedIndex: {
         type: Number,
         notify: true,
+        value: 0,
+        observer: 'selectedIndexChanged',
+      },
+      tabNames: {
+        value: [],
+      },
+      _nodePath: {
+        value: [],
       }
-    },
-
-    bind: {
-      'node': 'nodeChanged',
-      'selectedIndex': 'selectedIndexChanged',
-    },
-
-    configure: function() {
-      return {
-        node: null,
-        tabNames: [],
-        _nodePath: [],
-        selectedIndex: 0,
-      };
     },
 
     nodeChanged: function() {

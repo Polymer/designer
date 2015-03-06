@@ -8,12 +8,12 @@
 
     <dom-module id="designer-selection">
       <style>
-        designer-selection {
+        :host {
           display: block;
-          position: absolute;   
-          box-sizing: border-box;         
+          position: absolute;
+          box-sizing: border-box;
         }
-        designer-selection > #bounds {
+        #bounds {
           position: absolute;
           top: 0;
           left: 0;
@@ -23,53 +23,53 @@
           border: solid 1px #88f;
           box-sizing: border-box;
         }
-        designer-selection > .handle {
+        .handle {
           position: absolute;
           box-sizing: border-box;
           width: 8px;
           height: 8px;
           border: solid 1px #88f;
-          background: #fff;        
+          background: #fff;
         }
-        designer-selection > .handle:hover {
+        .handle:hover {
           background: #88f;
         }
-        designer-selection > #top {
+        #top {
           top: -4px;
           left: calc(50% - 4px);
           cursor: ns-resize;
         }
-        designer-selection > #left {
+        #left {
           top: calc(50% - 4px);
           left: -4px;
           cursor: ew-resize;
         }
-        designer-selection > #bottom {
+        #bottom {
           bottom: -4px;
           left: calc(50% - 4px);
           cursor: ns-resize;
         }
-        designer-selection > #right {
+        #right {
           top: calc(50% - 4px);
           right: -4px;
           cursor: ew-resize;
         }
-        designer-selection > #top_left {
+        #top_left {
           top: -4px;
           left: -4px;
           cursor: nwse-resize;
         }
-        designer-selection > #top_right {
+        #top_right {
           top: -4px;
           right: -4px;
           cursor: nesw-resize;
         }
-        designer-selection > #bottom_left {
+        #bottom_left {
           bottom: -4px;
           left: -4px;
           cursor: nesw-resize;
         }
-        designer-selection > #bottom_right {
+        #bottom_right {
           bottom: -4px;
           right: -4px;
           cursor: nwse-resize;
@@ -84,11 +84,9 @@
     </dom-module>
 
     <script type="text/javascript">
+
       Polymer({
         is: 'designer-selection',
-
-        created: function() {
-        },
 
         ready: function() {
           this.directions = ResizeDirection.ALL_DIRECTIONS;
@@ -111,13 +109,13 @@
           this.$.bounds.style.cursor = 'move';
           this._startDrag((function(x, y) {
             return {
-              left: x, 
-              top: y, 
-              width: this.offsetWidth, 
+              left: x,
+              top: y,
+              width: this.offsetWidth,
               height: this.offsetHeight,
             };
           }).bind(this),
-          e.clientX - this.offsetLeft, 
+          e.clientX - this.offsetLeft,
           e.clientY - this.offsetTop);
         },
 
@@ -143,21 +141,21 @@
           this._startDrag((function(x, y) {
             var newWidth =
                 direction.resizesLeft() ? offsetRight - x :
-                direction.resizesRight() ? x : 
+                direction.resizesRight() ? x :
                 this.offsetWidth;
 
             var newHeight =
                 direction.resizesTop() ? offsetBottom - y :
-                direction.resizesBottom() ? y : 
+                direction.resizesBottom() ? y :
                 this.offsetHeight;
 
             var newLeft = direction.resizesLeft() ? x : this.offsetLeft;
             var newTop = direction.resizesTop() ? y : this.offsetTop;
 
             return {
-              left: newLeft, 
+              left: newLeft,
               top: newTop,
-              width: newWidth, 
+              width: newWidth,
               height: newHeight,
             };
           }).bind(this),
@@ -191,7 +189,7 @@
 
           window.addEventListener('mousemove', onMouseMove);
           window.addEventListener('mouseup', onMouseUp);
-          // Note document instead of window: 
+          // Note document instead of window:
           // http://www.quirksmode.org/dom/events/contextmenu.html
           document.addEventListener('contextmenu', onMouseUp);
         },

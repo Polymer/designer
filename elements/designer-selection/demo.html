@@ -19,10 +19,10 @@
       selection.addEventListener('designer-selection-resize', function(event) {
         var detail = event.detail;
         var style = selection.style;
-        style.left = detail.left;
-        style.top = detail.top;
-        style.width = detail.width;
-        style.height = detail.height;
+        style.left = detail.left + 'px';
+        style.top = detail.top + 'px';
+        style.width = detail.width + 'px';
+        style.height = detail.height + 'px';
       });
     </script>
   </body>
