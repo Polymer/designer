@@ -8,8 +8,8 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier', 'dom-utils'],
-    function(pathLib, commands, DomCommandApplier, domUtils) {
+modulate('FrameManager', ['Path', 'Css', 'Commands', 'DomCommandApplier', 'dom-utils'],
+    function(pathLib, cssLib, commands, DomCommandApplier, domUtils) {
   'use strict';
 
   class FrameManager {
@@ -78,6 +78,7 @@ modulate('FrameManager', ['Path', 'Commands', 'DomCommandApplier', 'dom-utils'],
         tagName: element.tagName,
         display: style.display,
         position: style.position,
+        styles: cssLib.collectStyles(element),
       };
     }
 
