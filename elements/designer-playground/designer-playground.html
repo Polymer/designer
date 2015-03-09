@@ -15,6 +15,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../src/parse5/parse5.html">
 <link rel="import" href="../designer-breadcrumb/designer-breadcrumb.html">
 <link rel="import" href="../designer-stage/designer-stage.html">
+<link rel="import" href="../designer-inspector/designer-inspector.html">
 
 <dom-module id="designer-playground">
 
@@ -47,6 +48,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       color: white;
       flex: 0 0 240px;
       z-index: 100;
+      display: flex;
+      flex-direction: column;
     }
     #main > nav > #files > a {
       display: block;
@@ -57,6 +60,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     #main > nav > #files > a:hover {
       text-decoration: underline;
       cursor: pointer;
+    }
+    #main > nav > designer-inspector {
+      flex: 1;
     }
     #main > #doc {
       display: flex;
@@ -93,6 +99,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <a data-demo="demo-doc-4">block</a>
           <a data-demo="demo-doc-5">absolute</a>
         </div>
+        <designer-inspector element-info="{{currentElementInfo}}"></designer-inspector>
         <div id="packages">
           <button on-click="_installPackageClick">Bower Install</button>
         </div>
