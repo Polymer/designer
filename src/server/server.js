@@ -68,7 +68,7 @@ function startServer() {
 function buildFrameScript() {
   // files must be in dependency order
   var paths = [
-    'elements/designer-stage/modulate.js',
+    '../imd/imd.js',
     'src/dom-utils/dom-utils.js',
     'src/path/path.js',
     'src/css/css.js',

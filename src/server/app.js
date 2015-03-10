@@ -49,7 +49,7 @@ app.get('/components/*', function (req, res) {
 function buildFrameScript() {
   // files must be in dependency order
   var paths = [
-    'elements/designer-stage/modulate.js',
+    '../imd/imd.js',
     'src/dom-utils/dom-utils.js',
     'src/path/path.js',
     'src/css/css.js',
@@ -64,7 +64,7 @@ function buildFrameScript() {
 
   var frameScript = '(function() {\n' +
     files.join('\n') +
-    'using(["FrameManager"], function(fm) {\n' +
+    'define(["FrameManager"], function(fm) {\n' +
     '  new fm.FrameManager().listen();\n' +
     '});\n' +
     '})();';

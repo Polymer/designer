@@ -8,7 +8,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-modulate('ParsedHtmlCommandApplier',
+define('ParsedHtmlCommandApplier',
     ['CommandApplier', 'Path', 'parse5_utils', 'Commands'],
     function(CommandApplier, pathLib, parse5_utils, commands) {
 

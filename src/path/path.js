@@ -8,7 +8,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
- modulate('Path', ['Parse5', 'dom-utils'], function(Parse5, domUtils) {
+ define('Path', ['dom-utils'], function(domUtils) {
 
   /**
    * Returns the path to [node] in [doc]. A path is a slash-separated list
