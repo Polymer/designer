@@ -7967,9 +7967,14 @@ function endTagInForeignContent(p, token) {
  * Code distributed by Google as part of the polymer project is also
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
-
- define('Parse5', function() {
-  return require('parse5');
-});
+// Ideally, we would be able to just run the following...
+//
+//   browserify -e node_modules/parse5 -s parse5 -o vendor/parse5.js
+//
+// ...but browserify -> browser-pack -> umd don't actually provide a name to the
+// defined module (they assume a loader and implicit name).
+//
+// So...
+define('vendor/parse5', require('parse5'));
 
 },{"parse5":2}]},{},[23]);
