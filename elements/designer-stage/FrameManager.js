@@ -8,7 +8,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-modulate('FrameManager', ['Path', 'Css', 'Commands', 'DomCommandApplier', 'dom-utils'],
+define('FrameManager', ['Path', 'Css', 'Commands', 'DomCommandApplier', 'dom-utils'],
     function(pathLib, cssLib, commands, DomCommandApplier, domUtils) {
   'use strict';
 

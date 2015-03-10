@@ -1,4 +1,63 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+var queue = [];
+var draining = false;
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    draining = true;
+    var currentQueue;
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        var i = -1;
+        while (++i < len) {
+            currentQueue[i]();
+        }
+        len = queue.length;
+    }
+    draining = false;
+}
+process.nextTick = function (fun) {
+    queue.push(fun);
+    if (!draining) {
+        setTimeout(drainQueue, 0);
+    }
+};
+
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],2:[function(require,module,exports){
 'use strict';
 
 exports.Parser = require('./lib/tree_construction/parser');
@@ -12,7 +71,7 @@ exports.TreeAdapters = {
     htmlparser2: require('./lib/tree_adapters/htmlparser2')
 };
 
-},{"./lib/jsdom/jsdom_parser":6,"./lib/serialization/serializer":8,"./lib/simple_api/simple_api_parser":9,"./lib/tree_adapters/default":15,"./lib/tree_adapters/htmlparser2":16,"./lib/tree_construction/parser":21}],2:[function(require,module,exports){
+},{"./lib/jsdom/jsdom_parser":7,"./lib/serialization/serializer":9,"./lib/simple_api/simple_api_parser":10,"./lib/tree_adapters/default":16,"./lib/tree_adapters/htmlparser2":17,"./lib/tree_construction/parser":22}],3:[function(require,module,exports){
 'use strict';
 
 var Tokenizer = require('../tokenization/tokenizer'),
@@ -271,7 +330,7 @@ exports.isHtmlIntegrationPoint = function (tn, ns, attrs) {
     return ns === NS.SVG && (tn === $.FOREIGN_OBJECT || tn === $.DESC || tn === $.TITLE);
 };
 
-},{"../tokenization/tokenizer":14,"./html":3}],3:[function(require,module,exports){
+},{"../tokenization/tokenizer":15,"./html":4}],4:[function(require,module,exports){
 'use strict';
 
 var NS = exports.NAMESPACES = {
@@ -541,7 +600,7 @@ SPECIAL_ELEMENTS[NS.SVG][$.TITLE] = true;
 SPECIAL_ELEMENTS[NS.SVG][$.FOREIGN_OBJECT] = true;
 SPECIAL_ELEMENTS[NS.SVG][$.DESC] = true;
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 'use strict';
 
 exports.REPLACEMENT_CHARACTER = '\uFFFD';
@@ -591,7 +650,7 @@ exports.CODE_POINT_SEQUENCES = {
     SYSTEM_STRING: [0x53, 0x59, 0x53, 0x54, 0x45, 0x4D] //SYSTEM
 };
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 
 exports.mergeOptions = function (defaults, options) {
@@ -606,7 +665,7 @@ exports.mergeOptions = function (defaults, options) {
     }, {});
 };
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -648,7 +707,7 @@ exports.parseInnerHtml = function (innerHtml, contextElement, treeAdapter) {
     return parser.parseFragment(innerHtml, contextElement);
 };
 }).call(this,require('_process'))
-},{"../tree_construction/parser":21,"./parsing_unit":7,"_process":23}],7:[function(require,module,exports){
+},{"../tree_construction/parser":22,"./parsing_unit":8,"_process":1}],8:[function(require,module,exports){
 'use strict';
 
 var ParsingUnit = module.exports = function (parser) {
@@ -703,7 +762,7 @@ ParsingUnit.prototype.done = function (callback) {
     return this;
 };
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
 
 var DefaultTreeAdapter = require('../tree_adapters/default'),
@@ -899,7 +958,7 @@ Serializer.prototype._serializeDocumentTypeNode = function (node) {
     this.html += '>';
 };
 
-},{"../common/html":3,"../common/utils":5,"../tree_adapters/default":15}],9:[function(require,module,exports){
+},{"../common/html":4,"../common/utils":6,"../tree_adapters/default":16}],10:[function(require,module,exports){
 'use strict';
 
 var Tokenizer = require('../tokenization/tokenizer'),
@@ -1008,7 +1067,7 @@ SimpleApiParser.prototype._emitPendingText = function () {
     }
 };
 
-},{"../common/utils":5,"../tokenization/tokenizer":14,"./tokenizer_proxy":10}],10:[function(require,module,exports){
+},{"../common/utils":6,"../tokenization/tokenizer":15,"./tokenizer_proxy":11}],11:[function(require,module,exports){
 'use strict';
 
 var Tokenizer = require('../tokenization/tokenizer'),
@@ -1132,7 +1191,7 @@ TokenizerProxy.prototype._handleEndTagToken = function (token) {
         this._leaveCurrentNamespace();
 };
 
-},{"../common/foreign_content":2,"../common/html":3,"../common/unicode":4,"../tokenization/tokenizer":14}],11:[function(require,module,exports){
+},{"../common/foreign_content":3,"../common/html":4,"../common/unicode":5,"../tokenization/tokenizer":15}],12:[function(require,module,exports){
 'use strict';
 
 exports.assign = function (tokenizer) {
@@ -1214,7 +1273,7 @@ exports.assign = function (tokenizer) {
         });
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 //NOTE: this file contains auto generated trie structure that is used for named entity references consumption
@@ -1274,7 +1333,7 @@ module.exports = {
     0x5A: {l: {0x61: {l: {0x63: {l: {0x75: {l: {0x74: {l: {0x65: {l: {0x3B: {c: [377]}}}}}}}}}}}, 0x63: {l: {0x61: {l: {0x72: {l: {0x6F: {l: {0x6E: {l: {0x3B: {c: [381]}}}}}}}}}, 0x79: {l: {0x3B: {c: [1047]}}}}}, 0x64: {l: {0x6F: {l: {0x74: {l: {0x3B: {c: [379]}}}}}}}, 0x65: {l: {0x72: {l: {0x6F: {l: {0x57: {l: {0x69: {l: {0x64: {l: {0x74: {l: {0x68: {l: {0x53: {l: {0x70: {l: {0x61: {l: {0x63: {l: {0x65: {l: {0x3B: {c: [8203]}}}}}}}}}}}}}}}}}}}}}}}}}, 0x74: {l: {0x61: {l: {0x3B: {c: [918]}}}}}}}, 0x66: {l: {0x72: {l: {0x3B: {c: [8488]}}}}}, 0x48: {l: {0x63: {l: {0x79: {l: {0x3B: {c: [1046]}}}}}}}, 0x6F: {l: {0x70: {l: {0x66: {l: {0x3B: {c: [8484]}}}}}}}, 0x73: {l: {0x63: {l: {0x72: {l: {0x3B: {c: [119989]}}}}}}}}},
     0x7A: {l: {0x61: {l: {0x63: {l: {0x75: {l: {0x74: {l: {0x65: {l: {0x3B: {c: [378]}}}}}}}}}}}, 0x63: {l: {0x61: {l: {0x72: {l: {0x6F: {l: {0x6E: {l: {0x3B: {c: [382]}}}}}}}}}, 0x79: {l: {0x3B: {c: [1079]}}}}}, 0x64: {l: {0x6F: {l: {0x74: {l: {0x3B: {c: [380]}}}}}}}, 0x65: {l: {0x65: {l: {0x74: {l: {0x72: {l: {0x66: {l: {0x3B: {c: [8488]}}}}}}}}}, 0x74: {l: {0x61: {l: {0x3B: {c: [950]}}}}}}}, 0x66: {l: {0x72: {l: {0x3B: {c: [120119]}}}}}, 0x68: {l: {0x63: {l: {0x79: {l: {0x3B: {c: [1078]}}}}}}}, 0x69: {l: {0x67: {l: {0x72: {l: {0x61: {l: {0x72: {l: {0x72: {l: {0x3B: {c: [8669]}}}}}}}}}}}}}, 0x6F: {l: {0x70: {l: {0x66: {l: {0x3B: {c: [120171]}}}}}}}, 0x73: {l: {0x63: {l: {0x72: {l: {0x3B: {c: [120015]}}}}}}}, 0x77: {l: {0x6A: {l: {0x3B: {c: [8205]}}}, 0x6E: {l: {0x6A: {l: {0x3B: {c: [8204]}}}}}}}}}
 };
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 var UNICODE = require('../common/unicode');
@@ -1391,7 +1450,7 @@ Preprocessor.prototype.retreat = function () {
     this.pos--;
 };
 
-},{"../common/unicode":4}],14:[function(require,module,exports){
+},{"../common/unicode":5}],15:[function(require,module,exports){
 'use strict';
 
 var Preprocessor = require('./preprocessor'),
@@ -3710,7 +3769,7 @@ _[CDATA_SECTION_STATE] = function cdataSectionState(cp) {
     }
 };
 
-},{"../common/unicode":4,"./location_info_mixin":11,"./named_entity_trie":12,"./preprocessor":13}],15:[function(require,module,exports){
+},{"../common/unicode":5,"./location_info_mixin":12,"./named_entity_trie":13,"./preprocessor":14}],16:[function(require,module,exports){
 'use strict';
 
 //Node construction
@@ -3912,7 +3971,7 @@ exports.isElementNode = function (node) {
     return !!node.tagName;
 };
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 //Conversion tables for DOM Level1 structure emulation
@@ -4239,7 +4298,7 @@ exports.isElementNode = function (node) {
     return !!node.attribs;
 };
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 //Const
@@ -4350,7 +4409,7 @@ exports.isQuirks = function (name, publicId, systemId) {
     return false;
 };
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 
 //Const
@@ -4519,7 +4578,7 @@ FormattingElementList.prototype.getElementEntry = function (element) {
     return null;
 };
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 var OpenElementStack = require('./open_element_stack'),
@@ -4530,27 +4589,28 @@ var OpenElementStack = require('./open_element_stack'),
 //Aliases
 var $ = HTML.TAG_NAMES;
 
+
+function setEndLocation(element, endTagToken) {
+    if (element.__location)
+        element.__location.end = endTagToken.location.end;
+}
+
 //NOTE: patch open elements stack, so we can assign end location for the elements
 function patchOpenElementsStack(stack, parser) {
-    function setEndLocation(element) {
-        if (element.__location)
-            element.__location.end = parser.currentToken.location.end;
-    }
-
     stack.pop = function () {
-        setEndLocation(this.current);
+        setEndLocation(this.current, parser.currentToken);
         OpenElementStack.prototype.pop.call(this);
     };
 
     stack.popAllUpToHtmlElement = function () {
         for (var i = this.stackTop; i > 0; i--)
-            setEndLocation(this.items[i]);
+            setEndLocation(this.items[i], parser.currentToken);
 
         OpenElementStack.prototype.popAllUpToHtmlElement.call(this);
     };
 
     stack.remove = function (element) {
-        setEndLocation(element);
+        setEndLocation(element, parser.currentToken);
         OpenElementStack.prototype.remove.call(this, element);
     };
 }
@@ -4588,7 +4648,7 @@ exports.assign = function (parser) {
                 var element = this.openElements.items[i];
 
                 if (this.treeAdapter.getTagName(element) === token.tagName) {
-                    element.__location.end = token.location.end;
+                    setEndLocation(element, token);
                     break;
                 }
             }
@@ -4687,7 +4747,7 @@ exports.assign = function (parser) {
 };
 
 
-},{"../common/html":3,"../tokenization/tokenizer":14,"./open_element_stack":20}],20:[function(require,module,exports){
+},{"../common/html":4,"../tokenization/tokenizer":15,"./open_element_stack":21}],21:[function(require,module,exports){
 'use strict';
 
 var HTML = require('../common/html');
@@ -5068,7 +5128,7 @@ OpenElementStack.prototype.generateImpliedEndTagsWithExclusion = function (exclu
         this.pop();
 };
 
-},{"../common/html":3}],21:[function(require,module,exports){
+},{"../common/html":4}],22:[function(require,module,exports){
 'use strict';
 
 var Tokenizer = require('../tokenization/tokenizer'),
@@ -7897,68 +7957,19 @@ function endTagInForeignContent(p, token) {
     }
 }
 
-},{"../common/foreign_content":2,"../common/html":3,"../common/unicode":4,"../common/utils":5,"../tokenization/tokenizer":14,"../tree_adapters/default":15,"./doctype":17,"./formatting_element_list":18,"./location_info_mixin":19,"./open_element_stack":20}],22:[function(require,module,exports){
-modulate('Parse5', function() {
+},{"../common/foreign_content":3,"../common/html":4,"../common/unicode":5,"../common/utils":6,"../tokenization/tokenizer":15,"../tree_adapters/default":16,"./doctype":18,"./formatting_element_list":19,"./location_info_mixin":20,"./open_element_stack":21}],23:[function(require,module,exports){
+/**
+ * @license
+ * Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+ * This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+ * The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+ * The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+ * Code distributed by Google as part of the polymer project is also
+ * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+ */
+
+ define('Parse5', function() {
   return require('parse5');
 });
 
-},{"parse5":1}],23:[function(require,module,exports){
-// shim for using process in browser
-
-var process = module.exports = {};
-var queue = [];
-var draining = false;
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    draining = true;
-    var currentQueue;
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        var i = -1;
-        while (++i < len) {
-            currentQueue[i]();
-        }
-        len = queue.length;
-    }
-    draining = false;
-}
-process.nextTick = function (fun) {
-    queue.push(fun);
-    if (!draining) {
-        setTimeout(drainQueue, 0);
-    }
-};
-
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-// TODO(shtylman)
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-},{}]},{},[22]);
+},{"parse5":2}]},{},[23]);

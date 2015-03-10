@@ -14,7 +14,7 @@
  * Commands themselves are simple JSON objects so that they can be
  * serialized over postMessage.
  */
-modulate('Commands', function() {
+define('Commands', function() {
 
   // exports
   return {
