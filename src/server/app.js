@@ -56,7 +56,10 @@ function buildFrameScript() {
     'src/commands/commands.js',
     'src/commands/CommandApplier.js',
     'src/commands/DomCommandApplier.js',
-    'elements/designer-stage/FrameManager.js',
+    'src/protocol/Request.js',
+    'src/async/async.js',
+    'src/protocol/ServerConnection.js',
+    'src/protocol/DocumentServer.js',
   ];
   var files = paths.map(function(p) {
     return fs.readFileSync(p, {encoding: 'utf-8'})
@@ -64,8 +67,9 @@ function buildFrameScript() {
 
   var frameScript = '(function() {\n' +
     files.join('\n') +
-    'define(["FrameManager"], function(fm) {\n' +
-    '  new fm.FrameManager().listen();\n' +
+    'define(["ServerConnection", "DocumentServer"], function(ServerConnection, DocumentServer) {\n' +
+    '  var connection = new ServerConnection(window);\n' +
+    '  new DocumentServer(connection);\n' +
     '});\n' +
     '})();';
   return frameScript;

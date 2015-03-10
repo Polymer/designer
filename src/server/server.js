@@ -61,35 +61,6 @@ function startServer() {
   server = app.listen(port);
 }
 
-/**
- * Dynamically build the frame.js script so that we have edit-refresh
- * development.
- */
-function buildFrameScript() {
-  // files must be in dependency order
-  var paths = [
-    '../imd/imd.js',
-    'src/dom-utils/dom-utils.js',
-    'src/path/path.js',
-    'src/css/css.js',
-    'src/commands/commands.js',
-    'src/commands/CommandApplier.js',
-    'src/commands/DomCommandApplier.js',
-    'elements/designer-stage/FrameManager.js',
-  ];
-  var files = paths.map(function(p) {
-    return fs.readFileSync(p, {encoding: 'utf-8'});
-  });
-
-  var frameScript = '(function() {\n' +
-    files.join('\n') +
-    'using(["FrameManager"], function(fm) {\n' +
-    '  new fm.FrameManager().listen();\n' +
-    '});\n' +
-    '})();';
-  return frameScript;
-}
-
 module.exports = {
   startServer: startServer
 };

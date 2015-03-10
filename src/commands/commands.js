@@ -26,7 +26,6 @@ define('Commands', function() {
 
     setAttribute: function(path, attribute, oldValue, newValue) {
       return {
-        messageType: 'command',
         commandType: 'setAttribute',
         path: path,
         attribute: attribute,
@@ -44,7 +43,6 @@ define('Commands', function() {
      */
     setCssProperties: function(path, selector, properties) {
       return {
-        messageType: 'command',
         commandType: 'setCssProperties',
         path: path,
         selector: selector,
@@ -54,13 +52,12 @@ define('Commands', function() {
 
     moveElement: function(path, targetPath, position) {
       return {
-        messageType: 'command',
         commandType: 'moveElement',
         path: path,
         targetPath: targetPath,
         position: position,
       };
     },
-    
+
   };
 });

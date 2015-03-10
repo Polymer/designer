@@ -11,6 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../../src/commands/commands.html">
 <link rel="import" href="../../src/css/css.html">
+<link rel="import" href="../../src/protocol/document-client.html">
 <link rel="import" href="../designer-selection/designer-selection.html">
 
 <dom-module id="designer-stage">
@@ -72,7 +73,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </dom-module>
 
 <script>
-  define(['Commands'], function(commands) {
+  define(['Commands', 'DocumentClient', 'ClientConnection'],
+      function(commands, DocumentClient, ClientConnection) {
     'use strict';
 
     /**
@@ -124,17 +126,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         hoverPath: {
           type: String,
           value: null,
+        },
+
+        _client: {
+          type: Object,
+          value: null,
         }
       },
 
       ready() {
-        window.addEventListener('message', this._onMessage.bind(this));
         this.$.selection.addEventListener('designer-selection-resize',
             this._onSelectionResize.bind(this));
-
         window.addEventListener('mouseup', this._onMouseUp.bind(this));
-
-        var token = this.token = this._generateToken();
         this._reset();
       },
 
@@ -143,6 +146,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.currentMousePosition = null;
         this.insertPosition = null;
         this.hoverPath = null;
+        this._client = null;
         this._hideHover();
         this.$.selection.style.display = 'none';
       },
@@ -162,7 +166,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             // Return a new Promise so we can resolve/reject on load/error
             // events from the frame
             return new Promise((function(resolve, reject) {
-              var frame = this._getFrame();
+              var frame = Polymer.dom(this).querySelector('iframe');
               if (frame != null) {
                 Polymer.dom(this).removeChild(frame);
               }
@@ -193,10 +197,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
               // listen to load and error events from the frame
               var onFrameLoad = (function() {
-                frame.contentWindow.postMessage({
-                  messageType: 'handshake',
-                  token: this.token
-                }, '*');
+
+                var connection = new ClientConnection(
+                    window, frame.contentWindow);
+                this._client = new DocumentClient(connection);
+
                 frame.removeEventListener(onFrameLoad);
                 frame.removeEventListener(onFrameError);
                 resolve({document: doc, content: content});
@@ -218,63 +223,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       selectNode(path) {
-        this._sendSelectElementAtPath(path);
-      },
-
-      _getFrame() {
-        return Polymer.dom(this).querySelector('iframe');
-      },
-
-      dispatchCommand(command) {
-        this._getFrame().contentWindow.postMessage(command, "*");
-        this.dispatchEvent(new CustomEvent('designer-command', {
-          detail: command,
-        }));
-      },
-
-      _generateToken() {
-        var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        var token = '';
-        for (var i = 0; i < 16; i++) {
-          token += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-        }
-        return token;
-      },
-
-      _onMessage(e) {
-        if (e.data.token != this.token) {
-          throw new Error('Invalid message token', token);
-        }
-        var messages = e.data.messages;
-        for (var i = 0; i < messages.length; i++) {
-          var message = messages[i];
-          switch (message.messageType) {
-            case 'selectionBoundsChange':
-              this._onSelectionBoundsChange(message);
-              break;
-            case 'newSelection':
-              this._onNewSelection(message);
-              break;
-            case 'hoverElement':
-              this._onHoverElement(message);
-              break;
-            case 'command':
-              this._onCommand(message);
-              break;
-            default:
-              console.warn('<designer-stage> Unknown message type: ',
-                  message.messageType);
-          }
+        if (this._client !== null) {
+          this._client.selectElementAtPath(path)
+              .then(function(response) {
+                this._updateSelectionBounds(response.bounds);
+                this._updateCurrentElement(response.elementInfo);
+              }.bind(this));
         }
       },
 
-      _onCommand(message) {
-        this.dispatchEvent(new CustomEvent('designer-command', {
-          detail: message,
-        }));
-      },
-
-      _onSelectionBoundsChange(message) {
+      _updateSelectionBounds(message) {
         var style = this.$.selection.style;
         style.display = 'block';
         style.top = message.top + 'px';
@@ -283,7 +241,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         style.height = message.height + 'px';
       },
 
-      _onNewSelection(message) {
+      _updateCurrentElement(message) {
         // Set the valid resize handles
         var position = message.position;
         var display = message.display;
@@ -315,38 +273,40 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         };
       },
 
-      _onHoverElement(message) {
-        var hover = this.$.hover;
-        var hoverStyle = hover.style;
+      _updateHoverElement(message) {
 
-        if (message.path == null) {
+        if (message == null) {
           this._hideHover();
           return;
-        } else {
-          hoverStyle.display = 'block';
-          hoverStyle.top = message.top + 'px';
-          hoverStyle.left = message.left + 'px';
-          hoverStyle.width = message.width + 'px';
-          hoverStyle.height = message.height + 'px';
         }
+
+        var hover = this.$.hover;
+        var hoverStyle = hover.style;
+        var bounds = message.bounds;
+
+        hoverStyle.display = 'block';
+        hoverStyle.top = bounds.top + 'px';
+        hoverStyle.left = bounds.left + 'px';
+        hoverStyle.width = bounds.width + 'px';
+        hoverStyle.height = bounds.height + 'px';
 
         if (this.currentElementInfo &&
             this.currentElementInfo.position == 'static') {
-          var verticalMid = message.top + message.height / 2;
+          var verticalMid = bounds.top + bounds.height / 2;
           var insertAbove = this.currentMousePosition.y < verticalMid;
           var insertBelow = this.currentMousePosition.y > verticalMid;
 
           if (insertAbove) {
             hover.classList.add('insert-above');
             this.insertPosition = commands.InsertPosition.before;
-            this.hoverPath = message.path;
+            this.hoverPath = message.elementInfo.path;
           } else {
             hover.classList.remove('insert-above');
           }
           if (insertBelow) {
             hover.classList.add('insert-below');
             this.insertPosition = commands.InsertPosition.after;
-            this.hoverPath = message.path;
+            this.hoverPath = message.elementInfo.path;
           } else {
             hover.classList.remove('insert-below');
           }
@@ -362,26 +322,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onSelectionResize(e) {
-        // TODO: store this in the selection?
+        // TODO: store mouse position in the selection element?
         // Rationale: we're alredy storing the bounds state there
-        this.currentMousePosition = {
+        var cursor = this.currentMousePosition = {
           x: e.detail.cursor.x - this.offsetLeft,
           y: e.detail.cursor.y - this.offsetTop,
         };
-        this._getFrame().contentWindow.postMessage({
-          messageType: 'selectionChange',
-          bounds: e.detail.bounds,
-          cursor: this.currentMousePosition,
-        }, '*');
+        var bounds = e.detail.bounds;
+        this._client.selectionBoundsChanged(bounds, cursor)
+            .then(function(response) {
+              this._updateSelectionBounds(response.bounds);
+              this._updateHoverElement(response.hover);
+            }.bind(this));
       },
 
       _onMouseDown(e) {
-        this._sendSelectElementAtPoint(e.clientX, e.clientY);
+        var bounds = this.getBoundingClientRect();
+        this._client.selectElementAtPoint(e.clientX, e.clientY, bounds)
+            .then(function(response) {
+              this._updateSelectionBounds(response.bounds);
+              this._updateCurrentElement(response.elementInfo);
+            }.bind(this));
       },
 
       _onMouseUp(e) {
         if (this.hoverPath != null && this.insertPosition != null) {
-          this.dispatchCommand(
+          this._dispatchCommand(
             commands.moveElement(
               this.currentElementInfo.path,
               this.hoverPath,
@@ -391,27 +357,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onSelectionClick(e) {
-        this._sendSelectElementAtPoint(e.clientX, e.clientY);
-      },
-
-      _sendSelectElementAtPoint(clientX, clientY) {
         var bounds = this.getBoundingClientRect();
-        var x = clientX - bounds.left;
-        var y = clientY - bounds.top;
-        this._getFrame().contentWindow.postMessage({
-          messageType: 'selectElementAtPoint',
-          x: x,
-          y: y
-        }, "*");
+        this._client.selectElementAtPoint(e.clientX, e.clientY, bounds)
+            .then(function(response) {
+              this._updateSelectionBounds(response.bounds);
+              this._updateCurrentElement(response.elementInfo);
+            }.bind(this));
       },
 
-      _sendSelectElementAtPath(path) {
-        var frame = this._getFrame();
-        if (frame == null) return;
-        frame.contentWindow.postMessage({
-          messageType: 'selectElementAtPath',
-          path: path,
-        }, "*");
+      _dispatchCommand(command) {
+        return this._client.sendCommand(command)
+            .then(function(response) {
+              this._updateSelectionBounds(response.bounds);
+              this._updateCurrentElement(response.elementInfo);
+              this.dispatchEvent(new CustomEvent('designer-command', {
+                detail: command,
+              }));
+            }.bind(this));
       },
 
     });
