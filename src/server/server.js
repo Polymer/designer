@@ -71,6 +71,7 @@ function buildFrameScript() {
     'elements/designer-stage/modulate.js',
     'src/dom-utils/dom-utils.js',
     'src/path/path.js',
+    'src/css/css.js',
     'src/commands/commands.js',
     'src/commands/CommandApplier.js',
     'src/commands/DomCommandApplier.js',

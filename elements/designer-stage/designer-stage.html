@@ -10,6 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../core-asset/core-asset.html">
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../../src/commands/commands.html">
+<link rel="import" href="../../src/css/css.html">
 <link rel="import" href="../designer-selection/designer-selection.html">
 
 <dom-module id="designer-stage">
@@ -299,11 +300,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           console.warn("can't handle position", data.position);
           selection.directions = [];
         }
+
+        // TODO(nevir): This indirection seems overkill. This is, I think,
+        // **always** going to be message without the `messageType` property.
+        // We should just pass it through. Messages over the wire might be
+        // better wrapped.
         this.currentElementInfo = {
           path: message.path,
           tagName: message.tagName,
           display: message.display,
           position: message.position,
+          styles: message.styles,
         };
       },
 
