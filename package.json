@@ -13,7 +13,7 @@
   },
   "scripts": {
     "start": "./bin/polyserve",
-    "build": "browserify -o vendor/parse5/parse5.js vendor/parse5/parse5_amd.js"
+    "build": "browserify -e node_modules/parse5 -s parse5 -o vendor/parse5.js"
   },
   "dependencies": {
     "bower": "^1.3.12",
