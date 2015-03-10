@@ -164,12 +164,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             return new Promise((function(resolve, reject) {
               var frame = this._getFrame();
               if (frame != null) {
-                Polymer.dom.removeChild(frame, this);
+                Polymer.dom(this).removeChild(frame);
               }
               frame = document.createElement('iframe');
               frame.setAttribute('id', 'frame');
               frame.setAttribute('sandbox', 'allow-scripts');
-              Polymer.dom.appendChild(frame, this);
+              Polymer.dom(this).appendChild(frame);
 
               // create an HTML document from the content
               var doc = document.implementation.createHTMLDocument();
@@ -222,7 +222,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _getFrame() {
-        return Polymer.dom.querySelector('iframe', this);
+        return Polymer.dom(this).querySelector('iframe');
       },
 
       dispatchCommand(command) {
