@@ -9,6 +9,7 @@
  */
 
  modulate('Css', ['Path'], function(pathLib) {
+  'use strict';
 
   return {
 
@@ -24,8 +25,9 @@
 
     /**
      * @typedef {Object} StyleSheetInfo
-     * @property {string} ownerNode A pathlib path representing the `<style>`
-     *     element that defines the stylesheet.
+     * @property {string} ownerNodePath A pathlib path representing the
+     *     `<style>` or `<link>` element that defines the stylesheet.
+     * @property {string} stylesheetUrl The URL for the stylesheet, if relevant.
      * @property {Array<StyleRuleInfo>} rules The rules matching the element.
      */
 
@@ -43,14 +45,16 @@
 
       var doc = element.ownerDocument;
       for (var i = 0, sheet; sheet = doc.styleSheets[i]; i++) {
-        var rules = this.collectStyleRules(element, sheet.rules || sheet.cssRules);
+        var rules = this.collectStyleRules(element, sheet.cssRules);
         if (!rules || !rules.length) continue;
 
         var sheetInfo = {rules: rules};
         if (sheet.ownerNode) {
-          sheetInfo.ownerNode = pathLib.getNodePath(sheet.ownerNode, doc);
+          sheetInfo.ownerNodePath = pathLib.getNodePath(sheet.ownerNode, doc);
         }
-        // TODO(nevir): Support linked stylesheets, too.
+        if (sheet.href) {
+          sheetInfo.stylesheetUrl = sheet.href;
+        }
 
         results.push(sheetInfo);
       }
@@ -67,16 +71,10 @@
      */
     collectStyleRules(element, rules) {
       if (!rules) return null;
-      var matches = (
-          element.matches ||
-          element.webkitMatchesSelector ||
-          element.mozMatchesSelector ||
-          element.msMatchesSelector ||
-          element.oMatchesSelector).bind(element);
 
       var results = [];
       for (var i = 0, rule; rule = rules[i]; i++) {
-        if (!matches(rule.selectorText)) continue;
+        if (!element.matches(rule.selectorText)) continue;
 
         var ruleInfo = {
           selector: rule.selectorText,
