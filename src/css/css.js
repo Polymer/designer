@@ -76,21 +76,29 @@
       for (var i = 0, rule; rule = rules[i]; i++) {
         if (!element.matches(rule.selectorText)) continue;
 
-        var ruleInfo = {
-          selector: rule.selectorText,
-          index: 0,  // TODO(nevir): Handle duplicate selectors!
-          text: rule.cssText,
-          styles: {},
-        };
-        for (var j = 0, style; style = rule.style[j]; j++) {
-          ruleInfo.styles[style] = rule.style[style];
-        }
-        results.push(ruleInfo);
+        results.push(this.getRuleInfo(rule));
       }
-
       return results;
     },
 
+    getRuleInfo(rule) {
+      return {
+        selector: rule.selectorText,
+        index: 0,  // TODO(nevir): Handle duplicate selectors!
+        text: rule.cssText,
+        styles: this.getStyleProperties(rule.style),
+      };
+    },
+
+    getStyleProperties(style) {
+      var styles = {};
+      for (var j = 0, property; property = style[j]; j++) {
+        styles[property] = style[property];
+      }
+      return styles;
+    },
+
+    // TODO(justinfagnani): normalizeSelector(removeTransientPseudos : boolean)
   };
 
 });

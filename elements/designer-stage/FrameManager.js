@@ -79,6 +79,7 @@ define('FrameManager', ['Path', 'Css', 'Commands', 'DomCommandApplier', 'dom-uti
         display: style.display,
         position: style.position,
         styles: cssLib.collectStyles(element),
+        computedStyle: cssLib.getStyleProperties(style),
       };
     }
 
