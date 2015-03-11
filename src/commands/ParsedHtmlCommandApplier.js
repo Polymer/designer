@@ -8,8 +8,11 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-define('ParsedHtmlCommandApplier',
-    ['CommandApplier', 'Path', 'parse5_utils', 'Commands'],
+define('polymer-designer/commands/ParsedHtmlCommandApplier',[
+      'polymer-designer/commands/CommandApplier',
+      'polymer-designer/path',
+      'polymer-designer/parse5/parse5-utils',
+      'polymer-designer/commands'],
     function(CommandApplier, pathLib, parse5_utils, commands) {
 
   var getNodeFromPath = pathLib.getNodeFromPath;

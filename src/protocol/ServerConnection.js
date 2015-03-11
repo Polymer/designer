@@ -8,7 +8,9 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-define('ServerConnection', ['async', 'Request'], function(async, Request) {
+define('polymer-designer/protocol/ServerConnection',
+    ['polymer-designer/async', 'polymer-designer/protocol/request'],
+    function(async, Request) {
   'use strict';
 
   class ServerConnection {

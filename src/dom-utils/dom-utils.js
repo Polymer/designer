@@ -8,7 +8,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-define('dom-utils', [], function() {
+define('polymer-designer/dom-utils', function() {
 
   // polyfill Array.prototype.find(), from
   // developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find

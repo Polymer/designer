@@ -14,7 +14,7 @@
  * Commands themselves are simple JSON objects so that they can be
  * serialized over postMessage.
  */
-define('Commands', function() {
+define('polymer-designer/commands', function() {
 
   // exports
   return {

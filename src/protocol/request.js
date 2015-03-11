@@ -8,7 +8,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-define('Request', function() {
+define('polymer-designer/protocol/request', function() {
   'use strict';
 
   class Request {

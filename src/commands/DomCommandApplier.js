@@ -8,7 +8,10 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-define('DomCommandApplier', ['CommandApplier', 'Path', 'Commands'],
+define('polymer-designer/commands/DomCommandApplier', [
+      'polymer-designer/commands/CommandApplier',
+      'polymer-designer/path',
+      'polymer-designer/commands'],
     function(CommandApplier, pathLib, commands) {
 
   var getNodeFromPath = pathLib.getNodeFromPath;

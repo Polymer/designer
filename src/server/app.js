@@ -67,7 +67,7 @@ function buildFrameScript() {
 
   var frameScript = '(function() {\n' +
     files.join('\n') +
-    'define(["ServerConnection", "DocumentServer"], function(ServerConnection, DocumentServer) {\n' +
+    'define(["polymer-designer/protocol/ServerConnection", "polymer-designer/protocol/DocumentServer"], function(ServerConnection, DocumentServer) {\n' +
     '  var connection = new ServerConnection(window);\n' +
     '  new DocumentServer(connection);\n' +
     '});\n' +

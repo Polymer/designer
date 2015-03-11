@@ -73,8 +73,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </dom-module>
 
 <script>
-  define(['Commands', 'DocumentClient', 'ClientConnection'],
-      function(commands, DocumentClient, ClientConnection) {
+  define([
+        'polymer-designer/commands',
+        'polymer-designer/protocol/DocumentClient',
+        'polymer-designer/protocol/ClientConnection',
+        'polymer-designer/designer-selection/ResizeDirection'],
+      function(commands, DocumentClient, ClientConnection, ResizeDirection) {
+
     'use strict';
 
     /**
