@@ -1,0 +1,123 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../polymer/polymer.html">
+
+<link rel="import" href="../../src/rework-utils/rework-utils.html">
+
+<!--
+Displays the style rules that currently apply to `element`, and provides an
+editing interface for them.
+-->
+<dom-module id="designer-style-rule-editor">
+
+  <style>
+    :host {
+      box-sizing: border-box;
+      display: block;
+      font-family: monospace;
+      font-size: 0.8em;
+    }
+
+    .selector:after {
+      content: ' \007b'; /* ' {' - Escaped due to Polymer style parser bug. */
+    }
+    .properties:after {
+      content: ' \007d'; /* '}' - Escaped due to Polymer style parser bug. */
+    }
+
+    .property {
+      padding: 0 10px;
+    }
+    .property .key {
+      font-weight: bold;
+    }
+    .property .key:after {
+      content: ':';
+    }
+    .property .value:after {
+      content: ';';
+    }
+  </style>
+
+  <!--
+  OMGWTFBBQ contentEditable?!?!?
+
+  Well, yes. It actually gives us the sort of behavior that we want when editing
+  the values of the CSS properties. A nice inline editor, that line wraps and
+  all that jazz. We just have to be careful to
+  -->
+  <template>
+    <header class="selector">{{rule.selector}}</header>
+    <section class="properties">
+      <template is="x-repeat" items="{{_styles}}">
+        <div class="property">
+          <span class="key">{{item.key}}</span>
+          <span class="value" contentEditable>{{item.value}}</span>
+        </div>
+      </template>
+    </section>
+  </template>
+
+</dom-module>
+
+<script>
+define(['polymer-designer/rework-utils'], function(reworkUtils) {
+  'use strict';
+
+  Polymer({
+
+    is: 'designer-style-rule-editor',
+
+    properties: {
+
+      'rule': {
+        type:      Object,
+        observer: '_ruleChanged',
+      },
+
+    },
+
+    listeners: {
+      'input': '_onInput',
+    },
+
+    _ruleChanged() {
+      if (!this.rule) {
+        this._styles = [];
+        return;
+      }
+
+      // TODO(nevir): Collapse rules into shorthands.
+      let styles = Object.keys(this.rule.styles).map(function(key) {
+        return {
+          key: key,
+          value: this.rule.styles[key],
+        };
+      }.bind(this));
+      // Hide unspecified (expanded) shorthand properties.
+      this._styles = styles.filter(function (s) { return s.value !== 'initial' });
+    },
+
+    _onInput(event) {
+      let propertyEl = event.target;
+      while (propertyEl && !propertyEl.classList.contains('property')) {
+        propertyEl = propertyEl.parentNode;
+      }
+      if (!propertyEl) return;
+
+      let key   = propertyEl.querySelector('.key').textContent;
+      let value = propertyEl.querySelector('.value').textContent;
+      this.fire('designer-style-ruler-editor-style-changed', {key: key, value: value});
+    },
+
+  });
+
+});
+</script>

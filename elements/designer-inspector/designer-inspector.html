@@ -9,6 +9,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../../../polymer/polymer.html">
 
+<link rel="import" href="designer-style-inspector.html">
+
 <!--
 Inspects an element and provides tidbits about its properties, styles, and more.
 -->
@@ -27,7 +29,9 @@ Inspects an element and provides tidbits about its properties, styles, and more.
   </style>
 
   <template>
-    <pre class="dumped-state">{{_dumpedState}}</pre>
+    <designer-style-inspector
+        source-document="{{sourceDocument}}"
+        element-info="{{elementInfo}}"></designer-style-inspector>
   </template>
 
 </dom-module>
@@ -39,18 +43,17 @@ Inspects an element and provides tidbits about its properties, styles, and more.
     is: 'designer-inspector',
 
     properties: {
+
       /**
        * Metadata published by the stage about the currently selected element.
-       *
-       * @property {string} display  The element's display style.
-       * @property {string} path     The path to the element (pathLib style).
-       * @property {string} position The element's position style.
-       * @property {string} tagName  The element's tag name in ALL CAPS.
        */
       'elementInfo': {
         type:      Object,
         observer: '_elementInfoChanged',
       },
+
+      /** The document where edits should be made */
+      'sourceDocument': Object,
 
     },
 
