@@ -232,19 +232,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      _updateSelectionBounds(message) {
+      _updateSelectionBounds(bounds) {
         var style = this.$.selection.style;
         style.display = 'block';
-        style.top = message.top + 'px';
-        style.left = message.left + 'px';
-        style.width = message.width + 'px';
-        style.height = message.height + 'px';
+        style.top = bounds.top + 'px';
+        style.left = bounds.left + 'px';
+        style.width = bounds.width + 'px';
+        style.height = bounds.height + 'px';
       },
 
-      _updateCurrentElement(message) {
+      _updateCurrentElement(elementInfo) {
+        this.currentElementInfo = elementInfo;
+
         // Set the valid resize handles
-        var position = message.position;
-        var display = message.display;
+        var position = elementInfo.position;
+        var display = elementInfo.display;
 
         if (position === 'static' || position === 'relative') {
           if (display === 'block') {
@@ -258,31 +260,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           console.warn("can't handle position", data.position);
           selection.directions = [];
         }
-
-        // TODO(nevir): This indirection seems overkill. This is, I think,
-        // **always** going to be message without the `messageType` property.
-        // We should just pass it through. Messages over the wire might be
-        // better wrapped.
-        this.currentElementInfo = {
-          path: message.path,
-          tagName: message.tagName,
-          display: message.display,
-          position: message.position,
-          styles: message.styles,
-          computedStyle: message.computedStyle,
-        };
       },
 
-      _updateHoverElement(message) {
+      _updateHoverElement(elementInfo, bounds) {
 
-        if (message == null) {
+        if (elementInfo == null) {
           this._hideHover();
           return;
         }
 
         var hover = this.$.hover;
         var hoverStyle = hover.style;
-        var bounds = message.bounds;
 
         hoverStyle.display = 'block';
         hoverStyle.top = bounds.top + 'px';
@@ -299,14 +287,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           if (insertAbove) {
             hover.classList.add('insert-above');
             this.insertPosition = commands.InsertPosition.before;
-            this.hoverPath = message.elementInfo.path;
+            this.hoverPath = elementInfo.path;
           } else {
             hover.classList.remove('insert-above');
           }
           if (insertBelow) {
             hover.classList.add('insert-below');
             this.insertPosition = commands.InsertPosition.after;
-            this.hoverPath = message.elementInfo.path;
+            this.hoverPath = elementInfo.path;
           } else {
             hover.classList.remove('insert-below');
           }
@@ -332,7 +320,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._client.selectionBoundsChanged(bounds, cursor)
             .then(function(response) {
               this._updateSelectionBounds(response.bounds);
-              this._updateHoverElement(response.hover);
+              this._updateHoverElement(response.hover.elementInfo,
+                  response.hover.bounds);
             }.bind(this));
       },
 
