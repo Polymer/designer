@@ -51,6 +51,31 @@ define('polymer-designer/commands/ParsedHtmlCommandApplier',[
       },
     },
 
+    'setTextContent': {
+      canApply: function(doc, command) {
+        var node = getNodeFromPath(command.path, doc);
+        // Don't apply if there are element children.
+        return !node.childNodes.some(function(child) {
+          return child.nodeName !== '#text';
+        });
+      },
+
+      apply: function(doc, command) {
+        var node = getNodeFromPath(command.path, doc);
+        parse5_utils.setTextContent(node, command.newValue);
+      },
+
+      canUndo: function(doc, command) {
+        var node = getNodeFromPath(command.path, doc);
+        return parse5_utils.getTextContent(node) === command.newValue;
+      },
+
+      undo: function(doc, command) {
+        var node = getNodeFromPath(command.path, doc);
+        parse5_utils.setTextContent(node, command.oldValue);
+      },
+    },
+
     'moveElement': {
       canApply: function(doc, command) {
         var el = pathLib.getNodeFromPath(command.path, doc);

@@ -43,6 +43,35 @@ define('polymer-designer/commands/DomCommandApplier', [
       },
     },
 
+    'setTextContent': {
+      canApply: function(doc, command) {
+        var node = getNodeFromPath(command.path, doc);
+        if (!node) return false;
+        var hasElementChildren = node.children === 0;
+        if (hasElementChildren) {
+          console.warn(
+              'Not applying', command,
+              'because target node', node, 'has element children');
+        }
+        return !hasElementChildren;
+      },
+
+      apply: function(doc, command) {
+        var node = getNodeFromPath(command.path, doc);
+        node.textContent = command.newValue;
+      },
+
+      canUndo: function(doc, command) {
+        var node = getNodeFromPath(command.path, doc);
+        return node.textContent === command.newValue;
+      },
+
+      undo: function(doc, command) {
+        var node = getNodeFromPath(command.path, doc);
+        node.textContent = command.oldValue;
+      },
+    },
+
     'moveElement': {
       canApply: function(doc, command) {
         var el = pathLib.getNodeFromPath(command.path, doc);

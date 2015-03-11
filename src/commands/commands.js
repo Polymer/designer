@@ -34,6 +34,16 @@ define('polymer-designer/commands', function() {
       };
     },
 
+    setTextContent: function(path, oldValue, newValue) {
+      return {
+        messageType: 'command',
+        commandType: 'setTextContent',
+        path: path,
+        oldValue: oldValue,
+        newValue: newValue,
+      };
+    },
+
     /**
      * [path] and [selector] are used to find the CSS declaration to edit,
      * which may be:
