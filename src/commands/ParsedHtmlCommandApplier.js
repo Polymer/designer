@@ -15,7 +15,18 @@ define('polymer-designer/commands/ParsedHtmlCommandApplier',[
       'polymer-designer/commands'],
     function(CommandApplier, pathLib, parse5_utils, commands) {
 
-  var getNodeFromPath = pathLib.getNodeFromPath;
+  function getNodeFromPath(path, doc) {
+    // TODO(nevir): Fix this at a more appropriate place!
+    //
+    // Currently, the parsed document's <head> is out of sync with the live
+    // document because we're injecting a <base> and a <script> element into it.
+    //
+    // This shifts the offsets of any paths involving <head>.
+    var fixedPath = path.replace(/(HEAD:\d+\/\D+:)(\d+)/, function(match, prefix, index) {
+      return prefix + (Number(index) - 2);
+    });
+    return pathLib.getNodeFromPath(fixedPath, doc);
+  }
 
   var commandHandlers = {
     'setAttribute': {
