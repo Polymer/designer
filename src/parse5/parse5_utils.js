@@ -8,7 +8,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
- define('parse5_utils', function() {
+ define('polymer-designer/parse5/parse5-utils', function() {
 
   function getAttributeIndex(element, name) {
     for (var i = 0; i < element.attrs.length; i++) {

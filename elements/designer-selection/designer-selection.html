@@ -84,7 +84,8 @@
     </dom-module>
 
     <script type="text/javascript">
-      (function() {
+      define(['polymer-designer/designer-selection/ResizeDirection'],
+          function(ResizeDirection) {
         'use strict';
 
         Polymer({
@@ -196,7 +197,7 @@
             document.addEventListener('contextmenu', onMouseUp);
           },
         });
-      })();
+      });
     </script>
   </body>
 </html>

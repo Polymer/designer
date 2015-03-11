@@ -8,7 +8,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
- define('async', function() {
+ define('polymer-designer/async', function() {
   'use strict';
 
   class Deferred {

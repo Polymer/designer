@@ -8,7 +8,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-define('DocumentClient', function() {
+define('polymer-designer/protocol/DocumentClient', function() {
   'use strict';
 
   class DocumentClient {

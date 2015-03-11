@@ -8,7 +8,8 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
- define('Path', ['dom-utils'], function(domUtils) {
+ define('polymer-designer/path', ['polymer-designer/dom-utils'],
+     function(domUtils) {
 
   /**
    * Returns the path to [node] in [doc]. A path is a slash-separated list

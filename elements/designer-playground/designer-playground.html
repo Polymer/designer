@@ -116,8 +116,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script>
 
-  define(['DomCommandApplier', 'ParsedHtmlCommandApplier', 'vendor/parse5', 'Path'],
-      function(DomCommandApplier, ParsedHtmlCommandApplier, Parse5, pathLib) {
+  define([
+        'polymer-designer/commands/DomCommandApplier',
+        'polymer-designer/commands/ParsedHtmlCommandApplier',
+        'parse5',
+        'polymer-designer/path'],
+      function(
+        DomCommandApplier,
+        ParsedHtmlCommandApplier,
+        Parse5,
+        pathLib) {
+
     'use strict';
 
     var parser = new Parse5.Parser(null, {locationInfo: true});

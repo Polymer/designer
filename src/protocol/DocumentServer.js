@@ -8,7 +8,12 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-define('DocumentServer', ['Path', 'Css', 'Commands', 'DomCommandApplier', 'dom-utils'],
+define('polymer-designer/protocol/DocumentServer', [
+      'polymer-designer/path',
+      'polymer-designer/css',
+      'polymer-designer/commands',
+      'polymer-designer/commands/DomCommandApplier',
+      'polymer-designer/dom-utils'],
     function(pathLib, cssLib, commands, DomCommandApplier, domUtils) {
   'use strict';
 

@@ -8,7 +8,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
- define('Css', ['Path'], function(pathLib) {
+ define('polymer-designer/css', ['polymer-designer/path'], function(pathLib) {
   'use strict';
 
   return {

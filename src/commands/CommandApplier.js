@@ -8,7 +8,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-define('CommandApplier', function() {
+define('polymer-designer/commands/CommandApplier', function() {
 
   /**
    * Applies commands to documents, including embedded and linked
