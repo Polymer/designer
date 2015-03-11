@@ -237,6 +237,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
+      /**
+       * Applies a command to the live document (the frame).
+       *
+       * @param {Command} command
+       */
+      executeCommand(command) {
+        return this._client.sendCommand(command)
+            .then(function(response) {
+              this._updateSelectionBounds(response.bounds);
+              this._updateCurrentElement(response.elementInfo);
+            }.bind(this));
+      },
+
       _updateSelectionBounds(bounds) {
         var style = this.$.selection.style;
         style.display = 'block';
@@ -341,7 +354,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _onMouseUp(e) {
         if (this.hoverPath != null && this.insertPosition != null) {
-          this._dispatchCommand(
+          this.fire('designer-command',
             commands.moveElement(
               this.currentElementInfo.path,
               this.hoverPath,
@@ -356,17 +369,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             .then(function(response) {
               this._updateSelectionBounds(response.bounds);
               this._updateCurrentElement(response.elementInfo);
-            }.bind(this));
-      },
-
-      _dispatchCommand(command) {
-        return this._client.sendCommand(command)
-            .then(function(response) {
-              this._updateSelectionBounds(response.bounds);
-              this._updateCurrentElement(response.elementInfo);
-              this.dispatchEvent(new CustomEvent('designer-command', {
-                detail: command,
-              }));
             }.bind(this));
       },
 
