@@ -36,10 +36,31 @@
     }
   }
 
+  function getTextContent(element) {
+    var content = '';
+    for (var child of element.childNodes) {
+      if (child.nodeName === '#text') {
+        content += child.value;
+      } else {
+        content += getTextContent(child);
+      }
+    }
+    return content;
+  }
+
+  function setTextContent(element, value) {
+    console.assert(typeof value === 'string');
+    element.childNodes = [
+      {nodeName: '#text', value: value},
+    ];
+  }
+
   return {
     getAttributeIndex: getAttributeIndex,
     getAttribute: getAttribute,
     setAttribute: setAttribute,
+    getTextContent: getTextContent,
+    setTextContent: setTextContent,
   };
 
 });
