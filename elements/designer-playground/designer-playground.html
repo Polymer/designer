@@ -151,6 +151,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'currentElementInfo.path': 'pathChanged',
       },
 
+      listeners: {
+        'designer-command': '_onDesignerCommand',
+      },
+
       pathChanged() {
         if (this.currentElementInfo != null) {
           var path = this.currentElementInfo.path;
@@ -176,18 +180,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         };
       },
 
-      ready() {
-        this.$.stage.addEventListener('designer-command', (function(e) {
-          var command = e.detail;
-
-          this.domCommandApplier.apply(command);
-          this.parsedCommandApplier.apply(command);
-
-          if (this.parsedDocument != null) {
-            this.$.html.textContent =
-                serializer.serialize(this.parsedDocument);
-          }
-        }).bind(this));
+      _onDesignerCommand(event, command) {
+        this.domCommandApplier.apply(command);
+        this.parsedCommandApplier.apply(command);
+        this.$.stage.executeCommand(command);
+        this.$.html.textContent = serializer.serialize(this.parsedDocument);
       },
 
       _navOnClick(e) {
