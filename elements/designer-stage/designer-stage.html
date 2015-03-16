@@ -188,11 +188,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               // insert a script tag with the frame.js source
               var frameScriptElement = doc.createElement('script');
               frameScriptElement.textContent = frameScript;
+              frameScriptElement.setAttribute('designer-exclude', '');
               doc.head.insertBefore(frameScriptElement, doc.head.firstChild);
 
               // data: URIs need a base for relative URLs
               var base = doc.createElement('base');
               base.setAttribute('href', this.baseURI);
+              base.setAttribute('designer-exclude', '');
               doc.head.insertBefore(base, doc.head.firstChild);
 
               // set the iframe src to the new document

@@ -12,6 +12,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <head>
     <title>path.js Test</title>
     <meta charset="UTF-8">
+    <link rel="import" href="../../../imd/imd.html"/>
     <script src="../../../mocha/mocha.js"></script>
     <script src="../../../chai/chai.js"></script>
     <link rel="stylesheet" href="../../../mocha/mocha.css"/>
@@ -28,7 +29,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </div>
 
     <script>
-using(['Path', 'Parse5'], function(path, Parse5) {
+define(['polymer-designer/path', 'parse5', 'chai', 'polymer-designer/parse5/parse5-utils'],
+    function(path, Parse5, chai, parse5Utils) {
+  'use strict';
+
   mocha.setup('tdd');
   // mocha.checkLeaks();
 
@@ -38,7 +42,7 @@ using(['Path', 'Parse5'], function(path, Parse5) {
 
   suite('path', function() {
 
-    // We must include the doctype so that 
+    // We must include the doctype so that
     //   1) parse5 is in standards mode
     //   2) The DOM trees are the same (browser inserts doctype node)
     var docText = "<!DOCTYPE html><div id='A'>a1<div id='B'>b1</div>a2</div>";
@@ -48,7 +52,7 @@ using(['Path', 'Parse5'], function(path, Parse5) {
 
     // Sanity check that the parsed docs are the same
     assert.equal(
-        '<!DOCTYPE html>'+domDoc.documentElement.outerHTML, 
+        '<!DOCTYPE html>'+domDoc.documentElement.outerHTML,
         serializer.serialize(parsedDoc));
 
     function doTests(documentType, doc) {
@@ -83,12 +87,19 @@ using(['Path', 'Parse5'], function(path, Parse5) {
                 'BODY:1/DIV:0/#TEXT:2');
           });
 
+          test('filters nodes', function() {
+            assert.equal(path.getNodePath(divAText2, doc, function(n) {
+              return !((n.id && n.id === 'B') ||
+                  (n.attrs && parse5Utils.getAttribute(n, 'id') === 'B'));
+            }), 'BODY:1/DIV:0/#TEXT:1');
+          });
+
       });
 
       suite('getNodeFromPath on ' + documentType, function() {
 
         test('returns the node for a path to a top-level element', function() {
-          console.log(doc);
+          // console.log(doc);
           assert.equal(path.getNodeFromPath('BODY:1/DIV:0', doc), divA);
         });
 
@@ -121,6 +132,14 @@ using(['Path', 'Parse5'], function(path, Parse5) {
           assert.throws(function () {
             path.getNodeFromPath('BODY:3', doc);
           }, RangeError);
+        });
+
+        test('filters nodes', function() {
+          assert.equal(path.getNodeFromPath('BODY:1/DIV:0/#TEXT:1', doc,
+            function(n) {
+              return !((n.id && n.id === 'B') ||
+                  (n.attrs && parse5Utils.getAttribute(n, 'id') === 'B'));
+          }), divAText2);
         });
 
       });
