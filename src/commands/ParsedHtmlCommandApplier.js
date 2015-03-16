@@ -11,7 +11,7 @@
 define('polymer-designer/commands/ParsedHtmlCommandApplier',[
       'polymer-designer/commands/CommandApplier',
       'polymer-designer/path',
-      'polymer-designer/parse5/parse5-utils',
+      'dom5',
       'polymer-designer/commands'],
     function(CommandApplier, pathLib, parse5_utils, commands) {
 
