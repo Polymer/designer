@@ -31,33 +31,6 @@ function startServer() {
 
   app.use('/', require('./app'));
 
-  app.get('/component/*', function (req, res) {
-
-    var url = parseUrl(req.url, true);
-
-    var bowerFile = fs.readFileSync('bower.json');
-    var bowerJson = JSON.parse(bowerFile);
-    var bowerPackageName = bowerJson.name;
-    var bowerComponentDir = 'bower_components';
-
-    // Serve designer2 files from . and other components from bower_components
-    var splitPath = url.pathname.split(path.sep).slice(2);
-    splitPath = splitPath[0] == bowerPackageName
-       ? splitPath.slice(1)
-       : [bowerComponentDir].concat(splitPath);
-    var filePath = splitPath.join(path.sep);
-
-    // The designer-stage frame has a null origin, so we need to
-    // allow cross-origin requests for imports to work
-    res.append('Access-Control-Allow-Origin', '*');
-
-    if (filePath == 'elements/designer-stage/frame.js') {
-      res.send(buildFrameScript());
-    } else {
-      send(req, filePath).pipe(res);
-    }
-  });
-
   server = app.listen(port);
 }
 
