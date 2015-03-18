@@ -7,9 +7,10 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<link rel="import" href="../../../core-asset/core-asset.html">
 <link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../../core-asset/core-asset.html">
 <link rel="import" href="../../src/commands/commands.html">
+<link rel="import" href="../../src/hydrolysis/hydrolysis.html">
 <link rel="import" href="../../src/css/css.html">
 <link rel="import" href="../../src/protocol/document-client.html">
 <link rel="import" href="../designer-selection/designer-selection.html">
@@ -77,8 +78,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'polymer-designer/commands',
         'polymer-designer/protocol/DocumentClient',
         'polymer-designer/protocol/ClientConnection',
-        'polymer-designer/designer-selection/ResizeDirection'],
-      function(commands, DocumentClient, ClientConnection, ResizeDirection) {
+        'polymer-designer/designer-selection/ResizeDirection',
+        'hydrolysis'],
+      function(commands,
+               DocumentClient,
+               ClientConnection,
+               ResizeDirection,
+               hydrolysis) {
 
     'use strict';
 
@@ -128,6 +134,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         _client: {
           type: Object,
           value: null,
+        },
+
+        /**
+         * Monomers is the `hydrolysis`-provided database of Polymer metadata.
+         * @type {Monomers}
+         */
+        _monomers: {
+          type: Object,
+          value: null
         }
       },
 
@@ -149,14 +164,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       /**
-       * @returns {Promise<Document>} The modified document with an injected
-       * <script> tag for the message handler.
+       * Sets the current document and injects the message handler.
+       * @param {[type]} content The document source.
+       * @param {[type]} url     The document location.
+       * @returns {Promise<Document>} The modified document.
        */
-      setDocument(content) {
+      setDocument(content, url) {
         var module = document.createElement('dom-module');
         var frameScriptAsset = module.import('designer-stage', '#frame-script');
+        var loader = new hydrolysis.Loader({host: new URL(url).hostname});
+        loader.addResolver(new hydrolysis.XHRResolver());
+        this.monomers = new hydrolysis.Monomers(true, loader);
 
         this._reset();
+
 
         return frameScriptAsset.load()
           .then((function(frameScript) {
@@ -205,7 +226,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                 frame.removeEventListener(onFrameLoad);
                 frame.removeEventListener(onFrameError);
-                resolve({document: doc, content: content});
+                this.monomers.load(url).then(function(documentDescriptor) {
+                  return documentDescriptor.htmlLoaded;
+                }).then(function(parsedDocument) {
+                  resolve({document: doc, content: content, html: parsedDocument.ast});
+                });
               }).bind(this);
               frame.addEventListener('load', onFrameLoad);
 
