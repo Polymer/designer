@@ -51,6 +51,8 @@ function buildFrameScript() {
     'src/commands/DomCommandApplier.js',
     'src/protocol/Request.js',
     'src/async/async.js',
+    'src/text/PositionWalker.js',
+    'src/text/CursorManager.js',
     'src/protocol/ServerConnection.js',
     'src/protocol/DocumentServer.js',
   ];
@@ -61,6 +63,8 @@ function buildFrameScript() {
   var frameScript = '(function() {\n' +
     files.join('\n') +
     'define(["polymer-designer/protocol/ServerConnection", "polymer-designer/protocol/DocumentServer"], function(ServerConnection, DocumentServer) {\n' +
+    '  "use strict";\n' +
+    '  window.Polymer = { dom: "shadow" };\n' +
     '  var connection = new ServerConnection(window);\n' +
     '  new DocumentServer(connection);\n' +
     '});\n' +
