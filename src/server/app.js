@@ -34,6 +34,10 @@ app.get('/components/*', function (req, res) {
        : [bowerComponentDir].concat(splitPath);
     var filePath = splitPath.join(path.sep);
 
+    // The designer-stage frame has a null origin, so we need to
+    // allow cross-origin requests for imports to work
+    res.append('Access-Control-Allow-Origin', '*');
+
     if (filePath == 'elements/designer-stage/frame.js') {
       // dynamically build frame.js for edit-refresh goodness
       res.send(buildFrameScript());
