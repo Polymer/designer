@@ -1,0 +1,312 @@
+<!doctype html>
+<html>
+  <head>
+    <title>PositionWalker Test</title>
+    <meta charset="UTF-8">
+    <link rel="import" href="../../../imd/imd.html">
+    <script src="../../src/text/PositionWalker.js"></script>
+    <script src="../../../mocha/mocha.js"></script>
+    <script src="../../../chai/chai.js"></script>
+    <link rel="stylesheet" href="../../../mocha/mocha.css"/>
+    <style>
+      #d4 {
+        border: solid 1px blue;
+        width: 200px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <div id="d1"></div>
+    <div id="d2">abc</div>
+    <div id="d3">abc<span>def</span>ghi</div>
+    <div id="d4">
+      This is some longer content, with <span>spans</span>, that will
+      wrap because the containing div has a narrow width. It's used to test cursor
+      navigation with PositionState.
+    </div>
+    <script>
+
+define(['polymer-designer/PositionWalker', 'chai'], function(PositionWalker, chai) {
+  console.assert(PositionWalker != null);
+
+  mocha.setup('tdd');
+  mocha.checkLeaks();
+
+  var assert = chai.assert;
+
+  var d1 = document.querySelector('#d1');
+  var d2 = document.querySelector('#d2');
+  var d3 = document.querySelector('#d3');
+
+
+  suite('PositionWalker', function() {
+
+    test('starts with offset 0 in container for an empty div', function() {
+      var p = new PositionWalker(d1);
+      assert.equal(p.currentNode, d1);
+      assert.equal(p.localOffset, 0);
+      assert.equal(p.isAtBeginning, true);
+      assert.equal(p.isAtEnd, true);
+    });
+
+    test('nextNode() is a no-op in an empty div', function() {
+      var p = new PositionWalker(d1);
+      p.nextNode();
+      assert.equal(p.currentNode, d1);
+      assert.equal(p.localOffset, 0);
+      assert.equal(p.isAtBeginning, true);
+      assert.equal(p.isAtEnd, true);
+    });
+
+    test('nextPosition() is a no-op in an empty div', function() {
+      var p = new PositionWalker(d1);
+      p.nextPosition();
+      assert.equal(p.currentNode, d1);
+      assert.equal(p.localOffset, 0);
+      assert.equal(p.isAtBeginning, true);
+      assert.equal(p.isAtEnd, true);
+    });
+
+    test('previousNode() is a no-op in an empty div', function() {
+      var p = new PositionWalker(d1);
+      p.previousNode();
+      assert.equal(p.currentNode, d1);
+      assert.equal(p.localOffset, 0);
+      assert.equal(p.isAtBeginning, true);
+      assert.equal(p.isAtEnd, true);
+    });
+
+    test('previousPosition() is a no-op in an empty div', function() {
+      var p = new PositionWalker(d1);
+      p.previousPosition();
+      assert.equal(p.currentNode, d1);
+      assert.equal(p.localOffset, 0);
+      assert.equal(p.isAtBeginning, true);
+      assert.equal(p.isAtEnd, true);
+    });
+
+    test('nextNode() moves to next element', function() {
+      var t1 = d3.firstChild;
+      var span = d3.childNodes[1];
+      var p = new PositionWalker(d3);
+      assert.equal(p.currentNode, t1);
+      p.nextNode();
+      assert.equal(p.currentNode, span);
+      assert.equal(p.localOffset, 0);
+      assert.equal(p.isAtBeginning, false);
+      assert.equal(p.isAtEnd, false);
+    });
+
+    test('nextPosition() moves forward in a text node', function() {
+      var p = new PositionWalker(d2);
+      p.nextPosition();
+      assert.equal(p.currentNode, d2.firstChild);
+      assert.equal(p.localOffset, 1);
+      assert.equal(p.isAtBeginning, false);
+      assert.equal(p.isAtEnd, false);
+      p.nextPosition();
+      assert.equal(p.currentNode, d2.firstChild);
+      assert.equal(p.localOffset, 2);
+    });
+
+    test('nextPosition() moves to the end in a text node', function() {
+      var p = new PositionWalker(d2);
+      p.nextPosition();
+      p.nextPosition();
+      p.nextPosition();
+      assert.equal(p.currentNode, d2.firstChild);
+      assert.equal(p.localOffset, 3);
+      assert.equal(p.isAtEnd, true);
+    });
+
+    test('nextPosition() doesn\'t move off the end in a text node', function() {
+      var p = new PositionWalker(d2);
+      p.nextPosition();
+      p.nextPosition();
+      p.nextPosition();
+      p.nextPosition();
+      assert.equal(p.currentNode, d2.firstChild);
+      assert.equal(p.localOffset, 3);
+      assert.equal(p.isAtEnd, true);
+    });
+
+    test('prevPosition() moves back from the end in a text node', function() {
+      var p = new PositionWalker(d2);
+      p.nextPosition();
+      p.nextPosition();
+      p.nextPosition();
+      assert.equal(p.currentNode, d2.firstChild);
+      assert.equal(p.localOffset, 3);
+      assert.equal(p.isAtEnd, true);
+      p.previousPosition();
+      assert.equal(p.currentNode, d2.firstChild);
+      assert.equal(p.localOffset, 2);
+      assert.equal(p.isAtEnd, false);
+    });
+
+    test('nextPosition() moves into the next text node', function() {
+      var p = new PositionWalker(d3);
+      p.nextPosition();
+      p.nextPosition();
+      p.nextPosition();
+      assert.equal(p.currentNode, d3.childNodes[1].firstChild);
+      assert.equal(p.localOffset, 0);
+    });
+
+    test('previousPosition() moves back in a text node', function() {
+      var p = new PositionWalker(d2);
+      p.nextPosition();
+      assert.equal(p.currentNode, d2.firstChild);
+      assert.equal(p.localOffset, 1);
+
+      p.previousPosition();
+      assert.equal(p.currentNode, d2.firstChild);
+      assert.equal(p.localOffset, 0);
+    });
+
+    test('previousPosition() moves from the end in a text node', function() {
+      var p = new PositionWalker(d2);
+      p.nextPosition();
+      p.nextPosition();
+      p.nextPosition();
+      assert.equal(p.currentNode, d2.firstChild);
+      assert.equal(p.localOffset, 3);
+
+      p.previousPosition();
+      assert.equal(p.currentNode, d2.firstChild);
+      assert.equal(p.localOffset, 2);
+    });
+
+    test('previousPosition() moves into the previous text node', function() {
+      var p = new PositionWalker(d3);
+      p.nextPosition();
+      p.nextPosition();
+      p.nextPosition();
+      assert.equal(p.currentNode, d3.childNodes[1].firstChild);
+      assert.equal(p.localOffset, 0);
+
+      p.previousPosition();
+      assert.equal(p.currentNode, d3.firstChild);
+      assert.equal(p.localOffset, 2);
+    });
+
+    test('tracks a single char added to an empty div', function() {
+      var div = document.createElement('div');
+      var p = new PositionWalker(div);
+      var text = document.createTextNode(' ');
+      div.appendChild(text);
+
+      p.refresh();
+      assert.equal(p.isAtBeginning, true);
+      assert.equal(p.isAtEnd, false);
+
+      p.nextPosition();
+      assert.equal(p.isAtBeginning, false);
+      assert.equal(p.isAtEnd, true);
+    });
+
+    test('tracks a second char added to a div', function() {
+      var div = document.createElement('div');
+      var text = document.createTextNode(' ');
+      div.appendChild(text);
+
+      var p = new PositionWalker(div);
+      assert.equal(p.isAtBeginning, true);
+      assert.equal(p.isAtEnd, false);
+
+      p.nextPosition();
+      assert.equal(p.isAtBeginning, false);
+      assert.equal(p.isAtEnd, true);
+      var text2 = document.createTextNode('_');
+      div.appendChild(text2);
+
+      p.refresh();
+      assert.equal(p.isAtBeginning, false);
+      assert.equal(p.isAtEnd, false);
+
+      p.nextPosition();
+      assert.equal(p.isAtBeginning, false);
+      assert.equal(p.isAtEnd, true);
+    });
+
+    test('handles the only text node being removed', function() {
+      var div = document.createElement('div');
+      var text = document.createTextNode('1');
+      div.appendChild(text);
+
+      var p = new PositionWalker(div);
+      assert.equal(p.isAtBeginning, true);
+      assert.equal(p.isAtEnd, false);
+      assert.equal(p.localOffset, 0);
+
+      text.remove();
+      p.refresh();
+
+      assert.equal(p.isAtBeginning, true);
+      assert.equal(p.isAtEnd, true);
+      assert.equal(p.currentNode, div);
+      assert.equal(p.localOffset, 0);
+    });
+
+    test('move to next node when currentNode is removed', function() {
+      var div = document.createElement('div');
+      var text1 = document.createTextNode('1');
+      var text2 = document.createTextNode('2');
+      div.appendChild(text1);
+      div.appendChild(text2);
+
+      var p = new PositionWalker(div);
+      assert.equal(p.isAtBeginning, true);
+      assert.equal(p.isAtEnd, false);
+      assert.equal(p.currentNode, text1);
+      assert.equal(p.localOffset, 0);
+
+      text1.remove();
+      p.refresh();
+      assert.equal(p.isAtBeginning, true);
+      assert.equal(p.isAtEnd, false);
+      assert.equal(p.currentNode, text2);
+      assert.equal(p.localOffset, 0);
+
+      p.nextPosition();
+      assert.equal(p.isAtBeginning, false);
+      assert.equal(p.isAtEnd, true);
+      assert.equal(p.currentNode, text2);
+      assert.equal(p.localOffset, 1);
+    });
+
+    test('move to previous node when currentNode is removed', function() {
+      var div = document.createElement('div');
+      var text1 = document.createTextNode('1');
+      var text2 = document.createTextNode('2');
+      div.appendChild(text1);
+      div.appendChild(text2);
+
+      var p = new PositionWalker(div);
+      assert.equal(p.currentNode, text1);
+      assert.equal(p._currentNodeClone.nodeValue, '1');
+
+      p.nextPosition();
+      assert.equal(p.isAtBeginning, false);
+      assert.equal(p.isAtEnd, false);
+      assert.equal(p.currentNode, text2);
+      assert.equal(p.localOffset, 0);
+      assert.equal(p._currentNodeClone.nodeValue, '2');
+
+      text2.remove();
+      p.refresh();
+      assert.equal(p.isAtBeginning, false);
+      assert.equal(p.isAtEnd, true);
+      assert.equal(p.currentNode, text1);
+      assert.equal(p.localOffset, 1);
+    });
+
+  });
+
+  mocha.run();
+
+});
+    </script>
+  </body>
+</html>
