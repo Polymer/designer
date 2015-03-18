@@ -17,6 +17,11 @@ define('polymer-designer/protocol/DocumentServer', [
     function(pathLib, cssLib, commands, DomCommandApplier, domUtils) {
   'use strict';
 
+  function designerNodeFilter(node) {
+    return node.nodeType !== Node.ELEMENT_NODE ||
+        !node.hasAttribute('designer-exclude');
+  }
+
   class DocumentServer {
 
     constructor(connection) {
@@ -72,7 +77,8 @@ define('polymer-designer/protocol/DocumentServer', [
     }
 
     selectElementAtPath(request) {
-      this.currentElement = pathLib.getNodeFromPath(request.message.path);
+      this.currentElement = pathLib.getNodeFromPath(request.message.path,
+          document, designerNodeFilter);
       request.reply({
         bounds: this._elementBounds(this.currentElement),
         elementInfo: this._elementInfo(this.currentElement),
@@ -125,7 +131,8 @@ define('polymer-designer/protocol/DocumentServer', [
       // TODO: Send all commands to the editor as well so that it can apply
       // them to it's document model
       var element = this.currentElement;
-      var path = pathLib.getNodePath(element);
+      var path = pathLib.getNodePath(element, document,
+          designerNodeFilter);
       var command = commands.setAttribute(path, 'style',
         element.getAttribute('style'),
         `top: ${bounds.top}px; ` +
@@ -149,7 +156,8 @@ define('polymer-designer/protocol/DocumentServer', [
     _elementInfo(element) {
       var style = window.getComputedStyle(element);
       return {
-        path: pathLib.getNodePath(element),
+        path: pathLib.getNodePath(element, document,
+            designerNodeFilter),
         tagName: element.tagName,
         display: style.display,
         position: style.position,
