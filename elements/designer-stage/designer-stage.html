@@ -107,13 +107,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: null,
         },
 
-        /**
-         * @type {string}
-         */
-        token: {
-          type: String,
-          value: null,
-        },
+        // /**
+        //  * @type {string}
+        //  */
+        // token: {
+        //   type: String,
+        //   value: null,
+        // },
 
         /**
          * @type {{x: number, y: number}}
@@ -171,14 +171,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             // Return a new Promise so we can resolve/reject on load/error
             // events from the frame
             return new Promise((function(resolve, reject) {
-              var frame = Polymer.dom(this).querySelector('iframe');
+              var frame = Polymer.dom(this.root).querySelector('iframe');
               if (frame != null) {
-                Polymer.dom(this).removeChild(frame);
+                Polymer.dom(this.root).removeChild(frame);
+                this._connection.disconnect();
+
               }
               frame = document.createElement('iframe');
               frame.setAttribute('id', 'frame');
               frame.setAttribute('sandbox', 'allow-scripts');
-              Polymer.dom(this).appendChild(frame);
+              Polymer.dom(this.root).appendChild(frame);
 
               // create an HTML document from the content
               var doc = document.implementation.createHTMLDocument();
@@ -205,9 +207,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               // listen to load and error events from the frame
               var onFrameLoad = (function() {
 
-                var connection = new ClientConnection(
+                this._connection = new ClientConnection(
                     window, frame.contentWindow);
-                this._client = new DocumentClient(connection);
+                this._client = new DocumentClient(this._connection);
 
                 frame.removeEventListener(onFrameLoad);
                 frame.removeEventListener(onFrameError);

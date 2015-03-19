@@ -23,7 +23,7 @@ define('polymer-designer/protocol/ClientConnection',
     constructor(target, otherWindow) {
       this.target = target;
       this.otherWindow = otherWindow;
-      this._token = this._generateToken();;
+      this._token = this._generateToken();
       this._requestId = 0;
       this._pendingRequests = new Map();
       this._handlers = new Map();
@@ -40,7 +40,8 @@ define('polymer-designer/protocol/ClientConnection',
             reject(new Error('Illegal message received during handshake'));
           }
           this.target.removeEventListener('message', handshakeListener);
-          this.target.addEventListener('message', this._onMessage.bind(this));
+          this._messageHandler = this._onMessage.bind(this);
+          this.target.addEventListener('message', this._messageHandler);
           resolve();
         }.bind(this);
         this.target.addEventListener('message', handshakeListener);
@@ -53,12 +54,16 @@ define('polymer-designer/protocol/ClientConnection',
       }.bind(this));
     }
 
+    disconnect() {
+      this.target.removeEventListener('message', this._messageHandler);
+    }
+
     _onMessage(event) {
       var id = event.data.id;
       var message = event.data.message;
 
       if (event.data.token !== this._token) {
-        throw new Error('Invalid token');
+        throw new Error('Invalid token ' + event.data.token + ' ' + this._token);
       }
 
       if (id != null) {
