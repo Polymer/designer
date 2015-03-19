@@ -13,6 +13,7 @@ var fs = require('fs');
 var http = require('http');
 var path = require('path');
 var parseUrl = require('url').parse;
+var polyserve = require('polyserve');
 var send = require('send');
 
 var bowerComponentDir = 'bower_components';
@@ -22,29 +23,14 @@ app.get('/', function (req, res) {
   send(req, path.join(__dirname, 'index.html')).pipe(res);
 });
 
-app.get('/components/*', function (req, res) {
+// dynamically build frame.js for edit-refresh goodness
+app.get('/components/polymer-designer/elements/designer-stage/frame.js',
+  function (req, res) {
+    res.send(buildFrameScript());
+  }
+);
 
-    var url = parseUrl(req.url, true);
-
-    // Serve designer2 files from the polymer-designer package
-    // and other components from bower_components
-    var splitPath = url.pathname.split(path.sep).slice(2);
-    splitPath = splitPath[0] == 'polymer-designer'
-       ? splitPath.slice(1)
-       : [bowerComponentDir].concat(splitPath);
-    var filePath = splitPath.join(path.sep);
-
-    // The designer-stage frame has a null origin, so we need to
-    // allow cross-origin requests for imports to work
-    res.append('Access-Control-Allow-Origin', '*');
-
-    if (filePath == 'elements/designer-stage/frame.js') {
-      // dynamically build frame.js for edit-refresh goodness
-      res.send(buildFrameScript());
-    } else {
-      send(req, filePath).pipe(res);
-    }
-  });
+app.use('/components/', polyserve.makeApp());
 
 /**
  * Dynamically build the frame.js script so that we have edit-refresh
