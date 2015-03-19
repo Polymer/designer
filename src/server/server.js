@@ -22,11 +22,6 @@ function startServer() {
   // TODO: allow port to be set with flag, fallback to other ports
   var port = 8080;
 
-  app.use(function(request, response, next) {
-    console.log(request.method, request.url);
-    next();
-  });
-
   app.use('/api', require('./api'));
 
   app.use('/', require('./app'));
