@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * @license
  * Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
@@ -8,12 +7,5 @@
  * Code distributed by Google as part of the polymer project is also
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
-var resolve = require('resolve');
 
-process.title = 'polyserve';
-
-resolve('polymer-designer', {basedir: process.cwd()}, function(error, path) {
-  console.log('path', path);
-  var polyserve = path ? require(path) : require('..');
-  polyserve.server.startServer();
-});
+require('./src/server/server').startServer();

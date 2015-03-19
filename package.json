@@ -8,11 +8,7 @@
     "url": "http://polymer.github.io/LICENSE.txt"
   },
   "main": "main.js",
-  "bin": {
-    "polyserve": "bin/polyserve"
-  },
   "scripts": {
-    "start": "./bin/polyserve",
     "build": "./build.sh"
   },
   "dependencies": {
