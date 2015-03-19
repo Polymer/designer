@@ -282,12 +282,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      _updateHoverElement(elementInfo, bounds) {
-
-        if (elementInfo == null) {
+      _updateHoverElement(hoverInfo) {
+        if (hoverInfo == null) {
           this._hideHover();
           return;
         }
+
+        let elementInfo = hoverInfo.elementInfo;
+        let bounds = hoverInfo.bounds;
 
         var hover = this.$.hover;
         var hoverStyle = hover.style;
@@ -340,8 +342,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._client.selectionBoundsChanged(bounds, cursor)
             .then(function(response) {
               this._updateSelectionBounds(response.bounds);
-              this._updateHoverElement(response.hover.elementInfo,
-                  response.hover.bounds);
+              this._updateHoverElement(response.hover);
             }.bind(this));
       },
 
