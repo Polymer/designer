@@ -17,6 +17,9 @@ var polyserve = require('polyserve');
 var send = require('send');
 
 var bowerComponentDir = 'bower_components';
+var componentHeaders = {
+  'Access-Control-Allow-Origin': '*'
+}
 var app = express();
 
 app.get('/', function (req, res) {
@@ -30,7 +33,7 @@ app.get('/components/polymer-designer/elements/designer-stage/frame.js',
   }
 );
 
-app.use('/components/', polyserve.makeApp());
+app.use('/components/', polyserve.makeApp(bowerComponentDir, null, componentHeaders));
 
 /**
  * Dynamically build the frame.js script so that we have edit-refresh

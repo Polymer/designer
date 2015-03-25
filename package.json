@@ -17,6 +17,7 @@
     "css": "^2.2.0",
     "dom5": "git://github.com/PolymerLabs/dom5.git",
     "express": "^4.8.5",
+    "hydrolysis": "PolymerLabs/hydrolysis",
     "parse5": "^1.4.0",
     "polyserve": "^0.2.0",
     "resolve": "^1.0.0",

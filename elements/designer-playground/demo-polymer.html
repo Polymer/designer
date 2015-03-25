@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="/components/webcomponentsjs/webcomponents.js"></script>
+    <link rel="import" href="/components/polymer/polymer.html">
+    <style>
+      body {
+        position: relative;
+        margin: 0;
+        padding: 0;
+      }
+      .foo {
+        position: absolute;
+        background: #faa;
+        box-sizing: border-box;
+      }
+      static-a {
+        height: 100px;
+        display: block;
+        border: solid 1px black;
+        box-sizing: border-box;
+        background: green;
+      }
+      static-b {
+        height: 100px;
+        display: block;
+        border: solid 1px black;
+        box-sizing: border-box;
+        background: blue;
+        width: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <dom-module id="static-a">
+      <template>
+        <div></div>
+      </template>
+    </dom-module>
+    <dom-module id="static-b">
+      <template>
+        <div></div>
+      </template>
+    </dom-module>
+    <dom-module id="static-c">
+      <template>
+        <div><content></content></div>
+      </template>
+    </dom-module>
+    <dom-module id="static-d">
+      <template>
+        <div><content></content></div>
+      </template>
+    </dom-module>
+    <script>
+    Polymer({
+      is: 'static-a',
+      properties: {
+        prop1: {
+          type: String,
+          value: "biz"
+        },
+        prop2: {
+          type: Number,
+          value: 75
+        },
+        prop3: {
+          type: Object
+        }
+      }
+    });
+    Polymer({
+      is: 'static-b',
+      properties: {
+        propb1: {
+          type: String,
+          value: "biz"
+        },
+        propb2: {
+          type: Number,
+          value: 75
+        },
+        propb3: {
+          type: Object
+        }
+      }
+    });
+    Polymer({
+      is: 'static-c',
+      properties: {
+        propc1: {
+          type: String,
+          value: "biz"
+        },
+        propc2: {
+          type: Number,
+          value: 75
+        },
+        propc3: {
+          type: Object
+        }
+      }
+    });
+    Polymer({
+      is: 'static-d',
+      properties: {
+        propd1: {
+          type: String,
+          value: "biz"
+        },
+        propd2: {
+          type: Number,
+          value: 75
+        },
+        propd3: {
+          type: Object
+        }
+      }
+    });
+    </script>
+    <static-a></static-a>
+    <static-b></static-b>
+    <button>Button</button>
+    <static-c class="foo" style="top: 100px; left: 100px; height: 100px;width: 400px;">Hello Designer A</static-c>
+    <static-d class="foo" style="top: 300px; left: 100px; height: 100px;width: 400px;">Hello Designer B</static-d>
+  </body>
+</html>

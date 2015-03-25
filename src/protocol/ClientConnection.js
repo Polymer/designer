@@ -63,6 +63,7 @@ define('polymer-designer/protocol/ClientConnection',
       var message = event.data.message;
 
       if (event.data.token !== this._token) {
+        console.log(event.data.token);
         throw new Error('Invalid token');
       }
 
