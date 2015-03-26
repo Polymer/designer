@@ -8,7 +8,10 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
- define('polymer-designer/css', ['polymer-designer/path'], function(pathLib) {
+ define('polymer-designer/css', [
+   'polymer-designer/path',
+   'polymer-designer/dom-utils'], function(pathLib, domUtils) {
+
   'use strict';
 
   return {
@@ -50,7 +53,8 @@
 
         var sheetInfo = {rules: rules};
         if (sheet.ownerNode) {
-          sheetInfo.ownerNodePath = pathLib.getNodePath(sheet.ownerNode, doc);
+          sheetInfo.ownerNodePath = pathLib.getNodePath(sheet.ownerNode, doc,
+            domUtils.designerNodeFilter);
         }
         if (sheet.href) {
           sheetInfo.stylesheetUrl = sheet.href;

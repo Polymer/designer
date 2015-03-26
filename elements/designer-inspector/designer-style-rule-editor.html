@@ -78,7 +78,7 @@ define(['polymer-designer/rework-utils'], function(reworkUtils) {
     properties: {
 
       'rule': {
-        type:      Object,
+        type: Object,
         observer: '_ruleChanged',
       },
 
@@ -102,7 +102,9 @@ define(['polymer-designer/rework-utils'], function(reworkUtils) {
         };
       }.bind(this));
       // Hide unspecified (expanded) shorthand properties.
-      this._styles = styles.filter(function (s) { return s.value !== 'initial' });
+      this._styles = styles.filter(function (s) {
+        return s.value !== 'initial';
+      });
     },
 
     _onInput(event) {
@@ -112,9 +114,12 @@ define(['polymer-designer/rework-utils'], function(reworkUtils) {
       }
       if (!propertyEl) return;
 
-      let key   = propertyEl.querySelector('.key').textContent;
+      let key = propertyEl.querySelector('.key').textContent;
       let value = propertyEl.querySelector('.value').textContent;
-      this.fire('designer-style-ruler-editor-style-changed', {key: key, value: value});
+      this.fire('designer-element-style-changed', {
+        key: key,
+        value: value,
+      });
     },
 
   });

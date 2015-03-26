@@ -13,30 +13,30 @@ define('polymer-designer/commands/ParsedHtmlCommandApplier',[
       'polymer-designer/path',
       'dom5',
       'polymer-designer/commands'],
-    function(CommandApplier, pathLib, parse5_utils, commands) {
+    function(CommandApplier, pathLib, dom5, commands) {
 
   var getNodeFromPath = pathLib.getNodeFromPath;
-  
+
   var commandHandlers = {
     'setAttribute': {
       canApply: function(doc, command) {
         var node = getNodeFromPath(command.path, doc);
-        return parse5_utils.getAttribute(node, command.attribute) == command.oldValue;
+        return dom5.getAttribute(node, command.attribute) == command.oldValue;
       },
 
       apply: function(doc, command) {
         var node = getNodeFromPath(command.path, doc);
-        parse5_utils.setAttribute(node, command.attribute, command.newValue);
+        dom5.setAttribute(node, command.attribute, command.newValue);
       },
 
       canUndo: function(doc, command) {
         var node = getNodeFromPath(command.path, doc);
-        return parse5_utils.getAttribute(node, command.attribute) == command.newValue;
+        return dom5.getAttribute(node, command.attribute) == command.newValue;
       },
 
       undo: function(doc, command) {
         var node = getNodeFromPath(command.path, doc);
-        parse5_utils.setAttribute(node, command.attribute, command.oldValue);
+        dom5.setAttribute(node, command.attribute, command.oldValue);
       },
     },
 
@@ -51,17 +51,17 @@ define('polymer-designer/commands/ParsedHtmlCommandApplier',[
 
       apply: function(doc, command) {
         var node = getNodeFromPath(command.path, doc);
-        parse5_utils.setTextContent(node, command.newValue);
+        dom5.setTextContent(node, command.newValue);
       },
 
       canUndo: function(doc, command) {
         var node = getNodeFromPath(command.path, doc);
-        return parse5_utils.getTextContent(node) === command.newValue;
+        return dom5.getTextContent(node) === command.newValue;
       },
 
       undo: function(doc, command) {
         var node = getNodeFromPath(command.path, doc);
-        parse5_utils.setTextContent(node, command.oldValue);
+        dom5.setTextContent(node, command.oldValue);
       },
     },
 

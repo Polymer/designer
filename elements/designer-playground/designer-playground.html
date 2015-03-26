@@ -211,7 +211,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           demoAsset.load()
             .then(function(content) {
-              console.log(demoAsset.url.href);
               return this.$.stage.setDocument(content, demoAsset.url.href);
             }.bind(this))
             .then((function(result) {

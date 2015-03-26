@@ -10,21 +10,20 @@
 
 define('polymer-designer/commands/DomCommandApplier', [
       'polymer-designer/commands/CommandApplier',
+      'polymer-designer/dom-utils',
       'polymer-designer/path',
       'polymer-designer/commands'],
-    function(CommandApplier, pathLib, commands) {
+    function(CommandApplier, domUtils, pathLib, commands) {
 
-  var getNodeFromPath = pathLib.getNodeFromPath;
+  var getNodeFromPath = function(path, doc) {
+    return pathLib.getNodeFromPath(path, doc, domUtils.designerNodeFilter);
+  }
 
   var commandHandlers = {
     'setAttribute': {
       canApply: function(doc, command) {
         var node = getNodeFromPath(command.path, doc);
-        var r = node.getAttribute(command.attribute) === command.oldValue;
-        if (r === false) {
-          console.log("no apply", command.attribute, node.getAttribute(command.attribute), command.oldValue);
-        }
-        return r;
+        return node.getAttribute(command.attribute) === command.oldValue;
       },
 
       apply: function(doc, command) {

@@ -49,10 +49,11 @@ editing interface for them.
 <script>
 define([
     'css',
+    'polymer-designer/dom-utils',
     'polymer-designer/rework-utils',
     'polymer-designer/path',
     'polymer-designer/commands'],
-    function(rework, reworkUtils, pathLib, commands) {
+    function(rework, domUtils, reworkUtils, pathLib, commands) {
   'use strict';
 
   Polymer({
@@ -64,38 +65,41 @@ define([
       /**
        * Metadata published by the stage about the currently selected element.
        */
-      'elementInfo': {
+      elementInfo: {
         type:      Object,
         observer: '_elementInfoChanged',
       },
 
       /** The document where edits should be made */
-      'sourceDocument': Object,
+      sourceDocument: Object,
 
     },
 
     listeners: {
-      'designer-style-ruler-editor-style-changed': '_styleChanged',
+      'designer-element-style-changed': '_styleChanged',
     },
 
     _elementInfoChanged() {
-      this._sheets = this.elementInfo && this.elementInfo.styles || [];
+      this._sheets = (this.elementInfo && this.elementInfo.styles) || [];
     },
 
     _styleChanged(event, info) {
-      let rule  = event.target.rule;
+      let rule = event.target.rule;
       let sheet = event.target.parentNode._sheet;
       this._updateSheet(sheet, rule, info.key, info.value);
     },
 
     _updateSheet(sheet, rule, key, value) {
       console.assert(this.sourceDocument);
-      let sheetPath   = sheet.ownerNodePath;
-      let sourceStyle = pathLib.getNodeFromPath(sheetPath, this.sourceDocument);
+      console.assert(key);
+      let sheetPath = sheet.ownerNodePath;
+      let sourceStyle = pathLib.getNodeFromPath(sheetPath, this.sourceDocument,
+          domUtils.designerNodeFilter);
       let sheetSource = sourceStyle.textContent;
       let parsedSheet = rework.parse(sheetSource);
 
-      let parsedRule = reworkUtils.getRule(parsedSheet, rule.selector, rule.index);
+      let parsedRule =
+          reworkUtils.getRule(parsedSheet, rule.selector, rule.index);
       console.assert(parsedRule, 'Expected to find a parsed rule matching', rule);
       // TODO(nevir): We are going to have to support multiple transformations
       // (addition, deletion).
