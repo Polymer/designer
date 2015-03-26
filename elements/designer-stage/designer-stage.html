@@ -431,6 +431,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             .then(function(response) {
               this._updateCurrentElement(response.elementInfo);
               this._updateSelectionBounds(response.bounds);
+              // Start a drag. This is naive, because it's possible that by the
+              // time the response arrives the mouse is no longer down. In
+              // practice, this appears nearly impossible to do, so we'll go
+              // with the simplest thing for now. If it's a problem, we just
+              // need to track the mouse down state here.
+              this.$.selection._boundsDown(e);
             }.bind(this));
       },
 
