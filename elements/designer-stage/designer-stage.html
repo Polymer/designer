@@ -83,7 +83,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div id="caret"></div>
     <div id="text-edit-selection" on-click="_textOnClick"
          on-keydown="_onKeydown" on-keypress="_onKeypress" tabindex="0"></div>
-    <div id="glass" on-click="_onMouseDown" on-dblclick="_onDoubleClick"></div>
+    <div id="glass" on-mousedown="_onMouseDown" on-dblclick="_onDoubleClick"></div>
   </template>
 
   <core-asset id="frame-script" href="frame.js"></core-asset>
@@ -169,6 +169,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: String,
           value: 'layout',
         },
+
+        _mouseDown: {
+          type: Boolean,
+          value: false,
+        }
       },
 
       listeners: {
@@ -420,6 +425,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onMouseDown(e) {
+        this._mouseDown = true;
         if (this._mode === 'text') {
           this.exitTextMode();
         }
@@ -431,16 +437,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             .then(function(response) {
               this._updateCurrentElement(response.elementInfo);
               this._updateSelectionBounds(response.bounds);
-              // Start a drag. This is naive, because it's possible that by the
-              // time the response arrives the mouse is no longer down. In
-              // practice, this appears nearly impossible to do, so we'll go
-              // with the simplest thing for now. If it's a problem, we just
-              // need to track the mouse down state here.
-              this.$.selection._boundsDown(e);
+              // Start a drag after selection if the mouse is still down.
+              if (this._mouseDown) {
+                this.$.selection._boundsDown(e);
+              }
             }.bind(this));
       },
 
       _onMouseUp(e) {
+        this._mouseDown = false;
         if (this.hoverPath != null && this.insertPosition != null) {
           this.fire('designer-command',
             commands.moveElement(
