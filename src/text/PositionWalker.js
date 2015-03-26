@@ -8,7 +8,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-define('polymer-designer/PositionWalker', function() {
+define('polymer-designer/text/PositionWalker', function() {
    'use strict';
 
  /**

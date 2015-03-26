@@ -60,6 +60,28 @@ define('polymer-designer/protocol/DocumentClient', function() {
       });
     }
 
+    getCaretPosition(clientX, clientY, bounds) {
+      return this.connection.request({
+        messageType: 'getCaretPosition',
+        x: clientX - bounds.left,
+        y: clientY - bounds.top,
+      });
+    }
+
+    moveCursor(move) {
+      return this.connection.request({
+        messageType: 'moveCursor',
+        move: move,
+      });
+    }
+
+    insertText(text) {
+      return this.connection.request({
+        messageType: 'insertText',
+        text: text,
+      });
+    }
+
   }
 
   return DocumentClient;

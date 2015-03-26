@@ -13,8 +13,10 @@ define('polymer-designer/protocol/DocumentServer', [
       'polymer-designer/css',
       'polymer-designer/commands',
       'polymer-designer/commands/DomCommandApplier',
-      'polymer-designer/dom-utils'],
-    function(pathLib, cssLib, commands, DomCommandApplier, domUtils) {
+      'polymer-designer/dom-utils',
+      'polymer-designer/text/CursorManager'],
+    function(pathLib, cssLib, commands, DomCommandApplier, domUtils,
+        CursorManager) {
   'use strict';
 
   function designerNodeFilter(node) {
@@ -32,6 +34,9 @@ define('polymer-designer/protocol/DocumentServer', [
       connection.on('selectElementAtPoint', this.selectElementAtPoint.bind(this));
       connection.on('selectElementAtPath', this.selectElementAtPath.bind(this));
       connection.on('selectionBoundsChanged', this.selectionBoundsChanged.bind(this));
+      connection.on('getCaretPosition', this.getCaretPosition.bind(this));
+      connection.on('moveCursor', this.moveCursor.bind(this));
+      connection.on('insertText', this.insertText.bind(this));
       connection.on('command', this._onCommand.bind(this));
     }
 
@@ -49,6 +54,7 @@ define('polymer-designer/protocol/DocumentServer', [
       var x = request.message.x;
       var y = request.message.y;
       this.currentElement = this._getElementAt(x, y);
+      this.cursorManager = new CursorManager(this.currentElement);
       request.reply({
         bounds: this._elementBounds(this.currentElement),
         elementInfo: this._elementInfo(this.currentElement),
@@ -79,6 +85,8 @@ define('polymer-designer/protocol/DocumentServer', [
     selectElementAtPath(request) {
       this.currentElement = pathLib.getNodeFromPath(request.message.path,
           document, designerNodeFilter);
+      this.cursorManager = new CursorManager(this.currentElement);
+
       request.reply({
         bounds: this._elementBounds(this.currentElement),
         elementInfo: this._elementInfo(this.currentElement),
@@ -118,6 +126,100 @@ define('polymer-designer/protocol/DocumentServer', [
         }
       }
       request.reply(message);
+    }
+
+    getCaretPosition(request) {
+      // Note: We're assuming Shadow DOM here. This gets much more complicated
+      // with Shady DOM!
+      let caretRange = document.caretRangeFromPoint(request.message.x,
+          request.message.y);
+      let node = caretRange.startContainer;
+      let offset = caretRange.startOffset;
+
+      this.cursorManager.setPosition(node, offset);
+
+      let rect = this.cursorManager.walker.getCaretRange()
+          .getBoundingClientRect();
+
+      request.reply({
+        node: pathLib.getNodePath(node),
+        offset: offset,
+        rect: {
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height,
+        },
+      });
+    }
+
+    moveCursor(request) {
+      switch (request.message.move) {
+        case 'up':
+          this.cursorManager.up();
+          break;
+        case 'down':
+          this.cursorManager.down();
+          break;
+        case 'left':
+          this.cursorManager.back();
+          break;
+        case 'right':
+          this.cursorManager.forward();
+          break;
+        case 'beginningOfLine':
+          this.cursorManager.beginningOfLine();
+          break;
+        case 'endOfLine':
+          this.cursorManager.endOfLine();
+          break;
+        default:
+          console.error('Unrecognized cursor move', request.message.move);
+      }
+
+      let rect = this.cursorManager.walker.getCaretRange()
+          .getBoundingClientRect();
+      let node = this.cursorManager.walker.currentNode;
+      let offset = this.cursorManager.walker.localOffset;
+
+      request.reply({
+        node: pathLib.getNodePath(node),
+        offset: offset,
+        rect: {
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height,
+        },
+      });
+    }
+
+    insertText(request) {
+      let text = request.message.text;
+
+      let node = document.createTextNode(text);
+      let range = this.cursorManager.walker.getCaretRange();
+
+      range.insertNode(node);
+      this.cursorManager.walker.refresh();
+      this.cursorManager.forward();
+
+      let rect = this.cursorManager.walker.getCaretRange()
+          .getBoundingClientRect();
+
+      node = this.cursorManager.walker.currentNode;
+      let offset = this.cursorManager.walker.localOffset;
+
+      request.reply({
+        node: pathLib.getNodePath(node),
+        offset: offset,
+        rect: {
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height,
+        },
+      });
     }
 
     _resizeElement(bounds) {

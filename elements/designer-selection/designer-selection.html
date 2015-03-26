@@ -91,12 +91,23 @@
         Polymer({
           is: 'designer-selection',
 
-          ready() {
-            this.directions = ResizeDirection.ALL_DIRECTIONS;
+          properties: {
+            directions: {
+              type: Object,
+              value: ResizeDirection.ALL_DIRECTIONS,
+            },
           },
 
           listeners: {
             'mousedown': '_onMouseDown'
+          },
+
+          show() {
+            this.style.display = 'block';
+          },
+
+          hide() {
+            this.style.display = 'none';
           },
 
           _onMouseDown(e) {
