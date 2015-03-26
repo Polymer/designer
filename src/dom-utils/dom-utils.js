@@ -9,6 +9,7 @@
  */
 
 define('polymer-designer/dom-utils', function() {
+  'use strict';
 
   function isDescendant(element, target) {
     while (element.parentNode) {
@@ -35,9 +36,15 @@ define('polymer-designer/dom-utils', function() {
         })();
   }
 
+  function designerNodeFilter(node) {
+    return node.nodeType !== Node.ELEMENT_NODE ||
+        !node.hasAttribute('designer-exclude');
+  }
+
   return {
-    isDescendant: isDescendant,
+    designerNodeFilter: designerNodeFilter,
     getDocumentElement: getDocumentElement,
+    isDescendant: isDescendant,
   };
 
 });

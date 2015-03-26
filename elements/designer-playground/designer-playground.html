@@ -50,6 +50,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       z-index: 100;
       display: flex;
       flex-direction: column;
+      order: 0;
+    }
+    #main > #ancillary {
+      order: 10;
     }
     #main > nav > #files > a {
       display: block;
@@ -68,6 +72,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       display: flex;
       flex-direction: column;
       flex: 1;
+      order: 5;
     }
     #main > #doc > designer-stage {
       flex: 1;
@@ -103,10 +108,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <a data-demo="demo-doc-6">Text</a>
           <a data-demo="demo-polymer">polymer</a>
         </div>
-        <designer-inspector element-info="{{currentElementInfo}}"></designer-inspector>
         <div id="packages">
           <button on-click="_installPackageClick">Bower Install</button>
         </div>
+      </nav>
+      <nav id="ancillary">
+        <designer-inspector
+            source-document="{{domDocument}}"
+            element-info="{{currentElementInfo}}">
+        </designer-inspector>
       </nav>
       <div id="doc">
         <designer-breadcrumb node="{{currentNode}}"></designer-breadcrumb>
@@ -201,7 +211,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           demoAsset.load()
             .then(function(content) {
-              console.log(demoAsset.url.href);
               return this.$.stage.setDocument(content, demoAsset.url.href);
             }.bind(this))
             .then((function(result) {
