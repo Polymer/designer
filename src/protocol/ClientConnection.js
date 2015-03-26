@@ -59,11 +59,14 @@ define('polymer-designer/protocol/ClientConnection',
     }
 
     _onMessage(event) {
+      if (event.source !== this.otherWindow) {
+        return;
+      }
+
       var id = event.data.id;
       var message = event.data.message;
 
       if (event.data.token !== this._token) {
-        console.log(event.data.token);
         throw new Error('Invalid token');
       }
 
