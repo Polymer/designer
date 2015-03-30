@@ -154,15 +154,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         /**
-         * Monomers is the `hydrolysis`-provided database of Polymer metadata.
-         * @type {Monomers}
-         */
-        _monomers: {
-          type: Object,
-          value: null
-        },
-
-        /**
          * The current editing mode, 'text' or 'layout'.
          */
         _mode: {
@@ -203,85 +194,80 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       /**
        * Sets the current document and injects the message handler.
        * @param {[type]} content The document source.
-       * @param {[type]} url     The document location.
+       * @param {[type]} url The document location.
        * @returns {Promise<Document>} The modified document.
        */
       setDocument(content, url) {
-        var module = document.createElement('dom-module');
-        var frameScriptAsset = module.import('designer-stage', '#frame-script');
-        var loader = new hydrolysis.Loader({host: new URL(url).hostname});
-        loader.addResolver(new hydrolysis.XHRResolver());
-        this.monomers = new hydrolysis.Monomers(true, loader);
-
         this._reset();
 
+        return Promise.all([
+          getDocumentDescriptors(url).load(url).then(function(descriptor) {
+            return descriptor.htmlLoaded;
+          }),
+          this._frameScriptAsset.load(),
+        ]).then(function(results) {
+          // let documentDescriptor = results[0];
+          let parsedDocument = results[0];
+          let frameScript = results[1];
 
-        return frameScriptAsset.load()
-          .then((function(frameScript) {
-            // Return a new Promise so we can resolve/reject on load/error
-            // events from the frame
-            return new Promise((function(resolve, reject) {
-              var frame = Polymer.dom(this.root).querySelector('iframe');
-              if (frame != null) {
-                Polymer.dom(this.root).removeChild(frame);
-                this._connection.disconnect();
+          // Return a new Promise so we can resolve/reject on load/error
+          // events from the frame
+          // TODO(justinfagnani): create an element that wraps an iframe and
+          // provides a nicer Promise-based API
+          return new Promise(function(resolve, reject) {
+            let doc = createDocument(content, frameScript, this.baseURI);
+            let frame = this._addFrame(getDocumentUrl(doc));
+
+            // listen to load and error events from the frame
+            var onFrameLoad = function() {
+              frame.removeEventListener(onFrameLoad);
+              frame.removeEventListener(onFrameError);
+
+              this._connection = new ClientConnection(window,
+                  frame.contentWindow);
+              this._client = new DocumentClient(this._connection);
+              // TODO(justinfagnani): move document model here (or to a document
+              // model element) from designer-playground.
+              resolve({
+                document: doc,
+                content: content,
+                html: parsedDocument.ast
+              });
+
+            }.bind(this);
+            frame.addEventListener('load', onFrameLoad);
+
+            var onFrameError = function(e) {
+              if (e.type == 'load') {
+                console.warn("<designer-stage> error loading frame contents");
               }
-              frame = document.createElement('iframe');
-              frame.setAttribute('id', 'frame');
-              frame.setAttribute('sandbox', 'allow-scripts');
-              Polymer.dom(this.root).appendChild(frame);
+              frame.removeEventListener(onFrameLoad);
+              frame.removeEventListener(onFrameError);
+              reject("<designer-stage> error loading frame contents");
+            }.bind(this);
+            frame.addEventListener('error', onFrameError);
 
-              // create an HTML document from the content
-              var doc = document.implementation.createHTMLDocument();
+          }.bind(this));
+        }.bind(this));
+      },
 
-              doc.documentElement.innerHTML = content;
+      get _frameScriptAsset() {
+        let domModule = document.createElement('dom-module');
+        return domModule.import('designer-stage', '#frame-script');
+      },
 
-              // insert a script tag with the frame.js source
-              var frameScriptElement = doc.createElement('script');
-              frameScriptElement.textContent = frameScript;
-              frameScriptElement.setAttribute('designer-exclude', '');
-              doc.head.insertBefore(frameScriptElement, doc.head.firstChild);
-
-              // data: URIs need a base for relative URLs
-              var base = doc.createElement('base');
-              base.setAttribute('href', this.baseURI);
-              base.setAttribute('designer-exclude', '');
-              doc.head.insertBefore(base, doc.head.firstChild);
-
-              // set the iframe src to the new document
-              var docBlob = new Blob([doc.documentElement.innerHTML],
-                  {type: 'text/html'});
-              frame.src = URL.createObjectURL(docBlob);
-
-              // listen to load and error events from the frame
-              var onFrameLoad = (function() {
-
-                this._connection = new ClientConnection(
-                    window, frame.contentWindow);
-                this._client = new DocumentClient(this._connection);
-
-                frame.removeEventListener(onFrameLoad);
-                frame.removeEventListener(onFrameError);
-                this.monomers.load(url).then(function(documentDescriptor) {
-                  return documentDescriptor.htmlLoaded;
-                }).then(function(parsedDocument) {
-                  resolve({document: doc, content: content, html: parsedDocument.ast});
-                });
-              }).bind(this);
-              frame.addEventListener('load', onFrameLoad);
-
-              var onFrameError = (function(e) {
-                if (e.type == 'load') {
-                  console.warn("<designer-stage> error loading frame contents");
-                }
-                frame.removeEventListener(onFrameLoad);
-                frame.removeEventListener(onFrameError);
-                reject("<designer-stage> error loading frame contents");
-              }).bind(this);
-              frame.addEventListener('error', onFrameError);
-
-            }).bind(this));
-          }).bind(this));
+      _addFrame(url) {
+        let frame = Polymer.dom(this.root).querySelector('iframe');
+        if (frame != null) {
+          Polymer.dom(this.root).removeChild(frame);
+          this._connection.disconnect();
+        }
+        frame = document.createElement('iframe');
+        frame.setAttribute('id', 'frame');
+        frame.setAttribute('sandbox', 'allow-scripts');
+        Polymer.dom(this.root).appendChild(frame);
+        frame.src = url;
+        return frame;
       },
 
       selectNode(path) {
@@ -319,6 +305,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _updateCurrentElement(elementInfo) {
         this.currentElementInfo = elementInfo;
+        // TODO(justinfagnani): we need to find the document node for
+        // elementInfo.nodeId
 
         // Set the valid resize handles
         var position = elementInfo.position;
@@ -539,6 +527,63 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
     });
+
+    /**
+     * @returns {Monomers} a Hyrdolysis Monomers (analysis) object that can be
+     *     used to load and analyze an HTML document.
+     */
+    function getDocumentDescriptors(url) {
+      let loader = new hydrolysis.Loader({host: new URL(url).hostname});
+      loader.addResolver(new hydrolysis.XHRResolver());
+      return new hydrolysis.Monomers(true, loader);
+    }
+
+    /**
+     * @returns {ScriptElement} a new `<script>` element with the content of
+     * [frameScript].
+     */
+    function createFrameScriptElement(frameScript, doc) {
+      let frameScriptElement = doc.createElement('script');
+      frameScriptElement.textContent = frameScript;
+      frameScriptElement.setAttribute('designer-exclude', '');
+      return frameScriptElement
+    }
+
+    /**
+     * @returns a <base> tag with the given [href].
+     */
+    function createBase(href, doc) {
+      let base = doc.createElement('base');
+      base.setAttribute('href', href);
+      base.setAttribute('designer-exclude', '');
+      return base;
+    }
+
+    /**
+     * @returns {HTMLDocument} a HTML document with the given [content].
+     * A `<script>` tag with content from [framescript], and a `<base>` tag
+     * with `href` set to [baseUri] are injected into the document's `<head>`.
+     */
+    function createDocument(content, frameScript, baseUri) {
+      let doc = document.implementation.createHTMLDocument();
+      doc.documentElement.innerHTML = content;
+
+      doc.head.insertBefore(createFrameScriptElement(frameScript, doc),
+          doc.head.firstChild);
+
+      // data URIs need a base to be able to resolve relative URLs
+      doc.head.insertBefore(createBase(baseUri, doc), doc.head.firstChild);
+      return doc;
+    }
+
+    /**
+     * @returns {URL} a Blob URL for the given [doc].
+     */
+    function getDocumentUrl(doc) {
+      let docBlob = new Blob([doc.documentElement.innerHTML],
+          {type: 'text/html'});
+      return URL.createObjectURL(docBlob);
+    }
 
   });
 </script>

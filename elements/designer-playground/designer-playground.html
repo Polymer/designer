@@ -216,6 +216,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             .then((function(result) {
               this.domDocument = result.document;
               this.parsedDocument = result.html;
+
               this.domCommandApplier = new DomCommandApplier(this.domDocument);
               this.parsedCommandApplier = new ParsedHtmlCommandApplier(this.parsedDocument);
               this.$.html.textContent = serializer.serialize(this.parsedDocument);
