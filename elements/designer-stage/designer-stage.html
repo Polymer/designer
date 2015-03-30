@@ -13,6 +13,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../src/hydrolysis/hydrolysis.html">
 <link rel="import" href="../../src/css/css.html">
 <link rel="import" href="../../src/protocol/document-client.html">
+<link rel="import" href="../designer-frame/designer-frame.html">
 <link rel="import" href="../designer-selection/designer-selection.html">
 
 <dom-module id="designer-stage">
@@ -23,7 +24,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       box-sizing: border-box;
       position: relative;
     }
-    iframe {
+    #frame {
       position: absolute;
       top: 0;
       left: 0;
@@ -84,6 +85,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div id="text-edit-selection" on-click="_textOnClick"
          on-keydown="_onKeydown" on-keypress="_onKeypress" tabindex="0"></div>
     <div id="glass" on-mousedown="_onMouseDown" on-dblclick="_onDoubleClick"></div>
+    <designer-frame id="frame"></designer-frame>
   </template>
 
   <core-asset id="frame-script" href="frame.js"></core-asset>
@@ -210,43 +212,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           let parsedDocument = results[0];
           let frameScript = results[1];
 
-          // Return a new Promise so we can resolve/reject on load/error
-          // events from the frame
-          // TODO(justinfagnani): create an element that wraps an iframe and
-          // provides a nicer Promise-based API
-          return new Promise(function(resolve, reject) {
-            let doc = createDocument(content, frameScript, this.baseURI);
-            let frame = this._addFrame(getDocumentUrl(doc));
+          if (this._connection) {
+            this._connection.disconnect();
+            this._connection = null;
+            this._client = null;
+          }
 
-            // listen to load and error events from the frame
-            var onFrameLoad = function() {
-              frame.removeEventListener(onFrameLoad);
-              frame.removeEventListener(onFrameError);
+          let doc = createDocument(content, frameScript, this.baseURI);
+          let frame = this.$.frame;
 
-              this._connection = new ClientConnection(window,
-                  frame.contentWindow);
-              this._client = new DocumentClient(this._connection);
-              // TODO(justinfagnani): move document model here (or to a document
-              // model element) from designer-playground.
-              resolve({
-                document: doc,
-                content: content,
-                html: parsedDocument.ast
-              });
-
-            }.bind(this);
-            frame.addEventListener('load', onFrameLoad);
-
-            var onFrameError = function(e) {
-              if (e.type == 'load') {
-                console.warn("<designer-stage> error loading frame contents");
-              }
-              frame.removeEventListener(onFrameLoad);
-              frame.removeEventListener(onFrameError);
-              reject("<designer-stage> error loading frame contents");
-            }.bind(this);
-            frame.addEventListener('error', onFrameError);
-
+          return frame.setSource(getDocumentUrl(doc)).then(function() {
+            this._connection = new ClientConnection(window, frame.window);
+            this._client = new DocumentClient(this._connection);
+            return {
+              document: doc,
+              content: content,
+              html: parsedDocument.ast
+            };
           }.bind(this));
         }.bind(this));
       },
@@ -254,20 +236,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       get _frameScriptAsset() {
         let domModule = document.createElement('dom-module');
         return domModule.import('designer-stage', '#frame-script');
-      },
-
-      _addFrame(url) {
-        let frame = Polymer.dom(this.root).querySelector('iframe');
-        if (frame != null) {
-          Polymer.dom(this.root).removeChild(frame);
-          this._connection.disconnect();
-        }
-        frame = document.createElement('iframe');
-        frame.setAttribute('id', 'frame');
-        frame.setAttribute('sandbox', 'allow-scripts');
-        Polymer.dom(this.root).appendChild(frame);
-        frame.src = url;
-        return frame;
       },
 
       selectNode(path) {
