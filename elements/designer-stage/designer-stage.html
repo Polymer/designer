@@ -8,12 +8,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../../../polymer/polymer.html">
-<link rel="import" href="../../../core-asset/core-asset.html">
 <link rel="import" href="../../src/commands/commands.html">
-<link rel="import" href="../../src/hydrolysis/hydrolysis.html">
 <link rel="import" href="../../src/css/css.html">
-<link rel="import" href="../../src/protocol/document-client.html">
-<link rel="import" href="../designer-frame/designer-frame.html">
+<link rel="import" href="../designer-document/designer-document.html">
 <link rel="import" href="../designer-selection/designer-selection.html">
 
 <dom-module id="designer-stage">
@@ -24,7 +21,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       box-sizing: border-box;
       position: relative;
     }
-    #frame {
+    #doc {
       position: absolute;
       top: 0;
       left: 0;
@@ -85,10 +82,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div id="text-edit-selection" on-click="_textOnClick"
          on-keydown="_onKeydown" on-keypress="_onKeypress" tabindex="0"></div>
     <div id="glass" on-mousedown="_onMouseDown" on-dblclick="_onDoubleClick"></div>
-    <designer-frame id="frame"></designer-frame>
+    <designer-document id="doc"><designer-document>
   </template>
-
-  <core-asset id="frame-script" href="frame.js"></core-asset>
 
 </dom-module>
 
@@ -166,7 +161,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         _mouseDown: {
           type: Boolean,
           value: false,
-        }
+        },
+
       },
 
       listeners: {
@@ -201,41 +197,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        */
       setDocument(content, url) {
         this._reset();
-
-        return Promise.all([
-          getDocumentDescriptors(url).load(url).then(function(descriptor) {
-            return descriptor.htmlLoaded;
-          }),
-          this._frameScriptAsset.load(),
-        ]).then(function(results) {
-          // let documentDescriptor = results[0];
-          let parsedDocument = results[0];
-          let frameScript = results[1];
-
-          if (this._connection) {
-            this._connection.disconnect();
-            this._connection = null;
-            this._client = null;
-          }
-
-          let doc = createDocument(content, frameScript, this.baseURI);
-          let frame = this.$.frame;
-
-          return frame.setSource(getDocumentUrl(doc)).then(function() {
-            this._connection = new ClientConnection(window, frame.window);
-            this._client = new DocumentClient(this._connection);
-            return {
-              document: doc,
-              content: content,
-              html: parsedDocument.ast
-            };
-          }.bind(this));
+        return this.$.doc.setDocument(content, url).then(function(result) {
+          this._client = this.$.doc._client;
+          return result;
         }.bind(this));
-      },
-
-      get _frameScriptAsset() {
-        let domModule = document.createElement('dom-module');
-        return domModule.import('designer-stage', '#frame-script');
       },
 
       selectNode(path) {
@@ -495,63 +460,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
     });
-
-    /**
-     * @returns {Monomers} a Hyrdolysis Monomers (analysis) object that can be
-     *     used to load and analyze an HTML document.
-     */
-    function getDocumentDescriptors(url) {
-      let loader = new hydrolysis.Loader({host: new URL(url).hostname});
-      loader.addResolver(new hydrolysis.XHRResolver());
-      return new hydrolysis.Monomers(true, loader);
-    }
-
-    /**
-     * @returns {ScriptElement} a new `<script>` element with the content of
-     * [frameScript].
-     */
-    function createFrameScriptElement(frameScript, doc) {
-      let frameScriptElement = doc.createElement('script');
-      frameScriptElement.textContent = frameScript;
-      frameScriptElement.setAttribute('designer-exclude', '');
-      return frameScriptElement
-    }
-
-    /**
-     * @returns a <base> tag with the given [href].
-     */
-    function createBase(href, doc) {
-      let base = doc.createElement('base');
-      base.setAttribute('href', href);
-      base.setAttribute('designer-exclude', '');
-      return base;
-    }
-
-    /**
-     * @returns {HTMLDocument} a HTML document with the given [content].
-     * A `<script>` tag with content from [framescript], and a `<base>` tag
-     * with `href` set to [baseUri] are injected into the document's `<head>`.
-     */
-    function createDocument(content, frameScript, baseUri) {
-      let doc = document.implementation.createHTMLDocument();
-      doc.documentElement.innerHTML = content;
-
-      doc.head.insertBefore(createFrameScriptElement(frameScript, doc),
-          doc.head.firstChild);
-
-      // data URIs need a base to be able to resolve relative URLs
-      doc.head.insertBefore(createBase(baseUri, doc), doc.head.firstChild);
-      return doc;
-    }
-
-    /**
-     * @returns {URL} a Blob URL for the given [doc].
-     */
-    function getDocumentUrl(doc) {
-      let docBlob = new Blob([doc.documentElement.innerHTML],
-          {type: 'text/html'});
-      return URL.createObjectURL(docBlob);
-    }
 
   });
 </script>

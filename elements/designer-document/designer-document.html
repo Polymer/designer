@@ -1,0 +1,159 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../../core-asset/core-asset.html">
+<link rel="import" href="../../src/hydrolysis/hydrolysis.html">
+<link rel="import" href="../../src/protocol/document-client.html">
+<link rel="import" href="../designer-frame/designer-frame.html">
+
+<dom-module id="designer-document">
+
+  <style>
+    :host {
+      display: block;
+    }
+    #frame {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      box-sizing: border-box;
+    }
+  </style>
+
+  <template>
+    <designer-frame id="frame"></designer-frame>
+  </template>
+
+  <core-asset id="frame-script" href="frame.js"></core-asset>
+
+</dom-module>
+
+<script>
+  define([
+        'polymer-designer/protocol/DocumentClient',
+        'polymer-designer/protocol/ClientConnection',
+        'hydrolysis'],
+      function(DocumentClient,
+               ClientConnection,
+               hydrolysis) {
+
+    'use strict';
+
+    Polymer({
+      is: 'designer-document',
+
+      /**
+       * Sets the current document and injects the message handler.
+       * @param {[type]} content The document source.
+       * @param {[type]} url The document location.
+       * @returns {Promise<Document>} The modified document.
+       */
+      setDocument(content, url) {
+        return Promise.all([
+          getDocumentDescriptors(url).load(url).then(function(descriptor) {
+            return descriptor.htmlLoaded;
+          }),
+          this._frameScriptAsset.load(),
+        ]).then(function(results) {
+          let parsedDocument = results[0];
+          let frameScript = results[1];
+
+          if (this._connection) {
+            this._connection.disconnect();
+            this._connection = null;
+            this._client = null;
+          }
+
+          let frame = this.$.frame;
+          let doc = createDocument(content, frameScript, this.baseURI);
+
+          return this.$.frame.setSource(getDocumentUrl(doc)).then(function() {
+            this._connection = new ClientConnection(window, frame.window);
+            this._client = new DocumentClient(this._connection);
+
+            return {
+              document: doc,
+              content: content,
+              html: parsedDocument.ast
+            };
+
+          }.bind(this));
+        }.bind(this));
+      },
+
+      get _frameScriptAsset() {
+        let domModule = document.createElement('dom-module');
+        return domModule.import('designer-document', '#frame-script');
+      },
+
+    });
+
+    /**
+     * @returns {Monomers} a Hyrdolysis Monomers (analysis) object that can be
+     *     used to load and analyze an HTML document.
+     */
+    function getDocumentDescriptors(url) {
+      let loader = new hydrolysis.Loader({host: new URL(url).hostname});
+      loader.addResolver(new hydrolysis.XHRResolver());
+      return new hydrolysis.Monomers(true, loader);
+    }
+
+    /**
+     * @returns {ScriptElement} a new `<script>` element with the content of
+     * [frameScript].
+     */
+    function createFrameScriptElement(frameScript, doc) {
+      let frameScriptElement = doc.createElement('script');
+      frameScriptElement.textContent = frameScript;
+      frameScriptElement.setAttribute('designer-exclude', '');
+      return frameScriptElement
+    }
+
+    /**
+     * @returns a <base> tag with the given [href].
+     */
+    function createBase(href, doc) {
+      let base = doc.createElement('base');
+      base.setAttribute('href', href);
+      base.setAttribute('designer-exclude', '');
+      return base;
+    }
+
+    /**
+     * @returns {HTMLDocument} a HTML document with the given [content].
+     * A `<script>` tag with content from [framescript], and a `<base>` tag
+     * with `href` set to [baseUri] are injected into the document's `<head>`.
+     */
+    function createDocument(content, frameScript, baseUri) {
+      let doc = document.implementation.createHTMLDocument();
+      doc.documentElement.innerHTML = content;
+
+      doc.head.insertBefore(createFrameScriptElement(frameScript, doc),
+          doc.head.firstChild);
+
+      // data URIs need a base to be able to resolve relative URLs
+      doc.head.insertBefore(createBase(baseUri, doc), doc.head.firstChild);
+      return doc;
+    }
+
+    /**
+     * @returns {URL} a Blob URL for the given [doc].
+     */
+    function getDocumentUrl(doc) {
+      let docBlob = new Blob([doc.documentElement.innerHTML],
+          {type: 'text/html'});
+      return URL.createObjectURL(docBlob);
+    }
+
+  });
+</script>
