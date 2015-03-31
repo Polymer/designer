@@ -1,0 +1,82 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../polymer/polymer.html">
+
+<!--
+Displays the style rules that currently apply to `element`, and provides an
+editing interface for them.
+-->
+<dom-module id="designer-property-inspector">
+
+  <style>
+    :host {
+      box-sizing: border-box;
+      display: block;
+      padding: 0 10px;
+    }
+
+    div {
+      margin: 10px 0;
+    }
+  </style>
+
+  <template>
+    <div hidden="{{_hide}}">
+      <header>Properties</header>
+        <template is="x-repeat" items="{{_properties}}">
+          <section>
+            <span>{{item.name}}</span> | <span>{{item.type}}</span>
+          </section>
+        </template>
+      </div>
+  </template>
+
+</dom-module>
+
+<script>
+'use strict';
+
+Polymer({
+
+  is: 'designer-property-inspector',
+
+  properties: {
+
+    /**
+     * Metadata published by the stage about the currently selected element.
+     */
+    elementInfo: {
+      type:      Object,
+      observer: '_elementInfoChanged',
+    },
+
+  },
+
+  attached: function(){
+    this._hide = true;
+  },
+
+  _elementInfoChanged() {
+    console.log("eic");
+    console.log(this.elementInfo);
+    this._properties = (this.elementInfo &&
+                         this.elementInfo.analyzed &&
+                         this.elementInfo.analyzed.properties) || [];
+    if (this._properties.length == 0) {
+      this._hide = true;
+    } else {
+      this._hide = false;
+    }
+  },
+
+
+});
+
+</script>
