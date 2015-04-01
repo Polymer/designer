@@ -121,7 +121,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     function getDocumentDescriptors(url) {
       let loader = new hydrolysis.Loader({host: new URL(url).hostname});
       loader.addResolver(new hydrolysis.XHRResolver());
-      return new hydrolysis.Monomers(true, loader);
+      return new hydrolysis.Analyzer(true, loader);
     }
 
     /**
