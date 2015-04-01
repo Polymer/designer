@@ -55,11 +55,18 @@ define('polymer-designer/dom-utils', function() {
     return params;
   }
 
+  function removeChildren(element) {
+    while (element.firstChild !== null) {
+      element.removeChild(element.firstChild);
+    }
+  }
+
   return {
     designerNodeFilter: designerNodeFilter,
     getDocumentElement: getDocumentElement,
     isDescendant: isDescendant,
     parseQueryString: parseQueryString,
+    removeChildren: removeChildren,
   };
 
 });

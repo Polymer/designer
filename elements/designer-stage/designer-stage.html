@@ -10,6 +10,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../../src/commands/commands.html">
 <link rel="import" href="../../src/css/css.html">
+<link rel="import" href="../../src/dom-utils/dom-utils.html">
+<link rel="import" href="../../src/dragging/dragging.html">
+<link rel="import" href="../../src/protocol/document-client.html">
 <link rel="import" href="../designer-selection/designer-selection.html">
 
 <dom-module id="designer-stage">
@@ -61,6 +64,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       z-index: 104;
       min-width: 4px;
     }
+    #proxy {
+      position: absolute;
+      /* z-index must be > 100 because iframes are z-index 100 o_O */
+      z-index: 101;
+      display: none;
+      opacity: 0.5;
+      background: #f88;
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+    }
+    #proxy > * {
+      width: 100% !important;
+      height: 100% !important;
+      display: block !important;
+      margin: 0;
+    }
 
   </style>
 
@@ -80,6 +100,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         on-keypress="_onKeypress"
         tabindex="0">
     </div>
+    <div id="proxy"></div>
     <div id="glass" on-mousedown="_onMouseDown" on-dblclick="_onDoubleClick"></div>
     <content></content>
   </template>
@@ -89,8 +110,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <script>
   define([
         'polymer-designer/commands',
-        'polymer-designer/designer-selection/ResizeDirection'],
-      function(commands, ResizeDirection) {
+        'polymer-designer/designer-selection/ResizeDirection',
+        'polymer-designer/dom-utils',
+        'polymer-designer/dragging'],
+      function(
+        commands,
+        ResizeDirection,
+        domUtils,
+        dragging) {
 
     'use strict';
 
@@ -240,12 +267,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           } else if (display === 'inline') {
             selection.directions = [];
           }
+          console.log('proxy', this.currentElementInfo.proxy);
+          var dragProxy = dragging.buildDragProxy(this.currentElementInfo.proxy,
+            true);
+          domUtils.removeChildren(this.$.proxy);
+          this.$.proxy.appendChild(dragProxy);
         } else if (position === 'absolute') {
           selection.directions = ResizeDirection.ALL_DIRECTIONS;
         } else {
           console.warn("can't handle position", data.position);
           selection.directions = [];
         }
+
       },
 
       _updateHoverElement(hoverInfo) {
@@ -335,11 +368,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           y: e.detail.cursor.y - this.offsetTop,
         };
         var bounds = e.detail.bounds;
+        this._updateDragProxy(bounds);
         this.client.selectionBoundsChanged(bounds, cursor)
-          .then(function(response) {
-            this._updateSelectionBounds(response.bounds);
-            this._updateHoverElement(response.hover);
-          }.bind(this));
+            .then(function(response) {
+              if (response.commands) {
+                response.commands.forEach(function(command) {
+                  this.fire('designer-command', command);
+                }.bind(this));
+              };
+              if (response.elementInfo) {
+                console.log('response.elementInfo', response.elementInfo.path);
+                this._updateCurrentElement(response.elementInfo);
+              }
+              if (response.bounds) {
+                this._updateSelectionBounds(response.bounds);
+              }
+              this._updateHoverElement(response.hover);
+            }.bind(this));
+      },
+
+      _updateDragProxy(bounds) {
+        var proxy = this.$.proxy;
+        var proxyStyle = proxy.style;
+        if (this.currentElementInfo.position === 'static') {
+          proxyStyle.display = 'block';
+          proxyStyle.top = bounds.top + 'px';
+          proxyStyle.left = bounds.left + 'px';
+          proxyStyle.width = bounds.width + 'px';
+          proxyStyle.height = bounds.height + 'px';
+        } else {
+          proxyStyle.display = 'none';
+        }
+        // proxy.innerHTML = this.currentElementInfo.proxy;
       },
 
       _onMouseDown(e) {
@@ -366,13 +426,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._mouseDown = false;
         // TODO: check for hoverId
         if (this.hoverSourceId != null && this.insertPosition != null) {
-          this.fire('designer-command',
-            commands.moveElement(
-              this.currentElementInfo.sourceId,
-              this.hoverSourceId,
-              this.insertPosition));
+          // this.fire('designer-command',
+          //   commands.moveElement(
+          //     this.currentElementInfo.sourceId,
+          //     this.hoverSourceId,
+          //     this.insertPosition));
         }
         this._hideHover();
+        this.$.proxy.style.display = 'none';
       },
 
       _onDoubleClick(e) {

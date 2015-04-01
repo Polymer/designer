@@ -11,11 +11,12 @@
 define('polymer-designer/protocol/DocumentServer', [
       'polymer-designer/path',
       'polymer-designer/css',
+      'polymer-designer/dragging',
       'polymer-designer/commands',
       'polymer-designer/commands/DomCommandApplier',
       'polymer-designer/dom-utils',
       'polymer-designer/text/CursorManager'],
-    function(pathLib, cssLib, commands, DomCommandApplier, domUtils,
+    function(pathLib, cssLib, dragging, commands, DomCommandApplier, domUtils,
         CursorManager) {
   'use strict';
 
@@ -35,6 +36,7 @@ define('polymer-designer/protocol/DocumentServer', [
       this.commandApplier = new DomCommandApplier(document);
       this.nodes = new Map();
       this.nextId = 1;
+      this.cursorManager = null;
 
       connection.on('getDocument', this.getDocument.bind(this));
       connection.on('selectElementAtPoint', this.selectElementAtPoint.bind(this));
@@ -121,36 +123,81 @@ define('polymer-designer/protocol/DocumentServer', [
     }
 
     selectionBoundsChanged(request) {
-      var command = this._resizeElement(request.message.bounds);
-      var message = {
-        bounds: this._elementBounds(this.currentElement),
-        command: command,
+      let message = {
+        commands: [],
       };
 
+      let resizeCommand = this._resizeElement(request.message.bounds);
+      if (resizeCommand) message.commands.push(resizeCommand);
+
       if (request.message.cursor && document.elementsFromPoint) {
-        var hoverElements = document.elementsFromPoint(
-          request.message.cursor.x,
-          request.message.cursor.y);
-        var hoverElement = null;
+        let cursor = request.message.cursor;
+        let hoverElements = document.elementsFromPoint(cursor.x, cursor.y);
+        let hoverElement = null;
+
         // elementsFromPoint() is z-ordered. We want the first result that
         // is not currentElement, a ancestor or descendant
-        for (var i = 0; i < hoverElements.length; i++) {
-          var e = hoverElements[i];
+        for (let i = 0; i < hoverElements.length; i++) {
+          let e = hoverElements[i];
           if (!(e === this.currentElement ||
                 domUtils.isDescendant(e, this.currentElement) ||
-                domUtils.isDescendant(this.currentElement, e))) {
+                domUtils.isDescendant(this.currentElement, e) )) {
             hoverElement = e;
             break;
           }
         }
+
         if (hoverElement === null) {
           message.hover = null;
         } else {
+          let el = this.currentElement;
+
+          let currentElementStyle = getComputedStyle(this.currentElement);
+          let hoverStyle = getComputedStyle(hoverElement);
+
+          if (currentElementStyle.position == 'static') {
+            let hoverBounds = hoverElement.getBoundingClientRect();
+            console.log('hover height', hoverBounds.top, hoverBounds.height);
+            let verticalMid = hoverBounds.top + hoverBounds.height / 2;
+            let insertAbove = cursor.y < verticalMid;
+            let insertBelow = cursor.y > verticalMid;
+
+            let parent = hoverElement.parentNode;
+
+            console.log('insert?', verticalMid, insertAbove, insertBelow);
+
+            let currentElementId = this.currentElement.getAttribute(nodeIdProperty);
+            let hoverElementId = hoverElement.getAttribute(nodeIdProperty);
+
+            let insertPosition = insertAbove
+                ? commands.InsertPosition.before
+                : commands.InsertPosition.after;
+
+            let command = commands.moveElement(
+              currentElementId,
+              hoverElementId,
+              insertPosition);
+
+            this.commandApplier.apply(command);
+            message.commands.push(command);
+            // message.currentElementPath
+
+            //   parent.insertBefore(this.currentElement, hoverElement);
+            // } else if (insertBelow) {
+            //   parent.insertBefore(this.currentElement, hoverElement.nextSibling);
+            // }
+          }
+
           message.hover = {
             bounds: this._elementBounds(hoverElement),
             elementInfo: this._elementInfo(hoverElement)
           };
+
+          message.elementInfo = this._elementInfo(hoverElement);
+          message.bounds= this._elementBounds(this.currentElement);
+
         }
+
       }
       request.reply(message);
     }
@@ -250,27 +297,36 @@ define('polymer-designer/protocol/DocumentServer', [
     }
 
     _resizeElement(bounds) {
-      // TODO: explicitly support more display/position modes than block/absolute
       if (this.currentElement == null) {
         throw new Error('current element is null');
       }
       // Setting the style attribute isn't ideal for this operation - we'd
       // rather set style properties on the element's style, but setAttribtue
       // is a rather easy command to implement, so we'l use it for now
-      // TODO: Send all commands to the editor as well so that it can apply
-      // them to it's document model
       var element = this.currentElement;
       // var path = pathLib.getNodePath(element, document,
       //     designerNodeFilter);
       let id = element.getAttribute(nodeIdProperty);
-      var command = commands.setAttribute(id, 'style',
-        element.getAttribute('style'),
-        `top: ${bounds.top}px; ` +
-        `left: ${bounds.left}px; ` +
-        `height: ${bounds.height}px; ` +
-        `width: ${bounds.width}px;`);
-      this.commandApplier.apply(command);
-      return command;
+      var style = window.getComputedStyle(element);
+
+
+      // display:inline only supports move with a drag-proxy
+      if (style.display === 'inline') {
+      }
+
+      // display:{block|inline-block} x position:{absolute|relative} supports
+      // all-direction resizing and drag-positioning
+      if ((style.display === 'block' || style.display === 'inline-block') &&
+          (style.position === 'absolute' || style.position === 'relative')) {
+        var command = commands.setAttribute(id, 'style',
+          element.getAttribute('style'),
+          `top: ${bounds.top}px; ` +
+          `left: ${bounds.left}px; ` +
+          `height: ${bounds.height}px; ` +
+          `width: ${bounds.width}px;`);
+        this.commandApplier.apply(command);
+        return command;
+      }
     }
 
     _elementBounds(element) {
@@ -297,6 +353,7 @@ define('polymer-designer/protocol/DocumentServer', [
         position: style.position,
         styles: cssLib.collectStyles(element),
         computedStyle: cssLib.getStyleProperties(style),
+        proxy: dragging.getDragProxyInfo(element),
       };
     }
   }
