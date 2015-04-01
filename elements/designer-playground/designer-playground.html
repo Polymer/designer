@@ -128,6 +128,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div id="doc-view">
         <designer-document
             id="document"
+            source="[[documentSource]]"
+            url="[[documentUrl]]"
             text-content="{{textContent}}">
         </designer-document>
         <designer-breadcrumb node="{{currentNode}}"></designer-breadcrumb>
@@ -188,10 +190,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           notify: true,
         },
 
+        documentSource: {
+          type: String,
+          notify: true,
+        },
+
+        documentUrl: {
+          type: String,
+          notify: true,
+        },
+
       },
 
       observers: {
         'currentElementInfo.path': '_pathChanged',
+      },
+
+      ready() {
+        // TODO(justinfagnani): move these initializers to properties:
+        this.document = this.$.document;
+        this.frame = this.$.frame;
       },
 
       _documentChanged() {
@@ -222,12 +240,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      ready() {
-        // TODO(justinfagnani): move these initializers to properties:
-        this.document = this.$.document;
-        this.frame = this.$.frame;
-      },
-
       _onDesignerCommand(event, command) {
         this.document.executeCommand(command);
         // TODO(justinfagnani): execute command through the frame, and get the
@@ -242,7 +254,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var demoAsset = module.import(this.is, '#' + demoName);
 
           demoAsset.load().then(function(content) {
-            this.document.setDocument(content, demoAsset.url.href);
+            this.documentSource = content;
+            this.documentUrl = demoAsset.url.href;
           }.bind(this));
         }
       },

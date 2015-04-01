@@ -77,8 +77,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         ast: {
           type: String,
           notify: true,
-        }
+        },
 
+        source: String,
+        url: String,
+
+      },
+
+      observers: {
+        'source url': '_setDocument',
       },
 
       /**
@@ -88,7 +95,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        * @param {string} url The document location.
        * @returns {Promise<Document>} The modified document.
        */
-      setDocument(content, url) {
+      _setDocument(content, url) {
         return Promise.all([
           getDocumentDescriptors(url).load(url).then(function(descriptor) {
             return descriptor.htmlLoaded;
