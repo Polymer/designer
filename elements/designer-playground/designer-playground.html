@@ -164,7 +164,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         currentNode: {
           type: Object,
           notify: true,
-          observer: 'currentNodeChanged',
+          observer: '_currentNodeChanged',
         },
 
         document: {
@@ -191,7 +191,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       observers: {
-        'currentElementInfo.path': 'pathChanged',
+        'currentElementInfo.path': '_pathChanged',
       },
 
       _documentChanged() {
@@ -204,7 +204,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      pathChanged() {
+      _pathChanged() {
         if (this.document && this.currentElementInfo != null) {
           var path = this.currentElementInfo.path;
           var node = pathLib.getNodeFromPath(path, this.document.domDocument);
@@ -212,7 +212,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      currentNodeChanged() {
+      _currentNodeChanged() {
         if (this.document) {
           var path = pathLib.getNodePath(this.currentNode, this.document.domDocument);
           if (this.$.stage.currentElementInfo &&
