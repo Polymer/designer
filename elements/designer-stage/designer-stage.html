@@ -169,8 +169,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (this.document) {
           // If the designer-document element that this.document is bound to
           // ever changed, this would be a memory leak, but it doesn't.
-          this.document.addEventListener('document-changed', function(e) {
-            if (this.document.document) {
+          this.document.addEventListener('dom-document-changed', function(e) {
+            if (this.document.domDocument) {
               this._reset();
             }
           }.bind(this));

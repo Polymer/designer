@@ -121,13 +121,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </nav>
       <nav id="ancillary">
         <designer-inspector
-            source-document="{{domDocument}}"
+            source-document="[[domDocument]]"
             element-info="{{currentElementInfo}}">
         </designer-inspector>
       </nav>
       <div id="doc-view">
         <designer-document
             id="document"
+            source="[[documentSource]]"
+            url="[[documentUrl]]"
             text-content="{{textContent}}">
         </designer-document>
         <designer-breadcrumb node="{{currentNode}}"></designer-breadcrumb>
@@ -137,7 +139,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             frame="[[frame]]"
             current-element-info="{{currentElementInfo}}"
             on-designer-command="_onDesignerCommand">
-          <designer-frame id="frame" document="[[document]]"></designer-frame>
+          <designer-frame id="frame" document="[[domDocument]]"></designer-frame>
         </designer-stage>
         <pre id="html">[[textContent]]</pre>
       </div>
@@ -159,20 +161,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         currentElementInfo: {
           type: Object,
           notify: true,
+          observer: '_currentElementInfoChanged',
         },
 
         currentNode: {
           type: Object,
           notify: true,
-          observer: 'currentNodeChanged',
+          observer: '_currentNodeChanged',
         },
 
         document: {
           type: Object,
           notify: true,
+          observer: '_documentChanged',
         },
 
         frame: {
+          type: Object,
+          notify: true,
+        },
+
+        domDocument: {
           type: Object,
           notify: true,
         },
@@ -182,34 +191,56 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           notify: true,
         },
 
+        documentSource: {
+          type: String,
+          notify: true,
+        },
+
+        documentUrl: {
+          type: String,
+          notify: true,
+        },
+
       },
 
       observers: {
-        'currentElementInfo.path': 'pathChanged',
-      },
-
-      pathChanged() {
-        if (this.document && this.currentElementInfo != null) {
-          var path = this.currentElementInfo.path;
-          var node = pathLib.getNodeFromPath(path, this.document.document);
-          this.currentNode = node;
-        }
-      },
-
-      currentNodeChanged() {
-        if (this.document) {
-          var path = pathLib.getNodePath(this.currentNode, this.document.document);
-          if (this.$.stage.currentElementInfo &&
-              this.$.stage.currentElementInfo.path !== path) {
-            this.$.stage.selectNode(path);
-          }
-        }
+        'currentElementInfo.path': '_pathChanged',
       },
 
       ready() {
         // TODO(justinfagnani): move these initializers to properties:
         this.document = this.$.document;
         this.frame = this.$.frame;
+      },
+
+      _documentChanged() {
+        if (this.document) {
+          this.document.addEventListener('dom-document-changed', function(e) {
+            if (this.document.domDocument) {
+              this.domDocument = this.document.domDocument;
+            }
+          }.bind(this));
+        }
+      },
+
+      _pathChanged() {
+        if (this.document && this.currentElementInfo != null) {
+          var path = this.currentElementInfo.path;
+          var node = pathLib.getNodeFromPath(path, this.document.domDocument);
+          this.currentNode = node;
+        } else {
+          this.currentNode = null;
+        }
+      },
+
+      _currentNodeChanged() {
+        if (this.document) {
+          var path = pathLib.getNodePath(this.currentNode, this.document.domDocument);
+          if (this.$.stage.currentElementInfo &&
+              this.$.stage.currentElementInfo.path !== path) {
+            this.$.stage.selectNode(path);
+          }
+        }
       },
 
       _onDesignerCommand(event, command) {
@@ -226,7 +257,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var demoAsset = module.import(this.is, '#' + demoName);
 
           demoAsset.load().then(function(content) {
-            this.document.setDocument(content, demoAsset.url.href);
+            this.documentSource = content;
+            this.documentUrl = demoAsset.url.href;
           }.bind(this));
         }
       },
