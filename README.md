@@ -1,5 +1,16 @@
-# designer2
-A UI Designer for Polymer
+# Polymer Designer
+
+A UI Designer for HTML, Custom Elements, and Polymer.
+
+## Status
+
+This is a complete, from-scratch, rewrite of Polymer Designer in Polymer 0.8,
+sometimes referred to as Designer 2. It it not yet usable, and currently only
+allows basic editing of some hard-coded demos. Don't expect too much.
+
+We've moved the Designer 2 source into the master branch because we are no
+longer maintaining Designer 1. If you're looking for the Designer 1 source, it's
+still available in the designer1 branch.
 
 ## Developing
 
@@ -7,6 +18,10 @@ A UI Designer for Polymer
 
         bower install
         npm install
+
+  * Build the vendored dependencies:
+
+        npm run-script build
 
   * Start the local development server:
 
@@ -16,12 +31,6 @@ A UI Designer for Polymer
 
   * All bower components are available at
     `localhost:8080/component/{component-name}/`
-
-## Building
-
-To build/update our vendored dependencies (currently parse5), run:
-
-    npm run-script build
 
 ## Tests
 
