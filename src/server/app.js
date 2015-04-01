@@ -27,7 +27,7 @@ app.get('/', function (req, res) {
 });
 
 // dynamically build frame.js for edit-refresh goodness
-app.get('/components/polymer-designer/elements/designer-stage/frame.js',
+app.get('/components/polymer-designer/elements/designer-document/frame.js',
   function (req, res) {
     res.send(buildFrameScript());
   }

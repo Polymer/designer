@@ -8,11 +8,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../../../polymer/polymer.html">
-<link rel="import" href="../../../core-asset/core-asset.html">
 <link rel="import" href="../../src/commands/commands.html">
-<link rel="import" href="../../src/hydrolysis/hydrolysis.html">
 <link rel="import" href="../../src/css/css.html">
-<link rel="import" href="../../src/protocol/document-client.html">
+<link rel="import" href="../designer-document/designer-document.html">
 <link rel="import" href="../designer-selection/designer-selection.html">
 
 <dom-module id="designer-stage">
@@ -22,16 +20,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       display: block;
       box-sizing: border-box;
       position: relative;
-    }
-    iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-      box-sizing: border-box;
-      background: gray;
     }
     #glass {
       position: absolute;
@@ -84,24 +72,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div id="text-edit-selection" on-click="_textOnClick"
          on-keydown="_onKeydown" on-keypress="_onKeypress" tabindex="0"></div>
     <div id="glass" on-mousedown="_onMouseDown" on-dblclick="_onDoubleClick"></div>
+    <content></content>
   </template>
-
-  <core-asset id="frame-script" href="frame.js"></core-asset>
 
 </dom-module>
 
 <script>
   define([
         'polymer-designer/commands',
-        'polymer-designer/protocol/DocumentClient',
-        'polymer-designer/protocol/ClientConnection',
-        'polymer-designer/designer-selection/ResizeDirection',
-        'hydrolysis'],
-      function(commands,
-               DocumentClient,
-               ClientConnection,
-               ResizeDirection,
-               hydrolysis) {
+        'polymer-designer/designer-selection/ResizeDirection'],
+      function(commands, ResizeDirection) {
 
     'use strict';
 
@@ -148,22 +128,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: null,
         },
 
-        _client: {
-          type: Object,
-          value: null,
-        },
-
         /**
-         * Monomers is the `hydrolysis`-provided database of Polymer metadata.
-         * @type {Monomers}
-         */
-        _monomers: {
-          type: Object,
-          value: null
-        },
-
-        /**
-         * The current editing mode, 'text' or 'layout'.
+         * The current editing mode: 'text' or 'layout'.
          */
         _mode: {
           type: String,
@@ -173,7 +139,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         _mouseDown: {
           type: Boolean,
           value: false,
-        }
+        },
+
+        /** @type {DesignerDocument} a <designer-document> element */
+        document: {
+          type: Object,
+          observer: '_documentChanged',
+        },
+
+        /** @type {DesignerFrame} a <designer-frame> element */
+        frame: {
+          type: Object,
+        },
+
       },
 
       listeners: {
@@ -187,12 +165,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._reset();
       },
 
+      _documentChanged() {
+        if (this.document) {
+          // If the designer-document element that this.document is bound to
+          // ever changed, this would be a memory leak, but it doesn't.
+          this.document.addEventListener('document-changed', function(e) {
+            if (this.document.document) {
+              this._reset();
+            }
+          }.bind(this));
+        }
+      },
+
       _reset() {
         this.currentElementInfo = null;
         this.currentMousePosition = null;
         this.insertPosition = null;
         this.hoverPath = null;
-        this._client = null;
         this._hideHover();
         this.$.selection.hide();
         this.mode = 'layout';
@@ -200,93 +189,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.caret.style.display = 'none';
       },
 
-      /**
-       * Sets the current document and injects the message handler.
-       * @param {[type]} content The document source.
-       * @param {[type]} url     The document location.
-       * @returns {Promise<Document>} The modified document.
-       */
-      setDocument(content, url) {
-        var module = document.createElement('dom-module');
-        var frameScriptAsset = module.import('designer-stage', '#frame-script');
-        var loader = new hydrolysis.Loader({host: new URL(url).hostname});
-        loader.addResolver(new hydrolysis.XHRResolver());
-        this.monomers = new hydrolysis.Monomers(true, loader);
-
-        this._reset();
-
-
-        return frameScriptAsset.load()
-          .then((function(frameScript) {
-            // Return a new Promise so we can resolve/reject on load/error
-            // events from the frame
-            return new Promise((function(resolve, reject) {
-              var frame = Polymer.dom(this.root).querySelector('iframe');
-              if (frame != null) {
-                Polymer.dom(this.root).removeChild(frame);
-                this._connection.disconnect();
-              }
-              frame = document.createElement('iframe');
-              frame.setAttribute('id', 'frame');
-              frame.setAttribute('sandbox', 'allow-scripts');
-              Polymer.dom(this.root).appendChild(frame);
-
-              // create an HTML document from the content
-              var doc = document.implementation.createHTMLDocument();
-
-              doc.documentElement.innerHTML = content;
-
-              // insert a script tag with the frame.js source
-              var frameScriptElement = doc.createElement('script');
-              frameScriptElement.textContent = frameScript;
-              frameScriptElement.setAttribute('designer-exclude', '');
-              doc.head.insertBefore(frameScriptElement, doc.head.firstChild);
-
-              // data: URIs need a base for relative URLs
-              var base = doc.createElement('base');
-              base.setAttribute('href', this.baseURI);
-              base.setAttribute('designer-exclude', '');
-              doc.head.insertBefore(base, doc.head.firstChild);
-
-              // set the iframe src to the new document
-              var docBlob = new Blob([doc.documentElement.innerHTML],
-                  {type: 'text/html'});
-              frame.src = URL.createObjectURL(docBlob);
-
-              // listen to load and error events from the frame
-              var onFrameLoad = (function() {
-
-                this._connection = new ClientConnection(
-                    window, frame.contentWindow);
-                this._client = new DocumentClient(this._connection);
-
-                frame.removeEventListener(onFrameLoad);
-                frame.removeEventListener(onFrameError);
-                this.monomers.load(url).then(function(documentDescriptor) {
-                  return documentDescriptor.htmlLoaded;
-                }).then(function(parsedDocument) {
-                  resolve({document: doc, content: content, html: parsedDocument.ast});
-                });
-              }).bind(this);
-              frame.addEventListener('load', onFrameLoad);
-
-              var onFrameError = (function(e) {
-                if (e.type == 'load') {
-                  console.warn("<designer-stage> error loading frame contents");
-                }
-                frame.removeEventListener(onFrameLoad);
-                frame.removeEventListener(onFrameError);
-                reject("<designer-stage> error loading frame contents");
-              }).bind(this);
-              frame.addEventListener('error', onFrameError);
-
-            }).bind(this));
-          }).bind(this));
-      },
-
       selectNode(path) {
-        if (this._client !== null) {
-          this._client.selectElementAtPath(path)
+        if (this.frame.client !== null) {
+          this.frame.client.selectElementAtPath(path)
               .then(function(response) {
                 this._updateCurrentElement(response.elementInfo);
                 this._updateSelectionBounds(response.bounds);
@@ -300,7 +205,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        * @param {Command} command
        */
       executeCommand(command) {
-        return this._client.sendCommand(command)
+        return this.frame.client.sendCommand(command)
             .then(function(response) {
               this._updateCurrentElement(response.elementInfo);
               this._updateSelectionBounds(response.bounds);
@@ -417,7 +322,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           y: e.detail.cursor.y - this.offsetTop,
         };
         var bounds = e.detail.bounds;
-        this._client.selectionBoundsChanged(bounds, cursor)
+        this.frame.client.selectionBoundsChanged(bounds, cursor)
             .then(function(response) {
               this._updateSelectionBounds(response.bounds);
               this._updateHoverElement(response.hover);
@@ -433,7 +338,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // have a double-click to initiate any action, but the redundant
         // selection that happens here sometimes is ok for now
         var bounds = this.getBoundingClientRect();
-        this._client.selectElementAtPoint(e.clientX, e.clientY, bounds)
+        this.frame.client.selectElementAtPoint(e.clientX, e.clientY, bounds)
             .then(function(response) {
               this._updateCurrentElement(response.elementInfo);
               this._updateSelectionBounds(response.bounds);
@@ -458,7 +363,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _onDoubleClick(e) {
         var bounds = this.getBoundingClientRect();
-        this._client.selectElementAtPoint(e.clientX, e.clientY, bounds)
+        this.frame.client.selectElementAtPoint(e.clientX, e.clientY, bounds)
             .then(function(response) {
               this._updateCurrentElement(response.elementInfo);
               this._updateSelectionBounds(response.bounds);
@@ -468,7 +373,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _onSelectionClick(e) {
         var bounds = this.getBoundingClientRect();
-        this._client.selectElementAtPoint(e.clientX, e.clientY, bounds)
+        this.frame.client.selectElementAtPoint(e.clientX, e.clientY, bounds)
             .then(function(response) {
               this._updateCurrentElement(response.elementInfo);
               this._updateSelectionBounds(response.bounds);
@@ -478,7 +383,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _textOnClick(e) {
         e.stopPropagation();
         var bounds = this.getBoundingClientRect();
-        this._client.getCaretPosition(e.clientX, e.clientY, bounds)
+        this.frame.client.getCaretPosition(e.clientX, e.clientY, bounds)
           .then(function(response) {
             this._updateCaret(response.rect);
           }.bind(this));
@@ -515,7 +420,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             return;
         }
 
-        this._client.moveCursor(move)
+        this.frame.client.moveCursor(move)
           .then(function(response) {
             this._updateCaret(response.rect);
           }.bind(this));
@@ -532,7 +437,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _onKeypress(event) {
         var keyCode = event.keyCode;
         var char = String.fromCharCode(keyCode);
-        this._client.insertText(char)
+        this.frame.client.insertText(char)
           .then(function(response) {
             this._updateCaret(response.rect);
           }.bind(this));

@@ -18,7 +18,7 @@ define('polymer-designer/protocol/ClientConnection',
     /**
      * @param {EventTarget} target The object to listen for message events on.
      * @param {Window} otherWindow The window to postMessage to, which should
-     *     host a PostMessageServerConnection.
+     *     host a [ServerConnection].
      */
     constructor(target, otherWindow) {
       this.target = target;
