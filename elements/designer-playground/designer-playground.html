@@ -126,7 +126,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </designer-inspector>
       </nav>
       <div id="doc-view">
-        <designer-document id="document"></designer-document>
+        <designer-document
+            id="document"
+            text-content="{{textContent}}">
+        </designer-document>
         <designer-breadcrumb node="{{currentNode}}"></designer-breadcrumb>
         <designer-stage
             id="stage"
@@ -136,7 +139,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             on-designer-command="_onDesignerCommand">
           <designer-frame id="frame" document="[[document]]"></designer-frame>
         </designer-stage>
-        <pre id="html"></pre>
+        <pre id="html">[[textContent]]</pre>
       </div>
     <div>
   </template>
@@ -171,6 +174,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         frame: {
           type: Object,
+          notify: true,
+        },
+
+        textContent: {
+          type: String,
           notify: true,
         },
 

@@ -43,13 +43,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'polymer-designer/protocol/ClientConnection',
         'polymer-designer/commands/DomCommandApplier',
         'polymer-designer/commands/ParsedHtmlCommandApplier',
-        'hydrolysis'],
+        'hydrolysis',
+        'dom5'],
       function(
         DocumentClient,
         ClientConnection,
         DomCommandApplier,
         ParsedHtmlCommandApplier,
-        hydrolysis) {
+        hydrolysis,
+        dom5) {
 
     'use strict';
 
@@ -64,6 +66,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         document: {
           type: Object,
+          notify: true,
+        },
+
+        textContent: {
+          type: String,
+          notify: true,
+        },
+
+        ast: {
+          type: String,
           notify: true,
         }
 
@@ -87,10 +99,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           let frameScript = results[1];
 
           this.document = createDocument(content, frameScript, this.baseURI);
+          this.ast = parsedDocument.ast;
 
           this._domCommandApplier = new DomCommandApplier(this.document);
           this._parsedCommandApplier =
-              new ParsedHtmlCommandApplier(parsedDocument.ast);
+              new ParsedHtmlCommandApplier(this.ast);
+          this.textContent = dom5.serialize(this.ast);
 
           return {
             document: this.document,
@@ -104,6 +118,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       executeCommand(command) {
         this._domCommandApplier.apply(command);
         this._parsedCommandApplier.apply(command);
+        this.textContent = dom5.serialize(this.ast);
       },
 
       get _frameScriptAsset() {
