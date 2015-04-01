@@ -8,7 +8,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../../../polymer/polymer.html">
-<link rel="import" href="../../src/async/async.html">
 
 <!--
   <designer-frame> manages the <iframe> that hosts the live edited document, and
@@ -37,11 +36,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script>
   define([
-      'polymer-designer/async',
       'polymer-designer/protocol/DocumentClient',
       'polymer-designer/protocol/ClientConnection',
     ], function(
-      async,
       DocumentClient,
       ClientConnection) {
     'use strict';
@@ -53,7 +50,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         document: {
           type: Object,
-          notify: true,
           observer: '_documentChanged',
         },
 
@@ -62,18 +58,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           notify: true,
         },
 
-      },
-
-      _documentChanged() {
-        if (this.document) {
-          // If the designer-document element that this.document is bound to
-          // ever changed, this would be a memory leak, but it doesn't.
-          this.document.addEventListener('dom-document-changed', function(e) {
-            if (this.document.domDocument) {
-              this._setSource(getDocumentUrl(this.document.domDocument));
-            }
-          }.bind(this));
-        }
       },
 
       /**
@@ -85,37 +69,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        * here (setting this.client) is only needed after the content loads
        * anyway, such as when the use clicks on an element.
        */
-      _setSource(url) {
+      _documentChanged() {
+        let url = getDocumentUrl(this.document);
+
         if (this._frame != null) {
           Polymer.dom(this.root).removeChild(this._frame);
+        }
+
+        if (this.client != null) {
+          this.client.connection.disconnect();
         }
 
         this._frame = document.createElement('iframe');
         this._frame.setAttribute('sandbox', 'allow-scripts');
         Polymer.dom(this.root).appendChild(this._frame);
         Polymer.dom.flush();
-        this._loadedDeferred = new async.Deferred();
 
-        let onLoad = function(event) {
-          this._frame.removeEventListener('load', onLoad);
-          this._frame.removeEventListener('error', onLoad);
-          this._connection =
-              new ClientConnection(window, this._frame.contentWindow);
-          this.client = new DocumentClient(this._connection);
-          this._loadedDeferred.resolve();
-        }.bind(this);
-
-        let onError = function(event) {
-          this._frame.removeEventListener('load', onLoad);
-          this._frame.removeEventListener('error', onLoad);
-          this._loadedDeferred.reject();
-        }.bind(this);
-
-        this._frame.addEventListener('load', onLoad);
-        this._frame.addEventListener('error', onError);
+        this._frame.addEventListener('load', function(event) {
+          let conn = new ClientConnection(window, this._frame.contentWindow);
+          this.client = new DocumentClient(conn);
+        }.bind(this));
 
         this._frame.src = url;
-        return this._loadedDeferred.promise;
       },
 
     });
