@@ -191,14 +191,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       pathChanged() {
         if (this.document && this.currentElementInfo != null) {
           var path = this.currentElementInfo.path;
-          var node = pathLib.getNodeFromPath(path, this.document.document);
+          var node = pathLib.getNodeFromPath(path, this.document.domDocument);
           this.currentNode = node;
         }
       },
 
       currentNodeChanged() {
         if (this.document) {
-          var path = pathLib.getNodePath(this.currentNode, this.document.document);
+          var path = pathLib.getNodePath(this.currentNode, this.document.domDocument);
           if (this.$.stage.currentElementInfo &&
               this.$.stage.currentElementInfo.path !== path) {
             this.$.stage.selectNode(path);

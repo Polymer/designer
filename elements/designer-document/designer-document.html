@@ -64,7 +64,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Object,
         },
 
-        document: {
+        domDocument: {
           type: Object,
           notify: true,
         },
@@ -98,20 +98,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           let parsedDocument = results[0];
           let frameScript = results[1];
 
-          this.document = createDocument(content, frameScript, this.baseURI);
+          this.domDocument = createDocument(content, frameScript, this.baseURI);
           this.ast = parsedDocument.ast;
 
-          this._domCommandApplier = new DomCommandApplier(this.document);
+          this._domCommandApplier = new DomCommandApplier(this.domDocument);
           this._parsedCommandApplier =
               new ParsedHtmlCommandApplier(this.ast);
           this.textContent = dom5.serialize(this.ast);
-
-          return {
-            document: this.document,
-            content: content,
-            html: parsedDocument.ast
-          };
-
         }.bind(this));
       },
 
