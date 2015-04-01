@@ -10,6 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../polymer/polymer.html">
 
 <link rel="import" href="designer-style-inspector.html">
+<link rel="import" href="designer-property-inspector.html">
 
 <!--
 Inspects an element and provides tidbits about its properties, styles, and more.
@@ -32,6 +33,9 @@ Inspects an element and provides tidbits about its properties, styles, and more.
     <designer-style-inspector
         source-document="{{sourceDocument}}"
         element-info="{{elementInfo}}"></designer-style-inspector>
+    <designer-property-inspector
+        element-info="{{elementInfo}}"></designer-property-inspector>
+<!--         <div>{{_dumpedState}}</div> -->
   </template>
 
 </dom-module>

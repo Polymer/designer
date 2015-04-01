@@ -79,6 +79,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           notify: true,
         },
 
+        analyzer: Object,
         source: String,
         url: String,
 
@@ -96,8 +97,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        * @returns {Promise<Document>} The modified document.
        */
       _setDocument(content, url) {
+        this.analyzer = createAnalyzer(url);
+
         return Promise.all([
-          getDocumentDescriptors(url).load(url).then(function(descriptor) {
+          this.analyzer.load(url).then(function(descriptor) {
             return descriptor.htmlLoaded;
           }),
           this._frameScriptAsset.load(),
@@ -130,10 +133,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     });
 
     /**
-     * @returns {Monomers} a Hyrdolysis Monomers (analysis) object that can be
+     * @returns {Analyzer} a Hyrdolysis Analyzer (analysis) object that can be
      *     used to load and analyze an HTML document.
      */
-    function getDocumentDescriptors(url) {
+    function createAnalyzer(url) {
       let loader = new hydrolysis.Loader({host: new URL(url).hostname});
       loader.addResolver(new hydrolysis.XHRResolver());
       return new hydrolysis.Analyzer(true, loader);
