@@ -10,6 +10,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../../src/async/async.html">
 
+<!--
+  <designer-frame> manages the <iframe> that hosts the live edited document, and
+  provides a [DocumentClient] for interacting with it.
+
+  [frameDocument] must be set with the edited document DOM document with the
+  script containing a [DocumentServer] already injected.
+-->
 <dom-module id="designer-frame">
 
   <style>
@@ -29,24 +36,60 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </dom-module>
 
 <script>
-  define(['polymer-designer/async'], function(async) {
+  define([
+      'polymer-designer/async',
+      'polymer-designer/protocol/DocumentClient',
+      'polymer-designer/protocol/ClientConnection',
+    ], function(
+      async,
+      DocumentClient,
+      ClientConnection) {
     'use strict';
 
     Polymer({
       is: 'designer-frame',
 
-      get window() {
-        return this._frame.contentWindow;
+      properties: {
+
+        document: {
+          type: Object,
+          notify: true,
+          observer: '_documentChanged',
+        },
+
+        client: {
+          type: Object,
+          notify: true,
+        },
+
+      },
+
+      _documentChanged() {
+        if (this.document) {
+          // If the designer-document element that this.document is bound to
+          // ever changed, this would be a memory leak, but it doesn't.
+          this.document.addEventListener('document-changed', function(e) {
+            if (this.document.document) {
+              this._setSource(getDocumentUrl(this.document.document));
+            }
+          }.bind(this));
+        }
       },
 
       /**
        * @returns {Promise} a Promise that completes when the document has
        * loaded.
+       *
+       * Note: this method isn't called from anywhere than can handle the
+       * Promise at the moment. The assumption for now is that the side-effect
+       * here (setting this.client) is only needed after the content loads
+       * anyway, such as when the use clicks on an element.
        */
-      setSource(url) {
+      _setSource(url) {
         if (this._frame != null) {
           Polymer.dom(this.root).removeChild(this._frame);
         }
+
         this._frame = document.createElement('iframe');
         this._frame.setAttribute('sandbox', 'allow-scripts');
         Polymer.dom(this.root).appendChild(this._frame);
@@ -56,17 +99,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         let onLoad = function(event) {
           this._frame.removeEventListener('load', onLoad);
           this._frame.removeEventListener('error', onLoad);
-          if (this._loadedDeferred !== null) {
-            this._loadedDeferred.resolve();
-          }
+          this._connection =
+              new ClientConnection(window, this._frame.contentWindow);
+          this.client = new DocumentClient(this._connection);
+          this._loadedDeferred.resolve();
         }.bind(this);
 
         let onError = function(event) {
           this._frame.removeEventListener('load', onLoad);
           this._frame.removeEventListener('error', onLoad);
-          if (this._loadedDeferred !== null) {
-            this._loadedDeferred.reject();
-          }
+          this._loadedDeferred.reject();
         }.bind(this);
 
         this._frame.addEventListener('load', onLoad);
@@ -77,6 +119,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
     });
+
+    /**
+     * @returns {URL} a Blob URL for the given [doc].
+     */
+    function getDocumentUrl(doc) {
+      let docBlob = new Blob([doc.documentElement.innerHTML],
+          {type: 'text/html'});
+      return URL.createObjectURL(docBlob);
+    }
+
   });
 
 </script>

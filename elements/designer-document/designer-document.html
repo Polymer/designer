@@ -30,9 +30,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
   </style>
 
-  <template>
-    <designer-frame id="frame"></designer-frame>
-  </template>
+  <template></template>
 
   <core-asset id="frame-script" href="frame.js"></core-asset>
 
@@ -43,19 +41,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'polymer-designer/protocol/DocumentClient',
         'polymer-designer/protocol/ClientConnection',
         'hydrolysis'],
-      function(DocumentClient,
-               ClientConnection,
-               hydrolysis) {
+      function(
+        DocumentClient,
+        ClientConnection,
+        hydrolysis) {
 
     'use strict';
 
     Polymer({
       is: 'designer-document',
 
+      properties: {
+
+        client: {
+          type: Object,
+        },
+
+        document: {
+          type: Object,
+          notify: true,
+        }
+
+      },
+
       /**
-       * Sets the current document and injects the message handler.
-       * @param {[type]} content The document source.
-       * @param {[type]} url The document location.
+       * Sets the current document and injects the message handler script.
+       *
+       * @param {string} content The document source.
+       * @param {string} url The document location.
        * @returns {Promise<Document>} The modified document.
        */
       setDocument(content, url) {
@@ -67,27 +80,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         ]).then(function(results) {
           let parsedDocument = results[0];
           let frameScript = results[1];
+          this.document = createDocument(content, frameScript, this.baseURI);
 
-          if (this._connection) {
-            this._connection.disconnect();
-            this._connection = null;
-            this._client = null;
-          }
+          return {
+            document: this.document,
+            content: content,
+            html: parsedDocument.ast
+          };
 
-          let frame = this.$.frame;
-          let doc = createDocument(content, frameScript, this.baseURI);
-
-          return this.$.frame.setSource(getDocumentUrl(doc)).then(function() {
-            this._connection = new ClientConnection(window, frame.window);
-            this._client = new DocumentClient(this._connection);
-
-            return {
-              document: doc,
-              content: content,
-              html: parsedDocument.ast
-            };
-
-          }.bind(this));
         }.bind(this));
       },
 
@@ -144,15 +144,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       // data URIs need a base to be able to resolve relative URLs
       doc.head.insertBefore(createBase(baseUri, doc), doc.head.firstChild);
       return doc;
-    }
-
-    /**
-     * @returns {URL} a Blob URL for the given [doc].
-     */
-    function getDocumentUrl(doc) {
-      let docBlob = new Blob([doc.documentElement.innerHTML],
-          {type: 'text/html'});
-      return URL.createObjectURL(docBlob);
     }
 
   });

@@ -68,16 +68,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     #main > nav > designer-inspector {
       flex: 1;
     }
-    #main > #doc {
+    #main > #doc-view {
       display: flex;
       flex-direction: column;
       flex: 1;
       order: 5;
     }
-    #main > #doc > designer-stage {
+    #main > #doc-view > designer-stage {
       flex: 1;
     }
-    #main > #doc > #html {
+    #main > #doc-view > #html {
       flex: 0 0 400px;
       border: solid 1px #888;
       margin: 0;
@@ -118,9 +118,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             element-info="{{currentElementInfo}}">
         </designer-inspector>
       </nav>
-      <div id="doc">
+      <div id="doc-view">
+        <designer-document id="document"></designer-document>
         <designer-breadcrumb node="{{currentNode}}"></designer-breadcrumb>
-        <designer-stage id="stage" current-element-info="{{currentElementInfo}}"></designer-stage>
+        <designer-stage
+            id="stage"
+            document="[[document]]"
+            frame="[[frame]]"
+            current-element-info="{{currentElementInfo}}">
+          <designer-frame id="frame" document="[[document]]"></designer-frame>
+        </designer-stage>
         <pre id="html"></pre>
       </div>
     <div>
@@ -149,15 +156,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       is: 'designer-playground',
 
       properties: {
+
         currentElementInfo: {
           type: Object,
           notify: true,
         },
+
         currentNode: {
           type: Object,
           notify: true,
           observer: 'currentNodeChanged',
-        }
+        },
+
+        document: {
+          type: Object,
+          notify: true,
+        },
+
+        frame: {
+          type: Object,
+          notify: true,
+        },
+
       },
 
       observers: {
@@ -184,16 +204,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      configure() {
-        return {
-          currentElementInfo: null,
-          currentNode: null,
-          textDocument: null,
-          domDocument: null,
-          parsedDocument: null,
-          domCommandApplier: null,
-          parsedCommandApplier: null,
-        };
+      ready() {
+        // TODO(justinfagnani): move these initializers to properties:
+        this.document = this.$.document;
+        this.frame = this.$.frame;
       },
 
       _onDesignerCommand(event, command) {
@@ -211,7 +225,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           demoAsset.load()
             .then(function(content) {
-              return this.$.stage.setDocument(content, demoAsset.url.href);
+              return this.document.setDocument(content, demoAsset.url.href);
             }.bind(this))
             .then((function(result) {
               this.domDocument = result.document;
@@ -220,7 +234,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               this.domCommandApplier = new DomCommandApplier(this.domDocument);
               this.parsedCommandApplier = new ParsedHtmlCommandApplier(this.parsedDocument);
               this.$.html.textContent = serializer.serialize(this.parsedDocument);
-
             }).bind(this));
         }
       },
@@ -235,6 +248,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
       },
     });
+
   });
 
 </script>
