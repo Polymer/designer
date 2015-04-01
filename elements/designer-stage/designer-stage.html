@@ -213,7 +213,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       getAnalyzedElement(elementInfo) {
-        return this._analyzer.elements[elementInfo.tagName.toLowerCase()];
+        return this.document.analyzer.elements[elementInfo.tagName.toLowerCase()];
       },
 
       _updateSelectionBounds(bounds) {
@@ -228,7 +228,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _updateCurrentElement(elementInfo) {
         elementInfo.analyzed = this.getAnalyzedElement(elementInfo);
-        console.log(elementInfo.analyzed);
         this.currentElementInfo = elementInfo;
 
         // Set the valid resize handles

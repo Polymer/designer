@@ -64,8 +64,6 @@ Polymer({
   },
 
   _elementInfoChanged() {
-    console.log("eic");
-    console.log(this.elementInfo);
     this._properties = (this.elementInfo &&
                          this.elementInfo.analyzed &&
                          this.elementInfo.analyzed.properties) || [];
