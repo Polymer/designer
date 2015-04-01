@@ -9,6 +9,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../../../core-asset/core-asset.html">
+<link rel="import" href="../../src/commands/commands.html">
 <link rel="import" href="../../src/hydrolysis/hydrolysis.html">
 <link rel="import" href="../../src/protocol/document-client.html">
 <link rel="import" href="../designer-frame/designer-frame.html">
@@ -40,10 +41,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   define([
         'polymer-designer/protocol/DocumentClient',
         'polymer-designer/protocol/ClientConnection',
+        'polymer-designer/commands/DomCommandApplier',
+        'polymer-designer/commands/ParsedHtmlCommandApplier',
         'hydrolysis'],
       function(
         DocumentClient,
         ClientConnection,
+        DomCommandApplier,
+        ParsedHtmlCommandApplier,
         hydrolysis) {
 
     'use strict';
@@ -80,7 +85,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         ]).then(function(results) {
           let parsedDocument = results[0];
           let frameScript = results[1];
+
           this.document = createDocument(content, frameScript, this.baseURI);
+
+          this._domCommandApplier = new DomCommandApplier(this.document);
+          this._parsedCommandApplier =
+              new ParsedHtmlCommandApplier(parsedDocument.ast);
 
           return {
             document: this.document,
@@ -91,9 +101,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }.bind(this));
       },
 
+      executeCommand(command) {
+        this._domCommandApplier.apply(command);
+        this._parsedCommandApplier.apply(command);
+      },
+
       get _frameScriptAsset() {
-        let domModule = document.createElement('dom-module');
-        return domModule.import('designer-document', '#frame-script');
+        return (document
+            .createElement('dom-module')
+            .import('designer-document', '#frame-script'));
       },
 
     });

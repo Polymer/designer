@@ -11,8 +11,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../core-asset/core-asset.html">
 <link rel="import" href="../../../core-toolbar/core-toolbar.html">
 <link rel="import" href="../../../polymer/polymer.html">
-<link rel="import" href="../../src/commands/commands.html">
-<link rel="import" href="../../src/parse5/parse5.html">
 <link rel="import" href="../designer-breadcrumb/designer-breadcrumb.html">
 <link rel="import" href="../designer-stage/designer-stage.html">
 <link rel="import" href="../designer-inspector/designer-inspector.html">
@@ -125,7 +123,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             id="stage"
             document="[[document]]"
             frame="[[frame]]"
-            current-element-info="{{currentElementInfo}}">
+            current-element-info="{{currentElementInfo}}"
+            on-designer-command="_onDesignerCommand">
           <designer-frame id="frame" document="[[document]]"></designer-frame>
         </designer-stage>
         <pre id="html"></pre>
@@ -137,20 +136,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script>
 
-  define([
-        'polymer-designer/commands/DomCommandApplier',
-        'polymer-designer/commands/ParsedHtmlCommandApplier',
-        'parse5',
-        'polymer-designer/path'],
-      function(
-        DomCommandApplier,
-        ParsedHtmlCommandApplier,
-        Parse5,
-        pathLib) {
-
+  define(['polymer-designer/path'], function(pathLib) {
     'use strict';
-
-    var serializer = new Parse5.Serializer();
 
     Polymer({
       is: 'designer-playground',
@@ -184,23 +171,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'currentElementInfo.path': 'pathChanged',
       },
 
-      listeners: {
-        'designer-command': '_onDesignerCommand',
-      },
-
       pathChanged() {
-        if (this.currentElementInfo != null) {
+        if (this.document && this.currentElementInfo != null) {
           var path = this.currentElementInfo.path;
-          var node = pathLib.getNodeFromPath(path, this.domDocument);
+          var node = pathLib.getNodeFromPath(path, this.document.document);
           this.currentNode = node;
         }
       },
 
       currentNodeChanged() {
-        var path = pathLib.getNodePath(this.currentNode, this.domDocument);
-        if (this.$.stage.currentElementInfo &&
-            this.$.stage.currentElementInfo.path !== path) {
-          this.$.stage.selectNode(path);
+        if (this.document) {
+          var path = pathLib.getNodePath(this.currentNode, this.document.document);
+          if (this.$.stage.currentElementInfo &&
+              this.$.stage.currentElementInfo.path !== path) {
+            this.$.stage.selectNode(path);
+          }
         }
       },
 
@@ -211,10 +196,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onDesignerCommand(event, command) {
-        this.domCommandApplier.apply(command);
-        this.parsedCommandApplier.apply(command);
+        this.document.executeCommand(command);
+        // TODO(justinfagnani): execute command through the frame, and get the
+        // statge to update when the frame changes
         this.$.stage.executeCommand(command);
-        this.$.html.textContent = serializer.serialize(this.parsedDocument);
       },
 
       _navOnClick(e) {
@@ -223,18 +208,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var demoName = e.target.dataset.demo;
           var demoAsset = module.import(this.is, '#' + demoName);
 
-          demoAsset.load()
-            .then(function(content) {
-              return this.document.setDocument(content, demoAsset.url.href);
-            }.bind(this))
-            .then((function(result) {
-              this.domDocument = result.document;
-              this.parsedDocument = result.html;
-
-              this.domCommandApplier = new DomCommandApplier(this.domDocument);
-              this.parsedCommandApplier = new ParsedHtmlCommandApplier(this.parsedDocument);
-              this.$.html.textContent = serializer.serialize(this.parsedDocument);
-            }).bind(this));
+          demoAsset.load().then(function(content) {
+            this.document.setDocument(content, demoAsset.url.href);
+          }.bind(this));
         }
       },
 
