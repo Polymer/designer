@@ -10,9 +10,7 @@
 
 var express = require('express');
 var fs = require('fs');
-var http = require('http');
 var path = require('path');
-var parseUrl = require('url').parse;
 var polyserve = require('polyserve');
 var send = require('send');
 
