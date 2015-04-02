@@ -20,18 +20,14 @@ var componentHeaders = {
 }
 var app = express();
 
-app.get('/', function (req, res) {
-  send(req, path.join(__dirname, 'index.html')).pipe(res);
-});
-
 // dynamically build frame.js for edit-refresh goodness
-app.get('/components/polymer-designer/elements/designer-document/frame.js',
+app.get('/polymer-designer/elements/designer-document/frame.js',
   function (req, res) {
     res.send(buildFrameScript());
   }
 );
 
-app.use('/components/', polyserve.makeApp(bowerComponentDir, null, componentHeaders));
+app.use('/', polyserve.makeApp(bowerComponentDir, null, componentHeaders));
 
 /**
  * Dynamically build the frame.js script so that we have edit-refresh

@@ -1,0 +1,36 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'node', '/usr/local/bin/npm', 'start' ]
+2 info using npm@2.7.1
+3 info using node@v0.10.24
+4 verbose node symlink /usr/local/bin/node
+5 verbose run-script [ 'prestart', 'start', 'poststart' ]
+6 info prestart polymer-designer@0.8.0
+7 info start polymer-designer@0.8.0
+8 verbose unsafe-perm in lifecycle true
+9 info polymer-designer@0.8.0 Failed to exec start script
+10 verbose stack Error: polymer-designer@0.8.0 start: `node server.js`
+10 verbose stack Exit status 8
+10 verbose stack     at EventEmitter.<anonymous> (/usr/local/lib/node_modules/npm/lib/utils/lifecycle.js:213:16)
+10 verbose stack     at EventEmitter.emit (events.js:98:17)
+10 verbose stack     at ChildProcess.<anonymous> (/usr/local/lib/node_modules/npm/lib/utils/spawn.js:14:12)
+10 verbose stack     at ChildProcess.EventEmitter.emit (events.js:98:17)
+10 verbose stack     at maybeClose (child_process.js:735:16)
+10 verbose stack     at Process.ChildProcess._handle.onexit (child_process.js:802:5)
+11 verbose pkgid polymer-designer@0.8.0
+12 verbose cwd /Users/justinfagnani/Documents/Projects/Polymer/designer
+13 error Darwin 13.4.0
+14 error argv "node" "/usr/local/bin/npm" "start"
+15 error node v0.10.24
+16 error npm  v2.7.1
+17 error code ELIFECYCLE
+18 error polymer-designer@0.8.0 start: `node server.js`
+18 error Exit status 8
+19 error Failed at the polymer-designer@0.8.0 start script 'node server.js'.
+19 error This is most likely a problem with the polymer-designer package,
+19 error not with npm itself.
+19 error Tell the author that this fails on your system:
+19 error     node server.js
+19 error You can get their info via:
+19 error     npm owner ls polymer-designer
+19 error There is likely additional logging output above.
+20 verbose exit [ 1, true ]
