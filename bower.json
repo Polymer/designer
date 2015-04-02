@@ -5,6 +5,7 @@
     "chai": "chaijs/chai#^1.10.0",
     "core-ajax": "Polymer/core-ajax#0.8-preview",
     "core-asset": "PolymerLabs/core-asset",
+    "core-header-panel": "Polymer/core-header-panel#0.8-preview",
     "core-icons": "Polymer/core-icons#0.8-preview",
     "core-iconset-svg": "Polymer/core-iconset-svg#0.8-preview",
     "core-iconset": "Polymer/core-iconset#0.8-preview",
@@ -14,6 +15,8 @@
     "imd": "PolymerLabs/IMD#master",
     "layout": "Polymer/layout",
     "mocha": "mochajs/mocha#^2.1.0",
+    "paper-card": "Polymer/paper-card#master",
+    "paper-icon-button": "Polymer/paper-icon-button#0.8-initial-port",
     "paper-tabs": "Polymer/paper-tabs#0.8-preview",
     "polymer": "Polymer/polymer#0.8-preview",
     "webcomponentsjs": "webcomponents/webcomponentsjs"
