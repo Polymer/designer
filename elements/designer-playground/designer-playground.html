@@ -10,7 +10,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../core-ajax/core-request.html">
 <link rel="import" href="../../../core-asset/core-asset.html">
 <link rel="import" href="../../../core-header-panel/core-header-panel.html">
-<link rel="import" href="../../../core-icons/core-icons.html">
 <link rel="import" href="../../../core-toolbar/core-toolbar.html">
 <link rel="import" href="../../../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../../paper-card/paper-card.html">
@@ -38,6 +37,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       height: 100%;
       display: flex;
       flex-direction: row;
+      background: #eee;
     }
     core-toolbar {
       background: #424242;
@@ -53,13 +53,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       display: inline;
     }
     nav {
-      background: #616161;
-      color: #ddd;
-      font-size: 14px;
-      flex: 0 0 240px;
-      /*z-index: 100;*/
+      background: #252525;
+      color: #888;
       display: flex;
+      flex: 0 0 200px;
       flex-direction: column;
+      font-size: 13px;
+      /*z-index: 100;*/
+      letter-spacing: .2px;
+      line-height: 24px;
+      padding: 4px 16px;
       order: 0;
     }
     #main > #ancillary {
@@ -89,11 +92,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
     #main > #doc-view > #html {
       flex: 0 0 400px;
-      border: solid 1px #888;
+      border-top: solid 1px #888;
       margin: 0;
+      padding: 8px;
       overflow: auto;
-      background: #212121;
-      color: white;
+      /*background: #212121;*/
+      color: #888;
     }
     #frame {
       position: absolute;
@@ -109,7 +113,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <core-header-panel>
       <core-toolbar class="core-header">
-        <paper-icon-button icon="menu" title="menu"></paper-icon-button>
+        <!-- <paper-icon-button icon="menu" title="menu"></paper-icon-button> -->
         <img class="d-logo" src="PolymerLabs.png">
       </core-toolbar>
       <div id="main" class="content">

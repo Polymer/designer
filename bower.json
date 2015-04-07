@@ -16,7 +16,7 @@
     "layout": "Polymer/layout",
     "mocha": "mochajs/mocha#^2.1.0",
     "paper-card": "Polymer/paper-card#master",
-    "paper-icon-button": "Polymer/paper-icon-button#0.8-initial-port",
+    "paper-icon-button": "Polymer/paper-icon-button#0.8-preview",
     "paper-tabs": "Polymer/paper-tabs#0.8-preview",
     "polymer": "Polymer/polymer#0.8-preview",
     "webcomponentsjs": "webcomponents/webcomponentsjs"
