@@ -9,22 +9,24 @@
  */
 
 var express = require('express');
-var fs = require('fs');
-var http = require('http');
 var path = require('path');
-var parseUrl = require('url').parse;
 var send = require('send');
 
 function startServer() {
   console.log('Starting Polymer Designer Server on port 8080');
   var app = express();
-  var server = http.createServer(app);
   // TODO: allow port to be set with flag, fallback to other ports
   var port = 8080;
 
+  app.get('/', function(req, res) {
+    send(req, path.join(__dirname, 'index.html')).pipe(res);
+  });
+
   app.use('/api', require('./api'));
 
-  app.use('/', require('./app'));
+  app.use('/components', require('./components'));
+
+  app.use('/files', require('./files'));
 
   server = app.listen(port);
 }

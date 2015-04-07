@@ -12,8 +12,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../core-toolbar/core-toolbar.html">
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../designer-breadcrumb/designer-breadcrumb.html">
-<link rel="import" href="../designer-stage/designer-stage.html">
+<link rel="import" href="../designer-file-tree/designer-file-tree.html">
 <link rel="import" href="../designer-inspector/designer-inspector.html">
+<link rel="import" href="../designer-stage/designer-stage.html">
+<link rel="import" href="designer-demo-files.html">
 
 <dom-module id="designer-playground">
 
@@ -41,9 +43,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       font-weight: normal;
       display: inline;
     }
-    #main > nav {
+    nav {
       background: #424242;
-      color: white;
+      color: #ddd;
+      font-size: 14px;
       flex: 0 0 240px;
       z-index: 100;
       display: flex;
@@ -94,30 +97,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
   </style>
 
-  <core-asset id="demo-doc-1" href="demo-doc-1.html"></core-asset>
-  <core-asset id="demo-doc-2" href="demo-doc-2.html"></core-asset>
-  <core-asset id="demo-doc-3" href="demo-doc-3.html"></core-asset>
-  <core-asset id="demo-doc-4" href="demo-doc-4.html"></core-asset>
-  <core-asset id="demo-doc-5" href="demo-doc-5.html"></core-asset>
-  <core-asset id="demo-doc-6" href="demo-doc-6.html"></core-asset>
-  <core-asset id="demo-polymer" href="demo-polymer.html"></core-asset>
-
   <template>
     <core-toolbar><img class="d-logo" src="PolymerLabs.png"> <h2 class="d-logo">Designer</h2></core-toolbar>
     <div id="main">
-      <nav on-click="_navOnClick">
-        <div id="files">
-          <a data-demo="demo-doc-1">Demo 1</a>
-          <a data-demo="demo-doc-2">inline</a>
-          <a data-demo="demo-doc-3">inline-block</a>
-          <a data-demo="demo-doc-4">block</a>
-          <a data-demo="demo-doc-5">absolute</a>
-          <a data-demo="demo-doc-6">Text</a>
-          <a data-demo="demo-polymer">polymer</a>
-        </div>
-        <div id="packages">
-          <button on-click="_installPackageClick">Bower Install</button>
-        </div>
+      <nav>
+        <designer-file-tree on-file-data-load="_onFileDataLoad">
+          <designer-demo-files id="files"></designer-demo-files>
+        </designer-file-tree>
       </nav>
       <nav id="ancillary">
         <designer-inspector
@@ -249,17 +235,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.stage.executeCommand(command);
       },
 
-      _navOnClick(e) {
-        if (e.target.tagName == 'A') {
-          var module = document.createElement('dom-module');
-          var demoName = e.target.dataset.demo;
-          var demoAsset = module.import(this.is, '#' + demoName);
-
-          demoAsset.load().then(function(content) {
-            this.documentSource = content;
-            this.documentUrl = demoAsset.url.href;
-          }.bind(this));
-        }
+      _onFileDataLoad(e) {
+        this.documentSource = e.detail.file;
+        this.documentUrl = e.detail.href;
       },
 
       _installPackageClick(e) {
