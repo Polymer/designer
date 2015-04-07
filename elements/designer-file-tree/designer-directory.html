@@ -31,17 +31,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     ul {
       list-style: none;
       padding-left: 16px;
+      margin: 0;
     }
     core-icon {
       width: 20px;
       height: 20px;
+      color: #666;
     }
   </style>
 
   <template>
     <div id="item" on-click="_onClick">
       <core-icon icon="icons:folder"></core-icon>
-      <span>[[fileData.name]]</span>
+      <span>[[fileData.name]]</span>/
     </div>
     <ul id="file-list">
     <!-- TODO(justinfagnani): bring back when nested scopes land -->

@@ -9,7 +9,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../../../core-ajax/core-request.html">
 <link rel="import" href="../../../core-asset/core-asset.html">
+<link rel="import" href="../../../core-header-panel/core-header-panel.html">
 <link rel="import" href="../../../core-toolbar/core-toolbar.html">
+<link rel="import" href="../../../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../paper-card/paper-card.html">
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../designer-breadcrumb/designer-breadcrumb.html">
 <link rel="import" href="../designer-file-tree/designer-file-tree.html">
@@ -21,14 +24,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <style>
     :host {
-      display: flex;
-      flex-direction: column;
+      /*display: flex;
+      flex-direction: column;*/
       box-sizing: border-box;
     }
+    core-header-panel {
+      height: 100%;
+    }
     #main {
+      position: absolute;
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: row;
-      flex: 1;
+      background: #eee;
     }
     core-toolbar {
       background: #424242;
@@ -44,13 +53,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       display: inline;
     }
     nav {
-      background: #424242;
-      color: #ddd;
-      font-size: 14px;
-      flex: 0 0 240px;
-      z-index: 100;
+      background: #252525;
+      color: #888;
       display: flex;
+      flex: 0 0 200px;
       flex-direction: column;
+      font-size: 13px;
+      /*z-index: 100;*/
+      letter-spacing: .2px;
+      line-height: 24px;
+      padding: 4px 16px;
       order: 0;
     }
     #main > #ancillary {
@@ -80,11 +92,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
     #main > #doc-view > #html {
       flex: 0 0 400px;
-      border: solid 1px #888;
+      border-top: solid 1px #888;
       margin: 0;
+      padding: 8px;
       overflow: auto;
-      background: #212121;
-      color: white;
+      /*background: #212121;*/
+      color: #888;
     }
     #frame {
       position: absolute;
@@ -98,38 +111,43 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </style>
 
   <template>
-    <core-toolbar><img class="d-logo" src="PolymerLabs.png"> <h2 class="d-logo">Designer</h2></core-toolbar>
-    <div id="main">
-      <nav>
-        <designer-file-tree on-file-data-load="_onFileDataLoad">
-          <designer-demo-files id="files"></designer-demo-files>
-        </designer-file-tree>
-      </nav>
-      <nav id="ancillary">
-        <designer-inspector
-            source-document="[[domDocument]]"
-            element-info="{{currentElementInfo}}">
-        </designer-inspector>
-      </nav>
-      <div id="doc-view">
-        <designer-document
-            id="document"
-            source="[[documentSource]]"
-            url="[[documentUrl]]"
-            text-content="{{textContent}}">
-        </designer-document>
-        <designer-breadcrumb node="{{currentNode}}"></designer-breadcrumb>
-        <designer-stage
-            id="stage"
-            document="[[document]]"
-            frame="[[frame]]"
-            current-element-info="{{currentElementInfo}}"
-            on-designer-command="_onDesignerCommand">
-          <designer-frame id="frame" document="[[domDocument]]"></designer-frame>
-        </designer-stage>
-        <pre id="html">[[textContent]]</pre>
+    <core-header-panel>
+      <core-toolbar class="core-header">
+        <!-- <paper-icon-button icon="menu" title="menu"></paper-icon-button> -->
+        <img class="d-logo" src="PolymerLabs.png">
+      </core-toolbar>
+      <div id="main" class="content">
+        <nav>
+          <designer-file-tree on-file-data-load="_onFileDataLoad">
+            <designer-demo-files id="files"></designer-demo-files>
+          </designer-file-tree>
+        </nav>
+        <nav id="ancillary">
+          <designer-inspector
+              source-document="[[domDocument]]"
+              element-info="{{currentElementInfo}}">
+          </designer-inspector>
+        </nav>
+        <div id="doc-view">
+          <designer-document
+              id="document"
+              source="[[documentSource]]"
+              url="[[documentUrl]]"
+              text-content="{{textContent}}">
+          </designer-document>
+          <designer-breadcrumb node="{{currentNode}}"></designer-breadcrumb>
+          <designer-stage
+              id="stage"
+              document="[[document]]"
+              frame="[[frame]]"
+              current-element-info="{{currentElementInfo}}"
+              on-designer-command="_onDesignerCommand">
+            <designer-frame id="frame" document="[[domDocument]]"></designer-frame>
+          </designer-stage>
+          <pre id="html">[[textContent]]</pre>
+        </div>
       </div>
-    <div>
+    </core-header-panel>
   </template>
 
 </dom-module>
