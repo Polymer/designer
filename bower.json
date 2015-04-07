@@ -10,6 +10,7 @@
     "core-iconset-svg": "Polymer/core-iconset-svg#0.8-preview",
     "core-iconset": "Polymer/core-iconset#0.8-preview",
     "core-meta": "Polymer/core-meta#0.8-preview",
+    "core-pages": "Polymer/core-pages#0.8-preview",
     "core-toolbar": "Polymer/core-toolbar#0.8-preview",
     "font-roboto": "Polymer/font-roboto",
     "imd": "PolymerLabs/IMD#master",
