@@ -1,0 +1,189 @@
+<!doctype html>
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE
+The complete set of authors may be found at http://polymer.github.io/AUTHORS
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS
+-->
+
+<html>
+  <head>
+
+    <title>paper-tabs-vertical</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="../../../../webcomponentsjs/webcomponents-lite.js"></script>
+
+    <link rel="import" href="../../../../layout/layout.html">
+    <link rel="import" href="../../../../layout/shadow-layout.html">
+
+    <link rel="import" href="../../../../core-toolbar/core-toolbar.html">
+
+    <link rel="import" href="../paper-tabs-vertical.html">
+    <link rel="import" href="../paper-tab-vertical.html">
+
+    <style>
+
+      html {
+        height: 100%;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: sans-serif;
+        margin: 0;
+        padding: 24px;
+        color: #333;
+        height: 100%;
+        box-sizing: border-box;
+      }
+
+      paper-tabs-vertical, core-toolbar {
+        background-color: #00bcd4;
+        color: #fff;
+        box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2);
+      }
+
+      paper-tabs-vertical {
+        width: 64px;
+      }
+
+      paper-tab-vertical {
+        height: 64px;
+      }
+
+      core-toolbar paper-tabs-vertical {
+        box-shadow: none;
+      }
+
+      paper-tabs-vertical[noink][nobar] paper-tab-vertical.core-selected {
+        color: #ffff8d;
+      }
+
+      paper-tabs-vertical[alignBottom] {
+        box-shadow: 0px -2px 6px rgba(0, 0, 0, 0.15);
+      }
+
+      .demo {
+        height: 100%;
+        background: #212121;
+        display: flex;
+        flex-direction: column;
+        float: left;
+      }
+
+      h3 {
+        font-size: 16px;
+        font-weight: 400;
+        padding-top: 20px;
+      }
+
+    </style>
+
+  </head>
+  <body>
+
+    <div class="demo">
+
+      <h3>A. No ink effect and no sliding bar</h3>
+
+      <paper-tabs-vertical selected="0">
+
+        <paper-tab-vertical>ONE</paper-tab-vertical>
+        <paper-tab-vertical>TWO</paper-tab-vertical>
+        <paper-tab-vertical>THREE</paper-tab-vertical>
+
+      </paper-tabs-vertical>
+
+    </div>
+
+    <!-- <h3>B. The bottom bar appears to indicate the selected tab, but without sliding effect.</h3>
+
+    <paper-tabs-vertical selected="0" noink noslide>
+
+      <paper-tab-vertical>ITEM ONE</paper-tab-vertical>
+      <paper-tab-vertical>ITEM TWO</paper-tab-vertical>
+      <paper-tab-vertical>ITEM THREE</paper-tab-vertical>
+
+    </paper-tabs-vertical>
+
+    <h3>C. The bar slides to the selected tab</h3>
+
+    <paper-tabs-vertical selected="0" noink>
+
+      <paper-tab-vertical>ITEM ONE</paper-tab-vertical>
+      <paper-tab-vertical>ITEM TWO</paper-tab-vertical>
+      <paper-tab-vertical>ITEM THREE</paper-tab-vertical>
+
+    </paper-tabs-vertical>
+
+    <h3>D. Inky Tabs</h3>
+
+    <paper-tabs-vertical selected="0">
+
+      <paper-tab-vertical>ITEM ONE</paper-tab-vertical>
+      <paper-tab-vertical>ITEM TWO</paper-tab-vertical>
+      <paper-tab-vertical>ITEM THREE</paper-tab-vertical>
+
+    </paper-tabs-vertical>
+
+    <h3>E. Scrollable Tabs</h3>
+
+    <paper-tabs-vertical id="scrollableTabs" selected="0" scrollable>
+
+      <paper-tab-vertical>NUMBER ONE ITEM</paper-tab-vertical>
+      <paper-tab-vertical>ITEM TWO</paper-tab-vertical>
+      <paper-tab-vertical>THE THIRD ITEM</paper-tab-vertical>
+      <paper-tab-vertical>THE ITEM FOUR</paper-tab-vertical>
+      <paper-tab-vertical>FIFTH</paper-tab-vertical>
+      <paper-tab-vertical>THE SIXTH TAB</paper-tab-vertical>
+      <paper-tab-vertical>NUMBER SEVEN</paper-tab-vertical>
+      <paper-tab-vertical>EIGHT</paper-tab-vertical>
+      <paper-tab-vertical>NUMBER NINE</paper-tab-vertical>
+      <paper-tab-vertical>THE TENTH</paper-tab-vertical>
+      <paper-tab-vertical>THE ITEM ELEVEN</paper-tab-vertical>
+      <paper-tab-vertical>TWELFTH ITEM</paper-tab-vertical>
+
+    </paper-tabs-vertical>
+
+    <h3>F. Link Tabs</h3>
+
+    <paper-tabs-vertical selected="0">
+
+      <paper-tab-vertical link><a href="#item1" class="horizontal center-center layout">ITEM ONE</a></paper-tab-vertical>
+      <paper-tab-vertical link><a href="#item2" class="horizontal center-center layout">ITEM TWO</a></paper-tab-vertical>
+      <paper-tab-vertical link><a href="#item3" class="horizontal center-center layout">ITEM THREE</a></paper-tab-vertical>
+
+    </paper-tabs-vertical>
+
+    <h3>G. Tabs in Toolbar</h3>
+
+    <core-toolbar class="tall">
+
+      <paper-tabs-vertical selected="0" class="bottom self-end" style="width: 300px;">
+
+        <paper-tab-vertical>ITEM ONE</paper-tab-vertical>
+        <paper-tab-vertical>ITEM TWO</paper-tab-vertical>
+
+      </paper-tabs-vertical>
+
+      <div class="bottom flex"></div>
+
+    </core-toolbar>
+
+    <h3>H. Tabs aligned to bottom</h3>
+
+    <paper-tabs-vertical selected="0" alignBottom>
+
+      <paper-tab-vertical>ITEM ONE</paper-tab-vertical>
+      <paper-tab-vertical>ITEM TWO</paper-tab-vertical>
+      <paper-tab-vertical>ITEM THREE</paper-tab-vertical>
+
+    </paper-tabs-vertical> -->
+
+  </body>
+</html>
