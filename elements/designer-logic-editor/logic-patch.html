@@ -8,9 +8,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../../../polymer/polymer.html">
-<link rel="import" href="../../../core-icon/core-icon.html">
-<link rel="import" href="../../../core-iconset/core-iconset.html">
-<link rel="import" href="../../../core-icons/core-icons.html">
+<link rel="import" href="logic-port.html">
 
 <dom-module id="logic-patch">
 
@@ -32,6 +30,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       margin: 0;
       border-radius: 4px 4px 0 0;
       border: solid 1px red;
+      box-sizing: border-box;
       font-size: 16px;
       font-weight: normal;
       text-align: center;
@@ -60,14 +59,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div id="ports">
       <div id="inputs">
         <div class="group">
-          <template is="x-repeat" items="[[inputPorts]]">
+          <template id="input-repeat" is="x-repeat" items="[[inputPorts]]">
             <logic-port port=[[item]]></logic-port>
           </template>
         </div>
       </div>
       <div id="outputs">
         <div class="group">
-          <template is="x-repeat" items="[[outputPorts]]">
+          <template id="output-repeat" is="x-repeat" items="[[outputPorts]]">
             <logic-port port=[[item]] align="right"></logic-port>
           </template>
         </div>
@@ -77,88 +76,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 </dom-module>
 
-<dom-module id="logic-port">
-
-  <style>
-    :host {
-      white-space: nowrap;
-      display: flex;
-    }
-    :host([align=right]) core-icon {
-      order: 2;
-    }
-    :host([align=right]) span {
-      order: 1;
-    }
-    core-icon {
-      width: 16px;
-      height: 16px;
-    }
-    span {
-      padding: 0 2px;
-    }
-  </style>
-
-  <template>
-    <core-icon
-        id="icon"
-        icon="icons:radio-button-off"
-        on-mousedown="_onConnectionMouseDown">
-    </core-icon>
-    <span>[[port.name]]</span>
-  </template>
-</dom-module>
-
 <script>
 
 define(function() {
   'use strict';
-
-  Polymer({
-    is: 'logic-port',
-
-    properties: {
-      name: String,
-
-      port: {
-        type: Object,
-        observer: '_portChanged',
-      },
-
-      align: {
-        type: String,
-        reflectToAttribute: true,
-      },
-
-    },
-
-    getPortPosition() {
-      let icon = this.$.icon;
-      console.log('port.getPortPosition', this.offsetParent, this);
-      return {
-        x: icon.offsetLeft + icon.offsetWidth / 2,
-        y: icon.offsetTop + icon.offsetHeight / 2,
-      };
-    },
-
-    _portChanged() {
-      // danger! we can only do this because these port objects are private
-      // to logic-patch and logic-port
-      this.port.element = this;
-    },
-
-    _onConnectionMouseDown(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      console.log('port', this.port);
-      this.fire('logic-patch-port-mousedown', {
-        mouseEvent: e,
-        portName: this.port.name,
-        patch: this.host,
-      });
-    },
-
-  });
 
   Polymer({
     is: 'logic-patch',
@@ -216,12 +137,18 @@ define(function() {
 
     getConnectorPosition(portName) {
       let port = this.ports.get(portName);
-      let portPosition = port.element.getPortPosition();
-      console.log('portPosition', portPosition);
+      let portPosition = port.element.getConnectorBounds();
+      // console.log('portPosition', portPosition);
+      let parentBounds = this.offsetParent.getBoundingClientRect();
       return {
-        x: portPosition.x + this.offsetLeft,
-        y: portPosition.y + this.offsetTop,
+        x: portPosition.left + (portPosition.width / 2.0) - parentBounds.left,
+        y: portPosition.top + (portPosition.height / 2.0) - parentBounds.top,
       };
+    },
+
+    addConnection(portName, connection) {
+      let port = this.ports.get(portName);
+      port.element.connected = true;
     },
 
     _nodeRefChanged() {
@@ -230,7 +157,7 @@ define(function() {
     },
 
     _nodeChanged() {
-      // console.log('_nodeChanged', this.node.is);
+      // console.log('_nodeChanged', this.node.is, this.editor);
       let inputPorts = [];
       let outputPorts = [];
       for (let name in this.node.properties) {
@@ -251,6 +178,12 @@ define(function() {
       this.inputPorts = inputPorts;
       this.outputPorts = outputPorts;
       this.name = this.node.name;
+
+      // this.$['input-repeat'].flush();
+      // this.$['output-repeat'].flush();
+      // setTimeout(function() {
+      //   this.fire('patch-move');
+      // }.bind(this), 0);
     },
 
     _onMouseDown(e) {
