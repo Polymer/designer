@@ -1,0 +1,143 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../polymer/polymer.html">
+
+<dom-module id="logic-connection">
+
+  <style>
+    :host {
+      display: block;
+      box-sizing: border-box;
+      position: absolute;
+      /*border: solid 1px blue;*/
+    }
+    line {
+      stroke: #444;
+      stroke-width: 4px;
+    }
+    svg {
+      display: block;
+      position: absolute;
+      top: 0;
+      height: 100%;
+      left: 0;
+      width: 100%;
+    }
+  </style>
+
+  <template>
+    <svg id="svg" viewbox="[[viewbox]]">
+      <line id="line" x1="[[x1]]" y1="[[y1]]" x2="[[x2]]" y2="[[y2]]"></line>
+    </svg>
+  </template>
+
+</dom-module>
+
+<script>
+
+define(function() {
+  'use strict';
+
+  Polymer({
+    is: 'logic-connection',
+
+    properties: {
+      editor: Object,
+
+      fromPatchRef: {
+        type: String,
+      },
+
+      fromPort: {
+        type: String,
+      },
+
+      toPatchRef: {
+        type: String,
+      },
+
+      toPort: {
+        type: String,
+      },
+
+      x1: Number,
+      y1: Number,
+      x2: Number,
+      y2: Number,
+      viewbox: String,
+    },
+
+    observers: [
+      '_update(editor,fromPatchRef,fromPort,toPatchRef,toPort)',
+    ],
+
+    render() {
+      console.log('render', this.fromPatchRef, this.toPatchRef);
+      this.fromPatch = this.editor.getPatch(this.fromPatchRef);
+      this.toPatch = this.editor.getPatch(this.toPatchRef);
+
+      if (this.fromPatch) {
+        // console.log('fromPort', this.fromPatch, this.fromPort);
+        let fromPosition = this.fromPatch.getConnectorPosition(this.fromPort);
+        let toPosition;
+
+        if (this.toPatch) {
+          toPosition = this.toPatch.getConnectorPosition(this.toPort);
+        } else if (this.dragPosition) {
+          toPosition = this.dragPosition;
+        }
+
+        // Grow the rect by 2px to give room to draw the line if the rect is
+        // 0 in any dimension
+        let xMin = Math.min(fromPosition.x, toPosition.x) - 2;
+        let xMax = Math.max(fromPosition.x, toPosition.x) + 2;
+        let yMin = Math.min(fromPosition.y, toPosition.y) - 2;
+        let yMax = Math.max(fromPosition.y, toPosition.y) + 2;
+        let width = xMax - xMin;
+        let height = yMax - yMin;
+
+        let style = this.style;
+        style.left = xMin + 'px';
+        style.top = yMin + 'px';
+        style.width = width + 'px';
+        style.height = height + 'px';
+
+        let x1 = (fromPosition.x < toPosition.x) ? 0 : width;
+        let y1 = (fromPosition.y < toPosition.y) ? 0 : height;
+        let x2 = (fromPosition.x < toPosition.x) ? width : 0;
+        let y2 = (fromPosition.y < toPosition.y) ? height : 0;
+
+        this.$.svg.setAttribute('viewbox', `0 0 ${width} ${height}`);
+        this.$.line.setAttribute('x1', x1);
+        this.$.line.setAttribute('y1', y1);
+        this.$.line.setAttribute('x2', x2);
+        this.$.line.setAttribute('y2', y2);
+      }
+    },
+
+    _update() {
+      console.log('_update', {
+        editor: this.editor,
+        fromPatch: this.fromPatchRef,
+        fromPort: this.fromPort,
+        toPatch: this.toPatchRef,
+        toPort: this.toPort
+      });
+      this.fromPatch = this.editor.getPatch(this.fromPatchRef);
+      this.toPatch = this.editor.getPatch(this.toPatchRef);
+      var _render = this.render.bind(this);
+      this.fromPatch.addEventListener('patch-move', _render);
+      this.toPatch.addEventListener('patch-move', _render);
+      this.render();
+    },
+
+  });
+});
+</script>

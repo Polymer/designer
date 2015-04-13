@@ -1,0 +1,137 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="logic-patch.html">
+<link rel="import" href="logic-connection.html">
+<link rel="import" href="../logic/df-oscillator.html">
+<link rel="import" href="../logic/df-value.html">
+
+<dom-module id="designer-logic-editor">
+
+  <style>
+    :host {
+      display: flex;
+      box-sizing: border-box;
+      background-color: black;
+      color: #fff;
+    }
+    #stage {
+      position: relative;
+      flex: 1;
+    }
+    logic-patch {
+      position: absolute;
+    }
+    #nodes {
+      display: none;
+    }
+  </style>
+
+  <template>
+    <div id="stage">
+      <logic-patch
+          id="patch-1"
+          node-ref="node-1"
+          style="top: 100px; left: 300px;">
+      </logic-patch>
+      <logic-patch
+          id="patch-2"
+          node-ref="node-2"
+          style="top: 100px; left: 100px;">
+      </logic-patch>
+      <logic-connection
+          from-patch-ref="patch-2"
+          from-port="value"
+          to-patch-ref="patch-1"
+          to-port="period">
+      </logic-connection>
+    </div>
+    <div id="nodes">
+      <df-oscillator id="node-1"></df-oscillator>
+      <df-value id="node-2"></df-value>
+    </div>
+  </template>
+
+</dom-module>
+
+<script>
+
+define(function() {
+  'use strict';
+
+  Polymer({
+    is: 'designer-logic-editor',
+
+    properties: {
+    },
+
+    listeners: {
+      'logic-patch-port-mousedown': '_portMouseDown',
+    },
+
+    ready() {
+      let patches = Polymer.dom(this.$.stage).querySelectorAll('logic-patch');
+      patches.forEach(function(p) {
+        p.editor = this;
+      }.bind(this));
+
+      setImmediate(function() {
+        let connections = Polymer.dom(this.$.stage).querySelectorAll('logic-connection');
+        connections.forEach(function(c) {
+          c.editor = this;
+          // c.render();
+        }.bind(this));
+      }.bind(this));
+    },
+
+    getNode(id) {
+      return Polymer.dom(this.$.nodes).querySelector('#' + id);
+    },
+
+    getPatch(id) {
+      return Polymer.dom(this.$.stage).querySelector('#' + id);
+    },
+
+    _portMouseDown(e) {
+      let source = e.target;
+      let portName = e.detail.portName;
+      let patch = e.detail.patch;
+
+      console.log('mouse down', patch.id);
+
+      let connection = document.createElement('logic-connection');
+      connection.fromPatchRef = patch.id;
+      connection.fromPort = portName;
+      connection.editor = this;
+
+      Polymer.dom(this.$.stage).appendChild(connection);
+      Polymer.dom.flush();
+
+      let moveListener = function(e) {
+        let bounds = this.getBoundingClientRect();
+        connection.dragPosition = {
+          x: e.clientX - bounds.left,
+          y: e.clientY - bounds.top,
+        };
+        connection.render();
+      }.bind(this);
+
+      let upListener = function(e) {
+        // Polymer.dom(this.$.stage).removeChild(connection);
+        window.removeEventListener('mousemove', moveListener);
+        window.removeEventListener('mouseup', upListener);
+      }.bind(this);
+      window.addEventListener('mousemove', moveListener);
+      window.addEventListener('mouseup', upListener);
+    }
+
+  });
+});
+</script>
