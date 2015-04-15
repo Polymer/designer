@@ -1,0 +1,53 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../polymer/polymer.html">
+
+<dom-module id="designer-mini-nav">
+
+  <style>
+    :host {
+      overflow: visible;
+    }
+    /*
+      TODO(justinfagnani): try to size #small based on the .small light-child
+    */
+    #small {
+      width: 64px;
+      height: 100%;
+      transition: width 300ms;
+      overflow: hidden;
+    }
+    :host(:hover) #small {
+      width: 320px;
+    }
+    #large {
+      width: 320px;
+      height: 100%;
+      display: flex;
+    }
+  </style>
+
+  <template>
+    <div id="small"><div id="large"><content></content></div></div>
+  </template>
+
+</dom-module>
+
+<script>
+
+(function() {
+  'use strict';
+
+  Polymer({
+    is: 'designer-mini-nav',
+  });
+
+})();
+</script>

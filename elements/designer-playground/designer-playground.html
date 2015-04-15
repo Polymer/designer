@@ -18,7 +18,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../designer-breadcrumb/designer-breadcrumb.html">
 <link rel="import" href="../designer-file-tree/designer-file-tree.html">
 <link rel="import" href="../designer-inspector/designer-inspector.html">
+<link rel="import" href="../designer-mini-nav/designer-mini-nav.html">
 <link rel="import" href="../designer-stage/designer-stage.html">
+<link rel="import" href="../paper-tabs-vertical/paper-tabs-vertical.html">
+<link rel="import" href="../paper-tabs-vertical/paper-tab-vertical.html">
 <link rel="import" href="designer-demo-files.html">
 
 <dom-module id="designer-playground">
@@ -44,9 +47,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       background: #424242;
       color: white;
     }
-    core-toolbar img.d-logo {
+    #logo {
       width: 64px;
       height: 64px;
+      padding: 6px;
+      box-sizing: border-box;
+    }
+    img.d-logo {
+      width: 48px;
+      height: 48px;
     }
     core-toolbar h2.d-logo {
       opacity: 0.87;
@@ -65,6 +74,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       line-height: 24px;
       /*padding: 4px 16px;*/
       order: 0;
+    }
+    designer-mini-nav {
+      background: #252525;
+      color: #888;
+      width: 64px;
+      height: 100%;
+      position: relative;
+      z-index: 200;
+    }
+    designer-mini-nav .small {
+      text-align: center;
+      height: 100%;
+      flex: 0 0 64px;
+    }
+    designer-mini-nav .large {
+      background: #252525;
+      padding: 8px;
+      height: 100%;
+      width: 100%;
+      box-sizing: border-box;
     }
     #main > #ancillary {
       order: 10;
@@ -112,21 +141,45 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     designer-file-tree {
       padding: 4px 16px;
     }
+    paper-tabs-vertical {
+      width: 64px;
+      height: 100%;
+    }
+    paper-tab-vertical:first-of-type {
+      border-top: solid 1px #444;
+    }
+    paper-tab-vertical {
+      height: 64px;
+      box-sizing: border-box;
+      border-bottom: solid 1px #444;
+    }
+    paper-tab-vertical.core-selected {
+      color: #FFD740;
+    }
   </style>
 
   <template>
-    <core-header-panel>
-      <core-toolbar class="core-header">
+    <!-- <core-header-panel>
+      <core-toolbar class="core-header"> -->
         <!-- <paper-icon-button icon="menu" title="menu"></paper-icon-button> -->
-        <img class="d-logo" src="PolymerLabs.png">
-      </core-toolbar>
+        <!-- <img class="d-logo" src="PolymerLabs.png"> -->
+      <!-- </core-toolbar> -->
       <div id="main" class="content">
-        <nav>
-          <paper-tabs selected="{{_selectedNavTab}}" noink noslide>
-            <paper-tab>Files</paper-tab>
-            <paper-tab>Outline</paper-tab>
-          </paper-tabs>
-          <core-pages selected="{{_selectedNavTab}}">
+        <designer-mini-nav>
+          <div class="small">
+            <div id="logo">
+              <img class="d-logo" src="PolymerLabs.png">
+            </div>
+            <paper-tabs-vertical selected="{{_selectedNavTab}}" noink noslide nobar>
+              <paper-tab-vertical>
+                <core-icon icon="icons:folder-open"></core-icon>
+              </paper-tab-vertical>
+              <paper-tab-vertical>
+                <core-icon icon="editor:format-list-bulleted"></core-icon>
+              </paper-tab-vertical>
+            </paper-tabs-vertical>
+          </div>
+          <core-pages class="large" selected="{{_selectedNavTab}}">
             <div>
               <designer-file-tree on-file-data-load="_onFileDataLoad">
                 <designer-demo-files id="files"></designer-demo-files>
@@ -136,7 +189,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <h3>Outline</h3>
             </div>
           </core-pages>
-        </nav>
+        </designer-mini-nav>
         <nav id="ancillary">
           <designer-inspector
               source-document="[[domDocument]]"
@@ -162,7 +215,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <pre id="html">[[textContent]]</pre>
         </div>
       </div>
-    </core-header-panel>
+    <!-- </core-header-panel> -->
   </template>
 
 </dom-module>

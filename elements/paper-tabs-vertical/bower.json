@@ -1,0 +1,26 @@
+{
+  "name": "paper-tabs",
+  "version": "0.8.0",
+  "private": true,
+  "main": "paper-tabs.html",
+  "authors": [
+    "Frankie Fu <ffu@google.com>",
+    "The Polymer Authors"
+  ],
+  "repository": "https://github.com/Polymer/paper-tabs/tree/0.8-preview",
+  "dependencies": {
+    "polymer": "Polymer/polymer#0.8-preview",
+    "layout": "Polymer/layout#master",
+    "core-selector": "Polymer/core-selector#0.8-preview",
+    "paper-ripple": "Polymer/paper-ripple#0.8-preview",
+    "core-resizable": "Polymer/core-resizable#0.8-preview",
+    "core-icon": "Polymer/core-icon#0.8-preview",
+    "core-iconset-svg": "Polymer/core-iconset-svg#0.8-preview"
+  },
+  "devDependencies": {
+    "webcomponentsjs": "webcomponents/webcomponentsjs#master",
+    "web-component-tester": "Polymer/web-component-tester#^2.2.3",
+    "test-fixture": "Polymer/test-fixture#master",
+    "core-toolbar": "Polymer/core-toolbar#0.8-preview"
+  }
+}
