@@ -39,6 +39,14 @@
         isLeaf(node) {
           return !('children' in node);
         },
+
+        isLink(node) {
+          return true;
+        },
+
+        onClick(node) {
+          window.alert('clicked on ' + node.name);
+        },
       };
 
       tree.controller = controller;
