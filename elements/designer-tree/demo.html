@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="import" href="designer-tree.html">
+  </head>
+  <body>
+    <designer-tree></designer-tree>
+    <script>
+      var tree = document.querySelector('designer-tree');
+      var data = {
+        name: 'root',
+        children: [
+          {
+            name: 'one',
+            children: [
+              {name: 'a'},
+              {name: 'b'},
+              {name: 'c'},
+            ],
+          },
+          {name: 'two'},
+          {name: 'three'},
+        ],
+      };
+      var controller = {
+
+        getIcon(node) {
+          return  this.isLeaf(node) ? "editor:insert-drive-file" : "icons:folder";
+        },
+
+        getName(node) {
+          return node.name;
+        },
+
+        getChildren(node) {
+          return Promise.resolve(node.children);
+        },
+
+        isLeaf(node) {
+          return !('children' in node);
+        },
+      };
+
+      tree.controller = controller;
+      tree.data = data;
+    </script>
+  </body>
+</html>
