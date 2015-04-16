@@ -16,6 +16,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../paper-card/paper-card.html">
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../designer-breadcrumb/designer-breadcrumb.html">
+<link rel="import" href="../designer-document-outline/designer-document-outline.html">
 <link rel="import" href="../designer-file-tree/designer-file-tree.html">
 <link rel="import" href="../designer-inspector/designer-inspector.html">
 <link rel="import" href="../designer-mini-nav/designer-mini-nav.html">
@@ -187,6 +188,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </div>
             <div>
               <h3>Outline</h3>
+              <designer-document-outline ast=[[astDocumentElement]]></designer-document-outline>
             </div>
           </core-pages>
         </designer-mini-nav>
@@ -222,7 +224,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script>
 
-  define(['polymer-designer/path'], function(pathLib) {
+  define(['polymer-designer/path', 'polymer-designer/dom-utils'],
+      function(pathLib, domUtils) {
     'use strict';
 
     Polymer({
@@ -253,6 +256,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         domDocument: {
+          type: Object,
+          notify: true,
+        },
+
+        astDocumentElement: {
+          type: Object,
+          notify: true,
+        },
+
+        astDocument: {
           type: Object,
           notify: true,
         },
@@ -292,9 +305,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _documentChanged() {
         if (this.document) {
           this.document.addEventListener('dom-document-changed', function(e) {
-            if (this.document.domDocument) {
-              this.domDocument = this.document.domDocument;
-            }
+            this.domDocument = this.document.domDocument;
+          }.bind(this));
+          this.document.addEventListener('ast-changed', function(e) {
+            this.astDocument = this.document.ast;
+            this.astDocumentElement = domUtils.getDocumentElement(this.astDocument);
           }.bind(this));
         }
       },
