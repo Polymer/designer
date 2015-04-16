@@ -22,7 +22,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <designer-tree-item
       controller="[[controller]]"
-      data="[[data]]">
+      data="[[data]]"
+      noicon="[[noicon]]">
     </designer-tree-item>
   </template>
 
@@ -49,6 +50,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       controller: Object,
 
       data: Object,
+
+      noicon: {
+        type: Boolean,
+        value: false,
+      },
 
     },
 

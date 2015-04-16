@@ -33,16 +33,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       flex-direction: column;
       padding-left: 16px;
     }
-    #name {
-      /*padding-left: 4px;*/
+    #name.link {
+      cursor: pointer;
+    }
+    #name.link:hover {
+      text-decoration: underline;
     }
     #expand {
       width: 16px;
       height: 16px;
     }
-    core-icon {
+    #icon {
       width: 20px;
       height: 20px;
+      margin-right: 4px;
     }
   </style>
 
@@ -50,7 +54,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div id="item" on-click="_onClick">
       <core-icon id="expand" icon="[[expandIcon]]"></core-icon>
       <template is="x-if" if="[[_showIcon(noicon)]]">
-        <core-icon icon="[[icon]]"></core-icon>
+        <core-icon id="icon" icon="[[parent.icon]]"></core-icon>
       </template>
       <span id="name">[[name]]</span>
     </div>
@@ -59,7 +63,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <designer-tree-item
             data="[[item]]"
             controller="[[parent.controller]]"
-            noicon="[[noicon]]">
+            noicon="[[parent.noicon]]">
         </designer-tree-item>
       </template>
     </div>
@@ -103,6 +107,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       noicon: {
         type: Boolean,
         value: false,
+        reflectAsAttribtue: true,
       },
 
       open: {
@@ -120,13 +125,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       // console.log('_update', this.controller, this.data);
       let iconName = this.controller.getIcon(this.data);
       let isLeaf = this.controller.isLeaf(this.data);
-
+      let isLink = ('isLink' in this.controller) &&
+          this.controller.isLink(this.data);
+      if (isLink) {
+        this.$.name.classList.add('link');
+      }
       this.icon = iconName || "editor:insert-drive-file";
       this.expandIcon = isLeaf ? "designer-tree:blank" : "designer-tree:closed";
       this.name = this.controller.getName(this.data);
     },
 
     _onClick(e) {
+      if (this.controller.onClick && e.target === this.$.name) {
+        this.controller.onClick(this.data, e);
+        return;
+      }
       let isLeaf = this.controller.isLeaf(this.data);
       if (this.open) {
         this.children = [];
