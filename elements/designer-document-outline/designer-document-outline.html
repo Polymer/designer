@@ -1,0 +1,90 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../designer-tree/designer-tree.html">
+
+<dom-module id="designer-document-outline">
+
+  <style>
+    :host {
+      display: block;
+      box-sizing: border-box;
+      font-size: 13px;
+    }
+  </style>
+
+  <template>
+    <designer-tree-item
+      controller="[[controller]]"
+      data="[[ast]]"
+      noicon>
+    </designer-tree-item>
+  </template>
+
+</dom-module>
+
+<script>
+
+(function() {
+  'use strict';
+
+  Polymer({
+    is: 'designer-document-outline',
+
+    properties: {
+
+      /**
+       * An object for accessing information for rendering a tree item.
+       *
+       * getIcon(node) : Element
+       * getName(node) : String
+       * getChildren(node) : Promise<Array<Object>>
+       * isLeaf(node) : Boolean
+       */
+      controller: Object,
+
+      ast: Object,
+
+    },
+
+    ready() {
+      this.controller = new OutlineTreeController();
+    },
+
+  });
+
+  class OutlineTreeController {
+
+    getName(node) {
+      return node.nodeName;
+    }
+
+    getIcon(node) {
+      return 'designer-tree:blank';
+    }
+
+    getChildren(node) {
+      return Promise.resolve(node.childNodes.filter(function(n) {
+        return !n.nodeName.startsWith('#');
+      }));
+    }
+
+    isLeaf(node) {
+      if (!'childNodes' in node) return true;
+      let visibleChildren = node.childNodes.filter(function(n) {
+        return !n.nodeName.startsWith('#');
+      });
+      return (visibleChildren.length === 0);
+    }
+
+  }
+
+})();
+</script>

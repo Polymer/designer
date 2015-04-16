@@ -25,29 +25,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
     #item {
       display: flex;
-      flex: 0 0 24px;
+      flex: 0 0 20px;
+      align-items: center;
     }
     #children {
       display: flex;
       flex-direction: column;
-      padding-left: 24px;
+      padding-left: 16px;
     }
     #name {
-      padding-left: 4px;
+      /*padding-left: 4px;*/
+    }
+    #expand {
+      width: 16px;
+      height: 16px;
+    }
+    core-icon {
+      width: 20px;
+      height: 20px;
     }
   </style>
 
   <template>
     <div id="item" on-click="_onClick">
-      <core-icon icon="[[expandIcon]]"></core-icon>
-      <core-icon icon="[[icon]]"></core-icon>
+      <core-icon id="expand" icon="[[expandIcon]]"></core-icon>
+      <template is="x-if" if="[[_showIcon(noicon)]]">
+        <core-icon icon="[[icon]]"></core-icon>
+      </template>
       <span id="name">[[name]]</span>
     </div>
     <div id="children">
       <template is="x-repeat" items="[[children]]">
         <designer-tree-item
             data="[[item]]"
-            controller="[[parent.controller]]">
+            controller="[[parent.controller]]"
+            noicon="[[noicon]]">
         </designer-tree-item>
       </template>
     </div>
@@ -88,6 +100,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       children: Array,
 
+      noicon: {
+        type: Boolean,
+        value: false,
+      },
+
       open: {
         type: Boolean,
         value: false,
@@ -100,11 +117,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     },
 
     _update() {
+      // console.log('_update', this.controller, this.data);
       let iconName = this.controller.getIcon(this.data);
       let isLeaf = this.controller.isLeaf(this.data);
 
       this.icon = iconName || "editor:insert-drive-file";
-      this.expandIcon = isLeaf ? "designer-tree:blank" : "icons:chevron-right";
+      this.expandIcon = isLeaf ? "designer-tree:blank" : "designer-tree:closed";
       this.name = this.controller.getName(this.data);
     },
 
@@ -113,15 +131,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       if (this.open) {
         this.children = [];
         this.open = false;
-        this.expandIcon = isLeaf ? "designer-tree:blank" : "icons:chevron-right";
+        this.expandIcon = isLeaf ? "designer-tree:blank" : "designer-tree:closed";
       } else {
         this.controller.getChildren(this.data).then(function(results) {
           this.children = results;
           this.open = true;
-          this.expandIcon = isLeaf ? "designer-tree:blank" : "icons:expand-more";
+          this.expandIcon = isLeaf ? "designer-tree:blank" : "designer-tree:open";
         }.bind(this));
       }
     },
+
+    _showIcon() {
+      return !this.noicon;
+    }
 
   });
 
