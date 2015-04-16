@@ -188,7 +188,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </div>
             <div>
               <h3>Outline</h3>
-              <designer-document-outline ast=[[astDocumentElement]]></designer-document-outline>
+              <designer-document-outline
+                  root-node=[[domDocumentElement]]
+                  current-node="{{currentNode}}">
+              </designer-document-outline>
             </div>
           </core-pages>
         </designer-mini-nav>
@@ -260,12 +263,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           notify: true,
         },
 
-        astDocumentElement: {
+        domDocumentElement: {
           type: Object,
           notify: true,
         },
 
         astDocument: {
+          type: Object,
+          notify: true,
+        },
+
+        astDocumentElement: {
           type: Object,
           notify: true,
         },
@@ -306,6 +314,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (this.document) {
           this.document.addEventListener('dom-document-changed', function(e) {
             this.domDocument = this.document.domDocument;
+            this.domDocumentElement = domUtils.getDocumentElement(this.domDocument);
           }.bind(this));
           this.document.addEventListener('ast-changed', function(e) {
             this.astDocument = this.document.ast;
@@ -327,7 +336,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _currentNodeChanged() {
         if (this.document) {
           var path = pathLib.getNodePath(this.currentNode, this.document.domDocument);
-          if (this.$.stage.currentElementInfo &&
+          if (this.$.stage.currentElementInfo == null ||
               this.$.stage.currentElementInfo.path !== path) {
             this.$.stage.selectNode(path);
           }

@@ -23,7 +23,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <designer-tree-item
       controller="[[controller]]"
-      data="[[ast]]"
+      data="[[rootNode]]"
       noicon>
     </designer-tree-item>
   </template>
@@ -50,38 +50,57 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        */
       controller: Object,
 
-      ast: Object,
+      rootNode: Object,
+
+      currentNode: {
+        type: Object,
+        notify: true,
+      },
 
     },
 
     ready() {
-      this.controller = new OutlineTreeController();
+      this.controller = new OutlineTreeController(this);
     },
 
   });
 
   class OutlineTreeController {
 
+    constructor(host) {
+      this.host = host;
+    }
+
     getName(node) {
-      return node.nodeName;
+      return node.nodeName.toLowerCase();
     }
 
     getIcon(node) {
       return 'designer-tree:blank';
     }
 
-    getChildren(node) {
-      return Promise.resolve(node.childNodes.filter(function(n) {
+    _getVisibleChildren(node) {
+      return Array.prototype.slice.call(node.childNodes).filter(function(n) {
         return !n.nodeName.startsWith('#');
-      }));
+      });
+    }
+
+    getChildren(node) {
+      return Promise.resolve(this._getVisibleChildren(node));
     }
 
     isLeaf(node) {
-      if (!'childNodes' in node) return true;
-      let visibleChildren = node.childNodes.filter(function(n) {
-        return !n.nodeName.startsWith('#');
-      });
-      return (visibleChildren.length === 0);
+      return (this._getVisibleChildren(node).length === 0);
+    }
+
+    isLink(node) {
+      return true;
+    }
+
+    onClick(node) {
+      console.log('outline onClick', node);
+      this.host.fire('designer-outline-click', {node: node});
+      this.host.currentNode = node;
     }
 
   }
