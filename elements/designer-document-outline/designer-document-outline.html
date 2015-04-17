@@ -98,7 +98,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     onClick(node) {
-      console.log('outline onClick', node);
       this.host.fire('designer-outline-click', {node: node});
       this.host.currentNode = node;
     }
