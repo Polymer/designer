@@ -69,6 +69,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           notify: true,
         },
 
+        elements: {
+          type: Array,
+          notify: true,
+        },
+
         textContent: {
           type: String,
           notify: true,
@@ -100,21 +105,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.analyzer = createAnalyzer(url);
 
         return Promise.all([
-          this.analyzer.load(url).then(function(descriptor) {
-            return descriptor.htmlLoaded;
-          }),
+          this.analyzer.load(url),
           this._frameScriptAsset.load(),
         ]).then(function(results) {
-          let parsedDocument = results[0];
+          let analyzedDocument = results[0];
           let frameScript = results[1];
 
-          this.domDocument = createDocument(content, frameScript, this.baseURI);
-          this.ast = parsedDocument.ast;
+          Promise.all([
+            analyzedDocument.htmlLoaded,
+            analyzedDocument.metadataLoaded,
+          ]).then(function(results) {
+              let parsedDocument = results[0];
+              let metadata = results[1];
 
-          this._domCommandApplier = new DomCommandApplier(this.domDocument);
-          this._parsedCommandApplier =
-              new ParsedHtmlCommandApplier(this.ast);
-          this.textContent = dom5.serialize(this.ast);
+              this.domDocument = createDocument(content, frameScript, this.baseURI);
+              this.ast = parsedDocument.ast;
+              this.elements = metadata.elements;
+              this.textContent = dom5.serialize(this.ast);
+
+              this._domCommandApplier = new DomCommandApplier(this.domDocument);
+              this._parsedCommandApplier =
+                  new ParsedHtmlCommandApplier(this.ast);
+          }.bind(this));
+
         }.bind(this));
       },
 
