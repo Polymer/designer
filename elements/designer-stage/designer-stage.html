@@ -213,7 +213,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       getAnalyzedElement(elementInfo) {
-        return this.document.analyzer.elements[elementInfo.tagName.toLowerCase()];
+        return this.document.analyzer.elementsByTagName[elementInfo.tagName.toLowerCase()];
       },
 
       _updateSelectionBounds(bounds) {
