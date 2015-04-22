@@ -90,9 +90,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       },
 
-      observers: {
-        'source url': '_setDocument',
-      },
+      observers: [
+        '_setDocument(source,url)',
+      ],
 
       /**
        * Sets the current document and injects the message handler script.
