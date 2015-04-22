@@ -3,7 +3,7 @@
   "private": true,
   "dependencies": {
     "chai": "chaijs/chai#^1.10.0",
-    "iron-ajax": "PolymerElements/iron-ajax",
+    "iron-ajax": "PolymerElements/iron-ajax#master",
     "core-asset": "PolymerLabs/core-asset",
     "core-header-panel": "Polymer/core-header-panel#0.8-preview",
     "core-icons": "Polymer/core-icons#0.8-preview",
@@ -18,6 +18,7 @@
     "mocha": "mochajs/mocha#^2.1.0",
     "paper-card": "Polymer/paper-card#master",
     "paper-icon-button": "Polymer/paper-icon-button#0.8-preview",
+    "paper-ripple": "PolymerElements/paper-ripple#master",
     "paper-tabs": "Polymer/paper-tabs#0.8-preview",
     "polymer": "Polymer/polymer#0.8-preview",
     "webcomponentsjs": "webcomponents/webcomponentsjs"
@@ -26,6 +27,7 @@
   "resolutions": {
     "webcomponentsjs": "master",
     "layout": "master",
-    "polymer": "0.8-preview"
+    "polymer": "0.8-preview",
+    "paper-ripple": "master"
   }
 }
