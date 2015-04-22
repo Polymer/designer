@@ -313,9 +313,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       },
 
-      observers: {
-        'currentElementInfo.path': '_pathChanged',
-      },
+      observers: [
+        '_pathChanged(currentElementInfo.path)',
+      ],
 
       ready() {
         // TODO(justinfagnani): move these initializers to properties:
