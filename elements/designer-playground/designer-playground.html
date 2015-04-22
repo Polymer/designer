@@ -7,7 +7,7 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<link rel="import" href="../../../core-ajax/core-request.html">
+<link rel="import" href="../../../iron-ajax/iron-request.html">
 <link rel="import" href="../../../core-asset/core-asset.html">
 <link rel="import" href="../../../core-header-panel/core-header-panel.html">
 <link rel="import" href="../../../core-pages/core-pages.html">
@@ -373,7 +373,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _installPackageClick(e) {
-        var request = document.createElement('core-request');
+        var request = document.createElement('iron-request');
         request.send({
           url: '/api/bowerInstall',
           method: "POST",
