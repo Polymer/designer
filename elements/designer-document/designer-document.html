@@ -118,7 +118,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               let parsedDocument = results[0];
               let metadata = results[1];
 
-              this.domDocument = createDocument(content, frameScript, this.baseURI);
+              this.domDocument = createDocument(content, frameScript, url);
               this.ast = parsedDocument.ast;
               this.elements = metadata.elements;
               this.textContent = dom5.serialize(this.ast);
