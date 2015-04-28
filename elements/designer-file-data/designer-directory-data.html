@@ -37,7 +37,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       let lightDom = Polymer.dom(this);
 
       return this.fileSystem.loadDirectory(this.path)
-        .then(function(files) {
+        .then(function(dir) {
+          let files = dir.files;
           for (let i = 0; i < files.length; i++) {
             let file = files[i];
             let tagName = file.isDirectory

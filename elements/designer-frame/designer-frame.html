@@ -99,7 +99,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
      * @returns {URL} a Blob URL for the given [doc].
      */
     function getDocumentUrl(doc) {
-      let docBlob = new Blob([doc.documentElement.innerHTML],
+      let docBlob = new Blob([doc.documentElement.outerHTML],
           {type: 'text/html'});
       return URL.createObjectURL(docBlob);
     }
