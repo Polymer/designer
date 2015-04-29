@@ -84,6 +84,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           notify: true,
         },
 
+        filename: {
+          type: String,
+          notify: true,
+        },
+
         analyzer: Object,
         source: String,
         url: String,
@@ -103,6 +108,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        */
       _setDocument(content, url) {
         this.analyzer = createAnalyzer(url);
+
+        let splitUrl = url.split('/');
+        this.filename = splitUrl[splitUrl.length - 1];
 
         return Promise.all([
           this.analyzer.load(url),
