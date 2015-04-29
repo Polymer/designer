@@ -61,14 +61,17 @@ app.get('/ls/*', function(req, res) {
     if (stat.isDirectory()) {
       var files = fs.readdirSync(filePath);
       statJson.files = files.map(function(f) {
-        return statToJson(f, fs.lstatSync(path.join(filePath, f)));
+        var childPath = path.join(filePath, f);
+        var requestedChildPath = path.join(requestedPath, f);
+        return statToJson(requestedChildPath, fs.lstatSync(childPath));
       });
       // add the root package to the top level
       if (requestedPath === '/') {
+        var f = 'polymer-designer-demos';
+        var childPath = path.join(filePath, f);
+        var requestedChildPath = path.join(requestedPath, f);
         statJson.files.push(
-            statToJson(
-              'polymer-designer-demos',
-              fs.lstatSync(filesDir)));
+            statToJson(requestedChildPath, fs.lstatSync(filesDir)));
       }
     }
     res.type('json');
