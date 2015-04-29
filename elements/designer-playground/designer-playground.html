@@ -15,15 +15,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../../paper-card/paper-card.html">
 <link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../src/files/files.html">
 <link rel="import" href="../designer-breadcrumb/designer-breadcrumb.html">
 <link rel="import" href="../designer-document-outline/designer-document-outline.html">
-<link rel="import" href="../designer-file-tree/designer-file-tree.html">
 <link rel="import" href="../designer-inspector/designer-inspector.html">
 <link rel="import" href="../designer-mini-nav/designer-mini-nav.html">
 <link rel="import" href="../designer-stage/designer-stage.html">
+<link rel="import" href="../designer-tree/designer-tree.html">
 <link rel="import" href="../paper-tabs-vertical/paper-tabs-vertical.html">
 <link rel="import" href="../paper-tabs-vertical/paper-tab-vertical.html">
-<link rel="import" href="designer-demo-files.html">
 
 <dom-module id="designer-playground">
 
@@ -177,9 +177,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </div>
       <core-pages id="nav-detail" class="large" selected="{{_selectedNavTab}}">
         <div>
-          <designer-file-tree on-file-data-load="_onFileDataLoad">
-            <designer-demo-files id="files"></designer-demo-files>
-          </designer-file-tree>
+          <designer-tree
+              controller="[[_fileTreeController]]"
+              data="[[_rootFile]]"
+              on-file-data-load="_onFileDataLoad">
+          </designer-tree>
         </div>
         <div>
           <h3>Document</h3>
@@ -238,8 +240,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script>
 
-  define(['polymer-designer/path', 'polymer-designer/dom-utils'],
-      function(pathLib, domUtils) {
+  define([
+    'polymer-designer/path',
+    'polymer-designer/dom-utils',
+    'polymer-designer/files'],
+      function(pathLib, domUtils, files) {
     'use strict';
 
     Polymer({
@@ -324,6 +329,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // TODO(justinfagnani): move these initializers to properties:
         this.document = this.$.document;
         this.frame = this.$.frame;
+        this._fileTreeController = new files.DemoFilesTreeControl(
+          'http://localhost:8081/ls/',
+          'http://localhost:8081/files/');
+        this._fileTreeController.getInfo('polymer-designer-demos')
+          .then(function(root) {
+            this._rootFile = root;
+          }.bind(this));
       },
 
       _documentChanged() {
