@@ -198,7 +198,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </designer-mini-nav>
     <div id="main">
       <core-toolbar class="core-header">
-        {Toolbar}
+        <span>[[filename]]</span>
       </core-toolbar>
       <!-- <template is="x-if" if="{{domDocument}}">
         <designer-breadcrumb node="{{parent.currentNode}}"></designer-breadcrumb>
@@ -211,7 +211,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               source="[[documentSource]]"
               url="[[documentUrl]]"
               text-content="{{textContent}}"
-              elements="{{elements}}">
+              elements="{{elements}}"
+              filename="{{filename}}">
           </designer-document>
           <designer-stage
               id="stage"
