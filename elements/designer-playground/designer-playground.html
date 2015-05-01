@@ -208,17 +208,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div id="main">
       <paper-toolbar id="toolbar" class="paper-header">
         <span>[[filename]]</span>
-        <paper-tabs selected="{{_selectedEditor}}" noink>
-          <paper-tab>Storyboard</paper-tab>
-          <paper-tab>Layout</paper-tab>
-          <paper-tab>Logic</paper-tab>
-        </paper-tabs>
+        <template is="x-if" if="{{_showEditors}}">
+          <paper-tabs selected="{{_selectedEditor}}" noink>
+            <paper-tab>Storyboard</paper-tab>
+            <paper-tab>Layout</paper-tab>
+            <paper-tab>Logic</paper-tab>
+          </paper-tabs>
+        </template>
       </paper-toolbar>
       <!-- <template is="x-if" if="{{domDocument}}">
         <designer-breadcrumb node="{{parent.currentNode}}"></designer-breadcrumb>
       </template> -->
       <designer-breadcrumb node="{{currentNode}}"></designer-breadcrumb>
-      <core-pages id="editor" selected="{{_selectedEditor}}">
+      <iron-pages id="editor" selected="{{_selectedEditor}}">
         <div id="storyboard">
           Storyboard
         </div>
@@ -250,7 +252,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </template>
         </div> <!-- editor -->
         <designer-logic-editor></designer-logic-editor>
-      </core-pages>
+      </iron-pages>
     </div> <!-- main -->
   </template>
 
@@ -338,7 +340,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         _selectedEditor: {
-          value: 2,
+          // 0: storyboard
+          // 1: layout
+          // 2: logic
+          value: 1,
         },
 
       },
@@ -358,6 +363,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           .then(function(root) {
             this._rootFile = root;
           }.bind(this));
+        var queryParams = domUtils.parseQueryString(window.location.search);
+        this._showEditors = queryParams.get('show-editors');
       },
 
       _documentChanged() {

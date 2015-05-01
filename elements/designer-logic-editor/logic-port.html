@@ -8,9 +8,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../../../polymer/polymer.html">
-<link rel="import" href="../../../core-icon/core-icon.html">
-<link rel="import" href="../../../core-iconset/core-iconset.html">
-<link rel="import" href="../../../core-icons/core-icons.html">
+<link rel="import" href="../../../iron-icon/iron-icon.html">
+<link rel="import" href="../../../iron-iconset/iron-iconset.html">
+<link rel="import" href="../../../iron-icons/iron-icons.html">
 
 <dom-module id="logic-port">
 
@@ -20,13 +20,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       white-space: nowrap;
       display: flex;
     }
-    :host([align=right]) core-icon {
+    :host([align=right]) iron-icon {
       order: 2;
     }
     :host([align=right]) span {
       order: 1;
     }
-    core-icon {
+    iron-icon#icon {
       width: 16px;
       height: 16px;
     }
@@ -36,11 +36,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </style>
 
   <template>
-    <core-icon
+    <iron-icon
         id="icon"
         icon="[[icon]]"
         on-mousedown="_onConnectionMouseDown">
-    </core-icon>
+    </iron-icon>
     <span>[[port.name]]</span>
   </template>
 
@@ -106,6 +106,6 @@ define(function() {
     },
 
   });
-  
+
 });
 </script>

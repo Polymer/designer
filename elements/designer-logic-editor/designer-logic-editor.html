@@ -76,7 +76,7 @@ define(function() {
       'logic-patch-port-mousedown': '_portMouseDown',
     },
 
-    ready() {
+    attached() {
       let patches = Polymer.dom(this.$.stage).querySelectorAll('logic-patch');
       patches.forEach(function(p) {
         p.editor = this;

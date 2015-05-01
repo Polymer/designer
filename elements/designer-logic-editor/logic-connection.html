@@ -77,6 +77,7 @@ define(function() {
       x2: Number,
       y2: Number,
       viewbox: String,
+
     },
 
     observers: [
@@ -84,6 +85,7 @@ define(function() {
     ],
 
     render() {
+      if (!this.offsetParent) return;
       this.fromPatch = this.editor.getPatch(this.fromPatchRef);
       this.toPatch = this.editor.getPatch(this.toPatchRef);
 
@@ -133,6 +135,7 @@ define(function() {
       this.fromPatch.addEventListener('patch-move', _render);
       this.toPatch.addEventListener('patch-move', _render);
       this.render();
+      // try to wait for fonts to load
       setTimeout(function() {
         this.render();
       }.bind(this), 500);
