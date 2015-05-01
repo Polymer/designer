@@ -8,10 +8,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../../../polymer/polymer.html">
-<link rel="import" href="../../../core-icon/core-icon.html">
-<link rel="import" href="../../../core-iconset/core-iconset.html">
-<link rel="import" href="../../../core-icons/core-icons.html">
-<link rel="import" href="../../../core-icons/editor-icons.html">
+<link rel="import" href="../../../iron-icon/iron-icon.html">
+<link rel="import" href="../../../iron-iconset/iron-iconset.html">
+<link rel="import" href="../../../iron-icons/iron-icons.html">
+<link rel="import" href="../../../iron-icons/editor-icons.html">
 <link rel="import" href="designer-tree-icons.html">
 
 <dom-module id="designer-tree-item">
@@ -52,9 +52,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <template>
     <div id="item" on-click="_onClick">
-      <core-icon id="expand" icon="[[expandIcon]]"></core-icon>
+      <iron-icon id="expand" icon="[[expandIcon]]"></iron-icon>
       <template is="x-if" if="[[_showIcon(noicon)]]">
-        <core-icon id="icon" icon="[[parent.icon]]"></core-icon>
+        <iron-icon id="icon" icon="[[parent.icon]]"></iron-icon>
       </template>
       <span id="name">[[name]]</span>
     </div>
