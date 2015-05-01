@@ -9,11 +9,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../../../iron-ajax/iron-request.html">
 <link rel="import" href="../../../core-asset/core-asset.html">
-<link rel="import" href="../../../core-header-panel/core-header-panel.html">
-<link rel="import" href="../../../core-pages/core-pages.html">
-<link rel="import" href="../../../core-toolbar/core-toolbar.html">
-<link rel="import" href="../../../paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../../paper-card/paper-card.html">
+<link rel="import" href="../../../paper-header-panel/paper-header-panel.html">
+<link rel="import" href="../../../iron-pages/iron-pages.html">
+<link rel="import" href="../../../paper-toolbar/paper-toolbar.html">
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../../src/files/files.html">
 <link rel="import" href="../designer-breadcrumb/designer-breadcrumb.html">
@@ -65,7 +63,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       flex-direction: row;
       flex: 1 1 0;
     }
-    core-toolbar {
+    paper-toolbar#toolbar {
       background: #424242;
       color: white;
       flex: 0 0;
@@ -155,7 +153,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       box-sizing: border-box;
       border-bottom: solid 1px #444;
     }
-    paper-tab-vertical.core-selected {
+    paper-tab-vertical.iron-selected {
       color: #FFD740;
     }
   </style>
@@ -168,14 +166,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>
         <paper-tabs-vertical selected="{{_selectedNavTab}}" noink noslide nobar>
           <paper-tab-vertical>
-            <core-icon icon="icons:folder-open"></core-icon>
+            <iron-icon icon="icons:folder-open"></iron-icon>
           </paper-tab-vertical>
           <paper-tab-vertical>
-            <core-icon icon="editor:format-list-bulleted"></core-icon>
+            <iron-icon icon="editor:format-list-bulleted"></iron-icon>
           </paper-tab-vertical>
         </paper-tabs-vertical>
       </div>
-      <core-pages id="nav-detail" class="large" selected="{{_selectedNavTab}}">
+      <iron-pages id="nav-detail" class="large" selected="{{_selectedNavTab}}">
         <div>
           <designer-tree
               controller="[[_fileTreeController]]"
@@ -196,12 +194,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </template>
           </ul>
         </div>
-      </core-pages>
+      </iron-pages>
     </designer-mini-nav>
     <div id="main">
-      <core-toolbar class="core-header">
+      <paper-toolbar id="toolbar" class="paper-header">
         <span>[[filename]]</span>
-      </core-toolbar>
+      </paper-toolbar>
       <!-- <template is="x-if" if="{{domDocument}}">
         <designer-breadcrumb node="{{parent.currentNode}}"></designer-breadcrumb>
       </template> -->
