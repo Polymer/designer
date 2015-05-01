@@ -13,6 +13,7 @@
     "iron-iconset": "PolymerElements/iron-iconset#master",
     "iron-pages": "PolymerElements/iron-pages#master",
     "iron-selector": "PolymerElements/iron-selector#master",
+    "paper-card": "PolymerElements/paper-card#master",
     "paper-header-panel": "PolymerElements/paper-header-panel#master",
     "paper-ripple": "PolymerElements/paper-ripple#master",
     "paper-tabs": "PolymerElements/paper-tabs#master",

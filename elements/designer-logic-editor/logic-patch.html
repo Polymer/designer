@@ -1,0 +1,213 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="logic-port.html">
+
+<dom-module id="logic-patch">
+
+  <style>
+    :host {
+      cursor: default;
+      display: inline-block;
+      box-sizing: border-box;
+      position: absolute;
+      /*min-width: 100px;
+      min-height: 200px;*/
+      border-radius: 7px;
+      border: solid 2px red;
+      background: #200;
+      font-size: 12px;
+    }
+    h2 {
+      background: red;
+      margin: 0;
+      border-radius: 4px 4px 0 0;
+      border: solid 1px red;
+      box-sizing: border-box;
+      font-size: 16px;
+      font-weight: normal;
+      text-align: center;
+      padding: 4px;
+    }
+    #ports {
+      display: flex;
+    }
+    #ports > div {
+      /*flex: 1;*/
+    }
+    .group {
+      border-radius: 7px;
+      background: #400;
+      padding: 4px;
+      margin: 4px;
+      display: inline-block;
+    }
+    #outputs {
+      text-align: right;
+    }
+  </style>
+
+  <template>
+    <h2>[[name]]</h2>
+    <div id="ports">
+      <div id="inputs">
+        <div class="group">
+          <template id="input-repeat" is="x-repeat" items="[[inputPorts]]">
+            <logic-port port=[[item]]></logic-port>
+          </template>
+        </div>
+      </div>
+      <div id="outputs">
+        <div class="group">
+          <template id="output-repeat" is="x-repeat" items="[[outputPorts]]">
+            <logic-port port=[[item]] align="right"></logic-port>
+          </template>
+        </div>
+      </div>
+    </div>
+  </template>
+
+</dom-module>
+
+<script>
+
+define(function() {
+  'use strict';
+
+  Polymer({
+    is: 'logic-patch',
+
+    properties: {
+      editor: {
+        type: Object,
+      },
+
+      nodeRef: {
+        type: String,
+      },
+
+      node: {
+        type: Object,
+        observer: '_nodeChanged',
+      },
+
+      inputPorts: {
+        type: Array,
+      },
+
+      outputPorts: {
+        type: Array,
+      },
+
+      ports: {
+        type: Map,
+        value: function() { return new Map();},
+      },
+
+      name: {
+        type: String,
+        value: 'Patch',
+      },
+
+    },
+
+    listeners: {
+      'mousedown': '_onMouseDown'
+    },
+
+    observers: [
+      '_nodeRefChanged(editor,nodeRef)',
+    ],
+
+    created() {
+      // console.log('created');
+      // this.ports = new Map();
+    },
+
+    ready() {
+      // console.log('patch ready', this.nodeRef);
+    },
+
+    getConnectorPosition(portName) {
+      let port = this.ports.get(portName);
+      let portPosition = port.element.getConnectorBounds();
+      // console.log('portPosition', portPosition);
+      let parentBounds = this.offsetParent.getBoundingClientRect();
+      return {
+        x: portPosition.left + (portPosition.width / 2.0) - parentBounds.left,
+        y: portPosition.top + (portPosition.height / 2.0) - parentBounds.top,
+      };
+    },
+
+    addConnection(portName, connection) {
+      let port = this.ports.get(portName);
+      port.element.connected = true;
+    },
+
+    _nodeRefChanged() {
+      // console.log('_nodeRefChanged', this.nodeRef);
+      this.node = this.editor.getNode(this.nodeRef);
+    },
+
+    _nodeChanged() {
+      // console.log('_nodeChanged', this.node.is, this.editor);
+      let inputPorts = [];
+      let outputPorts = [];
+      for (let name in this.node.properties) {
+        let prop = this.node.properties[name];
+        if (prop.hidden == true) {
+          continue;
+        }
+        let port = {
+          name: name,
+        };
+        this.ports.set(name, port);
+        if (prop.outputPort == true) {
+          outputPorts.push(port);
+        } else {
+          inputPorts.push(port);
+        }
+      }
+      this.inputPorts = inputPorts;
+      this.outputPorts = outputPorts;
+      this.name = this.node.name;
+
+      // this.$['input-repeat'].flush();
+      // this.$['output-repeat'].flush();
+      // setTimeout(function() {
+      //   this.fire('patch-move');
+      // }.bind(this), 0);
+    },
+
+    _onMouseDown(e) {
+      let ox = e.clientX - this.offsetLeft;
+      let oy = e.clientY - this.offsetTop;
+      e.preventDefault();
+
+      let moveListener = function(e) {
+        let newX = e.clientX - ox;
+        let newY = e.clientY - oy;
+        this.style.left = newX + 'px';
+        this.style.top = newY + 'px';
+        e.preventDefault();
+        this.fire('patch-move');
+      }.bind(this);
+
+      let upListener = function(e) {
+        window.removeEventListener('mousemove', moveListener);
+        window.removeEventListener('mouseup', upListener);
+      };
+      window.addEventListener('mousemove', moveListener);
+      window.addEventListener('mouseup', upListener);
+    },
+
+  });
+});
+</script>

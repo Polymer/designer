@@ -41,10 +41,25 @@ define('polymer-designer/dom-utils', function() {
         !node.hasAttribute('designer-exclude');
   }
 
+  function parseQueryString(queryString) {
+    if (queryString.startsWith('?')) {
+      queryString = queryString.slice(1);
+    }
+    let params = new Map();
+    queryString.split('&').forEach(function(e) {
+      let keyValue = e.split('=');
+      if (keyValue[0]) {
+        params.set(keyValue[0], keyValue[1] || true);
+      }
+    });
+    return params;
+  }
+
   return {
     designerNodeFilter: designerNodeFilter,
     getDocumentElement: getDocumentElement,
     isDescendant: isDescendant,
+    parseQueryString: parseQueryString,
   };
 
 });
