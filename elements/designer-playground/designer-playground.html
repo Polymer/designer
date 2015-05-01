@@ -16,6 +16,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../src/files/files.html">
 <link rel="import" href="../designer-breadcrumb/designer-breadcrumb.html">
 <link rel="import" href="../designer-document-outline/designer-document-outline.html">
+<link rel="import" href="../designer-element-palette/designer-element-palette.html">
 <link rel="import" href="../designer-inspector/designer-inspector.html">
 <link rel="import" href="../designer-mini-nav/designer-mini-nav.html">
 <link rel="import" href="../designer-logic-editor/designer-logic-editor.html">
@@ -180,6 +181,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <paper-tab-vertical>
             <iron-icon icon="editor:format-list-bulleted"></iron-icon>
           </paper-tab-vertical>
+          <paper-tab-vertical>
+            <iron-icon icon="icons:polymer"></iron-icon>
+          </paper-tab-vertical>
         </paper-tabs-vertical>
       </div>
       <iron-pages id="nav-detail" class="large" selected="{{_selectedNavTab}}">
@@ -203,6 +207,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </template>
           </ul>
         </div>
+        <designer-element-palette></designer-element-palette>
       </iron-pages>
     </designer-mini-nav>
     <div id="main">
