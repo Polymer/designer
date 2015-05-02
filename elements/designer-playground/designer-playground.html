@@ -228,7 +228,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <paper-toolbar id="toolbar" class="paper-header">
         <span>[[filename]]</span>
         <template is="x-if" if="{{_showEditors}}">
-          <paper-tabs selected="{{_selectedEditor}}" noink>
+          <paper-tabs selected="{{parent._selectedEditor}}" noink>
             <paper-tab>Storyboard</paper-tab>
             <paper-tab>Layout</paper-tab>
             <paper-tab>Logic</paper-tab>

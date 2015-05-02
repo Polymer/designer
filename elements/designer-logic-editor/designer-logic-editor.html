@@ -82,7 +82,7 @@ define(function() {
         p.editor = this;
       }.bind(this));
 
-      setImmediate(function() {
+      this.async(function() {
         let connections = Polymer.dom(this.$.stage).querySelectorAll('logic-connection');
         connections.forEach(function(c) {
           c.editor = this;
