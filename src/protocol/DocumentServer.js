@@ -24,13 +24,19 @@ define('polymer-designer/protocol/DocumentServer', [
         !node.hasAttribute('designer-exclude');
   }
 
+  // TODO(justinfagnani): move to common location
+  const nodeIdProperty = '__designer_node_id__';
+
   class DocumentServer {
 
     constructor(connection) {
       this.connection = connection;
       this.currentElement = null;
       this.commandApplier = new DomCommandApplier(document);
+      this.nodes = new Map();
+      this.nextId = 1;
 
+      connection.on('getDocument', this.getDocument.bind(this));
       connection.on('selectElementAtPoint', this.selectElementAtPoint.bind(this));
       connection.on('selectElementAtPath', this.selectElementAtPath.bind(this));
       connection.on('selectionBoundsChanged', this.selectionBoundsChanged.bind(this));
@@ -47,6 +53,27 @@ define('polymer-designer/protocol/DocumentServer', [
       request.reply({
         bounds: this._elementBounds(this.currentElement),
         elementInfo: this._elementInfo(this.currentElement),
+      });
+    }
+
+    _getId(node) {
+      let id = node[nodeIdProperty];
+      if (id == null) {
+        id = node[nodeIdProperty] = this.nextId++;
+        this.nodes.set(id, node);
+      }
+      return id;
+    }
+
+    _getSourceId(node) {
+      return (node.nodeType === Node.ELEMENT_NODE)
+          ? node.getAttribute(nodeIdProperty)
+          : null;
+    }
+
+    getDocument(request) {
+      request.reply({
+        id: this._getId(document),
       });
     }
 
@@ -255,9 +282,13 @@ define('polymer-designer/protocol/DocumentServer', [
       };
     }
 
+    // TODO(justinfagnani): break element info into two parts: static,
+    // unchanging (id, tagName), and dynamic: parent, attributes, style...
     _elementInfo(element) {
       var style = window.getComputedStyle(element);
       return {
+        id: this._getId(element),
+        sourceId: this._getSourceId(element),
         path: pathLib.getNodePath(element, document,
             designerNodeFilter),
         tagName: element.tagName,

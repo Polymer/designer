@@ -59,6 +59,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     'use strict';
 
+    // TODO(justinfagnani): move to common location
+    const nodeIdProperty = '__designer_node_id__';
+
     Polymer({
       is: 'designer-document',
 
@@ -90,6 +93,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: String,
           notify: true,
           observer: '_currentPathChanged',
+        },
+
+        currentNodeId: {
+          type: String,
+          notify: true,
+          observer: '_currentNodeIdChanged',
         },
 
         currentElementInfo: {
@@ -135,6 +144,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         source: String,
         url: String,
 
+        _domNodes: {
+          type: Map,
+          value: function() {
+            return new Map();
+          },
+        },
+
       },
 
       observers: [
@@ -173,6 +189,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             this.astDocument = parsedDocument.ast;
             this.astDocumentElement = domUtils.getDocumentElement(this.astDocument);
+            let nextId = 1;
+            dom5.query(this.astDocument, function(node) {
+              dom5.setAttribute(node, nodeIdProperty, `${nextId++}`);
+            });
 
             this.elements = metadata.elements;
             this.textContent = dom5.serialize(this.astDocument);
@@ -189,6 +209,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         let path = this.currentPath = (this.currentNode)
             ? pathLib.getNodePath(this.currentNode, this.domDocument)
             : null;
+        // this.currentNodeId = (this.currentNode)
+        //     ? this.client.nodeRegistry.getNodeId(this.currentNode)
+        //     : null;
         if (this.client != null) {
           this.client.selectElementAtPath(path).then(function(response) {
             this.fire('designer-document-update', response);
@@ -202,10 +225,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             : null;
       },
 
+      _currentNodeIdChanged() {
+        console.log('_currentNodeIdChanged', this.currentNodeId);
+      },
+
       _clientConnectionChanged() {
         this.client = (this.clientConnection)
             ? new DocumentClient(this.clientConnection)
             : null;
+
+        this.client.getDocument().then(function(response) {
+          let id = response.id;
+          console.log('document id', response.id);
+          this._domNodes.set(id, this.domDocument);
+        }.bind(this));
       },
 
       executeCommand(command) {
@@ -264,6 +297,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     function createDocument(content, frameScript, baseUri) {
       let doc = document.implementation.createHTMLDocument();
       doc.documentElement.innerHTML = content;
+
+      let iterator = doc.createNodeIterator(doc, NodeFilter.SHOW_ELEMENT);
+      let node;
+      let nextId = 1;
+      while(node = iterator.nextNode()) {
+        node.setAttribute(nodeIdProperty, nextId++);
+      }
 
       doc.head.insertBefore(createFrameScriptElement(frameScript, doc),
           doc.head.firstChild);

@@ -16,6 +16,21 @@ define('polymer-designer/protocol/DocumentClient', function() {
     constructor(connection) {
       console.assert(connection != null);
       this.connection = connection;
+      // this.nodeRegistry = new node_registry.DomNodeRegistry();
+      this.nodes = new Map();
+    }
+
+    /**
+     * Returns a node descriptor that represents a live document node.
+     */
+    getNodeInfo(id) {
+      return this.nodes.get(id);
+    }
+
+    getDocument() {
+      return this.connection.request({
+        messageType: 'getDocument',
+      });
     }
 
     /**
@@ -36,7 +51,11 @@ define('polymer-designer/protocol/DocumentClient', function() {
         messageType: 'selectElementAtPoint',
         x: clientX - bounds.left,
         y: clientY - bounds.top,
-      });
+      }).then(function(response) {
+        let id = response.elementInfo.id;
+        this.nodes.set(id, response);
+        return response;
+      }.bind(this));
     }
 
     /**
