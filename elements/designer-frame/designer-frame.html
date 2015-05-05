@@ -53,7 +53,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           observer: '_documentChanged',
         },
 
-        client: {
+        clientConnection: {
           type: Object,
           notify: true,
         },
@@ -70,27 +70,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        * anyway, such as when the use clicks on an element.
        */
       _documentChanged() {
-        let url = getDocumentUrl(this.document);
+        if (this.clientConnection != null) {
+          this.clientConnection.disconnect();
+          this.clientConnection = null;
+        }
 
         if (this._frame != null) {
           Polymer.dom(this.root).removeChild(this._frame);
         }
-
-        if (this.client != null) {
-          this.client.connection.disconnect();
-        }
-
         this._frame = document.createElement('iframe');
         this._frame.setAttribute('sandbox', 'allow-scripts');
         Polymer.dom(this.root).appendChild(this._frame);
         Polymer.dom.flush();
 
         this._frame.addEventListener('load', function(event) {
-          let conn = new ClientConnection(window, this._frame.contentWindow);
-          this.client = new DocumentClient(conn);
+          this.clientConnection =
+              new ClientConnection(window, this._frame.contentWindow);
         }.bind(this));
 
-        this._frame.src = url;
+        this._frame.src = getDocumentUrl(this.document);;
       },
 
     });
