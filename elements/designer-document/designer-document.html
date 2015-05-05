@@ -74,6 +74,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           notify: true,
         },
 
+        clientConnection: {
+          type: Object,
+          notify: true,
+          observer: '_clientConnectionChanged',
+        },
+
         currentNode: {
           type: Object,
           notify: true,
@@ -188,6 +194,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _currentPathChanged() {
         this.currentNode = (this.currentPath)
             ? pathLib.getNodeFromPath(this.currentPath, this.domDocument)
+            : null;
+      },
+
+      _clientConnectionChanged() {
+        this.client = (this.clientConnection)
+            ? new DocumentClient(this.clientConnection)
             : null;
       },
 

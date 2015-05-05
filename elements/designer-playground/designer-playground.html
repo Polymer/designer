@@ -250,7 +250,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 id="document"
                 source="[[documentSource]]"
                 url="[[documentUrl]]"
+                client-connection="[[clientConnection]]"
                 analyzer="{{analyzer}}"
+                client="{{client}}"
                 dom-document="{{domDocument}}"
                 dom-document-element="{{domDocumentElement}}"
                 ast-document="{{astDocument}}"
@@ -272,9 +274,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 current-element-info="{{currentElementInfo}}"
                 on-designer-command="_onDesignerCommand">
               <designer-frame
-                id="frame"
-                client="{{client}}"
-                document="[[domDocument]]">
+                  id="frame"
+                  client-connection="{{clientConnection}}"
+                  document="[[domDocument]]">
               </designer-frame>
             </designer-stage>
             <pre id="html">[[textContent]]</pre>
@@ -313,6 +315,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         client: {
+          type: Object,
+          notify: true,
+        },
+
+        clientConnection: {
           type: Object,
           notify: true,
         },
