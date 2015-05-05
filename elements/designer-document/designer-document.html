@@ -43,6 +43,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'polymer-designer/protocol/ClientConnection',
         'polymer-designer/commands/DomCommandApplier',
         'polymer-designer/commands/ParsedHtmlCommandApplier',
+        'polymer-designer/dom-utils',
+        'polymer-designer/path',
         'hydrolysis',
         'dom5'],
       function(
@@ -50,6 +52,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         ClientConnection,
         DomCommandApplier,
         ParsedHtmlCommandApplier,
+        domUtils,
+        pathLib,
         hydrolysis,
         dom5) {
 
@@ -60,11 +64,49 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       properties: {
 
+        analyzer: {
+          type: Object,
+          notify: true,
+        },
+
         client: {
           type: Object,
+          notify: true,
+        },
+
+        currentNode: {
+          type: Object,
+          notify: true,
+          observer: '_currentNodeChanged',
+        },
+
+        currentPath: {
+          type: String,
+          notify: true,
+          observer: '_currentPathChanged',
+        },
+
+        currentElementInfo: {
+          type: Object,
+          notify: true,
         },
 
         domDocument: {
+          type: Object,
+          notify: true,
+        },
+
+        domDocumentElement: {
+          type: Object,
+          notify: true,
+        },
+
+        astDocument: {
+          type: Object,
+          notify: true,
+        },
+
+        astDocumentElement: {
           type: Object,
           notify: true,
         },
@@ -79,17 +121,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           notify: true,
         },
 
-        ast: {
-          type: String,
-          notify: true,
-        },
-
         filename: {
           type: String,
           notify: true,
         },
 
-        analyzer: Object,
         source: String,
         url: String,
 
@@ -123,26 +159,42 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             analyzedDocument.htmlLoaded,
             analyzedDocument.metadataLoaded,
           ]).then(function(results) {
-              let parsedDocument = results[0];
-              let metadata = results[1];
+            let parsedDocument = results[0];
+            let metadata = results[1];
 
-              this.domDocument = createDocument(content, frameScript, url);
-              this.ast = parsedDocument.ast;
-              this.elements = metadata.elements;
-              this.textContent = dom5.serialize(this.ast);
+            this.domDocument = createDocument(content, frameScript, url);
+            this.domDocumentElement = domUtils.getDocumentElement(this.domDocument);
 
-              this._domCommandApplier = new DomCommandApplier(this.domDocument);
-              this._parsedCommandApplier =
-                  new ParsedHtmlCommandApplier(this.ast);
+            this.astDocument = parsedDocument.ast;
+            this.astDocumentElement = domUtils.getDocumentElement(this.astDocument);
+
+            this.elements = metadata.elements;
+            this.textContent = dom5.serialize(this.astDocument);
+
+            this._domCommandApplier = new DomCommandApplier(this.domDocument);
+            this._parsedCommandApplier =
+                new ParsedHtmlCommandApplier(this.astDocument);
           }.bind(this));
 
         }.bind(this));
       },
 
+      _currentNodeChanged() {
+        this.currentPath = (this.currentNode)
+            ? pathLib.getNodePath(this.currentNode, this.domDocument)
+            : null;
+      },
+
+      _currentPathChanged() {
+        this.currentNode = (this.currentPath)
+            ? pathLib.getNodeFromPath(this.currentPath, this.domDocument)
+            : null;
+      },
+
       executeCommand(command) {
         this._domCommandApplier.apply(command);
         this._parsedCommandApplier.apply(command);
-        this.textContent = dom5.serialize(this.ast);
+        this.textContent = dom5.serialize(this.astDocument);
       },
 
       get _frameScriptAsset() {

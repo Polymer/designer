@@ -109,6 +109,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: null,
         },
 
+        currentNode: {
+          type: Object,
+          notify: true,
+        },
+
+        currentPath: {
+          type: String,
+          notify: true,
+          observer: '_currentPathChanged',
+        },
+
         /**
          * @type {{x: number, y: number}}
          */
@@ -140,16 +151,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: false,
         },
 
-        /** @type {DesignerDocument} a <designer-document> element */
-        document: {
+        domDocument: {
           type: Object,
-          observer: '_documentChanged',
+          observer: '_domDocumentChanged',
         },
 
-        /** @type {DesignerFrame} a <designer-frame> element */
-        frame: {
+        client: {
           type: Object,
         },
+
+        analyzer: {
+          type: Object,
+        }
 
       },
 
@@ -164,16 +177,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._reset();
       },
 
-      _documentChanged() {
-        if (this.document) {
-          // If the designer-document element that this.document is bound to
-          // ever changed, this would be a memory leak, but it doesn't.
-          this.document.addEventListener('dom-document-changed', function(e) {
-            if (this.document.domDocument) {
-              this._reset();
-            }
-          }.bind(this));
-        }
+      _domDocumentChanged() {
+        this._reset();
       },
 
       _reset() {
@@ -188,9 +193,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.caret.style.display = 'none';
       },
 
+      _currentPathChanged() {
+        this.selectNode(this.currentPath);
+      },
+
       selectNode(path) {
-        if (this.frame.client !== null) {
-          this.frame.client.selectElementAtPath(path)
+        if (this.client != null) {
+          this.client.selectElementAtPath(path)
               .then(function(response) {
                 this._updateCurrentElement(response.elementInfo);
                 this._updateSelectionBounds(response.bounds);
@@ -204,7 +213,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        * @param {Command} command
        */
       executeCommand(command) {
-        return this.frame.client.sendCommand(command)
+        // TODO: move to document?
+        return this.client.sendCommand(command)
             .then(function(response) {
               this._updateCurrentElement(response.elementInfo);
               this._updateSelectionBounds(response.bounds);
@@ -212,7 +222,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       getAnalyzedElement(elementInfo) {
-        return this.document.analyzer.elementsByTagName[elementInfo.tagName.toLowerCase()];
+        return this.analyzer.elementsByTagName[elementInfo.tagName.toLowerCase()];
       },
 
       _updateSelectionBounds(bounds) {
@@ -228,6 +238,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _updateCurrentElement(elementInfo) {
         elementInfo.analyzed = this.getAnalyzedElement(elementInfo);
         this.currentElementInfo = elementInfo;
+        this.currentPath = elementInfo.path;
 
         // Set the valid resize handles
         var position = elementInfo.position;
@@ -326,7 +337,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           y: e.detail.cursor.y - this.offsetTop,
         };
         var bounds = e.detail.bounds;
-        this.frame.client.selectionBoundsChanged(bounds, cursor)
+        this.client.selectionBoundsChanged(bounds, cursor)
             .then(function(response) {
               this._updateSelectionBounds(response.bounds);
               this._updateHoverElement(response.hover);
@@ -342,7 +353,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // have a double-click to initiate any action, but the redundant
         // selection that happens here sometimes is ok for now
         var bounds = this.getBoundingClientRect();
-        this.frame.client.selectElementAtPoint(e.clientX, e.clientY, bounds)
+        this.client.selectElementAtPoint(e.clientX, e.clientY, bounds)
             .then(function(response) {
               this._updateCurrentElement(response.elementInfo);
               this._updateSelectionBounds(response.bounds);
@@ -367,7 +378,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _onDoubleClick(e) {
         var bounds = this.getBoundingClientRect();
-        this.frame.client.selectElementAtPoint(e.clientX, e.clientY, bounds)
+        this.client.selectElementAtPoint(e.clientX, e.clientY, bounds)
             .then(function(response) {
               this._updateCurrentElement(response.elementInfo);
               this._updateSelectionBounds(response.bounds);
@@ -377,7 +388,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _onSelectionClick(e) {
         var bounds = this.getBoundingClientRect();
-        this.frame.client.selectElementAtPoint(e.clientX, e.clientY, bounds)
+        this.client.selectElementAtPoint(e.clientX, e.clientY, bounds)
             .then(function(response) {
               this._updateCurrentElement(response.elementInfo);
               this._updateSelectionBounds(response.bounds);
@@ -387,7 +398,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _textOnClick(e) {
         e.stopPropagation();
         var bounds = this.getBoundingClientRect();
-        this.frame.client.getCaretPosition(e.clientX, e.clientY, bounds)
+        this.client.getCaretPosition(e.clientX, e.clientY, bounds)
           .then(function(response) {
             this._updateCaret(response.rect);
           }.bind(this));
@@ -424,7 +435,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             return;
         }
 
-        this.frame.client.moveCursor(move)
+        this.client.moveCursor(move)
           .then(function(response) {
             this._updateCaret(response.rect);
           }.bind(this));
@@ -441,7 +452,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _onKeypress(event) {
         var keyCode = event.keyCode;
         var char = String.fromCharCode(keyCode);
-        this.frame.client.insertText(char)
+        this.client.insertText(char)
           .then(function(response) {
             this._updateCaret(response.rect);
           }.bind(this));
