@@ -250,21 +250,36 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 id="document"
                 source="[[documentSource]]"
                 url="[[documentUrl]]"
+                analyzer="{{analyzer}}"
+                dom-document="{{domDocument}}"
+                dom-document-element="{{domDocumentElement}}"
+                ast-document="{{astDocument}}"
+                ast-document-element="{{astDocumentElement}}"
                 text-content="{{textContent}}"
                 elements="{{elements}}"
-                filename="{{filename}}">
+                filename="{{filename}}"
+                current-node="{{currentNode}}"
+                current-path="{{currentPath}}"
+                current-element-info="{{currentElementInfo}}">
             </designer-document>
             <designer-stage
                 id="stage"
-                document="[[document]]"
-                frame="[[frame]]"
+                dom-document="[[domDocument]]"
+                analyzer="[[analyzer]]"
+                client="[[client]]"
+                current-node="{{currentNode}}"
+                current-path="{{currentPath}}"
                 current-element-info="{{currentElementInfo}}"
                 on-designer-command="_onDesignerCommand">
-              <designer-frame id="frame" document="[[domDocument]]"></designer-frame>
+              <designer-frame
+                id="frame"
+                client="{{client}}"
+                document="[[domDocument]]">
+              </designer-frame>
             </designer-stage>
             <pre id="html">[[textContent]]</pre>
           </div> <!-- doc-view -->
-          <template is="x-if" if="{{domDocument}}">
+          <template is="x-if" if="[[domDocument]]">
             <designer-inspector
                 source-document="[[parent.domDocument]]"
                 element-info="{{parent.currentElementInfo}}">
@@ -292,24 +307,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       properties: {
 
+        analyzer: {
+          type: Object,
+          notify: true,
+        },
+
+        client: {
+          type: Object,
+          notify: true,
+        },
+
         currentElementInfo: {
           type: Object,
           notify: true,
         },
 
         currentNode: {
-          type: Object,
-          notify: true,
-          observer: '_currentNodeChanged',
-        },
-
-        document: {
-          type: Object,
-          notify: true,
-          observer: '_documentChanged',
-        },
-
-        frame: {
           type: Object,
           notify: true,
         },
@@ -336,7 +349,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         elements: {
           type: Array,
-          observer: '_elementsChanged',
         },
 
         textContent: {
@@ -368,14 +380,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       },
 
-      observers: [
-        '_pathChanged(currentElementInfo.path)',
-      ],
-
       ready() {
-        // TODO(justinfagnani): move these initializers to properties:
-        this.document = this.$.document;
-        this.frame = this.$.frame;
         this._fileTreeController = new files.DemoFilesTreeControl(
           'http://localhost:8081/ls/',
           'http://localhost:8081/files/');
@@ -387,47 +392,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._showEditors = queryParams.get('show-editors');
       },
 
-      _documentChanged() {
-        if (this.document) {
-          this.document.addEventListener('dom-document-changed', function(e) {
-            this.domDocument = this.document.domDocument;
-            this.domDocumentElement = domUtils.getDocumentElement(this.domDocument);
-          }.bind(this));
-          this.document.addEventListener('ast-changed', function(e) {
-            this.astDocument = this.document.ast;
-            this.astDocumentElement = domUtils.getDocumentElement(this.astDocument);
-          }.bind(this));
-        }
-      },
-
-      _elementsChanged() {
-        console.log('_elementsChanged', this.elements);
-      },
-
-      _pathChanged() {
-        if (this.document && this.currentElementInfo != null) {
-          var path = this.currentElementInfo.path;
-          var node = pathLib.getNodeFromPath(path, this.document.domDocument);
-          this.currentNode = node;
-        } else {
-          this.currentNode = null;
-        }
-      },
-
-      _currentNodeChanged() {
-        if (this.document) {
-          var path = pathLib.getNodePath(this.currentNode, this.document.domDocument);
-          if (this.$.stage.currentElementInfo == null ||
-              this.$.stage.currentElementInfo.path !== path) {
-            this.$.stage.selectNode(path);
-          }
-        }
-      },
-
       _onDesignerCommand(event, command) {
-        this.document.executeCommand(command);
+        this.client.executeCommand(command);
         // TODO(justinfagnani): execute command through the frame, and get the
-        // statge to update when the frame changes
+        // stage to update when the frame changes
         this.$.stage.executeCommand(command);
       },
 
