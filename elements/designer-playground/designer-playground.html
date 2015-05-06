@@ -262,7 +262,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 filename="{{filename}}"
                 current-node="{{currentNode}}"
                 current-path="{{currentPath}}"
-                current-element-info="{{currentElementInfo}}">
+                current-element-info="{{currentElementInfo}}"
+                on-designer-document-update="_onDesignerDocumentUpdate">
             </designer-document>
             <designer-stage
                 id="stage"
@@ -400,10 +401,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onDesignerCommand(event, command) {
-        this.client.executeCommand(command);
-        // TODO(justinfagnani): execute command through the frame, and get the
-        // stage to update when the frame changes
-        this.$.stage.executeCommand(command);
+        // Event fired from designer-stage containing an edit command,
+        // forward to the designer-document.
+        this.$.document.executeCommand(command);
+      },
+
+      _onDesignerDocumentUpdate(event, response) {
+        // Event fired from designer-stage containing an edit response,
+        // forward to the designer-stage.
+        this.$.stage.applyDocumentUpdate(response);
       },
 
       _onFileDataLoad(e) {
