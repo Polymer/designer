@@ -400,7 +400,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onDesignerCommand(event, command) {
-        this.client.executeCommand(command);
+        this.$.document.executeCommand(command);
         // TODO(justinfagnani): execute command through the frame, and get the
         // stage to update when the frame changes
         this.$.stage.executeCommand(command);
