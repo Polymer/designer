@@ -186,9 +186,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _currentNodeChanged() {
-        this.currentPath = (this.currentNode)
+        let path = this.currentPath = (this.currentNode)
             ? pathLib.getNodePath(this.currentNode, this.domDocument)
             : null;
+        if (this.client != null) {
+          this.client.selectElementAtPath(path).then(function(response) {
+            this.fire('designer-document-update', response);
+          }.bind(this));
+        }
       },
 
       _currentPathChanged() {
@@ -207,6 +212,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._domCommandApplier.apply(command);
         this._parsedCommandApplier.apply(command);
         this.textContent = dom5.serialize(this.astDocument);
+        this.client.sendCommand(command).then(function(response) {
+          this.fire('designer-document-update', response);
+        }.bind(this));
       },
 
       get _frameScriptAsset() {
