@@ -59,14 +59,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div id="ports">
       <div id="inputs">
         <div class="group">
-          <template id="input-repeat" is="x-repeat" items="[[inputPorts]]">
+          <template id="input-repeat" is="dom-repeat" items="[[inputPorts]]">
             <logic-port port=[[item]]></logic-port>
           </template>
         </div>
       </div>
       <div id="outputs">
         <div class="group">
-          <template id="output-repeat" is="x-repeat" items="[[outputPorts]]">
+          <template id="output-repeat" is="dom-repeat" items="[[outputPorts]]">
             <logic-port port=[[item]] align="right"></logic-port>
           </template>
         </div>
@@ -148,7 +148,9 @@ define(function() {
 
     addConnection(portName, connection) {
       let port = this.ports.get(portName);
-      port.element.connected = true;
+      if (port.element) {
+        port.element.connected = true;
+      }
     },
 
     _nodeRefChanged() {

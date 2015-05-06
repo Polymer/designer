@@ -30,7 +30,7 @@ editing interface for them.
   <template>
     <div hidden="{{_hide}}">
       <header>Properties</header>
-        <template is="x-repeat" items="{{_properties}}">
+        <template is="dom-repeat" items="{{_properties}}">
           <section>
             <span>{{item.name}}</span> | <span>{{item.type}}</span>
           </section>

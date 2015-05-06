@@ -215,7 +215,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </designer-document-outline>
             <h3>Elements</h3>
             <ul>
-              <template is="x-repeat" items="[[elements]]">
+              <template is="dom-repeat" items="[[elements]]">
                 <li>[[item.is]]</li>
               </template>
             </ul>
@@ -227,19 +227,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div id="main">
       <paper-toolbar id="toolbar" class="paper-header">
         <span>[[filename]]</span>
-        <template is="x-if" if="{{_showEditors}}">
-          <paper-tabs selected="{{parent._selectedEditor}}" noink>
+        <template is="dom-if" if="[[_showEditors]]">
+          <paper-tabs selected="{{_selectedEditor}}" noink>
             <paper-tab>Storyboard</paper-tab>
             <paper-tab>Layout</paper-tab>
             <paper-tab>Logic</paper-tab>
           </paper-tabs>
         </template>
       </paper-toolbar>
-      <!-- <template is="x-if" if="{{domDocument}}">
-        <designer-breadcrumb node="{{parent.currentNode}}"></designer-breadcrumb>
+      <!-- <template is="dom-if" if="{{domDocument}}">
+        <designer-breadcrumb node="{{currentNode}}"></designer-breadcrumb>
       </template> -->
       <designer-breadcrumb node="{{currentNode}}"></designer-breadcrumb>
-      <iron-pages id="editor" selected="{{_selectedEditor}}">
+      <iron-pages id="editor" selected="[[_selectedEditor]]">
         <div id="storyboard">
           Storyboard
         </div>
@@ -281,10 +281,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </designer-stage>
             <pre id="html">[[textContent]]</pre>
           </div> <!-- doc-view -->
-          <template is="x-if" if="[[domDocument]]">
+          <template is="dom-if" if="[[domDocument]]">
             <designer-inspector
-                source-document="[[parent.domDocument]]"
-                element-info="{{parent.currentElementInfo}}">
+                source-document="[[domDocument]]"
+                element-info="{{currentElementInfo}}">
             </designer-inspector>
           </template>
         </div> <!-- editor -->
