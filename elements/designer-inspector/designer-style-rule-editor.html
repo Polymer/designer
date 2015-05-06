@@ -8,7 +8,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../../../polymer/polymer.html">
-
+<link rel="import" href="../../../paper-input/paper-input.html">
 <link rel="import" href="../../src/rework-utils/rework-utils.html">
 
 <!--
@@ -21,28 +21,12 @@ editing interface for them.
     :host {
       box-sizing: border-box;
       display: block;
-      font-family: monospace;
-      font-size: 0.8em;
     }
-
-    .selector:after {
-      content: ' \007b'; /* ' {' - Escaped due to Polymer style parser bug. */
-    }
-    .properties:after {
-      content: ' \007d'; /* '}' - Escaped due to Polymer style parser bug. */
-    }
-
     .property {
       padding: 0 10px;
     }
     .property .key {
       font-weight: bold;
-    }
-    .property .key:after {
-      content: ':';
-    }
-    .property .value:after {
-      content: ';';
     }
   </style>
 
@@ -58,8 +42,8 @@ editing interface for them.
     <section class="properties">
       <template is="dom-repeat" items="{{_styles}}">
         <div class="property">
-          <span class="key">{{item.key}}</span>
-          <span class="value" contentEditable>{{item.value}}</span>
+          <label class="key">{{item.key}}</label>
+          <paper-input value="{{item.value}}"></paper-input>
         </div>
       </template>
     </section>
