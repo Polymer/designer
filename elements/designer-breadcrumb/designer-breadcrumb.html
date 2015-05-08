@@ -32,7 +32,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <template>
     <paper-tabs selected="{{selectedIndex}}" noink noslide>
-      <template is="x-repeat" items="[[tabNames]]">
+      <template is="dom-repeat" items="[[tabNames]]">
         <paper-tab>[[item]]</paper-tab>
       </template>
     </paper-tabs>

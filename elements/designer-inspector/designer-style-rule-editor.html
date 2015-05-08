@@ -56,7 +56,7 @@ editing interface for them.
   <template>
     <header class="selector">{{rule.selector}}</header>
     <section class="properties">
-      <template is="x-repeat" items="{{_styles}}">
+      <template is="dom-repeat" items="{{_styles}}">
         <div class="property">
           <span class="key">{{item.key}}</span>
           <span class="value" contentEditable>{{item.value}}</span>

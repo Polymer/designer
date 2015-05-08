@@ -475,8 +475,9 @@ Example:
     positionBar: function(height, top) {
       this._height = height;
       this._top = top;
-      this.transform(this.$.selectionBar,
-          'translate3d(0, ' + top + '%, 0) scaleY(' + (height / 100) + ')');
+      this.transform(
+          'translate3d(0, ' + top + '%, 0) scaleY(' + (height / 100) + ')',
+          this.$.selectionBar);
     },
 
     onBarTransitionEnd: function(e) {

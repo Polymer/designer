@@ -34,10 +34,10 @@ editing interface for them.
   </style>
 
   <template>
-    <template is="x-repeat" items="{{_sheets}}">
+    <template is="dom-repeat" items="{{_sheets}}">
       <section class="sheet" _sheet="{{item}}">
         <header>{{item.ownerNodePath}}</header>
-        <template is="x-repeat" items="{{item.rules}}">
+        <template is="dom-repeat" items="{{item.rules}}">
           <designer-style-rule-editor rule="{{item}}"></designer-style-rule-editor>
         </template>
       </section>

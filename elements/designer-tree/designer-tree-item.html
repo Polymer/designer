@@ -53,17 +53,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <div id="item" on-click="_onClick">
       <iron-icon id="expand" icon="[[expandIcon]]"></iron-icon>
-      <template is="x-if" if="[[_showIcon(noicon)]]">
-        <iron-icon id="icon" icon="[[parent.icon]]"></iron-icon>
+      <template is="dom-if" if="[[_showIcon(noicon)]]">
+        <iron-icon id="icon" icon="[[icon]]"></iron-icon>
       </template>
       <span id="name">[[name]]</span>
     </div>
     <div id="children">
-      <template is="x-repeat" items="[[children]]">
+      <template is="dom-repeat" items="[[children]]">
         <designer-tree-item
             data="[[item]]"
-            controller="[[parent.controller]]"
-            noicon="[[parent.noicon]]">
+            controller="[[controller]]"
+            noicon="[[noicon]]">
         </designer-tree-item>
       </template>
     </div>
