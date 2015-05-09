@@ -16,13 +16,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <script src="../../../chai/chai.js"></script>
     <link rel="stylesheet" href="../../../mocha/mocha.css"/>
     <link rel="import" href="../../../polymer/polymer.html"/>
+    <link rel="import" href="../../../imd/imd.html"/>
     <link rel="import" href="../../src/commands/commands.html"/>
   </head>
   <body>
     <div id="mocha"></div>
 
     <script>
-using(['DomCommandApplier', 'Commands', 'Path'], 
+define([
+      'polymer-designer/commands/DomCommandApplier',
+      'polymer-designer/commands',
+      'polymer-designer/path'],
     function(DomCommandApplier, commands, pathlib) {
 
   mocha.setup('tdd');

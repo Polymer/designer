@@ -31,6 +31,7 @@ define('polymer-designer/commands/CommandApplier', function() {
         handler.apply(this.doc, command);
       } else {
         console.error("Can't apply command ", command);
+        throw new Error("Can't apply command " + command.commandType);
       }
     },
 
@@ -40,6 +41,7 @@ define('polymer-designer/commands/CommandApplier', function() {
         handler.undo(this.doc, command);
       } else {
         console.error("Can't undo command ", command);
+        throw new Error("Can't undo command " + command.commandType);
       }
     },
 
