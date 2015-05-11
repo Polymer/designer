@@ -3,10 +3,10 @@
   <head>
     <title>PositionWalker Test</title>
     <meta charset="UTF-8">
-    <link rel="import" href="../../../imd/imd.html">
-    <script src="../../src/text/PositionWalker.js"></script>
-    <script src="../../../mocha/mocha.js"></script>
     <script src="../../../chai/chai.js"></script>
+    <script src="../../../web-component-tester/browser.js"></script>
+    <link rel="import" href="../../../imd/imd.html"/>
+    <script src="../../src/text/PositionWalker.js"></script>
     <link rel="stylesheet" href="../../../mocha/mocha.css"/>
     <style>
       #d4 {
@@ -27,8 +27,7 @@
     </div>
     <script>
 
-define(['polymer-designer/text/PositionWalker', 'chai'], function(PositionWalker, chai) {
-  console.assert(PositionWalker != null);
+define(['polymer-designer/text/PositionWalker'], function(PositionWalker) {
 
   mocha.setup('tdd');
   mocha.checkLeaks();
@@ -304,7 +303,9 @@ define(['polymer-designer/text/PositionWalker', 'chai'], function(PositionWalker
 
   });
 
-  mocha.run();
+  if (!window.hasOwnProperty('WCT') || WCT._ChildRunner.current() == null) {
+    mocha.run();
+  }
 
 });
     </script>
