@@ -17,7 +17,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <link rel="stylesheet" href="../../../mocha/mocha.css"/>
     <link rel="import" href="../../../polymer/polymer.html"/>
     <link rel="import" href="../../../imd/imd.html"/>
-    <link rel="import" href="../../src/parse5/parse5.html"/>
+    <link rel="import" href="../../src/dom5/dom5.html"/>
     <link rel="import" href="../../src/commands/commands.html"/>
     <link rel="import" href="../../src/hydrolysis/hydrolysis.html">
   </head>
@@ -29,15 +29,13 @@ define([
   'polymer-designer/commands/ParsedHtmlCommandApplier',
   'polymer-designer/commands',
   'polymer-designer/path',
-  'parse5',
   'dom5'],
-    function(ParsedHtmlCommandApplier, commands, pathlib, Parse5, parse5_utils) {
+    function(ParsedHtmlCommandApplier, commands, pathlib, dom5) {
 
   mocha.setup('tdd');
   // mocha.checkLeaks();
 
   var assert = chai.assert;
-  var parser = new Parse5.Parser(null, {locationInfo: true});
 
   suite('ParsedHtmlCommandApplier', function() {
     var testDoc;
@@ -47,7 +45,7 @@ define([
 
       setup(function() {
         var testDocText = "<!DOCTYPE html><div id='A' class='test'><div id='B'></div></div>";
-        testDoc = parser.parse(testDocText);
+        testDoc = dom5.parse(testDocText);
         commandApplier = new ParsedHtmlCommandApplier(testDoc);
       });
 
@@ -60,7 +58,7 @@ define([
             null,
             'bar');
         commandApplier.apply(command);
-        assert.equal(parse5_utils.getAttribute(divA, 'foo'), 'bar');
+        assert.equal(dom5.getAttribute(divA, 'foo'), 'bar');
       });
 
       test('applies a new value to an existing attribute', function() {
@@ -72,7 +70,7 @@ define([
             'test',
             'test2');
         commandApplier.apply(command);
-        assert.equal(parse5_utils.getAttribute(divA, 'class'), 'test2');
+        assert.equal(dom5.getAttribute(divA, 'class'), 'test2');
       });
 
       test('fails to apply a new value if the old value is wrong', function() {
@@ -110,7 +108,7 @@ define([
             'test-1',
             'test');
         commandApplier.undo(command);
-        assert.equal(parse5_utils.getAttribute(divA, 'class'), 'test-1');
+        assert.equal(dom5.getAttribute(divA, 'class'), 'test-1');
       });
 
     });
