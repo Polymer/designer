@@ -12,8 +12,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <head>
     <title>DomCommandApplier Test</title>
     <meta charset="UTF-8">
-    <script src="../../../mocha/mocha.js"></script>
     <script src="../../../chai/chai.js"></script>
+    <script src="../../../web-component-tester/browser.js"></script>
+    <link rel="import" href="../../../imd/imd.html"/>
     <link rel="stylesheet" href="../../../mocha/mocha.css"/>
     <link rel="import" href="../../../polymer/polymer.html"/>
     <link rel="import" href="../../src/commands/commands.html"/>
@@ -22,7 +23,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div id="mocha"></div>
 
     <script>
-using(['DomCommandApplier', 'Commands', 'Path'], 
+define([
+      'polymer-designer/commands/DomCommandApplier',
+      'polymer-designer/commands',
+      'polymer-designer/path'],
     function(DomCommandApplier, commands, pathlib) {
 
   mocha.setup('tdd');
@@ -103,7 +107,9 @@ using(['DomCommandApplier', 'Commands', 'Path'],
 
   });
 
-  mocha.run();
+  if (!window.hasOwnProperty('WCT') || WCT._ChildRunner.current() == null) {
+    mocha.run();
+  }
 
 });
     </script>

@@ -12,13 +12,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <head>
     <title>path.js Test</title>
     <meta charset="UTF-8">
-    <link rel="import" href="../../../imd/imd.html"/>
-    <script src="../../../mocha/mocha.js"></script>
     <script src="../../../chai/chai.js"></script>
+    <script src="../../../web-component-tester/browser.js"></script>
+    <link rel="import" href="../../../imd/imd.html"/>
     <link rel="stylesheet" href="../../../mocha/mocha.css"/>
     <link rel="import" href="../../../polymer/polymer.html"/>
     <link rel="import" href="../../src/path/path.html"/>
-    <link rel="import" href="../../src/parse5/parse5.html"/>
+    <link rel="import" href="../../src/dom5/dom5.html"/>
   </head>
   <body>
     <div id="mocha"></div>
@@ -29,16 +29,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </div>
 
     <script>
-define(['polymer-designer/path', 'parse5', 'chai', 'polymer-designer/parse5/parse5-utils'],
-    function(path, Parse5, chai, parse5Utils) {
+define(['polymer-designer/path', 'dom5'], function(path, dom5) {
   'use strict';
 
   mocha.setup('tdd');
   // mocha.checkLeaks();
 
   var assert = chai.assert;
-  var parser = new Parse5.Parser();
-  var serializer = new Parse5.Serializer();
 
   suite('path', function() {
 
@@ -48,12 +45,12 @@ define(['polymer-designer/path', 'parse5', 'chai', 'polymer-designer/parse5/pars
     var docText = "<!DOCTYPE html><div id='A'>a1<div id='B'>b1</div>a2</div>";
     var domDoc = document.implementation.createHTMLDocument();
     domDoc.body.innerHTML = docText;
-    var parsedDoc = parser.parse(docText);
+    var parsedDoc = dom5.parse(docText);
 
     // Sanity check that the parsed docs are the same
     assert.equal(
         '<!DOCTYPE html>'+domDoc.documentElement.outerHTML,
-        serializer.serialize(parsedDoc));
+        dom5.serialize(parsedDoc));
 
     function doTests(documentType, doc) {
 
@@ -90,7 +87,7 @@ define(['polymer-designer/path', 'parse5', 'chai', 'polymer-designer/parse5/pars
           test('filters nodes', function() {
             assert.equal(path.getNodePath(divAText2, doc, function(n) {
               return !((n.id && n.id === 'B') ||
-                  (n.attrs && parse5Utils.getAttribute(n, 'id') === 'B'));
+                  (n.attrs && dom5.getAttribute(n, 'id') === 'B'));
             }), 'BODY:1/DIV:0/#TEXT:1');
           });
 
@@ -138,7 +135,7 @@ define(['polymer-designer/path', 'parse5', 'chai', 'polymer-designer/parse5/pars
           assert.equal(path.getNodeFromPath('BODY:1/DIV:0/#TEXT:1', doc,
             function(n) {
               return !((n.id && n.id === 'B') ||
-                  (n.attrs && parse5Utils.getAttribute(n, 'id') === 'B'));
+                  (n.attrs && dom5.getAttribute(n, 'id') === 'B'));
           }), divAText2);
         });
 
@@ -151,7 +148,9 @@ define(['polymer-designer/path', 'parse5', 'chai', 'polymer-designer/parse5/pars
 
   });
 
-  mocha.run();
+  if (!window.hasOwnProperty('WCT') || WCT._ChildRunner.current() == null) {
+    mocha.run();
+  }
 
 });
     </script>
