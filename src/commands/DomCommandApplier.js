@@ -27,7 +27,6 @@ define('polymer-designer/commands/DomCommandApplier', [
       },
 
       apply: function(doc, command) {
-        console.log('apply');
         var node = getNodeFromPath(command.path, doc);
         node.setAttribute(command.attribute, command.newValue);
       },

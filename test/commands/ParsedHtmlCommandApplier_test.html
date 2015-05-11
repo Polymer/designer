@@ -16,14 +16,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <script src="../../../chai/chai.js"></script>
     <link rel="stylesheet" href="../../../mocha/mocha.css"/>
     <link rel="import" href="../../../polymer/polymer.html"/>
-    <link rel="import" href="../../src/commands/commands.html"/>
+    <link rel="import" href="../../../imd/imd.html"/>
     <link rel="import" href="../../src/parse5/parse5.html"/>
+    <link rel="import" href="../../src/commands/commands.html"/>
+    <link rel="import" href="../../src/hydrolysis/hydrolysis.html">
   </head>
   <body>
     <div id="mocha"></div>
 
     <script>
-using(['ParsedHtmlCommandApplier', 'Commands', 'Path', 'Parse5', 'parse5_utils'], 
+define([
+  'polymer-designer/commands/ParsedHtmlCommandApplier',
+  'polymer-designer/commands',
+  'polymer-designer/path',
+  'parse5',
+  'dom5'],
     function(ParsedHtmlCommandApplier, commands, pathlib, Parse5, parse5_utils) {
 
   mocha.setup('tdd');
@@ -41,7 +48,6 @@ using(['ParsedHtmlCommandApplier', 'Commands', 'Path', 'Parse5', 'parse5_utils']
       setup(function() {
         var testDocText = "<!DOCTYPE html><div id='A' class='test'><div id='B'></div></div>";
         testDoc = parser.parse(testDocText);
-        console.log('testDoc', testDoc);
         commandApplier = new ParsedHtmlCommandApplier(testDoc);
       });
 
@@ -60,7 +66,6 @@ using(['ParsedHtmlCommandApplier', 'Commands', 'Path', 'Parse5', 'parse5_utils']
       test('applies a new value to an existing attribute', function() {
         //         doc html          body          div#a
         var divA = testDoc.childNodes[1].childNodes[1].childNodes[0];
-        console.log(divA, divA.attrs['class']);
         var command = commands.setAttribute(
             pathlib.getNodePath(divA, testDoc),
             'class',
