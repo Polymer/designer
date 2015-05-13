@@ -119,6 +119,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           notify: true,
         },
 
+        currentSourceId: {
+          type: String,
+          notify: true,
+        },
+
         /**
          * @type {{x: number, y: number}}
          */
@@ -215,6 +220,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         elementInfo.analyzed = this.getAnalyzedElement(elementInfo);
         this.currentElementInfo = elementInfo;
         this.currentPath = elementInfo.path;
+        this.currentSourceId = elementInfo.sourceId;
 
         // Set the valid resize handles
         var position = elementInfo.position;

@@ -95,10 +95,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           observer: '_currentPathChanged',
         },
 
-        currentNodeId: {
+        currentSourceId: {
           type: String,
           notify: true,
-          observer: '_currentNodeIdChanged',
+          observer: '_currentSourceIdChanged',
         },
 
         currentElementInfo: {
@@ -209,9 +209,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         let path = this.currentPath = (this.currentNode)
             ? pathLib.getNodePath(this.currentNode, this.domDocument)
             : null;
-        // this.currentNodeId = (this.currentNode)
-        //     ? this.client.nodeRegistry.getNodeId(this.currentNode)
-        //     : null;
+        this.currentSourceId = (this.currentNode && this.currentNode.nodeType === Node.ELEMENT_NODE)
+            ? this.currentNode.getAttribute(nodeIdProperty)
+            : null;
         if (this.client != null) {
           this.client.selectElementAtPath(path).then(function(response) {
             this.fire('designer-document-update', response);
@@ -225,8 +225,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             : null;
       },
 
-      _currentNodeIdChanged() {
-        console.log('_currentNodeIdChanged', this.currentNodeId);
+      _currentSourceIdChanged() {
+        console.log('_currentSourceIdChanged', this.currentSourceId);
       },
 
       _clientConnectionChanged() {
