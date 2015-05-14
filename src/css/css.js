@@ -53,8 +53,9 @@
 
         var sheetInfo = {rules: rules};
         if (sheet.ownerNode) {
-          sheetInfo.ownerNodePath = pathLib.getNodePath(sheet.ownerNode, doc,
-            domUtils.designerNodeFilter);
+          // sheetInfo.ownerNodePath = pathLib.getNodePath(sheet.ownerNode, doc,
+          //   domUtils.designerNodeFilter);
+          sheetInfo.ownerSourceId = sheet.ownerNode.getAttribute('__designer_node_id__');
         }
         if (sheet.href) {
           sheetInfo.stylesheetUrl = sheet.href;

@@ -230,15 +230,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _clientConnectionChanged() {
-        this.client = (this.clientConnection)
-            ? new DocumentClient(this.clientConnection)
-            : null;
-
-        this.client.getDocument().then(function(response) {
-          let id = response.id;
-          console.log('document id', response.id);
-          this._domNodes.set(id, this.domDocument);
-        }.bind(this));
+        if (this.clientConnection) {
+          this.client = new DocumentClient(this.clientConnection);
+          this.client.getDocument().then(function(response) {
+            let id = response.id;
+            console.log('document id', response.id);
+            this._domNodes.set(id, this.domDocument);
+          }.bind(this));
+        } else {
+          this.client = null;
+        }
       },
 
       executeCommand(command) {

@@ -15,36 +15,41 @@ define('polymer-designer/commands/DomCommandApplier', [
       'polymer-designer/commands'],
     function(CommandApplier, domUtils, pathLib, commands) {
 
-  var getNodeFromPath = function(path, doc) {
-    return pathLib.getNodeFromPath(path, doc, domUtils.designerNodeFilter);
+  'use strict';
+
+  // TODO(justinfagnani): move to common location
+  const nodeIdProperty = '__designer_node_id__';
+
+  function getNode(doc, sourceId) {
+    return doc.querySelector(`[${nodeIdProperty}="${sourceId}"]`);
   }
 
   var commandHandlers = {
     'setAttribute': {
       canApply: function(doc, command) {
-        var node = getNodeFromPath(command.path, doc);
+        let node = getNode(doc, command.sourceId);
         return node.getAttribute(command.attribute) === command.oldValue;
       },
 
       apply: function(doc, command) {
-        var node = getNodeFromPath(command.path, doc);
+        let node = getNode(doc, command.sourceId);
         node.setAttribute(command.attribute, command.newValue);
       },
 
       canUndo: function(doc, command) {
-        var node = getNodeFromPath(command.path, doc);
+        let node = getNode(doc, command.sourceId);
         return node.getAttribute(command.attribute) === command.newValue;
       },
 
       undo: function(doc, command) {
-        var node = getNodeFromPath(command.path, doc);
+        let node = getNode(doc, command.sourceId);
         node.setAttribute(command.attribute, command.oldValue);
       },
     },
 
     'setTextContent': {
       canApply: function(doc, command) {
-        var node = getNodeFromPath(command.path, doc);
+        let node = getNode(doc, command.sourceId);
         if (!node) return false;
         var hasElementChildren = node.children === 0;
         if (hasElementChildren) {
@@ -56,33 +61,34 @@ define('polymer-designer/commands/DomCommandApplier', [
       },
 
       apply: function(doc, command) {
-        var node = getNodeFromPath(command.path, doc);
+        let node = getNode(doc, command.sourceId);
         node.textContent = command.newValue;
       },
 
       canUndo: function(doc, command) {
-        var node = getNodeFromPath(command.path, doc);
+        let node = getNode(doc, command.sourceId);
         return node.textContent === command.newValue;
       },
 
       undo: function(doc, command) {
-        var node = getNodeFromPath(command.path, doc);
+        let node = getNode(doc, command.sourceId);
         node.textContent = command.oldValue;
       },
     },
 
     'moveElement': {
       canApply: function(doc, command) {
-        var el = pathLib.getNodeFromPath(command.path, doc);
-        var target = pathLib.getNodeFromPath(command.targetPath, doc);
+        let el = getNode(doc, command.sourceId);
+        let target = getNode(doc, command.targetSourceId);
+        // var target = pathLib.getNodeFromPath(command.targetPath, doc);
         return el != null && target != null &&
             (command.position == commands.InsertPosition.before ||
              command.position == commands.InsertPosition.after);
       },
 
       apply: function(doc, command) {
-        var el = pathLib.getNodeFromPath(command.path, doc);
-        var target = pathLib.getNodeFromPath(command.targetPath, doc);
+        let el = getNode(doc, command.sourceId);
+        let target = getNode(doc, command.targetSourceId);
         var container = target.parentNode;
         if (command.position == commands.InsertPosition.before) {
           container.insertBefore(el, target);

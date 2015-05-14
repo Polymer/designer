@@ -137,7 +137,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: null,
         },
 
-        hoverPath: {
+        hoverSourceId: {
           type: String,
           value: null,
         },
@@ -189,7 +189,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.currentElementInfo = null;
         this.currentMousePosition = null;
         this.insertPosition = null;
-        this.hoverPath = null;
+        this.hoverSourceId = null;
         this._hideHover();
         this.$.selection.hide();
         this.mode = 'layout';
@@ -267,14 +267,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           if (insertAbove) {
             hover.classList.add('insert-above');
             this.insertPosition = commands.InsertPosition.before;
-            this.hoverPath = elementInfo.path;
+            this.hoverSourceId = elementInfo.sourceId;
           } else {
             hover.classList.remove('insert-above');
           }
           if (insertBelow) {
             hover.classList.add('insert-below');
             this.insertPosition = commands.InsertPosition.after;
-            this.hoverPath = elementInfo.path;
+            this.hoverSourceId = elementInfo.sourceId;
           } else {
             hover.classList.remove('insert-below');
           }
@@ -286,7 +286,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var hoverStyle = hover.style;
         hoverStyle.display = 'none';
         this.insertPosition = null;
-        this.hoverPath = null;
+        this.hoverSourceId = null;
       },
 
       enterTextMode() {
@@ -348,11 +348,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _onMouseUp(e) {
         this._mouseDown = false;
-        if (this.hoverPath != null && this.insertPosition != null) {
+        // TODO: check for hoverId
+        if (this.hoverSourceId != null && this.insertPosition != null) {
           this.fire('designer-command',
             commands.moveElement(
-              this.currentElementInfo.path,
-              this.hoverPath,
+              this.currentElementInfo.sourceId,
+              this.hoverSourceId,
               this.insertPosition));
         }
         this._hideHover();

@@ -92,9 +92,8 @@ define([
     _updateSheet(sheet, rule, key, value) {
       console.assert(this.sourceDocument);
       console.assert(key);
-      let sheetPath = sheet.ownerNodePath;
-      let sourceStyle = pathLib.getNodeFromPath(sheetPath, this.sourceDocument,
-          domUtils.designerNodeFilter);
+      let sheetSourceId = sheet.ownerSourceId;
+      let sourceStyle = this.sourceDocument.querySelector(`[__designer_node_id__="${sheetSourceId}"]`);
       let sheetSource = sourceStyle.textContent;
       let parsedSheet = rework.parse(sheetSource);
 
@@ -105,7 +104,7 @@ define([
       // (addition, deletion).
       let newSource = reworkUtils.replaceProperty(sheetSource, parsedRule, key, value);
 
-      this.fire('designer-command', commands.setTextContent(sheetPath, sheetSource, newSource));
+      this.fire('designer-command', commands.setTextContent(sheetSourceId, sheetSource, newSource));
     },
 
   });

@@ -260,9 +260,10 @@ define('polymer-designer/protocol/DocumentServer', [
       // TODO: Send all commands to the editor as well so that it can apply
       // them to it's document model
       var element = this.currentElement;
-      var path = pathLib.getNodePath(element, document,
-          designerNodeFilter);
-      var command = commands.setAttribute(path, 'style',
+      // var path = pathLib.getNodePath(element, document,
+      //     designerNodeFilter);
+      let id = element.getAttribute(nodeIdProperty);
+      var command = commands.setAttribute(id, 'style',
         element.getAttribute('style'),
         `top: ${bounds.top}px; ` +
         `left: ${bounds.left}px; ` +

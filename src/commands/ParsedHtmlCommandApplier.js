@@ -15,34 +15,42 @@ define('polymer-designer/commands/ParsedHtmlCommandApplier',[
       'polymer-designer/commands'],
     function(CommandApplier, pathLib, dom5, commands) {
 
-  var getNodeFromPath = pathLib.getNodeFromPath;
+  'use strict';
+
+  // TODO(justinfagnani): move to common location
+  const nodeIdProperty = '__designer_node_id__';
+
+  // var getNodeFromPath = pathLib.getNodeFromPath;
+  function getNode(doc, id) {
+    return dom5.query(doc, dom5.predicates.hasAttrValue(nodeIdProperty, id));
+  }
 
   var commandHandlers = {
     'setAttribute': {
       canApply: function(doc, command) {
-        var node = getNodeFromPath(command.path, doc);
+        let node = getNode(doc, command.sourceId);
         return dom5.getAttribute(node, command.attribute) == command.oldValue;
       },
 
       apply: function(doc, command) {
-        var node = getNodeFromPath(command.path, doc);
+        let node = getNode(doc, command.sourceId);
         dom5.setAttribute(node, command.attribute, command.newValue);
       },
 
       canUndo: function(doc, command) {
-        var node = getNodeFromPath(command.path, doc);
+        let node = getNode(doc, command.sourceId);
         return dom5.getAttribute(node, command.attribute) == command.newValue;
       },
 
       undo: function(doc, command) {
-        var node = getNodeFromPath(command.path, doc);
+        let node = getNode(doc, command.sourceId);
         dom5.setAttribute(node, command.attribute, command.oldValue);
       },
     },
 
     'setTextContent': {
       canApply: function(doc, command) {
-        var node = getNodeFromPath(command.path, doc);
+        let node = getNode(doc, command.sourceId);
         // Don't apply if there are element children.
         return !node.childNodes.some(function(child) {
           return child.nodeName !== '#text';
@@ -50,33 +58,33 @@ define('polymer-designer/commands/ParsedHtmlCommandApplier',[
       },
 
       apply: function(doc, command) {
-        var node = getNodeFromPath(command.path, doc);
+        let node = getNode(doc, command.sourceId);
         dom5.setTextContent(node, command.newValue);
       },
 
       canUndo: function(doc, command) {
-        var node = getNodeFromPath(command.path, doc);
+        let node = getNode(doc, command.sourceId);
         return dom5.getTextContent(node) === command.newValue;
       },
 
       undo: function(doc, command) {
-        var node = getNodeFromPath(command.path, doc);
+        let node = getNode(doc, command.sourceId);
         dom5.setTextContent(node, command.oldValue);
       },
     },
 
     'moveElement': {
       canApply: function(doc, command) {
-        var el = pathLib.getNodeFromPath(command.path, doc);
-        var target = pathLib.getNodeFromPath(command.targetPath, doc);
+        let el = getNode(doc, command.sourceId);
+        let target = getNode(doc, command.targetSourceId);
         return el != null && target != null &&
             (command.position === commands.InsertPosition.before ||
              command.position === commands.InsertPosition.after);
       },
 
       apply: function(doc, command) {
-        var el = pathLib.getNodeFromPath(command.path, doc);
-        var target = pathLib.getNodeFromPath(command.targetPath, doc);
+        let el = getNode(doc, command.sourceId);
+        let target = getNode(doc, command.targetSourceId);
 
         var container = el.parentNode;
         var targetContainer = target.parentNode;
