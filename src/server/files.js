@@ -34,8 +34,7 @@ app.use('/files', polyserve.makeApp(bowerDir, null, componentHeaders, './demo'))
 app.get('/ls/*', function(req, res) {
 
   var url = parseUrl(req.path);
-  var requestedPath = path.normalize(
-      decodeURIComponent(url.pathname.substring(3)));
+  var requestedPath = decodeURIComponent(url.pathname.substring(3));
   var packageMatch = requestedPath.match(packageRegex);
   var filePath;
 
