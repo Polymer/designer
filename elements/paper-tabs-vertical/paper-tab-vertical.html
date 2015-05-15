@@ -125,15 +125,15 @@ Example:
       if (this.noink || (parent && parent.noink)) {
         return;
       }
-      this.$.ink.mousedownAction(e);
+      this.$.ink.downAction(e);
     },
 
     onUp: function() {
-      this.$.ink.mouseupAction();
+      this.$.ink.upAction();
     },
 
     cancelRipple: function() {
-      this.$.ink.mouseupAction();
+      this.$.ink.upAction();
     }
 
   });
