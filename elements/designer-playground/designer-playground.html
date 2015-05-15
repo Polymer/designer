@@ -261,6 +261,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 filename="{{filename}}"
                 current-node="{{currentNode}}"
                 current-path="{{currentPath}}"
+                current-source-id="{{currentSourceId}}"
                 current-element-info="{{currentElementInfo}}"
                 on-designer-document-update="_onDesignerDocumentUpdate">
             </designer-document>
@@ -271,6 +272,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 client="[[client]]"
                 current-node="{{currentNode}}"
                 current-path="{{currentPath}}"
+                current-source-id="{{currentSourceId}}"
                 current-element-info="{{currentElementInfo}}"
                 on-designer-command="_onDesignerCommand">
               <designer-frame
@@ -331,6 +333,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         currentNode: {
           type: Object,
+          notify: true,
+        },
+
+        currentSourceId: {
+          type: String,
           notify: true,
         },
 
