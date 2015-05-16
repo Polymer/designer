@@ -65,11 +65,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </style>
 
   <template>
-    <designer-selection id="selection" on-click="_onSelectionClick"></designer-selection>
+    <designer-selection
+        id="selection"
+        on-click="_onSelectionClick"
+        on-designer-selection-resize="_onSelectionResize"
+        on-designer-selection-move="_onSelectionMove">
+    </designer-selection>
     <div id="hover"></div>
     <div id="caret"></div>
-    <div id="text-edit-selection" on-click="_textOnClick"
-         on-keydown="_onKeydown" on-keypress="_onKeypress" tabindex="0"></div>
+    <div
+        id="text-edit-selection"
+        on-click="_textOnClick"
+        on-keydown="_onKeydown"
+        on-keypress="_onKeypress"
+        tabindex="0">
+    </div>
     <div id="glass" on-mousedown="_onMouseDown" on-dblclick="_onDoubleClick"></div>
     <content></content>
   </template>
@@ -175,8 +185,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       ready() {
-        this.$.selection.addEventListener('designer-selection-resize',
-            this._onSelectionResize.bind(this));
         window.addEventListener('mouseup', this._onMouseUp.bind(this));
         this._reset();
       },
@@ -312,6 +320,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onSelectionResize(e) {
+        var bounds = e.detail.bounds;
+        this.client.selectionBoundsChanged(bounds)
+          .then(function(response) {
+            this._updateSelectionBounds(response.bounds);
+          }.bind(this));
+      },
+
+      _onSelectionMove(e) {
         // TODO: store mouse position in the selection element?
         // Rationale: we're alredy storing the bounds state there
         var cursor = this.currentMousePosition = {
@@ -320,10 +336,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         };
         var bounds = e.detail.bounds;
         this.client.selectionBoundsChanged(bounds, cursor)
-            .then(function(response) {
-              this._updateSelectionBounds(response.bounds);
-              this._updateHoverElement(response.hover);
-            }.bind(this));
+          .then(function(response) {
+            this._updateSelectionBounds(response.bounds);
+            this._updateHoverElement(response.hover);
+          }.bind(this));
       },
 
       _onMouseDown(e) {
