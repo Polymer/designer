@@ -78,7 +78,11 @@
       <template>
         <div id="bounds"></div>
         <template is="dom-repeat" items="{{directions}}">
-          <div class="handle" id$="{{item.name}}"></div>
+          <div
+              id$="{{item.name}}"
+              class="handle"
+              on-click="_onHandleClick">
+          </div>
         </template>
       </template>
     </dom-module>
@@ -99,7 +103,7 @@
           },
 
           listeners: {
-            'mousedown': '_onMouseDown'
+            'mousedown': '_onMouseDown',
           },
 
           show() {
@@ -116,6 +120,10 @@
             } else {
               this._resizeHandleDown(e);
             }
+          },
+
+          _onHandleClick(e) {
+            e.stopPropagation();
           },
 
           // called for mousedown on the main bounding box div
