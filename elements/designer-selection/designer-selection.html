@@ -122,6 +122,7 @@
           _boundsDown(e) {
             this.$.bounds.style.cursor = 'move';
             this._startDrag(
+              'designer-selection-move',
                 this.offsetLeft,
                 this.offsetTop,
                 e.clientX,
@@ -156,6 +157,7 @@
                 : offsetBottom;
 
             this._startDrag(
+              'designer-selection-resize',
               startX,
               startY,
               e.clientX,
@@ -167,7 +169,7 @@
                     offsetWidth;
                 let newHeight =
                     direction.resizesTop() ? offsetBottom - y :
-                    direction.resizesBottom() ? y  - offsetTop:
+                    direction.resizesBottom() ? y - offsetTop:
                     offsetHeight;
                 let newLeft = direction.resizesLeft() ? x : offsetLeft;
                 let newTop = direction.resizesTop() ? y : offsetTop;
@@ -188,13 +190,13 @@
            * initial drag position (startX, startY), onMove is called with new
            * drag position.
            */
-          _startDrag(startX, startY, clientX, clientY, onMove) {
+          _startDrag(eventName, startX, startY, clientX, clientY, onMove) {
             let onMouseMove = (function(e) {
               let deltaX = e.clientX - clientX + startX;
               let deltaY = e.clientY - clientY + startY;
               let newBounds = onMove(deltaX, deltaY);
 
-              this.fire('designer-selection-resize', {
+              this.fire(eventName, {
                 bounds: newBounds,
                 cursor: {
                   // This is purposefully the client coordinates

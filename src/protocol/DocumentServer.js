@@ -127,7 +127,7 @@ define('polymer-designer/protocol/DocumentServer', [
         command: command,
       };
 
-      if (document.elementsFromPoint) {
+      if (request.message.cursor && document.elementsFromPoint) {
         var hoverElements = document.elementsFromPoint(
           request.message.cursor.x,
           request.message.cursor.y);
