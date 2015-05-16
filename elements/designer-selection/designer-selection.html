@@ -121,80 +121,90 @@
           // called for mousedown on the main bounding box div
           _boundsDown(e) {
             this.$.bounds.style.cursor = 'move';
-            this._startDrag((function(x, y) {
-              return {
-                left: x,
-                top: y,
-                width: this.offsetWidth,
-                height: this.offsetHeight,
-              };
-            }).bind(this),
-            e.clientX - this.offsetLeft,
-            e.clientY - this.offsetTop);
+            this._startDrag(
+                this.offsetLeft,
+                this.offsetTop,
+                e.clientX,
+                e.clientY,
+                function(x, y) {
+                  return {
+                    left: x,
+                    top: y,
+                    width: this.offsetWidth,
+                    height: this.offsetHeight,
+                  };
+                }.bind(this));
           },
 
           // called for mousedown on one of the resize handle divs
           _resizeHandleDown(e) {
-            var handle = e.target;
-            var direction = ResizeDirection[handle.id];
+            let direction = ResizeDirection[e.target.id];
 
-            var boundsBounds = this.$.bounds.getBoundingClientRect();
-            var handleBounds = handle.getBoundingClientRect();
+            let offsetLeft = this.offsetLeft;
+            let offsetTop = this.offsetTop;
+            let offsetWidth = this.offsetWidth;
+            let offsetHeight = this.offsetHeight;
+            let offsetRight = offsetLeft + offsetWidth;
+            let offsetBottom = offsetTop + offsetHeight;
 
-            var offsetLeft = direction.resizesLeft()
-                ? 0
-                : boundsBounds.left + (e.clientX - handleBounds.left);
+            let startX = direction.resizesLeft()
+                ? offsetLeft
+                : offsetRight;
 
-            var offsetTop = direction.resizesTop()
-                ? 0
-                : boundsBounds.top + (e.clientY - handleBounds.top);
+            let startY = direction.resizesTop()
+                ? offsetTop
+                : offsetBottom;
 
-            var offsetRight = this.offsetLeft + this.offsetWidth;
-            var offsetBottom = this.offsetTop + this.offsetHeight;
+            this._startDrag(
+              startX,
+              startY,
+              e.clientX,
+              e.clientY,
+              function(x, y) {
+                let newWidth =
+                    direction.resizesLeft() ? offsetRight - x :
+                    direction.resizesRight() ? x - offsetLeft :
+                    offsetWidth;
+                let newHeight =
+                    direction.resizesTop() ? offsetBottom - y :
+                    direction.resizesBottom() ? y  - offsetTop:
+                    offsetHeight;
+                let newLeft = direction.resizesLeft() ? x : offsetLeft;
+                let newTop = direction.resizesTop() ? y : offsetTop;
 
-            this._startDrag((function(x, y) {
-              var newWidth =
-                  direction.resizesLeft() ? offsetRight - x :
-                  direction.resizesRight() ? x :
-                  this.offsetWidth;
-
-              var newHeight =
-                  direction.resizesTop() ? offsetBottom - y :
-                  direction.resizesBottom() ? y :
-                  this.offsetHeight;
-
-              var newLeft = direction.resizesLeft() ? x : this.offsetLeft;
-              var newTop = direction.resizesTop() ? y : this.offsetTop;
-
-              return {
-                left: newLeft,
-                top: newTop,
-                width: newWidth,
-                height: newHeight,
-              };
-            }).bind(this),
-            offsetLeft, offsetTop);
+                return {
+                  left: newLeft,
+                  top: newTop,
+                  width: newWidth,
+                  height: newHeight,
+                };
+              }.bind(this));
           },
 
-          _startDrag(onMove, offsetX, offsetY) {
-            var onMouseMove = (function(e) {
-              var deltaX = e.clientX - offsetX;
-              var deltaY = e.clientY - offsetY;
-              var newBounds = onMove(deltaX, deltaY);
+          /**
+           * Starts a mouse drag operation.
+           *
+           * Given an initial client position at (clientX, clientY) and an
+           * initial drag position (startX, startY), onMove is called with new
+           * drag position.
+           */
+          _startDrag(startX, startY, clientX, clientY, onMove) {
+            let onMouseMove = (function(e) {
+              let deltaX = e.clientX - clientX + startX;
+              let deltaY = e.clientY - clientY + startY;
+              let newBounds = onMove(deltaX, deltaY);
 
-              this.dispatchEvent(new CustomEvent('designer-selection-resize', {
-                detail: {
-                  bounds: newBounds,
-                  cursor: {
-                    // This is purposefully the client coordinates
-                    x: e.clientX,
-                    y: e.clientY,
-                  },
-                }
-              }));
+              this.fire('designer-selection-resize', {
+                bounds: newBounds,
+                cursor: {
+                  // This is purposefully the client coordinates
+                  x: e.clientX,
+                  y: e.clientY,
+                },
+              });
             }).bind(this);
 
-            var onMouseUp = (function(e) {
+            let onMouseUp = (function(e) {
               window.removeEventListener('mousemove', onMouseMove);
               window.removeEventListener('mouseup', onMouseUp);
               document.removeEventListener('contextmenu', onMouseUp);
