@@ -14,11 +14,8 @@
   /**
    * Deep clones a node, only copying visible nodes and inlining all computed
    * styles.
-   *
-   * TODO(justinfagnani): add option to strip margins?
-   * TODO(justinfagnani): created divs rather than clones?
    */
-  function createDragProxy(node) {
+  function createDragProxy(node, stripMargins) {
     if (node.nodeType === Node.TEXT_NODE) {
       return node.cloneNode();
     } else if (node.nodeType === Node.ELEMENT_NODE) {
@@ -33,6 +30,9 @@
       }
       let properties = css.getStyleProperties(style);
       let styleText = Object.keys(properties)
+        .filter(function(prop) {
+          return !(stripMargins && prop.startsWith('margin'));
+        })
         .map(function(prop) {
           return `${prop}: ${properties[prop]}`;
         })
