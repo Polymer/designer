@@ -1,0 +1,73 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<!doctype html>
+<html>
+  <head>
+    <title>path.js Test</title>
+    <meta charset="UTF-8">
+    <script src="../../../chai/chai.js"></script>
+    <script src="../../../web-component-tester/browser.js"></script>
+    <!-- <script src="../../../mocha/mocha.js"></script> -->
+    <link rel="import" href="../../../imd/imd.html"/>
+    <link rel="stylesheet" href="../../../mocha/mocha.css"/>
+    <link rel="import" href="../../src/dragging/dragging.html"/>
+  </head>
+  <body>
+    <div id="mocha"></div>
+
+    <!-- This test is very sensitive to text nodes! -->
+    <style>
+      #A {
+        color: red;
+      }
+      #B {
+        color: blue;
+      }
+    </style>
+    <section id="A">
+      <header id="B">text</header>
+    </section>
+
+    <script>
+define(['polymer-designer/dragging',], function(dragging) {
+  'use strict';
+
+  mocha.setup('tdd');
+  // mocha.checkLeaks();
+
+  var assert = chai.assert;
+
+  suite('dragging', function() {
+
+
+    suite('createDragProxy', function() {
+
+      test('creates a proxy', function() {
+        let testNode = document.querySelector('#A');
+        let proxy = dragging.createDragProxy(testNode);
+        assert.equal(proxy.style.color, 'rgb(255, 0, 0)');
+        assert.equal(proxy.querySelector('#B').style.color,
+            'rgb(0, 0, 255)');
+        assert.equal(proxy.tagName, 'DIV');
+        assert.equal(proxy.querySelector('#B').tagName, 'DIV');
+      });
+
+    });
+
+  });
+
+  if (!window.hasOwnProperty('WCT') || WCT._ChildRunner.current() == null) {
+    mocha.run();
+  }
+
+});
+    </script>
+  </body>
+</html>
