@@ -11,11 +11,12 @@
 define('polymer-designer/protocol/DocumentServer', [
       'polymer-designer/path',
       'polymer-designer/css',
+      'polymer-designer/dragging',
       'polymer-designer/commands',
       'polymer-designer/commands/DomCommandApplier',
       'polymer-designer/dom-utils',
       'polymer-designer/text/CursorManager'],
-    function(pathLib, cssLib, commands, DomCommandApplier, domUtils,
+    function(pathLib, cssLib, dragging, commands, DomCommandApplier, domUtils,
         CursorManager) {
   'use strict';
 
@@ -297,6 +298,7 @@ define('polymer-designer/protocol/DocumentServer', [
         position: style.position,
         styles: cssLib.collectStyles(element),
         computedStyle: cssLib.getStyleProperties(style),
+        proxy: dragging.createDragProxy(element, true).outerHTML,
       };
     }
   }

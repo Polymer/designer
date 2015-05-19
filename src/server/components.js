@@ -40,6 +40,7 @@ function buildFrameScript() {
     'src/dom-utils/dom-utils.js',
     'src/path/path.js',
     'src/css/css.js',
+    'src/dragging/dragging.js',
     'src/commands/commands.js',
     'src/commands/CommandApplier.js',
     'src/commands/DomCommandApplier.js',
