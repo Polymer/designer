@@ -12,6 +12,35 @@
   'use strict';
 
   /**
+   * Starts a mouse drag operation.
+   *
+   * Given an initial client position at (clientX, clientY) and an
+   * initial drag position (startX, startY), onMove is called with new
+   * drag position.
+   */
+  function startDrag(element, startX, startY, clientX, clientY, onMove, onDragEnd) {
+    let onMouseMove = function(e) {
+      let deltaX = e.clientX - clientX + startX;
+      let deltaY = e.clientY - clientY + startY;
+      onMove(deltaX, deltaY);
+    };
+
+    let onMouseUp = function(e) {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('contextmenu', onMouseUp);
+      // this.$.bounds.style.cursor = 'auto';
+      onDragEnd();
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    // Note document instead of window:
+    // http://www.quirksmode.org/dom/events/contextmenu.html
+    document.addEventListener('contextmenu', onMouseUp);
+  }
+
+  /**
    * Deep clones a node, only copying visible nodes and inlining all computed
    * styles.
    */
@@ -23,7 +52,12 @@
       if (style.display === 'none') {
         return null;
       }
-      let clone = node.ownerDocument.createElement('div');
+      let clone;
+      if (style.display === 'inline') {
+        clone = node.ownerDocument.createElement('span');
+      } else {
+        clone = node.ownerDocument.createElement('div');
+      }
       for (let i = 0; i < node.attributes.length; i++) {
         let attr = node.attributes[i];
         clone.setAttribute(attr.name, attr.value);
@@ -51,6 +85,7 @@
 
   return {
     createDragProxy: createDragProxy,
+    startDrag: startDrag,
   };
 
 });

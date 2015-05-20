@@ -8,6 +8,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../src/dragging/dragging.html">
 
 <dom-module id="designer-element-palette">
 
@@ -35,6 +36,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       margin: 1px;
       /*vertical-align: middle;
       text-align: center;*/
+      cursor: default;
+    }
+    #proxy {
+      position: fixed;
+      /* z-index must be > 100 because iframes are z-index 100 o_O */
+      z-index: 101;
+      display: none;
+      opacity: 0.75;
+      background: #f88;
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      cursor: copy;
+    }
+    #proxy > * {
+      /*display: flex;*/
+      width: 100% !important;
+      height: 100% !important;
+      /*display: block !important;*/
+      margin: 0;
     }
   </style>
 
@@ -42,16 +64,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <h1>Elements</h1>
     <div id="elements">
       <template is="dom-repeat" items="{{builtIns}}">
-        <div class="element">&lt;<span>{{item}}</span>&gt;</div>
+        <div class="element" on-mousedown="_onMouseDown">&lt;<span>{{item}}</span>&gt;</div>
       </template>
     </div>
+    <div id="proxy"></div>
   </template>
 
 </dom-module>
 
 <script>
 
-(function() {
+define(['polymer-designer/dragging'], function(dragging) {
   'use strict';
 
   Polymer({
@@ -71,9 +94,48 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
     },
 
+    _onMouseDown: function(e) {
+      let el = e.target;
+      while (!el.classList.contains('element')) {
+        el = el.parentNode;
+      }
+      let proxy = dragging.createDragProxy(el, true);
+      this.$.proxy.innerHTML = proxy.outerHTML;
+      let bounds = el.getBoundingClientRect();
+      dragging.startDrag(
+        el,
+        bounds.left,
+        bounds.top,
+        e.clientX,
+        e.clientY,
+        function(x, y) {
+          this._updateDragProxy({
+            left: x,
+            top: y,
+            width: el.offsetWidth,
+            height: el.offsetHeight,
+          });
+        }.bind(this),
+        function() {
+          this._hideDragProxy();
+        }.bind(this));
+    },
+
+    _updateDragProxy(bounds) {
+      var style = this.$.proxy.style;
+      style.display = 'block';
+      style.top = bounds.top + 'px';
+      style.left = bounds.left + 'px';
+      style.width = bounds.width + 'px';
+      style.height = bounds.height + 'px';
+    },
+
+    _hideDragProxy() {
+      var style = this.$.proxy.style;
+      style.display = 'none';
+    }
 
   });
 
-
-})();
+});
 </script>
