@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * @license
  * Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
@@ -7,5 +8,8 @@
  * Code distributed by Google as part of the polymer project is also
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
-
-require('./src/server/server').startServer();
+var argv = require('minimist')(process.argv.slice(2));
+require('./src/server/server').startServer(
+  argv.port || argv.p,
+  argv['files-port'] || argv.f
+);

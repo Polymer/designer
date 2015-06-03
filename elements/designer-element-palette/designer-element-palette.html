@@ -32,10 +32,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       height: 32px;
       background: #424242;
       box-sizing: border-box;
-      /*border: solid 1px #888;*/
       margin: 1px;
-      /*vertical-align: middle;
-      text-align: center;*/
       cursor: default;
     }
     #proxy {
@@ -52,10 +49,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       cursor: copy;
     }
     #proxy > * {
-      /*display: flex;*/
       width: 100% !important;
       height: 100% !important;
-      /*display: block !important;*/
       margin: 0;
     }
   </style>
@@ -64,10 +59,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <h1>Elements</h1>
     <div id="elements">
       <template is="dom-repeat" items="{{builtIns}}">
-        <div class="element" on-mousedown="_onMouseDown">&lt;<span>{{item}}</span>&gt;</div>
+        <div class="element" on-mousedown="_onMouseDown">
+          &lt;<span>{{item}}</span>&gt;
+        </div>
       </template>
     </div>
-    <div id="proxy"></div>
+    <div id="proxy"
+        on-mouseover="_onProxyMouseOver"
+        on-mouseout="_onProxyMouseOut"
+        on-mouseup="_onProxyMouseUp">
+    </div>
   </template>
 
 </dom-module>
@@ -95,13 +96,18 @@ define(['polymer-designer/dragging'], function(dragging) {
     },
 
     _onMouseDown: function(e) {
-      let el = e.target;
-      while (!el.classList.contains('element')) {
-        el = el.parentNode;
-      }
+      // the palette item has a class of 'element'
+      let el = e.target.closest('.element');
       let proxy = dragging.createDragProxy(el, true);
       this.$.proxy.innerHTML = proxy.outerHTML;
       let bounds = el.getBoundingClientRect();
+      this._updateDragProxy({
+        left: bounds.left,
+        top: bounds.top,
+        width: el.offsetWidth,
+        height: el.offsetHeight,
+      });
+      this.fire('designer-mini-nav-collapse');
       dragging.startDrag(
         el,
         bounds.left,
@@ -115,10 +121,25 @@ define(['polymer-designer/dragging'], function(dragging) {
             width: el.offsetWidth,
             height: el.offsetHeight,
           });
+
         }.bind(this),
         function() {
           this._hideDragProxy();
         }.bind(this));
+    },
+
+    _onProxyMouseOver(e) {
+      e.stopPropagation();
+    },
+
+    _onProxyMouseOut(e) {
+      e.stopPropagation();
+    },
+
+    _onProxyMouseUp() {
+      // this is a hack to keep the mini-nav from expanding when the proxy
+      // is released
+      this.fire('designer-mini-nav-collapse');
     },
 
     _updateDragProxy(bounds) {

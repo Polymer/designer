@@ -13,12 +13,14 @@ var path = require('path');
 var send = require('send');
 var files = require('./files');
 
-function startServer() {
-  console.log('Starting Polymer Designer Server on port 8080');
+function startServer(serverPort, filesPort) {
   var app = express();
-  // TODO: allow port to be set with flag, fallback to other ports
-  var port = 8080;
-  var filesPort = 8081;
+
+  serverPort = parseInt(serverPort || 8080, 10);
+  filesPort = parseInt(filesPort || (serverPort + 1), 10);
+
+  console.log('Starting Polymer Designer Server on port ' + serverPort);
+  console.log('Serving files on port ' + filesPort);
 
   app.get('/', function(req, res) {
     send(req, path.join(__dirname, 'index.html')).pipe(res);
@@ -28,7 +30,7 @@ function startServer() {
 
   app.use('/components', require('./components'));
 
-  var server = app.listen(port);
+  var server = app.listen(serverPort);
   files.app.listen(filesPort);
 }
 
