@@ -11,13 +11,23 @@
 var bower = require('../bower/bower.js');
 var express = require('express');
 
-var app = express();
+function makeApi(designerConfig) {
+  var app = express();
 
-app.post('/bowerInstall', function(req, res) {
-  console.log('starting bower install');
-  bower.install();
-  console.log('bower install done');
-  res.send('OK');
-});
+  app.post('/bowerInstall', function(req, res) {
+    console.log('starting bower install');
+    bower.install();
+    console.log('bower install done');
+    res.send('OK');
+  });
 
-module.exports = app;
+  app.get('/fileService/config', function(req, res) {
+    res.json({
+      port: designerConfig.files.port
+    });
+  });
+
+  return app;
+}
+
+module.exports = makeApi;

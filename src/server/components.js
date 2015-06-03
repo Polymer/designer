@@ -17,7 +17,7 @@ var send = require('send');
 var bowerComponentDir = 'bower_components';
 var componentHeaders = {
   'Access-Control-Allow-Origin': '*'
-}
+};
 var app = express();
 
 // dynamically build frame.js for edit-refresh goodness
@@ -52,7 +52,7 @@ function buildFrameScript() {
     'src/protocol/DocumentServer.js',
   ];
   var files = paths.map(function(p) {
-    return fs.readFileSync(p, {encoding: 'utf-8'})
+    return fs.readFileSync(p, {encoding: 'utf-8'});
   });
 
   var frameScript = '(function() {\n' +
