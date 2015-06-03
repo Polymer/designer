@@ -8,7 +8,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../../../iron-ajax/iron-request.html">
-<link rel="import" href="../../../core-asset/core-asset.html">
+<link rel="import" href="../../../iron-ajax/iron-ajax.html">
 <link rel="import" href="../../../iron-pages/iron-pages.html">
 <link rel="import" href="../../../paper-toolbar/paper-toolbar.html">
 <link rel="import" href="../../../polymer/polymer.html">
@@ -180,6 +180,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </style>
 
   <template>
+    <iron-ajax url="/api/fileService/config" last-response="{{_fileServiceConfig}}" auto></iron-ajax>
     <designer-mini-nav>
       <div class="small">
         <div id="logo">
@@ -392,12 +393,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: 1,
         },
 
+        _fileServiceConfig: {
+          type: Object
+        }
       },
 
-      ready() {
+      observers: [
+        '_initializeDesignerApp(_fileServiceConfig)'
+      ],
+
+      _initializeDesignerApp: function(fileServiceConfig) {
         this._fileTreeController = new files.DemoFilesTreeControl(
-          'http://localhost:8081/ls/',
-          'http://localhost:8081/files/');
+          'http://localhost:' + fileServiceConfig.port + '/ls/',
+          'http://localhost:' + fileServiceConfig.port + '/files/');
         this._fileTreeController.getInfo('polymer-designer-demos')
           .then(function(root) {
             this._rootFile = root;

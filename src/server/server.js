@@ -12,26 +12,38 @@ var express = require('express');
 var path = require('path');
 var send = require('send');
 var files = require('./files');
+var api = require('./api');
+var components = require('./components');
 
 function startServer(serverPort, filesPort) {
   var app = express();
+  var designerConfig;
 
   serverPort = parseInt(serverPort || 8080, 10);
   filesPort = parseInt(filesPort || (serverPort + 1), 10);
 
-  console.log('Starting Polymer Designer Server on port ' + serverPort);
-  console.log('Serving files on port ' + filesPort);
+  designerConfig = {
+    server: {
+      port: serverPort
+    },
+    files: {
+      port: filesPort
+    }
+  };
+
+  console.log('Starting Polymer Designer Server on port ' + designerConfig.server.port);
+  console.log('Serving files on port ' + designerConfig.files.port);
 
   app.get('/', function(req, res) {
     send(req, path.join(__dirname, 'index.html')).pipe(res);
   });
 
-  app.use('/api', require('./api'));
+  app.use('/api', api(designerConfig));
 
-  app.use('/components', require('./components'));
+  app.use('/components', components);
 
-  var server = app.listen(serverPort);
-  files.app.listen(filesPort);
+  var server = app.listen(designerConfig.server.port);
+  files.app.listen(designerConfig.files.port);
 }
 
 module.exports = {
