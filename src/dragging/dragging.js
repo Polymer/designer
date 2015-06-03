@@ -22,7 +22,21 @@
     let onMouseMove = function(e) {
       let deltaX = e.clientX - clientX + startX;
       let deltaY = e.clientY - clientY + startY;
-      onMove(deltaX, deltaY);
+      onMove(deltaX, deltaY, e);
+      var dropTargets = document.elementsFromPoint(e.clientX, e.clientY);
+      for (let i = 0; i < dropTargets.length; i++) {
+        var target = dropTargets[i];
+        if (target.designerDropTarget) {
+          let dragEvent = new CustomEvent('designer-drag-move', {
+            detail: {
+              test: 'woot',
+              clientX: e.clientX,
+              clientY: e.clientY,
+            }
+          });
+          target.dispatchEvent(dragEvent);
+        }
+      }
     };
 
     let onMouseUp = function(e) {
@@ -30,7 +44,7 @@
       window.removeEventListener('mouseup', onMouseUp);
       document.removeEventListener('contextmenu', onMouseUp);
       // this.$.bounds.style.cursor = 'auto';
-      onDragEnd();
+      onDragEnd(e);
     };
 
     window.addEventListener('mousemove', onMouseMove);

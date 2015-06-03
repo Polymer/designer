@@ -213,6 +213,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       ready() {
         window.addEventListener('mouseup', this._onMouseUp.bind(this));
+        this.addEventListener('designer-drag-move', this._onDragMove.bind(this));
         this._reset();
       },
 
@@ -414,6 +415,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 this.$.selection._boundsDown(e);
               }
             }.bind(this));
+      },
+
+      _onDragMove(e) {
+        console.log('_onDragMove', e.detail.test);
       },
 
       _onMouseUp(e) {

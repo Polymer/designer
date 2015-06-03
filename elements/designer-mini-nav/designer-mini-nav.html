@@ -24,7 +24,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       transition: width 300ms;
       overflow: hidden;
     }
-    :host(:hover) #small {
+    :host([expanded]) #small {
       width: 320px;
     }
     #large {
@@ -47,6 +47,46 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   Polymer({
     is: 'designer-mini-nav',
+
+    properties: {
+
+      expanded: {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true,
+      },
+
+      _collapsing: {
+        type: Boolean,
+        value: function() { return false; },
+      },
+
+    },
+
+    listeners: {
+      'designer-mini-nav-collapse': '_onCollapse',
+      'mouseover': '_onMouseOver',
+      'mouseout': '_onMouseOut',
+    },
+
+    _onCollapse() {
+      this.expanded = false;
+      this._collapsing = true;
+      window.setTimeout(function() {
+        this._collapsing = false;
+      }.bind(this), 300);
+    },
+
+    _onMouseOver(e) {
+      // prevent the nav from expanding during an _explicit_ collapse
+      // like when a palette item is being dragged
+      this.expanded = !this._collapsing;
+    },
+
+    _onMouseOut() {
+      this.expanded = false;
+    },
+
   });
 
 })();
