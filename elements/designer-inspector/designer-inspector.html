@@ -1,4 +1,5 @@
 <!--
+@license
 Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
 This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
 The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
@@ -8,7 +9,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../../iron-pages/iron-pages.html">
+<link rel="import" href="../../../paper-tabs/paper-tabs.html">
+<link rel="import" href="../../../paper-styles/paper-styles.html">
 
+<link rel="import" href="designer-inspector-behavior.html">
 <link rel="import" href="designer-style-inspector.html">
 <link rel="import" href="designer-property-inspector.html">
 
@@ -19,39 +24,50 @@ Inspects an element and provides tidbits about its properties, styles, and more.
 
   <style>
     :host {
+      @apply(--layout);
+      @apply(--layout-vertical);
+      @apply(--layout-flex);
+
+      background: var(--designer-background-primary-color, --paper-grey-900);
       box-sizing: border-box;
       display: block;
       overflow: auto;
+
+      --paper-tab-content: {
+        color: var(--designer-primary-color, --paper-grey-400);
+      };
+    }
+
+    .dumped-state {
+      font-size: 0.7em;
+      overflow: hidden;
     }
   </style>
 
   <template>
-    <designer-style-inspector
-        source-document="[[sourceDocument]]"
-        selection="[[selection]]">
-    </designer-style-inspector>
-    <designer-property-inspector
-        selection="[[selection]]">
-    </designer-property-inspector>
+    <!--<paper-tabs selected="{{selectedPanelIndex}}">
+      <paper-tab>Properties</paper-tab>
+      <paper-tab>Styles</paper-tab>
+    </paper-tabs>-->
+    <iron-pages selected="0">
+      <designer-property-inspector
+        selection="[[selection]]"
+        source-document="[[sourceDocument]]">
+      <!--<designer-style-inspector selection="[[selection]]" source-document=[[source-document]]></designer-style-inspector>-->
+    </iron-pages>
   </template>
 
 </dom-module>
 
 <script>
+  'use strict';
+
   Polymer({
 
     is: 'designer-inspector',
 
-    properties: {
-
-      /**
-       * Metadata published by the stage about the currently selected element.
-       */
-      selection: Object,
-
-      /** The document where edits should be made */
-      documentInfo: Object,
-    },
-
+    behaviors: [
+      Polymer.DesignerInspectorBehavior
+    ],
   });
 </script>
