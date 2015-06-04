@@ -436,6 +436,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onMouseUp(e) {
+        // TODO(justinfagnani): need a better way to differentiate between
+        // operations that are completed with a mouse up. ie: dragging a
+        // current element vs. dropping a new one.
         this._mouseDown = false;
         if (this.hoverSourceId != null && this.insertPosition != null) {
           this.fire('designer-command',
@@ -445,6 +448,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               this.insertPosition));
         }
         this._hideHover();
+        this.insertPosition = null;
         this.$.proxy.style.display = 'none';
       },
 
