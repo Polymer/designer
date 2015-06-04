@@ -55,11 +55,31 @@ define('polymer-designer/dom-utils', function() {
     return params;
   }
 
+  /**
+   * Converts a client position to a local position within [node].
+   *
+   * @param node {Node}
+   * @param clientX {number}
+   * @param clientY {number}
+   * @return {{
+   *   x: number,
+   *   y: number,
+   * }}
+   */
+  function toLocalPosition(node, clientX, clientY) {
+    let bounds = node.getBoundingClientRect();
+    return {
+      x: clientX - bounds.left,
+      y: clientY - bounds.top,
+    };
+  }
+
   return {
     designerNodeFilter: designerNodeFilter,
     getDocumentElement: getDocumentElement,
     isDescendant: isDescendant,
     parseQueryString: parseQueryString,
+    toLocalPosition: toLocalPosition,
   };
 
 });

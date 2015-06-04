@@ -203,7 +203,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         analyzer: {
           type: Object,
-        }
+        },
+
+        designerDropTarget: {
+          type: Boolean,
+          value: true,
+        },
 
       },
 
@@ -405,8 +410,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // TODO(justinfagnani): we might want to wait until we know we don't
         // have a double-click to initiate any action, but the redundant
         // selection that happens here sometimes is ok for now
-        var bounds = this.getBoundingClientRect();
-        this.client.selectElementAtPoint(e.clientX, e.clientY, bounds)
+        let position = domUtils.toLocalPosition(this, e.clientX, e.clientY);
+        this.client.selectElementAtPoint(position.x, position.y)
             .then(function(response) {
               this._updateCurrentElement(response.elementInfo);
               this._updateSelectionBounds(response.bounds);
@@ -418,10 +423,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onDragMove(e) {
-        console.log('_onDragMove', e.detail.test);
+        if (!this.client) {
+          return;
+        }
+        let position = domUtils.toLocalPosition(this,
+            e.detail.clientX, e.detail.clientY);
+        this.client.getElementsAtPoint(position.x, position.y)
+          .then(function(response) {
+            let hoverElement = (response.length > 1) ? response[0] : null;
+            this._updateHoverElement(hoverElement);
+          }.bind(this));
       },
 
       _onMouseUp(e) {
+        // TODO(justinfagnani): need a better way to differentiate between
+        // operations that are completed with a mouse up. ie: dragging a
+        // current element vs. dropping a new one.
         this._mouseDown = false;
         if (this.hoverSourceId != null && this.insertPosition != null) {
           this.fire('designer-command',
@@ -431,32 +448,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               this.insertPosition));
         }
         this._hideHover();
+        this.insertPosition = null;
         this.$.proxy.style.display = 'none';
       },
 
       _onDoubleClick(e) {
-        var bounds = this.getBoundingClientRect();
-        this.client.selectElementAtPoint(e.clientX, e.clientY, bounds)
-            .then(function(response) {
-              this._updateCurrentElement(response.elementInfo);
-              this._updateSelectionBounds(response.bounds);
-              this.enterTextMode();
-            }.bind(this));
+        let position = domUtils.toLocalPosition(this, e.clientX, e.clientY);
+        this.client.selectElementAtPoint(position.x, position.y)
+          .then(function(response) {
+            this._updateCurrentElement(response.elementInfo);
+            this._updateSelectionBounds(response.bounds);
+            this.enterTextMode();
+          }.bind(this));
       },
 
       _onSelectionClick(e) {
-        var bounds = this.getBoundingClientRect();
-        this.client.selectElementAtPoint(e.clientX, e.clientY, bounds)
-            .then(function(response) {
-              this._updateCurrentElement(response.elementInfo);
-              this._updateSelectionBounds(response.bounds);
-            }.bind(this));
+        let position = domUtils.toLocalPosition(this, e.clientX, e.clientY);
+        this.client.selectElementAtPoint(position.x, position.y)
+          .then(function(response) {
+            this._updateCurrentElement(response.elementInfo);
+            this._updateSelectionBounds(response.bounds);
+          }.bind(this));
       },
 
       _textOnClick(e) {
         e.stopPropagation();
-        var bounds = this.getBoundingClientRect();
-        this.client.getCaretPosition(e.clientX, e.clientY, bounds)
+        let position = domUtils.toLocalPosition(this, e.clientX, e.clientY);
+        this.client.getCaretPosition(position.x, position.y)
           .then(function(response) {
             this._updateCaret(response.rect);
           }.bind(this));
