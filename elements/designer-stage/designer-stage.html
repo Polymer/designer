@@ -410,8 +410,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // TODO(justinfagnani): we might want to wait until we know we don't
         // have a double-click to initiate any action, but the redundant
         // selection that happens here sometimes is ok for now
-        let bounds = this.getBoundingClientRect();
-        this.client.selectElementAtPoint(e.clientX, e.clientY, bounds)
+        let position = domUtils.toLocalPosition(this, e.clientX, e.clientY);
+        this.client.selectElementAtPoint(position.x, position.y)
             .then(function(response) {
               this._updateCurrentElement(response.elementInfo);
               this._updateSelectionBounds(response.bounds);
@@ -423,8 +423,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onDragMove(e) {
-        let bounds = this.getBoundingClientRect();
-        this.client.getElementsAtPoint(e.detail.clientX, e.detail.clientY, bounds)
+        if (!this.client) {
+          return;
+        }
+        let position = domUtils.toLocalPosition(this,
+            e.detail.clientX, e.detail.clientY);
+        this.client.getElementsAtPoint(position.x, position.y)
           .then(function(response) {
             let hoverElement = (response.length > 1) ? response[0] : null;
             this._updateHoverElement(hoverElement);
@@ -445,28 +449,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onDoubleClick(e) {
-        var bounds = this.getBoundingClientRect();
-        this.client.selectElementAtPoint(e.clientX, e.clientY, bounds)
-            .then(function(response) {
-              this._updateCurrentElement(response.elementInfo);
-              this._updateSelectionBounds(response.bounds);
-              this.enterTextMode();
-            }.bind(this));
+        let position = domUtils.toLocalPosition(this, e.clientX, e.clientY);
+        this.client.selectElementAtPoint(position.x, position.y)
+          .then(function(response) {
+            this._updateCurrentElement(response.elementInfo);
+            this._updateSelectionBounds(response.bounds);
+            this.enterTextMode();
+          }.bind(this));
       },
 
       _onSelectionClick(e) {
-        var bounds = this.getBoundingClientRect();
-        this.client.selectElementAtPoint(e.clientX, e.clientY, bounds)
-            .then(function(response) {
-              this._updateCurrentElement(response.elementInfo);
-              this._updateSelectionBounds(response.bounds);
-            }.bind(this));
+        let position = domUtils.toLocalPosition(this, e.clientX, e.clientY);
+        this.client.selectElementAtPoint(position.x, position.y)
+          .then(function(response) {
+            this._updateCurrentElement(response.elementInfo);
+            this._updateSelectionBounds(response.bounds);
+          }.bind(this));
       },
 
       _textOnClick(e) {
         e.stopPropagation();
-        var bounds = this.getBoundingClientRect();
-        this.client.getCaretPosition(e.clientX, e.clientY, bounds)
+        let position = domUtils.toLocalPosition(this, e.clientX, e.clientY);
+        this.client.getCaretPosition(position.x, position.y)
           .then(function(response) {
             this._updateCaret(response.rect);
           }.bind(this));

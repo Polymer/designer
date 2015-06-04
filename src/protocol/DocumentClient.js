@@ -44,13 +44,15 @@ define('polymer-designer/protocol/DocumentClient', function() {
     }
 
     /**
+     * @param x {number}
+     * @param y {number}
      * @returns {Promise}
      */
-    selectElementAtPoint(clientX, clientY, bounds) {
+    selectElementAtPoint(x, y) {
       return this.connection.request({
         messageType: 'selectElementAtPoint',
-        x: clientX - bounds.left,
-        y: clientY - bounds.top,
+        x: x,
+        y: y,
       }).then(function(response) {
         let id = response.elementInfo.id;
         this.nodes.set(id, response);
@@ -61,11 +63,11 @@ define('polymer-designer/protocol/DocumentClient', function() {
     /**
      * @returns {Promise}
      */
-    getElementsAtPoint(clientX, clientY, bounds) {
+    getElementsAtPoint(x, y) {
       return this.connection.request({
         messageType: 'getElementsAtPoint',
-        x: clientX - bounds.left,
-        y: clientY - bounds.top,
+        x: x,
+        y: y,
       }).then(function(response) {
         let elements = response.elements;
         for (let i in elements) {
@@ -98,11 +100,11 @@ define('polymer-designer/protocol/DocumentClient', function() {
       });
     }
 
-    getCaretPosition(clientX, clientY, bounds) {
+    getCaretPosition(x, y) {
       return this.connection.request({
         messageType: 'getCaretPosition',
-        x: clientX - bounds.left,
-        y: clientY - bounds.top,
+        x: x,
+        y: y,
       });
     }
 
