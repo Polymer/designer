@@ -203,7 +203,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         analyzer: {
           type: Object,
-        }
+        },
+
+        designerDropTarget: {
+          type: Boolean,
+          value: true,
+        },
 
       },
 
@@ -405,7 +410,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // TODO(justinfagnani): we might want to wait until we know we don't
         // have a double-click to initiate any action, but the redundant
         // selection that happens here sometimes is ok for now
-        var bounds = this.getBoundingClientRect();
+        let bounds = this.getBoundingClientRect();
         this.client.selectElementAtPoint(e.clientX, e.clientY, bounds)
             .then(function(response) {
               this._updateCurrentElement(response.elementInfo);
@@ -418,7 +423,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onDragMove(e) {
-        console.log('_onDragMove', e.detail.test);
+        let bounds = this.getBoundingClientRect();
+        this.client.getElementsAtPoint(e.detail.clientX, e.detail.clientY, bounds)
+          .then(function(response) {
+            let hoverElement = (response.length > 1) ? response[0] : null;
+            this._updateHoverElement(hoverElement);
+          }.bind(this));
       },
 
       _onMouseUp(e) {

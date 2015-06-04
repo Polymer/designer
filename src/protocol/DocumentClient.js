@@ -61,6 +61,25 @@ define('polymer-designer/protocol/DocumentClient', function() {
     /**
      * @returns {Promise}
      */
+    getElementsAtPoint(clientX, clientY, bounds) {
+      return this.connection.request({
+        messageType: 'getElementsAtPoint',
+        x: clientX - bounds.left,
+        y: clientY - bounds.top,
+      }).then(function(response) {
+        let elements = response.elements;
+        for (let i in elements) {
+          let element = elements[i];
+          let id = element.elementInfo.id;
+          this.nodes.set(id, element);
+        }
+        return response;
+      }.bind(this));
+    }
+
+    /**
+     * @returns {Promise}
+     */
     selectElementAtPath(path) {
       return this.connection.request({
         messageType: 'selectElementAtPath',

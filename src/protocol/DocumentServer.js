@@ -38,6 +38,7 @@ define('polymer-designer/protocol/DocumentServer', [
       this.nextId = 1;
 
       connection.on('getDocument', this.getDocument.bind(this));
+      connection.on('getElementsAtPoint', this.getElementsAtPoint.bind(this));
       connection.on('selectElementAtPoint', this.selectElementAtPoint.bind(this));
       connection.on('selectElementAtPath', this.selectElementAtPath.bind(this));
       connection.on('selectionBoundsChanged', this.selectionBoundsChanged.bind(this));
@@ -81,7 +82,7 @@ define('polymer-designer/protocol/DocumentServer', [
     selectElementAtPoint(request) {
       var x = request.message.x;
       var y = request.message.y;
-      this.currentElement = this._getElementAt(x, y);
+      this.currentElement = document.elementFromPoint(x, y);
       this.cursorManager = new CursorManager(this.currentElement);
       request.reply({
         bounds: this._elementBounds(this.currentElement),
@@ -89,25 +90,25 @@ define('polymer-designer/protocol/DocumentServer', [
       });
     }
 
-    _getElementAt(x, y) {
-      var el = document.elementFromPoint(x, y);
-      var lastLightCandidate = el;
-      while (el != null) {
-        if (el.lightParent instanceof DocumentFragment) {
-          // reset our search
-          lastLightCandidate = null;
-        } else if (el.lightParent == null) {
-          // now at a top-level host, return the candidate
-          if (lastLightCandidate == null) {
-            lastLightCandidate = el;
-          }
-          break;
-        } else {
-          lastLightCandidate = el;
-        }
-        el = el.parentNode;
+    /**
+     * Returns a list of elements that overlap the point
+     * ([request.message.x], [request.message.y]).
+     *
+     * @return {Array<ElementDescriptor>}
+     */
+    getElementsAtPoint(request) {
+      var x = request.message.x;
+      var y = request.message.y;
+      var elements = document.elementsFromPoint(x, y);
+      var response = [];
+      for (var i in elements) {
+        var element = elements[i];
+        response.push({
+          bounds: this._elementBounds(element),
+          elementInfo: this._elementInfo(element),
+        });
       }
-      return lastLightCandidate;
+      request.reply(response);
     }
 
     selectElementAtPath(request) {
