@@ -10,6 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../iron-ajax/iron-request.html">
 <link rel="import" href="../../../iron-ajax/iron-ajax.html">
 <link rel="import" href="../../../iron-pages/iron-pages.html">
+<link rel="import" href="../../../paper-styles/paper-styles.html">
 <link rel="import" href="../../../paper-toolbar/paper-toolbar.html">
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../../src/files/files.html">
@@ -28,14 +29,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="designer-app">
 
   <style>
+    :root {
+      --dark-primary-color: var(--paper-grey-900);
+      --default-primary-color: var(--paper-grey-800);
+      --light-primary-color: var(--paper-grey-500);
+      --accent-color: var(--paper-yellow-a200);
+      --primary-background-color: var(--paper-grey-200);
+      --primary-text-color: rgba(255, 255, 255, var(--dark-primary-opacity));
+      --secondary-text-color: rgba(255, 255, 255, var(--dark-secondary-opacity));
+      --disabled-text-color: rgba(255, 255, 255, var(--dark-disabled-opacity));
+      --divider-color: rgba(255, 255, 255, var(--dark-divider-opacity));
+      color: var(--primary-text-color);
+    }
     :host {
       background: #eee;
       box-sizing: border-box;
       display: flex;
     }
     designer-mini-nav {
-      background: #252525;
-      color: #aaa;
       width: 64px;
       height: 100%;
       position: relative;
@@ -43,12 +54,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       flex: 0 0 64px;
     }
     designer-mini-nav .small {
+      background: var(--default-primary-color);
       text-align: center;
       height: 100%;
       flex: 0 0 64px;
     }
     designer-mini-nav .large {
-      background: #252525;
+      background: var(--dark-primary-color);
+      color: var(--secondary-text-color);
       height: 100%;
       width: 100%;
       box-sizing: border-box;
@@ -56,8 +69,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
     #nav-detail > header {
       height: 64px;
-      border-bottom: solid 1px #444;
-      /*box-sizing: border-box;*/
+      border-bottom: solid 1px var(--divider-color);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -82,15 +94,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       flex: 1;
     }
     paper-toolbar#toolbar {
-      background: #424242;
-      color: white;
+      background: var(--default-primary-color);
+      color: var(--primary-text-color);;
       flex: 0 0;
     }
     designer-breadcrumb {
-      background: #424242;
-      border: solid #252525;
+      background: var(--default-primary-color);
+      border-style: solid;
+      border-color: var(--divider-color);
       border-width: 1px 0 1px 0;
-      color: #aaa;
+      color: var(--primary-text-color);
       font-weight: normal;
     }
     #logo {
@@ -104,13 +117,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       height: 48px;
     }
     nav {
-      background: #252525;
-      color: #aaa;
+      background: var(--dark-primary-color);
+      color: var(--secondary-text-color);
       display: flex;
       flex: 0 0 200px;
       flex-direction: column;
       font-size: 13px;
-      /*z-index: 100;*/
       letter-spacing: .2px;
       line-height: 24px;
     }
@@ -125,8 +137,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       cursor: pointer;
     }
     designer-inspector {
-      background: #252525;
-      color: #aaa;
+      background: var(--dark-primary-color);
+      color: var(--secondary-text-color);
       display: flex;
       flex: 0 0 200px;
       flex-direction: column;
@@ -144,11 +156,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
     #html {
       flex: 0 0 400px;
-      border-top: solid 1px #888;
+      border-top: solid 1px var(--paper-grey-400);
       margin: 0;
       padding: 8px;
       overflow: auto;
-      color: #444;
+      color: var(--paper-grey-800);
     }
     #frame {
       position: absolute;
@@ -167,15 +179,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       height: 100%;
     }
     paper-tab-vertical:first-of-type {
-      border-top: solid 1px #444;
+      border-top: solid 1px var(--divider-color);
     }
     paper-tab-vertical {
       height: 64px;
       box-sizing: border-box;
-      border-bottom: solid 1px #444;
+      border-bottom: solid 1px var(--divider-color);
     }
     paper-tab-vertical.iron-selected {
-      color: #FFD740;
+      color: var(--accent-color);
     }
   </style>
 
