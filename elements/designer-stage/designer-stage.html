@@ -13,6 +13,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../src/dom-utils/dom-utils.html">
 <link rel="import" href="../../src/dragging/dragging.html">
 <link rel="import" href="../../src/protocol/document-client.html">
+<link rel="import" href="../designer-element-highlight/designer-element-highlight.html">
 <link rel="import" href="../designer-selection/designer-selection.html">
 
 <dom-module id="designer-stage">
@@ -39,16 +40,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       position: absolute;
       /* z-index must be > 100 because iframes are z-index 100 o_O */
       z-index: 101;
-      display: none;
-      opacity: 0.5;
-      background: #c66;
-      box-sizing: border-box;
-    }
-    #hover.insert-above {
-      border-top: solid 4px black;
-    }
-    #hover.insert-below {
-      border-bottom: solid 4px black;
     }
     #text-edit-selection {
       outline: solid 4px blue;
@@ -92,7 +83,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         on-designer-selection-resize="_onSelectionResize"
         on-designer-selection-move="_onSelectionMove">
     </designer-selection>
-    <div id="hover"></div>
+    <designer-element-highlight id="hover"></designer-element-highlight>
     <div id="caret"></div>
     <div
         id="text-edit-selection"
@@ -259,38 +250,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           return;
         }
 
-        let elementInfo = hoverInfo.elementInfo;
-        let bounds = hoverInfo.bounds;
-
-        var hover = this.$.hover;
-        domUtils.setBounds(hover, bounds);
-        domUtils.show(hover);
+        let hover = this.$.hover;
+        hover.setElementInfoAndBounds(hoverInfo);
+        hover.show();
 
         if (this.selection &&
             this.selection.elementInfo.position == 'static') {
-          var verticalMid = bounds.top + bounds.height / 2;
-          var insertAbove = this.currentMousePosition.y < verticalMid;
-          var insertBelow = this.currentMousePosition.y > verticalMid;
-
-          if (insertAbove) {
-            hover.classList.add('insert-above');
-            this.insertPosition = commands.InsertPosition.before;
-            this.hoverSourceId = elementInfo.sourceId;
-          } else {
-            hover.classList.remove('insert-above');
-          }
-          if (insertBelow) {
-            hover.classList.add('insert-below');
-            this.insertPosition = commands.InsertPosition.after;
-            this.hoverSourceId = elementInfo.sourceId;
-          } else {
-            hover.classList.remove('insert-below');
-          }
+          console.log('inserting...');
+          this.insertPosition = hover.showInsertMarker(
+              this.currentMousePosition.x,
+              this.currentMousePosition.y);
+          this.hoverSourceId = hoverInfo.elementInfo.sourceId;
         }
       },
 
       _hideHover() {
-        domUtils.hide(this.$.hover);
+        this.$.hover.hide();
 
         // TODO(justinfagnani): move the next two lines to a better location,
         // like where we know that we don't have a current valid move operation.
