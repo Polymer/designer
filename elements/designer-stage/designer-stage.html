@@ -51,10 +51,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       border-bottom: solid 4px black;
     }
     #text-edit-selection {
-      /* border size must be keep in sync with the offset in enterTextMode */
-      border: solid 4px blue;
+      outline: solid 4px blue;
       position: absolute;
       display: none;
+      /* z-index must be > 100 because iframes are z-index 100 o_O */
       z-index: 103;
     }
     #caret {
@@ -62,6 +62,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       position: absolute;
       background: rgba(32, 32, 255, .4);
       z-index: 104;
+      /* z-index must be > 100 because iframes are z-index 100 o_O */
       min-width: 4px;
     }
     #proxy {
@@ -199,20 +200,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.currentMousePosition = null;
         this.insertPosition = null;
         this.hoverSourceId = null;
+        this.mode = 'layout';
         this._hideHover();
         this.$.selection.hide();
-        this.mode = 'layout';
-        this.$['text-edit-selection'].style.display = 'none';
-        this.$.caret.style.display = 'none';
+        domUtils.hide(this.$['text-edit-selection']);
+        domUtils.hide(this.$.caret);
       },
 
       _updateSelectionBounds(bounds) {
-        var style = this.$.selection.style;
-        style.display = 'block';
-        style.top = bounds.top + 'px';
-        style.left = bounds.left + 'px';
-        style.width = bounds.width + 'px';
-        style.height = bounds.height + 'px';
+        // this.currentElementInfo.bounds = bounds;
+        this.$.selection.setBounds(bounds);
+        this.$.selection.show();
       },
 
       _selectElement(elementInfo) {
@@ -265,13 +263,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         let bounds = hoverInfo.bounds;
 
         var hover = this.$.hover;
-        var hoverStyle = hover.style;
-
-        hoverStyle.display = 'block';
-        hoverStyle.top = bounds.top + 'px';
-        hoverStyle.left = bounds.left + 'px';
-        hoverStyle.width = bounds.width + 'px';
-        hoverStyle.height = bounds.height + 'px';
+        domUtils.setBounds(hover, bounds);
+        domUtils.show(hover);
 
         if (this.selection &&
             this.selection.elementInfo.position == 'static') {
@@ -297,9 +290,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _hideHover() {
-        var hover = this.$.hover;
-        var hoverStyle = hover.style;
-        hoverStyle.display = 'none';
+        domUtils.hide(this.$.hover);
+
+        // TODO(justinfagnani): move the next two lines to a better location,
+        // like where we know that we don't have a current valid move operation.
         this.insertPosition = null;
         this.hoverSourceId = null;
       },
@@ -307,23 +301,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       enterTextMode() {
         this._mode = 'text';
         this.$.selection.hide();
-        let style = this.$['text-edit-selection'].style;
-        let bounds = this.selection.bounds;
-        style.display = 'block';
-        // offset must be keep in sync with the border size in CSS
-        style.top = (bounds.top - 4) + 'px';
-        style.left = (bounds.left - 4) + 'px';
-        style.width = bounds.width + 'px';
-        style.height = bounds.height + 'px';
-        // TODO(justinfagnani): set up caret initial state
-        this.$.caret.style.display = 'block';
+        let textSelection = this.$['text-edit-selection'];
+        domUtils.setBounds(textSelection, this.currentElementInfo.bounds);
+        domUtils.show(textSelection);
+
+        // TODO(justinfagnani): set up caret initial state (to first character?)
+        domUtils.show(this.$.caret);
       },
 
       exitTextMode() {
         this._mode = 'layout';
         this.$.selection.show();
-        let style = this.$['text-edit-selection'].style;
-        style.display = 'none';
+        domUtils.hide(this.$['text-edit-selection']);
+        domUtils.hide(this.$.caret);
       },
 
       _onSelectionResize(e) {
@@ -336,7 +326,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onSelectionMove(e) {
-        // TODO: store mouse position in the selection element?
+        // TODO: store mouse position in the designer-selection element?
         // Rationale: we're alredy storing the bounds state there
         var cursor = this.currentMousePosition = {
           x: e.detail.cursor.x - this.offsetLeft,
@@ -365,15 +355,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _updateDragProxy(bounds) {
         var proxy = this.$.proxy;
-        var proxyStyle = proxy.style;
         if (this.selection.elementInfo.position === 'static') {
-          proxyStyle.display = 'block';
-          proxyStyle.top = bounds.top + 'px';
-          proxyStyle.left = bounds.left + 'px';
-          proxyStyle.width = bounds.width + 'px';
-          proxyStyle.height = bounds.height + 'px';
+          domUtils.setBounds(proxy, bounds);
+          domUtils.show(proxy);
         } else {
-          proxyStyle.display = 'none';
+          domUtils.hide(proxy);
         }
       },
 
@@ -424,8 +410,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               });
         }
         this._hideHover();
-        this.insertPosition = null;
-        this.$.proxy.style.display = 'none';
+        domUtils.hide(this.$.proxy);
       },
 
       _onDoubleClick(e) {
@@ -492,11 +477,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _updateCaret(bounds) {
-        let caret = this.$.caret;
-        caret.style.top = bounds.top + 'px';
-        caret.style.left = bounds.left + 'px';
-        caret.style.width = bounds.width + 'px';
-        caret.style.height = bounds.height + 'px';
+        domUtils.setBounds(this.$.caret, bounds);
       },
 
       _onKeypress(event) {
