@@ -1,0 +1,33 @@
+<link rel="import" href="../../vendor/hydrolysis.html">
+
+<script>
+define(['hydrolysis'], function(hydrolysis) {
+  'use strict';
+
+  Polymer({
+    is: 'hydrolysis-loader',
+
+    properties: {
+      host: String,
+      instance: {
+        type: Object,
+        value: function() { return new hydrolysis.Loader(); },
+      }
+    },
+
+    listeners: {
+      'hydrolysis-resolver-ready': '_onHydrolysisResolverReady',
+    },
+
+    attached() {
+      this.fire('hydrolysis-loader-ready');
+    },
+
+    _onHydrolysisResolverReady(e) {
+      this.instance.addResolver(e.target.instance);
+      e.stopPropagation();
+    },
+
+  });
+});
+</script>

@@ -10,7 +10,7 @@
   "bin": {
     "polymer-designer": "./server.js"
   },
-  "main": "main.js",
+  "main": "electron-main.js",
   "scripts": {
     "build": "./build.sh"
   },
@@ -24,12 +24,18 @@
     "minimist": "^1.1.1",
     "parse5": "^1.4.0",
     "polyserve": "^0.4.0",
+    "q-io": "^1.13.1",
     "resolve": "^1.0.0",
     "send": "^0.10.1"
   },
   "devDependencies": {
     "browserify": "^10.2.3",
     "chai": "^1.9.2",
+    "gulp": "^3.9.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-includer": "^0.1.0",
+    "gulp-insert": "^0.4.0",
+    "gulp-symlink": "^2.1.0",
     "mocha": "^2.0.1"
   }
 }

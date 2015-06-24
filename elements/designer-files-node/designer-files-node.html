@@ -1,0 +1,107 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../polymer/polymer.html">
+
+<script>
+(function() {
+  'use strict';
+
+  console.log('hahaha');
+
+  let fs = require('q-io/fs');
+  let fsSync = require('fs');
+  let pathLib = require('path');
+
+  function getFilename(path) {
+    let splitPath = path.split('/');
+    return splitPath[splitPath.length - 1];
+  }
+
+  Polymer({
+    is: 'designer-files-node',
+
+    properties: {
+
+      _rootPath: {
+        type: String,
+        value: '.',
+      },
+
+    },
+
+    created() {
+      console.log('designer-files-node created');
+    },
+
+    attached() {
+      console.log('designer-files-node attached');
+      this.fire('designer-files-ready');
+    },
+
+    getInfo(path) {
+      path = pathLib.join(this._rootPath, path || '');
+      return fs.stat(path)
+        .then(function(response) {
+          response.path = path;
+          return response;
+        });
+    },
+
+    loadFile(path) {
+      return fs.read(path);
+    },
+
+    getIcon(node) {
+      return node.isFile() ? 'editor:insert-drive-file' : 'icons:folder';
+    },
+
+    getName(node) {
+      return getFilename(node.path);
+    },
+
+    getChildren(node) {
+      if (node.isFile()) {
+        return Promise.resolve(null);
+      }
+      return fs.list(node.path).then(function(result) {
+        let promises = result.filter(function(path) {
+            return !path.startsWith('.');
+          }.bind(this)).map(function(path) {
+            return this.getInfo(pathLib.join(node.path, path));
+          }.bind(this));
+        return Promise.all(promises);
+      }.bind(this));
+    },
+
+    isLeaf(node) {
+      return node.isFile();
+    },
+
+    isLink(node) {
+      return true;
+    },
+
+    onClick(node, event) {
+      this.loadFile(node.path).then(function(fileData) {
+        let loadEvent = new CustomEvent('file-data-load', {
+          detail: {
+            file: fileData,
+            href: node.path,
+          },
+          bubbles: true,
+        });
+        event.target.dispatchEvent(loadEvent);
+      }.bind(this));
+    },
+
+  });
+
+})();
+</script>

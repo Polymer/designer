@@ -1,0 +1,23 @@
+<link rel="import" href="../../vendor/hydrolysis.html">
+
+<script>
+define(['hydrolysis'], function(hydrolysis) {
+  'use strict';
+
+  Polymer({
+    is: 'hydrolysis-fs-resolver',
+
+    properties: {
+      instance: {
+        type: Object,
+        value: function() { return new hydrolysis.FSResolver(); },
+      },
+    },
+
+    attached() {
+      this.fire('hydrolysis-resolver-ready');
+    },
+
+  });
+});
+</script>

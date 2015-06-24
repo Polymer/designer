@@ -13,6 +13,7 @@ var fs = require('fs');
 var path = require('path');
 var polyserve = require('polyserve');
 var send = require('send');
+var frameScript = require('../../tools/frame-script');
 
 var bowerComponentDir = 'bower_components';
 var componentHeaders = {
@@ -34,37 +35,10 @@ app.use('/', polyserve.makeApp(bowerComponentDir, null, componentHeaders));
  * development.
  */
 function buildFrameScript() {
-  // files must be in dependency order
-  var paths = [
-    'bower_components/imd/imd.js',
-    'src/dom-utils/dom-utils.js',
-    'src/path/path.js',
-    'src/css/css.js',
-    'src/dragging/dragging.js',
-    'src/commands/commands.js',
-    'src/commands/CommandApplier.js',
-    'src/commands/DomCommandApplier.js',
-    'src/protocol/Request.js',
-    'src/async/async.js',
-    'src/text/PositionWalker.js',
-    'src/text/CursorManager.js',
-    'src/protocol/ServerConnection.js',
-    'src/protocol/DocumentServer.js',
-  ];
-  var files = paths.map(function(p) {
+  var files = frameScript.dependencies.map(function(p) {
     return fs.readFileSync(p, {encoding: 'utf-8'});
   });
-
-  var frameScript = '(function() {\n' +
-    files.join('\n') +
-    'define(["polymer-designer/protocol/ServerConnection", "polymer-designer/protocol/DocumentServer"], function(ServerConnection, DocumentServer) {\n' +
-    '  "use strict";\n' +
-    '  window.Polymer = { dom: "shadow" };\n' +
-    '  var connection = new ServerConnection(window);\n' +
-    '  new DocumentServer(connection);\n' +
-    '});\n' +
-    '})();';
-  return frameScript;
+  return frameScript.buildFrameScript(files);
 }
 
 module.exports = app;

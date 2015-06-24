@@ -7,13 +7,10 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<link rel="import" href="../../../iron-ajax/iron-request.html">
-<link rel="import" href="../../../iron-ajax/iron-ajax.html">
 <link rel="import" href="../../../iron-pages/iron-pages.html">
 <link rel="import" href="../../../paper-styles/paper-styles.html">
 <link rel="import" href="../../../paper-toolbar/paper-toolbar.html">
 <link rel="import" href="../../../polymer/polymer.html">
-<link rel="import" href="../../src/files/files.html">
 <link rel="import" href="../designer-breadcrumb/designer-breadcrumb.html">
 <link rel="import" href="../designer-document/designer-document.html">
 <link rel="import" href="../designer-document-outline/designer-document-outline.html">
@@ -185,7 +182,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </style>
 
   <template>
-    <iron-ajax url="/api/fileService/config" last-response="{{_fileServiceConfig}}" auto></iron-ajax>
     <designer-mini-nav>
       <div class="small">
         <div id="logo">
@@ -252,7 +248,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 client-connection="[[clientConnection]]"
                 client="{{client}}"
                 document-info="{{documentInfo}}"
-                selection="{{selection}}">
+                selection="{{selection}}"
+                analyzer="[[analyzer]]">
             </designer-document>
             <designer-stage
                 id="stage"
@@ -273,10 +270,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 selection="[[selection]]">
             </designer-inspector>
           </template>
-        </div> <!-- editor -->
+        </div>
         <designer-logic-editor></designer-logic-editor>
       </iron-pages>
-    </div> <!-- main -->
+    </div>
   </template>
 
 </dom-module>
@@ -284,9 +281,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <script>
 
   define([
-    'polymer-designer/dom-utils',
-    'polymer-designer/files'],
-      function(domUtils, files) {
+    'polymer-designer/dom-utils'],
+      function(domUtils) {
     'use strict';
 
     Polymer({
@@ -324,34 +320,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: 1,
         },
 
-        _fileServiceConfig: {
-          type: Object
-        }
       },
 
       observers: [
-        '_initializeDesignerApp(_fileServiceConfig)',
+        // '_initializeDesignerApp(_fileServiceConfig)',
       ],
 
       listeners: {
-        'designer-select-element': '_onDesignerSelectElement',
         'designer-command': '_onDesignerCommand',
+        'designer-select-element': '_onDesignerSelectElement',
+        'designer-files-attached': '_onDesignerFilesAttached',
+        'designer-files-ready': '_onDesignerFilesReady',
+        'hydrolysis-analyzer-ready': '_onHydrolysisAnalyzerReady',
       },
 
-      _initializeDesignerApp: function(fileServiceConfig) {
-        this._fileTreeController = new files.DemoFilesTreeControl(
-          'http://localhost:' + fileServiceConfig.port + '/ls/',
-          'http://localhost:' + fileServiceConfig.port + '/files/');
-        this._fileTreeController.getInfo('polymer-designer-demos')
-          .then(function(root) {
-            this._rootFile = root;
-          }.bind(this));
+      ready() {
         var queryParams = domUtils.parseQueryString(window.location.search);
         this._showEditors = queryParams.get('show-editors');
       },
 
+      _onDesignerFilesReady(event) {
+        this._fileTreeController = event.target;
+        this._fileTreeController.getInfo()
+          .then(function(root) {
+            this._rootFile = root;
+          }.bind(this));
+      },
+
       _onDesignerSelectElement(event, detail) {
         this.$.document.setSourceId(detail.sourceId);
+      },
+
+      _onHydrolysisAnalyzerReady(e) {
+        this.analyzer = e.target.instance;
       },
 
       _onDesignerCommand(event, command) {
