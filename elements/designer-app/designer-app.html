@@ -299,7 +299,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <template is="dom-if" if="[[domDocument]]">
             <designer-inspector
                 source-document="[[domDocument]]"
-                element-info="{{currentElementInfo}}">
+                element-info="[[currentElementInfo]]"
+                current-node="[[currentNode]]">
             </designer-inspector>
           </template>
         </div> <!-- editor -->
@@ -411,7 +412,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       observers: [
-        '_initializeDesignerApp(_fileServiceConfig)'
+        '_initializeDesignerApp(_fileServiceConfig)',
       ],
 
       _initializeDesignerApp: function(fileServiceConfig) {
