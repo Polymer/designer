@@ -11,6 +11,31 @@
 define('polymer-designer/dom-utils', function() {
   'use strict';
 
+  const sourceIdAttribute = '__designer_node_id__';
+
+  /**
+   * @param {Element} element
+   * @return {string} The source ID of the element, which is assigned to the to
+   *     the element before its document is parsed.
+   */
+  function getSourceId(element) {
+    return element.getAttribute(sourceIdAttribute);
+  }
+
+  /**
+   * @param {Node} node
+   * @return {Array<Node>} The ancestors of [node] not including the node's
+   *     owner document.
+   */
+  function getAncestors(node) {
+    var ancestors = [];
+    while (node.parentNode !== node.ownerDocument) {
+      ancestors.push(node);
+      node = node.parentNode;
+    }
+    return ancestors.reverse();
+  }
+
   function isDescendant(element, target) {
     while (element.parentNode) {
       if (element.parentNode == target) {
@@ -76,9 +101,12 @@ define('polymer-designer/dom-utils', function() {
 
   return {
     designerNodeFilter: designerNodeFilter,
+    getAncestors: getAncestors,
     getDocumentElement: getDocumentElement,
+    getSourceId: getSourceId,
     isDescendant: isDescendant,
     parseQueryString: parseQueryString,
+    sourceIdAttribute: sourceIdAttribute,
     toLocalPosition: toLocalPosition,
   };
 
