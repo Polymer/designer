@@ -415,6 +415,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         '_initializeDesignerApp(_fileServiceConfig)',
       ],
 
+      listeners: {
+        'designer-select-element': '_onDesignerSelectElement',
+      },
+
       _initializeDesignerApp: function(fileServiceConfig) {
         this._fileTreeController = new files.DemoFilesTreeControl(
           'http://localhost:' + fileServiceConfig.port + '/ls/',
@@ -425,6 +429,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }.bind(this));
         var queryParams = domUtils.parseQueryString(window.location.search);
         this._showEditors = queryParams.get('show-editors');
+      },
+
+      _onDesignerSelectElement(event, detail) {
+        // This triggers a sync between currentSourceId, currentPath and
+        // currentNode in designer-document
+        // TODO(justinfagnani): consider chaning to calling a method on
+        // designer-document
+        this.currentSourceId = detail.sourceId;
       },
 
       _onDesignerCommand(event, command) {
