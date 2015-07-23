@@ -22,7 +22,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <template>
     <designer-tree-item
-      controller="[[controller]]"
+      controller="[[_controller]]"
       data="[[rootNode]]"
       noicon>
     </designer-tree-item>
@@ -32,7 +32,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script>
 
-(function() {
+define(['polymer-designer/dom-utils'], function(domUtils) {
   'use strict';
 
   Polymer({
@@ -48,19 +48,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        * getChildren(node) : Promise<Array<Object>>
        * isLeaf(node) : Boolean
        */
-      controller: Object,
-
-      rootNode: Object,
-
-      currentNode: {
+      _controller: {
         type: Object,
-        notify: true,
+        value: function() { return new OutlineTreeController(this); },
       },
 
-    },
+      /**
+       * @type {Element}
+       */
+      rootNode: Object,
 
-    ready() {
-      this.controller = new OutlineTreeController(this);
+      /**
+       * @type {Element}
+       */
+      currentNode: Object,
+
     },
 
   });
@@ -98,11 +100,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     onClick(node) {
-      this.host.fire('designer-outline-click', {node: node});
-      this.host.currentNode = node;
+      this.host.fire('designer-select-element', {
+        sourceId: domUtils.getSourceId(node),
+      }, { bubbles: true, });
     }
 
   }
 
-})();
+});
 </script>
