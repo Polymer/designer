@@ -226,7 +226,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _currentSourceIdChanged() {
-        console.log('_currentSourceIdChanged', this.currentSourceId);
+        this.currentNode = (this.currentSourceId)
+            ? this.domDocument.querySelector(`[__designer_node_id__="${this.currentSourceId}"]`)
+            : null;
       },
 
       _clientConnectionChanged() {
