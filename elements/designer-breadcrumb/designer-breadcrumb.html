@@ -106,7 +106,10 @@ define(['polymer-designer/dom-utils'], function(domUtils) {
     selectedIndexChanged() {
       if (this._nodePath !== null &&
           this.selectedIndex < this._nodePath.length) {
-        this.node = this._nodePath[this.selectedIndex];
+        let newNode = this._nodePath[this.selectedIndex];
+        this.fire('designer-select-element', {
+          sourceId: domUtils.getSourceId(newNode),
+        }, { bubbles: true, });
       }
     },
 
