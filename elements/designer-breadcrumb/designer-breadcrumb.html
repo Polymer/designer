@@ -32,7 +32,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <template>
     <paper-tabs selected="{{selectedIndex}}" noink noslide>
-      <template is="dom-repeat" items="[[tabNames]]">
+      <template is="dom-repeat" items="[[_tabNames]]">
         <paper-tab>[[item]]</paper-tab>
       </template>
     </paper-tabs>
@@ -49,52 +49,64 @@ define(['polymer-designer/dom-utils'], function(domUtils) {
     is: 'designer-breadcrumb',
 
     properties: {
+
+      /**
+       * @type {Element}
+       */
       node: {
         type: Object,
-        notify: true,
         value: null,
-        observer: 'nodeChanged',
+        observer: '_nodeChanged',
       },
+
+      /**
+       * @type {number}
+       */
       selectedIndex: {
         type: Number,
         notify: true,
         value: 0,
-        observer: 'selectedIndexChanged',
+        observer: '_selectedIndexChanged',
       },
-      tabNames: {
-        value: [],
+
+      /**
+       * @type {Array<String>}
+       */
+      _tabNames: {
+        value: function() { return []; },
       },
+
+      /**
+       * The list of elements contained in the breadcrumb.
+       *
+       * @type Array<Element>}
+       */
       _nodePath: {
-        value: [],
+        value: function() { return []; },
       }
     },
 
-    nodeChanged() {
-      var node = this.node;
+    _nodeChanged() {
+      let node = this.node;
 
       if (node === null) {
         this._nodePath = [];
-        this.tabNames = [];
+        this._tabNames = [];
         return;
       }
 
-      // If we've selected a node already present in the current path  don't
+      // If we've selected a node already present in the current path don't
       // recompute the breadcrumb path, just select the new node.
-      var index = this._nodePath.indexOf(node);
+      let index = this._nodePath.indexOf(node);
       if (index !== -1) {
         this.selectedIndex = index;
         return;
       }
 
-      var ancestorPath = [];
-      while (node.parentNode !== node.ownerDocument) {
-        ancestorPath.push(node);
-        node = node.parentNode;
-      }
-      this._nodePath = ancestorPath.reverse();
-      this.tabNames = this._nodePath.map(function(n) {
-        var name = n.tagName.toLowerCase();
-        var id = n.id;
+      this._nodePath = domUtils.getAncestors(node);
+      this._tabNames = this._nodePath.map(function(n) {
+        let name = n.tagName.toLowerCase();
+        let id = n.id;
         if (id) {
           name += '#' + id;
         }
@@ -103,10 +115,13 @@ define(['polymer-designer/dom-utils'], function(domUtils) {
       this.selectedIndex = this._nodePath.length - 1;
     },
 
-    selectedIndexChanged() {
+    _selectedIndexChanged() {
       if (this._nodePath !== null &&
           this.selectedIndex < this._nodePath.length) {
-        this.node = this._nodePath[this.selectedIndex];
+        let newNode = this._nodePath[this.selectedIndex];
+        this.fire('designer-select-element', {
+          sourceId: domUtils.getSourceId(newNode),
+        }, { bubbles: true, });
       }
     },
 

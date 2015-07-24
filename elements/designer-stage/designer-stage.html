@@ -146,16 +146,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: null,
         },
 
-        currentNode: {
-          type: Object,
-          notify: true,
-        },
-
-        currentPath: {
-          type: String,
-          notify: true,
-        },
-
         currentSourceId: {
           type: String,
           notify: true,
@@ -258,10 +248,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _updateCurrentElement(elementInfo) {
+        // TODO(justinfagnani): the stage should not be invoking the analyzer.
+        // move this to designer-document
         elementInfo.analyzed = this.getAnalyzedElement(elementInfo);
         this.currentElementInfo = elementInfo;
-        this.currentPath = elementInfo.path;
-        this.currentSourceId = elementInfo.sourceId;
+        this.fire('designer-select-element', {
+          sourceId: elementInfo.sourceId,
+        }, { bubbles: true, });
 
         // Set the valid resize handles
         var position = elementInfo.position;
