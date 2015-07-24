@@ -80,12 +80,31 @@ define('polymer-designer/protocol/DocumentClient', function() {
     }
 
     /**
+     * Selects an element by its elementInfo.id.
+     *
      * @returns {Promise}
      */
-    selectElementAtPath(path) {
+    selectElement(id) {
       return this.connection.request({
-        messageType: 'selectElementAtPath',
-        path: path,
+        messageType: 'selectElement',
+        id: id,
+      });
+    }
+
+    /**
+     * Selects an element by its sourceId.
+     *
+     * In live documents where there is more than one element with the same
+     * sourceId (as with an expanded template/repeat), we'll need a way to
+     * determine the "original" element.
+     *
+     * @returns {Promise}
+     */
+    selectElementForSourceId(sourceId) {
+      console.assert(sourceId != null);
+      return this.connection.request({
+        messageType: 'selectElementForSourceId',
+        sourceId: sourceId,
       });
     }
 

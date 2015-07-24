@@ -65,13 +65,13 @@ define([
       /**
        * Metadata published by the stage about the currently selected element.
        */
-      elementInfo: {
-        type:      Object,
-        observer: '_elementInfoChanged',
+      selection: {
+        type: Object,
+        observer: '_selectionChanged',
       },
 
       /** The document where edits should be made */
-      sourceDocument: Object,
+      documentInfo: Object,
 
     },
 
@@ -79,8 +79,10 @@ define([
       'designer-element-style-changed': '_styleChanged',
     },
 
-    _elementInfoChanged() {
-      this._sheets = (this.elementInfo && this.elementInfo.styles) || [];
+    _selectionChanged() {
+      this._sheets = (this.selection &&
+          this.selection.elementInfo &&
+          this.selection.elementInfo.styles) || [];
     },
 
     _styleChanged(event, info) {
@@ -90,10 +92,11 @@ define([
     },
 
     _updateSheet(sheet, rule, key, value) {
-      console.assert(this.sourceDocument);
+      console.assert(this.documentInfo);
       console.assert(key);
       let sheetSourceId = sheet.ownerSourceId;
-      let sourceStyle = this.sourceDocument.querySelector(`[__designer_node_id__="${sheetSourceId}"]`);
+      let sourceStyle = this.documentInfo.domDocument
+          .querySelector(`[${domUtils.sourceIdAttribute}="${sheetSourceId}"]`);
       let sheetSource = sourceStyle.textContent;
       let parsedSheet = rework.parse(sheetSource);
 
@@ -102,9 +105,11 @@ define([
       console.assert(parsedRule, 'Expected to find a parsed rule matching', rule);
       // TODO(nevir): We are going to have to support multiple transformations
       // (addition, deletion).
-      let newSource = reworkUtils.replaceProperty(sheetSource, parsedRule, key, value);
+      let newSource =
+          reworkUtils.replaceProperty(sheetSource, parsedRule, key, value);
 
-      this.fire('designer-command', commands.setTextContent(sheetSourceId, sheetSource, newSource));
+      this.fire('designer-command',
+          commands.setTextContent(sheetSourceId, sheetSource, newSource));
     },
 
   });

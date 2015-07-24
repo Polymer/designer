@@ -223,12 +223,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <div>
             <h3>Document</h3>
             <designer-document-outline
-                root-node=[[domDocumentElement]]
-                current-node="[[currentNode]]">
+                root-node=[[documentInfo.domDocumentElement]]>
             </designer-document-outline>
             <h3>Elements</h3>
             <ul>
-              <template is="dom-repeat" items="[[elements]]">
+              <template is="dom-repeat" items="[[documentInfo.elements]]">
                 <li>[[item.is]]</li>
               </template>
             </ul>
@@ -248,10 +247,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </paper-tabs>
         </template>
       </paper-toolbar>
-      <!-- <template is="dom-if" if="{{domDocument}}">
-        <designer-breadcrumb node="{{currentNode}}"></designer-breadcrumb>
-      </template> -->
-      <designer-breadcrumb node="[[currentNode]]"></designer-breadcrumb>
+      <designer-breadcrumb node="[[selection.node]]"></designer-breadcrumb>
       <iron-pages id="editor" selected="[[_selectedEditor]]">
         <div id="storyboard">
           Storyboard
@@ -260,45 +256,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <div id="doc-view">
             <designer-document
                 id="document"
-                source="[[documentSource]]"
-                url="[[documentUrl]]"
                 client-connection="[[clientConnection]]"
-                analyzer="{{analyzer}}"
                 client="{{client}}"
-                dom-document="{{domDocument}}"
-                dom-document-element="{{domDocumentElement}}"
-                ast-document="{{astDocument}}"
-                ast-document-element="{{astDocumentElement}}"
-                text-content="{{textContent}}"
-                elements="{{elements}}"
-                filename="{{filename}}"
-                current-node="{{currentNode}}"
-                current-path="{{currentPath}}"
-                current-source-id="{{currentSourceId}}"
-                current-element-info="{{currentElementInfo}}"
-                on-designer-document-update="_onDesignerDocumentUpdate">
+                document-info="{{documentInfo}}"
+                selection="{{selection}}">
             </designer-document>
             <designer-stage
                 id="stage"
-                dom-document="[[domDocument]]"
-                analyzer="[[analyzer]]"
+                document-info="[[documentInfo]]"
                 client="[[client]]"
-                current-source-id="[[currentSourceId]]"
-                current-element-info="[[currentElementInfo]]"
+                selection="[[selection]]"
                 on-designer-command="_onDesignerCommand">
               <designer-frame
                   id="frame"
                   client-connection="{{clientConnection}}"
-                  document="[[domDocument]]">
+                  document-info="[[documentInfo]]">
               </designer-frame>
             </designer-stage>
             <pre id="html">[[textContent]]</pre>
           </div> <!-- doc-view -->
-          <template is="dom-if" if="[[domDocument]]">
+          <template is="dom-if" if="[[documentInfo]]">
             <designer-inspector
-                source-document="[[domDocument]]"
-                element-info="[[currentElementInfo]]"
-                current-node="[[currentNode]]">
+                document-info="[[documentInfo]]"
+                selection="[[selection]]">
             </designer-inspector>
           </template>
         </div> <!-- editor -->
@@ -312,21 +292,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <script>
 
   define([
-    'polymer-designer/path',
     'polymer-designer/dom-utils',
     'polymer-designer/files'],
-      function(pathLib, domUtils, files) {
+      function(domUtils, files) {
     'use strict';
 
     Polymer({
       is: 'designer-app',
 
       properties: {
-
-        analyzer: {
-          type: Object,
-          notify: true,
-        },
 
         client: {
           type: Object,
@@ -338,58 +312,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           notify: true,
         },
 
-        currentElementInfo: {
+        selection: {
           type: Object,
-          notify: true,
         },
 
-        currentNode: {
+        documentInfo: {
           type: Object,
-          notify: true,
-        },
-
-        currentSourceId: {
-          type: String,
-          notify: true,
-        },
-
-        domDocument: {
-          type: Object,
-          notify: true,
-        },
-
-        domDocumentElement: {
-          type: Object,
-          notify: true,
-        },
-
-        astDocument: {
-          type: Object,
-          notify: true,
-        },
-
-        astDocumentElement: {
-          type: Object,
-          notify: true,
-        },
-
-        elements: {
-          type: Array,
-        },
-
-        textContent: {
-          type: String,
-          notify: true,
-        },
-
-        documentSource: {
-          type: String,
-          notify: true,
-        },
-
-        documentUrl: {
-          type: String,
-          notify: true,
         },
 
         _selectedNavTab: {
@@ -430,11 +358,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onDesignerSelectElement(event, detail) {
-        // This triggers a sync between currentSourceId, currentPath and
-        // currentNode in designer-document
-        // TODO(justinfagnani): consider chaning to calling a method on
-        // designer-document
-        this.currentSourceId = detail.sourceId;
+        this.$.document.setSourceId(detail.sourceId);
       },
 
       _onDesignerCommand(event, command) {
@@ -443,15 +367,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.document.executeCommand(command);
       },
 
-      _onDesignerDocumentUpdate(event, response) {
-        // Event fired from designer-stage containing an edit response,
-        // forward to the designer-stage.
-        this.$.stage.applyDocumentUpdate(response);
-      },
-
       _onFileDataLoad(e) {
-        this.documentSource = e.detail.file;
-        this.documentUrl = e.detail.href;
+        this.$.document.setDocument(e.detail.file, e.detail.href);
       },
 
       _installPackageClick(e) {

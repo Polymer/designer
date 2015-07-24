@@ -59,18 +59,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     'use strict';
 
-    // TODO(justinfagnani): move to common location
-    const nodeIdProperty = '__designer_node_id__';
+    const sourceIdAttribute = domUtils.sourceIdAttribute;
 
     Polymer({
       is: 'designer-document',
 
       properties: {
-
-        analyzer: {
-          type: Object,
-          notify: true,
-        },
 
         client: {
           type: Object,
@@ -83,66 +77,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           observer: '_clientConnectionChanged',
         },
 
-        currentNode: {
-          type: Object,
-          notify: true,
-          observer: '_currentNodeChanged',
-        },
-
-        currentPath: {
-          type: String,
-          notify: true,
-          observer: '_currentPathChanged',
-        },
-
-        currentSourceId: {
-          type: String,
-          notify: true,
-          observer: '_currentSourceIdChanged',
-        },
-
-        currentElementInfo: {
+        selection: {
           type: Object,
           notify: true,
         },
 
-        domDocument: {
+        documentInfo: {
           type: Object,
           notify: true,
         },
-
-        domDocumentElement: {
-          type: Object,
-          notify: true,
-        },
-
-        astDocument: {
-          type: Object,
-          notify: true,
-        },
-
-        astDocumentElement: {
-          type: Object,
-          notify: true,
-        },
-
-        elements: {
-          type: Array,
-          notify: true,
-        },
-
-        textContent: {
-          type: String,
-          notify: true,
-        },
-
-        filename: {
-          type: String,
-          notify: true,
-        },
-
-        source: String,
-        url: String,
 
         _domNodes: {
           type: Map,
@@ -153,10 +96,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       },
 
-      observers: [
-        '_setDocument(source,url)',
-      ],
-
       /**
        * Sets the current document and injects the message handler script.
        *
@@ -164,14 +103,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        * @param {string} url The document location.
        * @returns {Promise<Document>} The modified document.
        */
-      _setDocument(content, url) {
-        this.analyzer = createAnalyzer(url);
-
-        let splitUrl = url.split('/');
-        this.filename = splitUrl[splitUrl.length - 1];
+      setDocument(content, url) {
+        let analyzer = createAnalyzer(url);
 
         return Promise.all([
-          this.analyzer.load(url),
+          analyzer.load(url),
           this._frameScriptAsset.load(),
         ]).then(function(results) {
           let analyzedDocument = results[0];
@@ -184,60 +120,87 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             let parsedDocument = results[0];
             let metadata = results[1];
 
-            this.domDocument = createDocument(content, frameScript, url);
-            this.domDocumentElement = domUtils.getDocumentElement(this.domDocument);
+            let domDocument = createDocument(content, frameScript, url);
+            let domDocumentElement = domUtils.getDocumentElement(domDocument);
 
-            this.astDocument = parsedDocument.ast;
-            this.astDocumentElement = domUtils.getDocumentElement(this.astDocument);
+            let astDocument = parsedDocument.ast;
+            let astDocumentElement = domUtils.getDocumentElement(astDocument);
+
+            // assign sequential IDs to all elements in the document
             let nextId = 1;
-            dom5.query(this.astDocument, function(node) {
-              dom5.setAttribute(node, nodeIdProperty, `${nextId++}`);
+            dom5.query(astDocument, function(node) {
+              dom5.setAttribute(node, sourceIdAttribute, `${nextId++}`);
             });
 
-            this.elements = metadata.elements;
-            this.textContent = dom5.serialize(this.astDocument);
+            let elements = metadata.elements;
+            let textContent = dom5.serialize(astDocument);
 
-            this._domCommandApplier = new DomCommandApplier(this.domDocument);
+            let splitUrl = url.split('/');
+            let filename = splitUrl[splitUrl.length - 1];
+
+            this._domCommandApplier = new DomCommandApplier(domDocument);
             this._parsedCommandApplier =
-                new ParsedHtmlCommandApplier(this.astDocument);
+                new ParsedHtmlCommandApplier(astDocument);
+
+            // TODO(justinfagnani): cleanup
+            //   - define a class and jscompiler type?
+            //   - remove document element proeprties
+            //   - add method to query element by sourceId
+            //   - only include one public text document
+            //   - don't include both elements and analyzer?
+            this.documentInfo = {
+              domDocument: domDocument,
+              domDocumentElement: domDocumentElement,
+              astDocument: astDocument,
+              astDocumentElement: astDocumentElement,
+              elements: elements,
+              textContent: textContent,
+              analyzer: analyzer,
+              source: content,
+              url: url,
+              filename: filename,
+            };
           }.bind(this));
 
         }.bind(this));
       },
 
-      _currentNodeChanged() {
-        let path = this.currentPath = (this.currentNode)
-            ? pathLib.getNodePath(this.currentNode, this.domDocument)
-            : null;
-        this.currentSourceId = (this.currentNode && this.currentNode.nodeType === Node.ELEMENT_NODE)
-            ? this.currentNode.getAttribute(nodeIdProperty)
-            : null;
-        if (this.client != null) {
-          this.client.selectElementAtPath(path).then(function(response) {
-            this.fire('designer-document-update', response);
-          }.bind(this));
+      /**
+       * Sets the current source ID which we use to set the current selection.
+       *
+       * @param {string} sourceId The source ID of the element to select.
+       * @returns {Promise<>} A promise that completes with the operation.
+       */
+      setSourceId(sourceId) {
+        if (sourceId == null || this.client == null) {
+          this.selection = null;
+          return Promise.resolve();
+        } else {
+          return this.client.selectElementForSourceId(sourceId)
+            .then(function(response) {
+              let tagName = response.elementInfo.tagName;
+              // TODO(justinfagnani): create class for selectino object
+              this.selection = {
+                elementInfo: response.elementInfo,
+                bounds: response.bounds,
+                // TODO(justinfagnani): add method for retrieving elements by id
+                node: this.documentInfo.domDocument.querySelector(
+                    `[${sourceIdAttribute}="${sourceId}"]`),
+                analysisInfo: this._getAnalysisInfo(tagName),
+              };
+            }.bind(this));
         }
       },
 
-      _currentPathChanged() {
-        this.currentNode = (this.currentPath)
-            ? pathLib.getNodeFromPath(this.currentPath, this.domDocument)
-            : null;
-      },
-
-      _currentSourceIdChanged() {
-        this.currentNode = (this.currentSourceId)
-            ? this.domDocument.querySelector(`[__designer_node_id__="${this.currentSourceId}"]`)
-            : null;
+      _getAnalysisInfo(tagName) {
+        return this.documentInfo.analyzer.elementsByTagName[tagName];
       },
 
       _clientConnectionChanged() {
         if (this.clientConnection) {
           this.client = new DocumentClient(this.clientConnection);
           this.client.getDocument().then(function(response) {
-            let id = response.id;
-            console.log('document id', response.id);
-            this._domNodes.set(id, this.domDocument);
+            this._domNodes.set(response.id, this.documentInfo.domDocument);
           }.bind(this));
         } else {
           this.client = null;
@@ -247,7 +210,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       executeCommand(command) {
         this._domCommandApplier.apply(command);
         this._parsedCommandApplier.apply(command);
-        this.textContent = dom5.serialize(this.astDocument);
+        this.set('documentInfo.textContent',
+            dom5.serialize(this.documentInfo.astDocument));
         this.client.sendCommand(command).then(function(response) {
           this.fire('designer-document-update', response);
         }.bind(this));
@@ -305,7 +269,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       let node;
       let nextId = 1;
       while(node = iterator.nextNode()) {
-        node.setAttribute(nodeIdProperty, nextId++);
+        node.setAttribute(sourceIdAttribute, nextId++);
       }
 
       doc.head.insertBefore(createFrameScriptElement(frameScript, doc),

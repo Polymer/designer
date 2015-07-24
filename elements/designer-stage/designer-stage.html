@@ -122,33 +122,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     'use strict';
 
     /**
-     * `<designer-stage>` is a WYSIWYG editing surface and container for
-     * an HTML document.
-     *
-     * @typedef {{
-     *   path: string,
-     *   tagName: string,
-     *   display: string,
-     *   position: string,
-     * }} CurrentElementInfo
+     * `<designer-stage>` hanldes user input for WYSIWYG editing.
      */
     Polymer({
       is: 'designer-stage',
 
       properties: {
 
-        /**
-         * @type {CurrentElementInfo}
-         */
-        currentElementInfo: {
+        selection: {
           type: Object,
-          notify: true,
-          value: null,
-        },
-
-        currentSourceId: {
-          type: String,
-          notify: true,
+          observer: '_selectionChanged',
         },
 
         /**
@@ -182,16 +165,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: false,
         },
 
-        domDocument: {
+        documentInfo: {
           type: Object,
-          observer: '_domDocumentChanged',
+          observer: '_documentInfoChanged',
         },
 
         client: {
-          type: Object,
-        },
-
-        analyzer: {
           type: Object,
         },
 
@@ -212,12 +191,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._reset();
       },
 
-      _domDocumentChanged() {
+      _documentInfoChanged() {
         this._reset();
       },
 
       _reset() {
-        this.currentElementInfo = null;
         this.currentMousePosition = null;
         this.insertPosition = null;
         this.hoverSourceId = null;
@@ -228,17 +206,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.caret.style.display = 'none';
       },
 
-      applyDocumentUpdate(update) {
-        this._updateCurrentElement(update.elementInfo);
-        this._updateSelectionBounds(update.bounds);
-      },
-
-      getAnalyzedElement(elementInfo) {
-        return this.analyzer.elementsByTagName[elementInfo.tagName.toLowerCase()];
-      },
-
       _updateSelectionBounds(bounds) {
-        this.currentElementInfo.bounds = bounds;
         var style = this.$.selection.style;
         style.display = 'block';
         style.top = bounds.top + 'px';
@@ -247,31 +215,42 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         style.height = bounds.height + 'px';
       },
 
-      _updateCurrentElement(elementInfo) {
-        // TODO(justinfagnani): the stage should not be invoking the analyzer.
-        // move this to designer-document
-        elementInfo.analyzed = this.getAnalyzedElement(elementInfo);
-        this.currentElementInfo = elementInfo;
+      _selectElement(elementInfo) {
         this.fire('designer-select-element', {
+          // TODO(justinfagnani): this is a waste of the elementInfo, which
+          // will be retreived again by designer-document, but it's a little
+          // simpler to reason about elementInfo always coming from one place
+          // at the moment.
           sourceId: elementInfo.sourceId,
         }, { bubbles: true, });
+      },
 
-        // Set the valid resize handles
-        var position = elementInfo.position;
-        var display = elementInfo.display;
+      _selectionChanged() {
+        if (this.selection == null) {
+          this._reset();
+          return;
+        }
+        if (this.selection.bounds) {
+          this._updateSelectionBounds(this.selection.bounds);
+          // Set the valid resize handles
+          var position = this.selection.elementInfo.position;
+          var display = this.selection.elementInfo.display;
 
-        if (position === 'static' || position === 'relative') {
-          if (display === 'block') {
-            selection.directions = ResizeDirection.WIDTH_HEIGHT;
-          } else if (display === 'inline') {
-            selection.directions = [];
+          if (position === 'static' || position === 'relative') {
+            if (display === 'block') {
+              this.$.selection.directions = ResizeDirection.WIDTH_HEIGHT;
+            } else if (display === 'inline') {
+              this.$.selection.directions = [];
+            }
+            this.$.proxy.innerHTML = this.selection.elementInfo.proxy;
+          } else if (position === 'absolute') {
+            this.$.selection.directions = ResizeDirection.ALL_DIRECTIONS;
+          } else {
+            console.warn("can't handle position", data.position);
+            this.$.selection.directions = [];
           }
-          this.$.proxy.innerHTML = this.currentElementInfo.proxy;
-        } else if (position === 'absolute') {
-          selection.directions = ResizeDirection.ALL_DIRECTIONS;
         } else {
-          console.warn("can't handle position", data.position);
-          selection.directions = [];
+          this.$.selection.hide();
         }
 
       },
@@ -294,8 +273,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         hoverStyle.width = bounds.width + 'px';
         hoverStyle.height = bounds.height + 'px';
 
-        if (this.currentElementInfo &&
-            this.currentElementInfo.position == 'static') {
+        if (this.selection &&
+            this.selection.elementInfo.position == 'static') {
           var verticalMid = bounds.top + bounds.height / 2;
           var insertAbove = this.currentMousePosition.y < verticalMid;
           var insertBelow = this.currentMousePosition.y > verticalMid;
@@ -329,7 +308,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._mode = 'text';
         this.$.selection.hide();
         let style = this.$['text-edit-selection'].style;
-        let bounds = this.currentElementInfo.bounds;
+        let bounds = this.selection.bounds;
         style.display = 'block';
         // offset must be keep in sync with the border size in CSS
         style.top = (bounds.top - 4) + 'px';
@@ -351,6 +330,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var bounds = e.detail.bounds;
         this.client.selectionBoundsChanged(bounds)
           .then(function(response) {
+            // TODO(justinfagnani): fire event
             this._updateSelectionBounds(response.bounds);
           }.bind(this));
       },
@@ -372,7 +352,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }.bind(this));
               };
               if (response.elementInfo) {
-                this._updateCurrentElement(response.elementInfo);
+                this._selectElement(response.elementInfo);
               }
               if (response.bounds) {
                 this._updateSelectionBounds(response.bounds);
@@ -384,7 +364,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _updateDragProxy(bounds) {
         var proxy = this.$.proxy;
         var proxyStyle = proxy.style;
-        if (this.currentElementInfo.position === 'static') {
+        if (this.selection.elementInfo.position === 'static') {
           proxyStyle.display = 'block';
           proxyStyle.top = bounds.top + 'px';
           proxyStyle.left = bounds.left + 'px';
@@ -406,8 +386,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         let position = domUtils.toLocalPosition(this, e.clientX, e.clientY);
         this.client.selectElementAtPoint(position.x, position.y)
             .then(function(response) {
-              this._updateCurrentElement(response.elementInfo);
-              this._updateSelectionBounds(response.bounds);
+              this._selectElement(response.elementInfo);
               // Start a drag after selection if the mouse is still down.
               if (this._mouseDown) {
                 this.$.selection._boundsDown(e);
@@ -436,7 +415,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (this.hoverSourceId != null && this.insertPosition != null) {
           this.fire('designer-command',
             commands.moveElement(
-              this.currentElementInfo.sourceId,
+              this.selection.elementInfo.sourceId,
               this.hoverSourceId,
               this.insertPosition));
         }
@@ -449,8 +428,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         let position = domUtils.toLocalPosition(this, e.clientX, e.clientY);
         this.client.selectElementAtPoint(position.x, position.y)
           .then(function(response) {
-            this._updateCurrentElement(response.elementInfo);
-            this._updateSelectionBounds(response.bounds);
+            this._selectElement(response.elementInfo);
             this.enterTextMode();
           }.bind(this));
       },
@@ -459,8 +437,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         let position = domUtils.toLocalPosition(this, e.clientX, e.clientY);
         this.client.selectElementAtPoint(position.x, position.y)
           .then(function(response) {
-            this._updateCurrentElement(response.elementInfo);
-            this._updateSelectionBounds(response.bounds);
+            this._selectElement(response.elementInfo);
           }.bind(this));
       },
 
