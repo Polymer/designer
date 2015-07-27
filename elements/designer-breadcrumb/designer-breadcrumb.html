@@ -7,7 +7,7 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<link rel="import" href="../../src/commands/commands.html">
+<link rel="import" href="../../src/dom-utils/dom-utils.html">
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../../../paper-tabs/paper-tabs.html">
 <link rel="import" href="../../../paper-tabs/paper-tab.html">
@@ -31,7 +31,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </style>
 
   <template>
-    <paper-tabs selected="{{selectedIndex}}" noink noslide>
+    <paper-tabs selected="{{_selectedIndex}}" noink noslide>
       <template is="dom-repeat" items="[[_tabNames]]">
         <paper-tab>[[item]]</paper-tab>
       </template>
@@ -62,9 +62,8 @@ define(['polymer-designer/dom-utils'], function(domUtils) {
       /**
        * @type {number}
        */
-      selectedIndex: {
+      _selectedIndex: {
         type: Number,
-        notify: true,
         value: 0,
         observer: '_selectedIndexChanged',
       },
@@ -89,7 +88,7 @@ define(['polymer-designer/dom-utils'], function(domUtils) {
     _nodeChanged() {
       let node = this.node;
 
-      if (node === null) {
+      if (node == null) {
         this._nodePath = [];
         this._tabNames = [];
         return;
@@ -99,7 +98,7 @@ define(['polymer-designer/dom-utils'], function(domUtils) {
       // recompute the breadcrumb path, just select the new node.
       let index = this._nodePath.indexOf(node);
       if (index !== -1) {
-        this.selectedIndex = index;
+        this._setIndex(index);
         return;
       }
 
@@ -112,13 +111,22 @@ define(['polymer-designer/dom-utils'], function(domUtils) {
         }
         return name;
       });
-      this.selectedIndex = this._nodePath.length - 1;
+      this._setIndex(this._nodePath.length - 1);
+    },
+
+    // prevents firing designer-select-element when index changes from the
+    // node being set externally
+    _setIndex(index) {
+      this._settingIndex = true;
+      this._selectedIndex = index;
+      this._settingIndex = false;
     },
 
     _selectedIndexChanged() {
-      if (this._nodePath !== null &&
-          this.selectedIndex < this._nodePath.length) {
-        let newNode = this._nodePath[this.selectedIndex];
+      if (!this._settingIndex &&
+          this._nodePath != null &&
+          this._selectedIndex < this._nodePath.length) {
+        let newNode = this._nodePath[this._selectedIndex];
         this.fire('designer-select-element', {
           sourceId: domUtils.getSourceId(newNode),
         }, { bubbles: true, });

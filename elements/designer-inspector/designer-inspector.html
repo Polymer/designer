@@ -23,25 +23,21 @@ Inspects an element and provides tidbits about its properties, styles, and more.
       display: block;
       overflow: auto;
     }
-    .dumped-state {
-      font-size: 0.7em;
-      overflow: hidden;
-    }
   </style>
 
   <template>
     <designer-style-inspector
-        source-document="{{sourceDocument}}"
-        element-info="{{elementInfo}}"></designer-style-inspector>
+        source-document="[[sourceDocument]]"
+        selection="[[selection]]">
+    </designer-style-inspector>
     <designer-property-inspector
-        element-info="{{elementInfo}}"></designer-property-inspector>
-<!--         <div>{{_dumpedState}}</div> -->
+        selection="[[selection]]">
+    </designer-property-inspector>
   </template>
 
 </dom-module>
 
 <script>
-
   Polymer({
 
     is: 'designer-inspector',
@@ -51,20 +47,11 @@ Inspects an element and provides tidbits about its properties, styles, and more.
       /**
        * Metadata published by the stage about the currently selected element.
        */
-      'elementInfo': {
-        type:      Object,
-        observer: '_elementInfoChanged',
-      },
+      selection: Object,
 
       /** The document where edits should be made */
-      'sourceDocument': Object,
-
-    },
-
-    _elementInfoChanged() {
-      this._dumpedState = JSON.stringify(this.elementInfo, null, 1);
+      documentInfo: Object,
     },
 
   });
-
 </script>

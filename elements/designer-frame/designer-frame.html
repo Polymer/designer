@@ -48,9 +48,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       properties: {
 
-        document: {
+        documentInfo: {
           type: Object,
-          observer: '_documentChanged',
+          observer: '_documentInfoChanged',
         },
 
         clientConnection: {
@@ -60,16 +60,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       },
 
-      /**
-       * @returns {Promise} a Promise that completes when the document has
-       * loaded.
-       *
-       * Note: this method isn't called from anywhere than can handle the
-       * Promise at the moment. The assumption for now is that the side-effect
-       * here (setting this.client) is only needed after the content loads
-       * anyway, such as when the use clicks on an element.
-       */
-      _documentChanged() {
+      _documentInfoChanged() {
         if (this.clientConnection != null) {
           this.clientConnection.disconnect();
           this.clientConnection = null;
@@ -88,7 +79,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               new ClientConnection(window, this._frame.contentWindow);
         }.bind(this));
 
-        this._frame.src = getDocumentUrl(this.document);;
+        this._frame.src = getDocumentUrl(this.documentInfo.domDocument);
       },
 
     });
