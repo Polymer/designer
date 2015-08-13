@@ -9,116 +9,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../../../polymer/polymer.html">
-<link rel="import" href="designer-inspector-behavior.html">
 <link rel="import" href="../../../paper-input/paper-input.html">
-
-<dom-module id="designer-property-inspector-value">
-  <style>
-  </style>
-  <template>
-    <paper-input id="input" on-value-changed="_onInputValueChanged"></paper-input>
-  </template>
-  <script>
-
-    define([
-      'polymer-designer/commands'],
-        function(commands) {
-      'use strict';
-      Polymer({
-        is: 'designer-property-inspector-value',
-
-        properties: {
-          property: {
-            type: Object,
-          },
-
-          currentNode: {
-            type: Object,
-          },
-
-          elementInfo: {
-            type: Object,
-          },
-
-          _updatingInputValue: {
-            type: Boolean,
-            value: false
-          }
-        },
-
-        observers: [
-          '_updateInputValue(currentNode, elementInfo, property)'
-        ],
-
-        get _kebabPropertyName() {
-          return Polymer.CaseMap.camelToDashCase(this.property.name);
-        },
-
-        _updateInputValue(currentNode, elementInfo, property) {
-          console.log('UPDATING PROPERTY', elementInfo);
-
-          this._updatingInputValue = true;
-
-          if (currentNode.hasAttribute(this._kebabPropertyName)) {
-            this.$.input.value = this._attributeValueForProperty;
-          } else {
-            this.$.input.value = this._defaultValueForProperty;
-          }
-
-          this._updatingInputValue = false;
-        },
-
-        get _attributeValueForProperty() {
-          return this.currentNode.getAttribute(this._kebabPropertyName);
-        },
-
-        get _defaultValueForProperty() {
-          for (let descriptor of this.elementInfo.analyzed.properties) {
-            if (descriptor.name === this.property.name) {
-              return descriptor.default;
-            }
-          }
-        },
-
-        _onInputValueChanged(event) {
-          if (!this.elementInfo || !this.currentNode || this._updatingInputValue) {
-            return;
-          }
-
-          console.log('FIRING COMMAND', event.detail.value);
-          this.fire('designer-command',
-            commands.setAttribute(
-              this.elementInfo.sourceId,
-              this._kebabPropertyName,
-              this._attributeValueForProperty,
-              event.detail.value),
-            {
-              bubbles: true
-            });
-        }
-      });
-    });
-  </script>
-</dom-module>
+<link rel="import" href="designer-inspector-behavior.html">
+<link rel="import" href="designer-property-inspector-editor.html">
 
 <dom-module id="designer-property-inspector">
   <style>
     :host {
-      color: #fff;
+      display: block;
     }
   </style>
   <template>
-    <span>Properties</span>
+    <h2>Properties</h2>
     <table>
-      <template is="dom-repeat" items="[[elementInfo.analyzed.properties]]" as="property">
+      <template is="dom-repeat" items="[[_properties]]" as="property">
         <tr>
           <td>[[property.name]]</td>
           <td>
-            <designer-property-inspector-value
-              current-node="[[currentNode]]"
-              element-info="[[elementInfo]]"
+            <designer-property-inspector-editor
+              selection="[[selection]]"
+              document-info="[[documentInfo]]"
               property="[[property]]">
-            </designer-property-inspector-value>
+            </designer-property-inspector-editor>
           </td>
         </tr>
       </template>
@@ -135,35 +47,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         Polymer.DesignerInspectorBehavior
       ],
 
-      observers: [
-        //'_updatePropertyInspector(currentNode, elementInfo)',
-      ],
-
-      _updatePropertyInspector(currentNode, elementInfo) {
-        // TODO: change to constant from some file:
-        if (currentNode.getAttribute('__designer_node_id__') !== elementInfo.sourceId) {
-          return;
-        }
-      },
-
-      _valueForProperty(currentNode, elementInfo, property) {
-        var kebabifiedProperty = Polymer.CaseMap.camelToDashCase(property.name);
-        console.log('UPDATING PROPERTY', elementInfo);
-
-        if (currentNode.hasAttribute(kebabifiedProperty)) {
-          console.log('Attribute:', currentNode.getAttribute(kebabifiedProperty));
-          return currentNode.getAttribute(kebabifiedProperty);
-        }
-
-        console.log('Default:', this._defaultValueForProperty(property.name));
-        return this._defaultValueForProperty(property.name);
-      },
-
       _selectionChanged() {
         this._properties = (this.selection &&
             this.selection.analysisInfo &&
             this.selection.analysisInfo.properties) || [];
-        if (this._properties.length == 0) {
+        if (this._properties.length === 0) {
           this._hide = true;
         } else {
           this._hide = false;
@@ -173,5 +61,3 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   </script>
 </dom-module>
-
-

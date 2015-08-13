@@ -9,13 +9,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../../../polymer/polymer.html">
-<link rel="import" href="../../../iron-pages/iron-pages.html">
 <link rel="import" href="../../../paper-tabs/paper-tabs.html">
 <link rel="import" href="../../../paper-styles/paper-styles.html">
 
 <link rel="import" href="designer-inspector-behavior.html">
-<link rel="import" href="designer-style-inspector.html">
 <link rel="import" href="designer-property-inspector.html">
+<link rel="import" href="designer-style-inspector.html">
 
 <!--
 Inspects an element and provides tidbits about its properties, styles, and more.
@@ -30,31 +29,17 @@ Inspects an element and provides tidbits about its properties, styles, and more.
 
       background: var(--designer-background-primary-color, --paper-grey-900);
       box-sizing: border-box;
+      color: var(--secondary-text-color);
       display: block;
       overflow: auto;
-
-      --paper-tab-content: {
-        color: var(--designer-primary-color, --paper-grey-400);
-      };
-    }
-
-    .dumped-state {
-      font-size: 0.7em;
-      overflow: hidden;
     }
   </style>
 
   <template>
-    <!--<paper-tabs selected="{{selectedPanelIndex}}">
-      <paper-tab>Properties</paper-tab>
-      <paper-tab>Styles</paper-tab>
-    </paper-tabs>-->
-    <iron-pages selected="0">
-      <designer-property-inspector
-        selection="[[selection]]"
-        source-document="[[sourceDocument]]">
-      <!--<designer-style-inspector selection="[[selection]]" source-document=[[source-document]]></designer-style-inspector>-->
-    </iron-pages>
+    <designer-property-inspector
+        document-info="[[documentInfo]]"
+        selection="[[selection]]">
+    <!--<designer-style-inspector selection="[[selection]]" source-document=[[source-document]]></designer-style-inspector>-->
   </template>
 
 </dom-module>
@@ -63,7 +48,6 @@ Inspects an element and provides tidbits about its properties, styles, and more.
   'use strict';
 
   Polymer({
-
     is: 'designer-inspector',
 
     behaviors: [
