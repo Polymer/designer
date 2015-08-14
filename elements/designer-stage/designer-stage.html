@@ -348,7 +348,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             .then(function(response) {
               if (response.commands) {
                 response.commands.forEach(function(command) {
-                  this.fire('designer-command', command);
+                  this.fire('designer-command', command, {
+                    bubbles: true
+                  });
                 }.bind(this));
               };
               if (response.elementInfo) {
@@ -417,7 +419,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             commands.moveElement(
               this.selection.elementInfo.sourceId,
               this.hoverSourceId,
-              this.insertPosition));
+              this.insertPosition), {
+                bubbles: true
+              });
         }
         this._hideHover();
         this.insertPosition = null;

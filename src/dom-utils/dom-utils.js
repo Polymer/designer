@@ -99,6 +99,13 @@ define('polymer-designer/dom-utils', function() {
     };
   }
 
+  function attributesForElement(element) {
+    return Array.prototype.reduce.call(element.attributes, function(attributes, attribute) {
+      attributes[attribute.name] = attribute.value;
+      return attributes;
+    }, {});
+  }
+
   return {
     designerNodeFilter: designerNodeFilter,
     getAncestors: getAncestors,
@@ -108,6 +115,7 @@ define('polymer-designer/dom-utils', function() {
     parseQueryString: parseQueryString,
     sourceIdAttribute: sourceIdAttribute,
     toLocalPosition: toLocalPosition,
+    attributesForElement: attributesForElement,
   };
 
 });

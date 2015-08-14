@@ -1,4 +1,5 @@
 <!--
+@license
 Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
 This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
 The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
@@ -8,73 +9,55 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../../paper-input/paper-input.html">
+<link rel="import" href="designer-inspector-behavior.html">
+<link rel="import" href="designer-property-inspector-editor.html">
 
-<!--
-Displays the style rules that currently apply to `element`, and provides an
-editing interface for them.
--->
 <dom-module id="designer-property-inspector">
-
   <style>
     :host {
-      box-sizing: border-box;
       display: block;
-      padding: 0 10px;
-    }
-
-    div {
-      margin: 10px 0;
     }
   </style>
-
   <template>
-    <div hidden="{{_hide}}">
-      <header>Properties</header>
-        <template is="dom-repeat" items="{{_properties}}">
-          <section>
-            <span>{{item.name}}</span> | <span>{{item.type}}</span>
-          </section>
-        </template>
-      </div>
+    <h2>Properties</h2>
+    <table>
+      <template is="dom-repeat" items="[[_properties]]" as="property">
+        <tr>
+          <td>[[property.name]]</td>
+          <td>
+            <designer-property-inspector-editor
+              selection="[[selection]]"
+              document-info="[[documentInfo]]"
+              property="[[property]]">
+            </designer-property-inspector-editor>
+          </td>
+        </tr>
+      </template>
+    </table>
   </template>
+  <script>
+    'use strict';
 
+    Polymer({
+
+      is: 'designer-property-inspector',
+
+      behaviors: [
+        Polymer.DesignerInspectorBehavior
+      ],
+
+      _selectionChanged() {
+        this._properties = (this.selection &&
+            this.selection.analysisInfo &&
+            this.selection.analysisInfo.properties) || [];
+        if (this._properties.length === 0) {
+          this._hide = true;
+        } else {
+          this._hide = false;
+        }
+      },
+    });
+
+  </script>
 </dom-module>
-
-<script>
-'use strict';
-
-Polymer({
-
-  is: 'designer-property-inspector',
-
-  properties: {
-
-    /**
-     * Metadata published by the stage about the currently selected element.
-     */
-    selection: {
-      type: Object,
-      observer: '_selectionChanged',
-    },
-
-  },
-
-  attached: function(){
-    this._hide = true;
-  },
-
-  _selectionChanged() {
-    this._properties = (this.selection &&
-        this.selection.analysisInfo &&
-        this.selection.analysisInfo.properties) || [];
-    if (this._properties.length == 0) {
-      this._hide = true;
-    } else {
-      this._hide = false;
-    }
-  },
-
-
-});
-
-</script>

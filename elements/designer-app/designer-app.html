@@ -136,13 +136,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       text-decoration: underline;
       cursor: pointer;
     }
-    designer-inspector {
-      background: var(--dark-primary-color);
-      color: var(--secondary-text-color);
-      display: flex;
-      flex: 0 0 200px;
-      flex-direction: column;
-    }
     #doc-view {
       display: flex;
       flex: 1;
@@ -265,8 +258,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 id="stage"
                 document-info="[[documentInfo]]"
                 client="[[client]]"
-                selection="[[selection]]"
-                on-designer-command="_onDesignerCommand">
+                selection="[[selection]]">
               <designer-frame
                   id="frame"
                   client-connection="{{clientConnection}}"
@@ -343,6 +335,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       listeners: {
         'designer-select-element': '_onDesignerSelectElement',
+        'designer-command': '_onDesignerCommand',
       },
 
       _initializeDesignerApp: function(fileServiceConfig) {
@@ -362,8 +355,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onDesignerCommand(event, command) {
-        // Event fired from designer-stage containing an edit command,
-        // forward to the designer-document.
         this.$.document.executeCommand(command);
       },
 
