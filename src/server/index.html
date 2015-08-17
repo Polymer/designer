@@ -5,6 +5,10 @@
     <link rel="import" href="/components/polymer-designer/src/polyfills/polyfills.html">
     <link rel="import" href="/components/font-roboto/roboto.html">
     <link rel="import" href="/components/polymer-designer/elements/designer-app/designer-app.html">
+    <link rel="import" href="/components/polymer-designer/elements/designer-files-demos/designer-files-demos.html">
+    <link rel="import" href="/components/polymer-designer/elements/hydrolysis/hydrolysis-analyzer.html">
+    <link rel="import" href="/components/polymer-designer/elements/hydrolysis/hydrolysis-loader.html">
+    <link rel="import" href="/components/polymer-designer/elements/hydrolysis/hydrolysis-xhr-resolver.html">
     <style>
       html, body {
         margin: 0;
@@ -19,6 +23,13 @@
     </style>
   </head>
   <body>
-    <designer-app></designer-app>
+    <designer-app>
+      <designer-files-demos></designer-files-demos>
+      <hydrolysis-analyzer>
+        <hydrolysis-loader>
+          <hydrolysis-xhr-resolver></hydrolysis-xhr-resolver>
+        </hydrolysis-loader>
+      </hydrolysis-analyzer>
+    </designer-app>
   </body>
 </html>
