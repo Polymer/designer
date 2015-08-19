@@ -18,6 +18,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <link rel="stylesheet" href="../../../mocha/mocha.css"/>
     <link rel="import" href="../../../polymer/polymer.html"/>
     <link rel="import" href="../../src/commands/commands.html"/>
+    <link rel="import" href="../../src/dom-utils/dom-utils.html"/>
   </head>
   <body>
     <div id="mocha"></div>
@@ -26,13 +27,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 define([
       'polymer-designer/commands/DomCommandApplier',
       'polymer-designer/commands',
-      'polymer-designer/path'],
-    function(DomCommandApplier, commands, pathlib) {
+      'polymer-designer/dom-utils'],
+    function(DomCommandApplier, commands, domUtils) {
 
   mocha.setup('tdd');
   // mocha.checkLeaks();
 
   var assert = chai.assert;
+  const sourceIdAttribute = domUtils.sourceIdAttribute;
 
   suite('DomCommandApplier', function() {
     var testDoc;
@@ -42,14 +44,17 @@ define([
 
       setup(function() {
         testDoc = document.implementation.createHTMLDocument('test');
-        testDoc.body.innerHTML = "<div id='A' class='test'><div id='B'></div></div>";
+        testDoc.body.innerHTML =
+            `<div id='A' class='test' ${sourceIdAttribute}='1'>
+               <div id='B' ${sourceIdAttribute}='2'></div>
+             </div>`;
         commandApplier = new DomCommandApplier(testDoc);
       });
 
       test('applies a new attribute', function() {
         var node = testDoc.querySelector('#A');
         var command = commands.setAttribute(
-            pathlib.getNodePath(node, testDoc),
+            node.getAttribute(sourceIdAttribute),
             'foo',
             null,
             'bar');
@@ -60,7 +65,7 @@ define([
       test('applies a new value to an existing attribute', function() {
         var node = testDoc.querySelector('#A');
         var command = commands.setAttribute(
-            pathlib.getNodePath(node, testDoc),
+            node.getAttribute(sourceIdAttribute),
             'class',
             'test',
             'test2');
@@ -71,7 +76,7 @@ define([
       test('fails to apply a new value if the old value is wrong', function() {
         var node = testDoc.querySelector('#A');
         var command = commands.setAttribute(
-            pathlib.getNodePath(node, testDoc),
+            node.getAttribute(sourceIdAttribute),
             'class',
             'test1',
             'test2');
@@ -83,7 +88,7 @@ define([
       test('fails to apply a new value if the old value is null', function() {
         var node = testDoc.querySelector('#A');
         var command = commands.setAttribute(
-            pathlib.getNodePath(node, testDoc),
+            node.getAttribute(sourceIdAttribute),
             'foo',
             'bar',
             'bar2');
@@ -95,7 +100,7 @@ define([
       test('undoes a new value to an existing attribute', function() {
         var node = testDoc.querySelector('#A');
         var command = commands.setAttribute(
-            pathlib.getNodePath(node, testDoc),
+            node.getAttribute(sourceIdAttribute),
             'class',
             'test-1',
             'test');

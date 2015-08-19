@@ -18,6 +18,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <link rel="stylesheet" href="../../../mocha/mocha.css"/>
     <link rel="import" href="../../../polymer/polymer.html"/>
     <link rel="import" href="../../src/dom5/dom5.html"/>
+    <link rel="import" href="../../src/dom-utils/dom-utils.html"/>
     <link rel="import" href="../../src/commands/commands.html"/>
     <link rel="import" href="../../src/hydrolysis/hydrolysis.html">
   </head>
@@ -26,16 +27,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <script>
 define([
-  'polymer-designer/commands/ParsedHtmlCommandApplier',
-  'polymer-designer/commands',
-  'polymer-designer/path',
-  'dom5'],
-    function(ParsedHtmlCommandApplier, commands, pathlib, dom5) {
+      'polymer-designer/commands/ParsedHtmlCommandApplier',
+      'polymer-designer/commands',
+      'dom5',
+      'polymer-designer/dom-utils'],
+    function(ParsedHtmlCommandApplier, commands, dom5, domUtils) {
 
   mocha.setup('tdd');
   // mocha.checkLeaks();
 
   var assert = chai.assert;
+  const sourceIdAttribute = domUtils.sourceIdAttribute;
 
   suite('ParsedHtmlCommandApplier', function() {
     var testDoc;
@@ -44,7 +46,11 @@ define([
     suite('setAttribute comand', function() {
 
       setup(function() {
-        var testDocText = "<!DOCTYPE html><div id='A' class='test'><div id='B'></div></div>";
+        var testDocText =
+            `<!DOCTYPE html>
+             <div id='A' class='test' ${sourceIdAttribute}='1'>
+               <div id='B' ${sourceIdAttribute}='2'></div>
+             </div>`;
         testDoc = dom5.parse(testDocText);
         commandApplier = new ParsedHtmlCommandApplier(testDoc);
       });
@@ -53,7 +59,7 @@ define([
         //         doc html          body          div#a
         var divA = testDoc.childNodes[1].childNodes[1].childNodes[0];
         var command = commands.setAttribute(
-            pathlib.getNodePath(divA, testDoc),
+            dom5.getAttribute(divA, sourceIdAttribute),
             'foo',
             null,
             'bar');
@@ -65,7 +71,7 @@ define([
         //         doc html          body          div#a
         var divA = testDoc.childNodes[1].childNodes[1].childNodes[0];
         var command = commands.setAttribute(
-            pathlib.getNodePath(divA, testDoc),
+            dom5.getAttribute(divA, sourceIdAttribute),
             'class',
             'test',
             'test2');
@@ -77,7 +83,7 @@ define([
         //         doc html          body          div#a
         var divA = testDoc.childNodes[1].childNodes[1].childNodes[0];
         var command = commands.setAttribute(
-            pathlib.getNodePath(divA, testDoc),
+            dom5.getAttribute(divA, sourceIdAttribute),
             'class',
             'test1',
             'test2');
@@ -90,7 +96,7 @@ define([
         //         doc html          body          div#a
         var divA = testDoc.childNodes[1].childNodes[1].childNodes[0];
         var command = commands.setAttribute(
-            pathlib.getNodePath(divA, testDoc),
+            dom5.getAttribute(divA, sourceIdAttribute),
             'foo',
             'bar',
             'bar2');
@@ -103,7 +109,7 @@ define([
         //         doc html          body          div#a
         var divA = testDoc.childNodes[1].childNodes[1].childNodes[0];
         var command = commands.setAttribute(
-            pathlib.getNodePath(divA, testDoc),
+            dom5.getAttribute(divA, sourceIdAttribute),
             'class',
             'test-1',
             'test');
