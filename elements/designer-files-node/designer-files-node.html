@@ -13,8 +13,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 (function() {
   'use strict';
 
-  console.log('hahaha');
-
   let fs = require('q-io/fs');
   let fsSync = require('fs');
   let pathLib = require('path');
@@ -36,12 +34,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     },
 
-    created() {
-      console.log('designer-files-node created');
-    },
-
     attached() {
-      console.log('designer-files-node attached');
       this.fire('designer-files-ready');
     },
 
