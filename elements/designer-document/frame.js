@@ -249,16 +249,56 @@ define('polymer-designer/dom-utils', function() {
     }, {});
   }
 
+  /**
+   * Sets the left, top, width and height of [element] from [bounds]. Useful
+   * for absolutely positioning elements.
+   *
+   * @param element {Element}
+   * @param bounds {ClientRect|Object}
+   */
+  function setBounds(element, bounds) {
+    var style = element.style;
+    style.top = bounds.top + 'px';
+    style.left = bounds.left + 'px';
+    style.width = bounds.width + 'px';
+    style.height = bounds.height + 'px';
+  }
+
+
+  /**
+   * Sets [element]'s style display property to [display] or 'block' if
+   * [display] is not specified.
+   *
+   * @param element {Element}
+   * @param display {string|Null}
+   */
+  function show(element, display) {
+    element.style.display = display || 'block';
+  }
+
+  /**
+   * Sets [element]'s style display property to 'none';
+   *
+   * @param element {Element}
+   */
+  function hide(element) {
+    element.style.display = 'none';
+  }
+
   return {
+    attributesForElement: attributesForElement,
     designerNodeFilter: designerNodeFilter,
     getAncestors: getAncestors,
     getDocumentElement: getDocumentElement,
     getSourceId: getSourceId,
+    hide: hide,
+    isDescendant: isDescendant,
     isDescendant: isDescendant,
     parseQueryString: parseQueryString,
+    setBounds: setBounds,
+    show: show,
     sourceIdAttribute: sourceIdAttribute,
     toLocalPosition: toLocalPosition,
-    attributesForElement: attributesForElement,
   };
 
 });

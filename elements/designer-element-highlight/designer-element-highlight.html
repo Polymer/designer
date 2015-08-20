@@ -1,0 +1,137 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<html>
+  <head>
+    <link rel="import" href="../../../polymer/polymer.html">
+  </head>
+  <body>
+
+    <dom-module id="designer-element-highlight">
+      <style>
+        :host {
+          display: block;
+          position: absolute;
+          box-sizing: border-box;
+        }
+        :host.insert-top {
+          border-top: solid 4px black;
+        }
+        :host.insert-bottom {
+          border-bottom: solid 4px black;
+        }
+        :host.insert-left {
+          border-left: solid 4px black;
+        }
+        :host.insert-right {
+          border-right: solid 4px black;
+        }
+        :host.insert-into {
+          background: rgba(255, 128, 128, .75);
+        }
+        #bounds {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(255, 128, 128, .5);
+          border: solid 1px #f88;
+          box-sizing: border-box;
+        }
+      </style>
+      <template>
+        <div id="bounds"></div>
+      </template>
+    </dom-module>
+
+    <script type="text/javascript">
+    define([
+        'polymer-designer/commands',
+        'polymer-designer/dom-utils'],
+      function(commands, domUtils) {
+        'use strict';
+
+        Polymer({
+          is: 'designer-element-highlight',
+
+          properties: {
+            bounds: Object,
+          },
+
+          show() {
+            this.style.display = 'block';
+          },
+
+          hide() {
+            this.style.display = 'none';
+          },
+
+          // TODO(justinfagnani): I chose this terribly ugly and long name to
+          // encourage me to tighten up the hoverInfo/elementInfo data
+          // structures. So.... do that.
+          setElementInfoAndBounds(elementInfoAndBounds) {
+            this._elementInfoAndBounds = elementInfoAndBounds;
+            this.bounds = elementInfoAndBounds.bounds;
+            domUtils.setBounds(this, this.bounds);
+          },
+
+          /**
+           * Shows a marker indicating where an element would be inserted if it
+           * were dropped at the position ([x], [y]). The marker may be a lines
+           * at one of the borders, or may be an indicator that the element
+           * will be inserted as a child.
+           *
+           * @return {String} the insert operation, either 'before' or 'after'.
+           */
+          showInsertMarker(x, y) {
+            let edgeSize = 10;
+            let bounds = this.bounds;
+            let display = this._elementInfoAndBounds.elementInfo.display;
+            console.log('display', display);
+
+            let inline = display === 'inline' || display === 'inline-block';
+
+            let nearLeft = false;
+            let nearRight = false;
+            let nearTop = false;
+            let nearBottom = false;
+            let insertInto = false;
+
+            if (inline) {
+              nearLeft = x < bounds.left + edgeSize;
+              nearRight = x > bounds.left + bounds.width - edgeSize;
+              insertInto = !(nearLeft || nearRight);
+            } else {
+              nearTop = y < bounds.top + edgeSize;
+              nearBottom = y > bounds.top + bounds.height - edgeSize;
+              insertInto = !(nearTop || nearBottom);
+            }
+
+            let thisDom = Polymer.dom(this);
+            let insertPosition =
+              nearLeft || nearTop ? commands.InsertPosition.before :
+              nearRight || nearBottom ? commands.InsertPosition.after :
+              commands.InsertPosition.into;
+
+            thisDom.classList.toggle('insert-top', nearTop);
+            thisDom.classList.toggle('insert-left', nearLeft);
+            thisDom.classList.toggle('insert-right', nearRight);
+            thisDom.classList.toggle('insert-bottom', nearBottom);
+            thisDom.classList.toggle('insert-into', insertInto);
+
+            return insertPosition;
+          },
+
+        });
+      });
+    </script>
+  </body>
+</html>

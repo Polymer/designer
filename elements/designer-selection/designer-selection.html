@@ -88,8 +88,11 @@
     </dom-module>
 
     <script type="text/javascript">
-      define(['polymer-designer/designer-selection/ResizeDirection'],
-          function(ResizeDirection) {
+      define([
+            'polymer-designer/designer-selection/ResizeDirection',
+            'polymer-designer/dom-utils'],
+          function(ResizeDirection, domUtils) {
+            
         'use strict';
 
         Polymer({
@@ -112,6 +115,10 @@
 
           hide() {
             this.style.display = 'none';
+          },
+
+          setBounds(bounds) {
+            domUtils.setBounds(this, bounds);
           },
 
           _onMouseDown(e) {
