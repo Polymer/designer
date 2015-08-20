@@ -10,6 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../../src/dom-utils/dom-utils.html">
 <link rel="import" href="../designer-breadcrumb/designer-breadcrumb.html">
+<link rel="import" href="../designer-breakpoint-selector/designer-breakpoint-selector.html">
 <link rel="import" href="../designer-stage/designer-stage.html">
 
 <dom-module id="designer-ui-editor">
@@ -19,6 +20,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
+      align-items: center;
+    }
+    designer-breakpoint-selector {
+      flex: 0 0 40px;
+      width: 100%
     }
     designer-breadcrumb {
       background: var(--default-primary-color);
@@ -27,18 +33,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       border-width: 1px 0 1px 0;
       color: var(--primary-text-color);
       font-weight: normal;
+      width: 100%
     }
     designer-stage {
       flex: 1;
       position: relative;
+      width: 100%;
     }
   </style>
   <template>
+    <designer-breakpoint-selector breakpoint="{{breakpoint}}">
+    </designer-breakpoint-selector>
     <designer-stage
         id="stage"
         document-info="[[documentInfo]]"
         client="[[client]]"
-        selection="[[selection]]">
+        selection="[[selection]]"
+        size="{{breakpoint.size}}">
       <content></content>
     </designer-stage>
     <designer-breadcrumb node="[[selection.node]]" hidden$="{{_hideBreadcrumb}}">
@@ -72,6 +83,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Boolean,
           value: true,
         },
+
+        breakpoint: {
+          type: Object,
+        }
 
       },
 

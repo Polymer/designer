@@ -1,0 +1,220 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../../iron-selector/iron-selector.html">
+<link rel="import" href="../../src/dom-utils/dom-utils.html">
+
+<dom-module id="designer-breakpoint-selector">
+  <style>
+    :host {
+      display: block;
+      box-sizing: border-box;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #label-size {
+      position: absolute;
+      top: 0;
+      width: 200px;
+      z-index: 10000;
+      color: white;
+      left: 50%;
+      margin-left: -100px;
+      line-height: 40px;
+      text-align: center;
+      pointer-events:none;
+    }
+
+    #size-selector-topbar {
+      background: #333;
+      color: #666;
+      height: 40px;
+      white-space: nowrap;
+      border-bottom: 1px solid rgba(0,0,0,.15);
+      overflow: hidden;
+      position: absolute;
+      left: 0;
+      right: 0;
+    }
+
+    .item:hover {
+      background: #000;
+    }
+
+    .item {
+      border-right: 1px solid #666;
+      border-left: 1px solid #666;
+      height: 40px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 24px;
+      text-align: right;
+      -webkit-transition: .1s all;
+    }
+
+    iron-selector {
+      cursor: pointer;
+    }
+
+    .item.iron-selected {
+      border-right: 1px solid #ccc;
+      border-left: 1px solid #ccc;
+      background: #000;
+    }
+
+    .item.iron-selected .px:before {
+      border-top: 5px solid #fff;
+    }
+
+    .item.iron-selected .px {
+      color: white;
+    }
+
+    .item .px {
+      margin-right: 12px;
+      margin-left: 12px;
+    }
+
+    .right {
+      float: right;
+    }
+
+    .left {
+      float: left;
+    }
+
+    .item .px.right:before {
+      position: absolute;
+      content: "";
+      right: -5px;
+      width: 0;
+    	height: 0;
+    	border-left: 5px solid transparent;
+    	border-right: 5px solid transparent;
+    	border-top: 5px solid #666;/*rgba(255,255,255,.6)*/
+    }
+
+    .item .px.left:before {
+      position: absolute;
+      content: "";
+      left: -5px;
+      width: 0;
+    	height: 0;
+    	border-left: 5px solid transparent;
+    	border-right: 5px solid transparent;
+    	border-top: 5px solid #666;/*rgba(255,255,255,.6)*/
+    }
+  </style>
+  <template>
+    <div id="size-selector-topbar">
+
+      <iron-selector selected="{{selectedIndex}}">
+        <template is="dom-repeat" items="[[breakpoints]]">
+          <div name$="[[item.size]]"
+              class="item"
+              style$="[[cssWidth(item.size, index)]]">
+            <div title="[[item.size]]" class="left px">{{item.size}}</div>
+            <div title="[[item.size]]" class="right px">{{item.size}}</div>
+          </div>
+        </template>
+      </iron-selector>
+
+    </div>
+    <div id="label-size">[[breakpoint.name]]</div>
+
+  </template>
+</dom-module>
+
+<script>
+define(['polymer-designer/dom-utils'], function(domUtils) {
+  'use strict';
+
+  Polymer({
+    is: 'designer-breakpoint-selector',
+
+    properties: {
+
+      breakpoints: {
+        type: Array,
+        value: function() {
+          return [
+            {
+              size: 480,
+              name: 'Desktop XS',
+            },
+            {
+              size: 600,
+              name: 'Desktop SM',
+            },
+            {
+              size: 840,
+              name: 'Desktop MED',
+            },
+            {
+              size: 960,
+              name: 'Desktop MED',
+            },
+            {
+              size: 1280,
+              name: 'Desktop LG',
+            },
+            {
+              size: 1440,
+              name: 'Desktop XL',
+            },
+          ];
+        }
+      },
+
+      breakpoint: {
+        type: Object,
+        notify: true,
+        observer: '_breakpointChanged',
+      },
+
+      selectedIndex: {
+        type: Number,
+        notify: true,
+        observer: '_selectedIndexChanged',
+      }
+    },
+
+    _selectedIndexChanged() {
+      if (this._updating) return;
+      this._updating = true;
+      if (this.breakpoints != null &&
+          this.selectedIndex >= 0 &&
+          this.selectedIndex < this.breakpoints.length) {
+        this.breakpoint = this.breakpoints[this.selectedIndex];
+      } else {
+        this.breakpoint = null;
+      }
+      this._updating = false;
+    },
+
+    _breakpointChanged() {
+      if (this._updating) return;
+      this._updating = true;
+      this.selectedIndex = this.breakpoints.indexOf(this.breakpoint);
+      this._updating = false;
+    },
+
+    cssWidth(value, index) {
+      return `width: ${value}px; z-index:${100-index}; left: 50%; margin-left:-${value/2}px`;
+    },
+
+  });
+});
+</script>
