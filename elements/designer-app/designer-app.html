@@ -182,6 +182,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </style>
 
   <template>
+    <div id="hidden-stuff" hidden="true">
+      <designer-document
+          id="document"
+          client-connection="[[clientConnection]]"
+          client="{{client}}"
+          document-info="{{documentInfo}}"
+          selection="{{selection}}"
+          analyzer="[[analyzer]]">
+      </designer-document>
+      <content></content>
+    </div>
     <designer-mini-nav>
       <div class="small">
         <div id="logo">
