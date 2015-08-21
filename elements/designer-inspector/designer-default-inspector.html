@@ -1,0 +1,114 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../../paper-input/paper-input.html">
+<link rel="import" href="../../../paper-styles/paper-styles.html">
+<link rel="import" href="designer-inspector-behavior.html">
+
+<dom-module id="designer-default-inspector">
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 16px;
+        border-bottom: solid 1px rgba(255, 255, 255, .25);
+      }
+      h2 {
+        @apply(--designer-inspector-title);
+      }
+      paper-input {
+        @apply(--designer-inspector-row-value);
+      }
+      label {
+        @apply(--designer-inspector-row-label);
+      }
+      .inspector-row {
+        @apply(--designer-inspector-row);
+      }
+    </style>
+    <h2>Element</h2>
+    <div class="inspector-row">
+      <label>Tag Name</label>
+      <paper-input
+          no-label-float="true"
+          value="[[selection.elementInfo.tagName]]"
+          on-value-changed="_tagNameChanged">
+      </paper-input>
+    </div>
+    <div class="inspector-row">
+      <label>id</label>
+      <paper-input
+          no-label-float="true"
+          value="[[selection.node.id]]"
+          on-value-changed="_idChanged">
+      </paper-input>
+    </div>
+  </template>
+  <script>
+  define(['polymer-designer/commands'], function(commands) {
+    'use strict';
+
+    Polymer({
+
+      is: 'designer-default-inspector',
+
+      behaviors: [
+        Polymer.DesignerInspectorBehavior
+      ],
+
+      _idChanged(event) {
+        this._attributeChanged('id', event);
+      },
+
+      _tagNameChanged(event) {
+        // console.log('tagNameChanged', event);
+        if (!this.selection || this._updating) {
+          return;
+        }
+        let newValue = event.detail.value.toLowerCase();
+        let oldValue = this.selection.elementInfo.tagName.toLowerCase();
+        if (newValue === oldValue) {
+          return;
+        }
+        // console.log('  handling');
+        this._updating = true;
+        let command = commands.setTagName(
+            this.selection.elementInfo.sourceId,
+            oldValue,
+            newValue);
+        this.fire('designer-command', command, { bubbles: true });
+        Promise.resolve().then(function() {
+          this._updating = false;
+        }.bind(this));
+      },
+
+      _attributeChanged(attribute, event) {
+        if (!this.selection || this._updating ||
+          // paper-input fires value-changed twice
+          event.detail.value === this.selection.node.id) {
+          return;
+        }
+        this._updating = true;
+        let command = commands.setAttribute(
+            this.selection.elementInfo.sourceId,
+            attribute,
+            this.selection.node.getAttribute(attribute),
+            event.detail.value);
+        this.fire('designer-command', command, { bubbles: true });
+        Promise.resolve().then(function() {
+          this._updating = false;
+        }.bind(this));
+      },
+
+    });
+  });
+  </script>
+</dom-module>

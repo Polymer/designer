@@ -15,11 +15,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <style>
   </style>
   <template>
-    <paper-input
-        id="input"
-        no-label-float="true"
-        on-value-changed="_onInputValueChanged">
-    </paper-input>
+    <label><content select="[label]"></content>
+    <content select="[value]"></content>
   </template>
   <script>
 

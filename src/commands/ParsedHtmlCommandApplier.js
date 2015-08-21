@@ -10,121 +10,141 @@
 
 define('polymer-designer/commands/ParsedHtmlCommandApplier',[
       'polymer-designer/commands/CommandApplier',
-      'polymer-designer/path',
+      'polymer-designer/dom-utils',
       'dom5',
       'polymer-designer/commands'],
-    function(CommandApplier, pathLib, dom5, commands) {
+    function(CommandApplier, domUtils, dom5, commands) {
 
   'use strict';
 
-  // TODO(justinfagnani): move to common location
-  const nodeIdProperty = '__designer_node_id__';
-
-  // var getNodeFromPath = pathLib.getNodeFromPath;
-  function getNode(doc, id) {
-    return dom5.query(doc, dom5.predicates.hasAttrValue(nodeIdProperty, id));
-  }
-
-  var commandHandlers = {
-    'setAttribute': {
-      canApply: function(doc, command) {
-        let node = getNode(doc, command.sourceId);
-        return dom5.getAttribute(node, command.attribute) == command.oldValue;
-      },
-
-      apply: function(doc, command) {
-        let node = getNode(doc, command.sourceId);
-        dom5.setAttribute(node, command.attribute, command.newValue);
-      },
-
-      canUndo: function(doc, command) {
-        let node = getNode(doc, command.sourceId);
-        return dom5.getAttribute(node, command.attribute) == command.newValue;
-      },
-
-      undo: function(doc, command) {
-        let node = getNode(doc, command.sourceId);
-        dom5.setAttribute(node, command.attribute, command.oldValue);
-      },
-    },
-
-    'setTextContent': {
-      canApply: function(doc, command) {
-        let node = getNode(doc, command.sourceId);
-        // Don't apply if there are element children.
-        return !node.childNodes.some(function(child) {
-          return child.nodeName !== '#text';
-        });
-      },
-
-      apply: function(doc, command) {
-        let node = getNode(doc, command.sourceId);
-        dom5.setTextContent(node, command.newValue);
-      },
-
-      canUndo: function(doc, command) {
-        let node = getNode(doc, command.sourceId);
-        return dom5.getTextContent(node) === command.newValue;
-      },
-
-      undo: function(doc, command) {
-        let node = getNode(doc, command.sourceId);
-        dom5.setTextContent(node, command.oldValue);
-      },
-    },
-
-    'moveElement': {
-      canApply: function(doc, command) {
-        let el = getNode(doc, command.sourceId);
-        let target = getNode(doc, command.targetSourceId);
-        return el != null && target != null &&
-            (command.position === commands.InsertPosition.before ||
-             command.position === commands.InsertPosition.after);
-      },
-
-      apply: function(doc, command) {
-        let el = getNode(doc, command.sourceId);
-        let target = getNode(doc, command.targetSourceId);
-
-        var container = el.parentNode;
-        var targetContainer = target.parentNode;
-
-        var index = container.childNodes.indexOf(el);
-        var targetIndex = targetContainer.childNodes.indexOf(el);
-
-        // remove from old position
-        container.childNodes.splice(index, 1);
-
-        // add in new position
-        if (targetContainer === container) {
-          targetIndex--;
-        }
-
-        if (command.position === commands.InsertPosition.before) {
-          targetContainer.childNodes.splice(targetIndex, 0, el);
-        } else if (command.position === commands.InsertPosition.after) {
-          targetContainer.childNodes.splice(targetIndex + 1, 0, el);
-        }
-
-      },
-
-      canUndo: function(doc, command) {
-        return false;
-      },
-    },
-  };
+  const nodeIdProperty = domUtils.sourceIdAttribute;
 
   /**
    * Applies commands to DOM Documents, including embedded and linked
    * stylesheets.
    */
-  function ParsedHtmlCommandApplier(doc) {
-    CommandApplier.call(this, doc);
-  }
-  ParsedHtmlCommandApplier.prototype = Object.create(CommandApplier.prototype);
-  ParsedHtmlCommandApplier.prototype.constructor = ParsedHtmlCommandApplier;
+  class ParsedHtmlCommandApplier extends CommandApplier {
 
-  ParsedHtmlCommandApplier.prototype.handlers = commandHandlers;
+    constructor(doc) {
+      super(doc);
+      this.handlers = {
+        'setAttribute': {
+          checkApply: function(doc, command) {
+            let node = this.getNode(doc, command.sourceId);
+            this.check(dom5.getAttribute(node, command.attribute) == command.oldValue);
+          },
+
+          apply: function(doc, command) {
+            let node = this.getNode(doc, command.sourceId);
+            dom5.setAttribute(node, command.attribute, command.newValue);
+          },
+
+          checkUndo: function(doc, command) {
+            let node = this.getNode(doc, command.sourceId);
+            this.check(dom5.getAttribute(node, command.attribute) == command.newValue);
+          },
+
+          undo: function(doc, command) {
+            let node = this.getNode(doc, command.sourceId);
+            dom5.setAttribute(node, command.attribute, command.oldValue);
+          },
+        },
+
+        'setTextContent': {
+          checkApply: function(doc, command) {
+            let node = this.getNode(doc, command.sourceId);
+            // Don't apply if there are element children.
+            this.check(!node.childNodes.some(function(child) {
+              return child.nodeName !== '#text';
+            }));
+          },
+
+          apply: function(doc, command) {
+            let node = this.getNode(doc, command.sourceId);
+            dom5.setTextContent(node, command.newValue);
+          },
+
+          checkUndo: function(doc, command) {
+            let node = this.getNode(doc, command.sourceId);
+            this.check(dom5.getTextContent(node) === command.newValue);
+          },
+
+          undo: function(doc, command) {
+            let node = this.getNode(doc, command.sourceId);
+            dom5.setTextContent(node, command.oldValue);
+          },
+        },
+
+        'setTagName': {
+          checkApply: function(doc, command) {
+            let node = this.getNode(doc, command.sourceId);
+            this.check(node &&
+                node.tagName.toLowerCase() === command.oldValue.toLowerCase());
+          },
+
+          apply: function(doc, command) {
+            let node = this.getNode(doc, command.sourceId);
+            node.tagName = node.nodeName = command.newValue;
+          },
+
+          checkUndo: function(doc, command) {
+            let node = this.getNode(doc, command.sourceId);
+            this.check(node &&
+                node.tagName.toLowerCase() === command.oldValue.toLowerCase());
+          },
+
+          undo: function(doc, command) {
+            let node = this.getNode(doc, command.sourceId);
+            node.tagName = node.nodeName = command.oldValue;
+          },
+        },
+
+        'moveElement': {
+          checkApply: function(doc, command) {
+            let el = this.getNode(doc, command.sourceId);
+            let target = this.getNode(doc, command.targetSourceId);
+            this.check(el != null && target != null &&
+                (command.position === commands.InsertPosition.before ||
+                 command.position === commands.InsertPosition.after));
+          },
+
+          apply: function(doc, command) {
+            let el = this.getNode(doc, command.sourceId);
+            let target = this.getNode(doc, command.targetSourceId);
+
+            var container = el.parentNode;
+            var targetContainer = target.parentNode;
+
+            var index = container.childNodes.indexOf(el);
+            var targetIndex = targetContainer.childNodes.indexOf(el);
+
+            // remove from old position
+            container.childNodes.splice(index, 1);
+
+            // add in new position
+            if (targetContainer === container) {
+              targetIndex--;
+            }
+
+            if (command.position === commands.InsertPosition.before) {
+              targetContainer.childNodes.splice(targetIndex, 0, el);
+            } else if (command.position === commands.InsertPosition.after) {
+              targetContainer.childNodes.splice(targetIndex + 1, 0, el);
+            }
+
+          },
+
+          checkUndo: function(doc, command) {
+            this.check(false);
+          },
+        },
+      };
+    }
+
+    getNode(doc, id) {
+      return dom5.query(doc, dom5.predicates.hasAttrValue(nodeIdProperty, id));
+    }
+  }
 
   // exports
   return ParsedHtmlCommandApplier;

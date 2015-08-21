@@ -44,6 +44,16 @@ define('polymer-designer/commands', function() {
       };
     },
 
+    setTagName: function(sourceId, oldValue, newValue) {
+      return {
+        messageType: 'command',
+        commandType: 'setTagName',
+        sourceId: sourceId,
+        oldValue: oldValue,
+        newValue: newValue,
+      };
+    },
+
     /**
      * [path] and [selector] are used to find the CSS declaration to edit,
      * which may be:

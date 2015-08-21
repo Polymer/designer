@@ -9,6 +9,7 @@
  */
 
 define('polymer-designer/commands/CommandApplier', function() {
+  'use strict';
 
   /**
    * Applies commands to documents, including embedded and linked
@@ -16,36 +17,41 @@ define('polymer-designer/commands/CommandApplier', function() {
    *
    * @abstract
    */
-  function CommandApplier(doc) {
-    this.doc = doc;
-  }
+  class CommandApplier {
 
-  CommandApplier.prototype = {
+    /**
+     * @param {Document} doc
+     */
+    constructor(doc) {
+      this.doc = doc;
+    }
 
-    apply: function(command) {
-      var handler = this.handlers[command.commandType];
+    apply(command) {
+      var handler = this._getHandler(command);
+      handler.checkApply.call(this, this.doc, command);
+      handler.apply.call(this, this.doc, command);
+    }
+
+    undo(command) {
+      var handler = getHandler(command);
+      handler.checkUndo.call(this, this.doc, command);
+      handler.undo.call(this, this.doc, command);
+    }
+
+    _getHandler(command) {
+      let handler = this.handlers[command.commandType];
       if (handler == null) {
-        throw new Error('Unknown command type: ' + command.commandType);
+        throw new Error('Unknown command type:', command.commandType);
       }
-      if (handler.canApply(this.doc, command)) {
-        handler.apply(this.doc, command);
-      } else {
-        console.error("Can't apply command ", command);
-        throw new Error("Can't apply command " + command.commandType);
-      }
-    },
+      return handler;
+    }
 
-    undo: function(command) {
-      var handler = this.handlers[command.commandType];
-      if (handler.canUndo(this.doc, command)) {
-        handler.undo(this.doc, command);
-      } else {
-        console.error("Can't undo command ", command);
-        throw new Error("Can't undo command " + command.commandType);
+    check(pass, reason, command) {
+      if (!pass) {
+        throw new Error(`Can't apply command`, reason, command);
       }
-    },
-
-  };
+    }
+  }
 
   // exports
   return CommandApplier;
