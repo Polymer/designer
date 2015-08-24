@@ -20,9 +20,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <style>
     :host {
-      display: block;
+      display: flex;
       box-sizing: border-box;
       position: relative;
+      justify-content: center;
     }
     #glass {
       position: absolute;
@@ -73,28 +74,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       display: block !important;
       margin: 0;
     }
-
+    #content {
+      width: 100%;
+      position: relative;
+    }
   </style>
 
   <template>
-    <designer-selection
-        id="selection"
-        on-click="_onSelectionClick"
-        on-designer-selection-resize="_onSelectionResize"
-        on-designer-selection-move="_onSelectionMove">
-    </designer-selection>
-    <designer-element-highlight id="hover"></designer-element-highlight>
-    <div id="caret"></div>
-    <div
-        id="text-edit-selection"
-        on-click="_textOnClick"
-        on-keydown="_onKeydown"
-        on-keypress="_onKeypress"
-        tabindex="0">
+    <div id="content">
+      <designer-selection
+          id="selection"
+          on-click="_onSelectionClick"
+          on-designer-selection-resize="_onSelectionResize"
+          on-designer-selection-move="_onSelectionMove">
+      </designer-selection>
+      <designer-element-highlight id="hover"></designer-element-highlight>
+      <div id="caret"></div>
+      <div
+          id="text-edit-selection"
+          on-click="_textOnClick"
+          on-keydown="_onKeydown"
+          on-keypress="_onKeypress"
+          tabindex="0">
+      </div>
+      <div id="proxy"></div>
+      <div id="glass" on-mousedown="_onMouseDown" on-dblclick="_onDoubleClick"></div>
+      <content></content>
     </div>
-    <div id="proxy"></div>
-    <div id="glass" on-mousedown="_onMouseDown" on-dblclick="_onDoubleClick"></div>
-    <content></content>
   </template>
 
 </dom-module>
@@ -171,6 +177,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: true,
         },
 
+        size: {
+          type: Number,
+          observer: '_sizeChanged',
+        }
+
       },
 
       listeners: {
@@ -185,6 +196,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _documentInfoChanged() {
         this._reset();
+      },
+
+      _sizeChanged() {
+        if (typeof this.size == "number") {
+          this.$.content.style.width = `${this.size}px`;
+        } else {
+          this.$.content.style.width = '100%';
+        }
       },
 
       _reset() {
@@ -346,7 +365,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // TODO(justinfagnani): we might want to wait until we know we don't
         // have a double-click to initiate any action, but the redundant
         // selection that happens here sometimes is ok for now
-        let position = domUtils.toLocalPosition(this, e.clientX, e.clientY);
+        let position = domUtils.toLocalPosition(this.$.content, e.clientX, e.clientY);
         this.client.selectElementAtPoint(position.x, position.y)
             .then(function(response) {
               this._selectElement(response.elementInfo);
@@ -361,7 +380,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (!this.client) {
           return;
         }
-        let position = domUtils.toLocalPosition(this,
+        let position = domUtils.toLocalPosition(this.$.content,
             e.detail.clientX, e.detail.clientY);
         this.client.getElementsAtPoint(position.x, position.y)
           .then(function(response) {
@@ -389,7 +408,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onDoubleClick(e) {
-        let position = domUtils.toLocalPosition(this, e.clientX, e.clientY);
+        let position = domUtils.toLocalPosition(this.$.content, e.clientX, e.clientY);
         this.client.selectElementAtPoint(position.x, position.y)
           .then(function(response) {
             this._selectElement(response.elementInfo);
@@ -398,7 +417,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onSelectionClick(e) {
-        let position = domUtils.toLocalPosition(this, e.clientX, e.clientY);
+        let position = domUtils.toLocalPosition(this.$.content, e.clientX, e.clientY);
         this.client.selectElementAtPoint(position.x, position.y)
           .then(function(response) {
             this._selectElement(response.elementInfo);
@@ -407,7 +426,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _textOnClick(e) {
         e.stopPropagation();
-        let position = domUtils.toLocalPosition(this, e.clientX, e.clientY);
+        let position = domUtils.toLocalPosition(this.$.content, e.clientX, e.clientY);
         this.client.getCaretPosition(position.x, position.y)
           .then(function(response) {
             this._updateCaret(response.rect);

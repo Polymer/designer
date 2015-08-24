@@ -11,15 +11,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../paper-styles/paper-styles.html">
 <link rel="import" href="../../../paper-toolbar/paper-toolbar.html">
 <link rel="import" href="../../../polymer/polymer.html">
-<link rel="import" href="../designer-breadcrumb/designer-breadcrumb.html">
 <link rel="import" href="../designer-document/designer-document.html">
 <link rel="import" href="../designer-document-outline/designer-document-outline.html">
 <link rel="import" href="../designer-element-palette/designer-element-palette.html">
 <link rel="import" href="../designer-inspector/designer-inspector.html">
-<link rel="import" href="../designer-mini-nav/designer-mini-nav.html">
 <link rel="import" href="../designer-logic-editor/designer-logic-editor.html">
-<link rel="import" href="../designer-stage/designer-stage.html">
+<link rel="import" href="../designer-mini-nav/designer-mini-nav.html">
 <link rel="import" href="../designer-tree/designer-tree.html">
+<link rel="import" href="../designer-ui-editor/designer-ui-editor.html">
 <link rel="import" href="../paper-tabs-vertical/paper-tabs-vertical.html">
 <link rel="import" href="../paper-tabs-vertical/paper-tab-vertical.html">
 
@@ -95,14 +94,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       color: var(--primary-text-color);;
       flex: 0 0;
     }
-    designer-breadcrumb {
-      background: var(--default-primary-color);
-      border-style: solid;
-      border-color: var(--divider-color);
-      border-width: 1px 0 1px 0;
-      color: var(--primary-text-color);
-      font-weight: normal;
-    }
     #logo {
       width: 64px;
       height: 64px;
@@ -138,19 +129,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       flex: 1;
       flex-direction: column;
     }
-    designer-stage {
+    .flex {
+      display: flex;
       flex: 1;
     }
-    #doc-view > designer-stage {
+    designer-ui-editor {
       flex: 1;
     }
-    #html {
-      flex: 0 0 400px;
-      border-top: solid 1px var(--paper-grey-400);
-      margin: 0;
-      padding: 8px;
-      overflow: auto;
-      color: var(--paper-grey-800);
+    designer-inspector {
+      flex: 0 0 320px;
     }
     #frame {
       position: absolute;
@@ -182,6 +169,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </style>
 
   <template>
+    <div id="hidden-stuff" hidden="true">
+      <designer-document
+          id="document"
+          client-connection="[[clientConnection]]"
+          client="{{client}}"
+          document-info="{{documentInfo}}"
+          selection="{{selection}}"
+          analyzer="[[analyzer]]">
+      </designer-document>
+      <content></content>
+    </div>
     <designer-mini-nav>
       <div class="small">
         <div id="logo">
@@ -236,34 +234,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </paper-tabs>
         </template>
       </paper-toolbar>
-      <designer-breadcrumb node="[[selection.node]]"></designer-breadcrumb>
-      <iron-pages id="editor" selected="[[_selectedEditor]]">
+      <iron-pages class="flex" selected="[[_selectedEditor]]">
         <div id="storyboard">
           Storyboard
         </div>
         <div id="editor">
-          <div id="doc-view">
-            <designer-document
-                id="document"
-                client-connection="[[clientConnection]]"
-                client="{{client}}"
-                document-info="{{documentInfo}}"
-                selection="{{selection}}"
-                analyzer="[[analyzer]]">
-            </designer-document>
-            <designer-stage
-                id="stage"
-                document-info="[[documentInfo]]"
-                client="[[client]]"
-                selection="[[selection]]">
-              <designer-frame
-                  id="frame"
-                  client-connection="{{clientConnection}}"
-                  document-info="[[documentInfo]]">
-              </designer-frame>
-            </designer-stage>
-            <pre id="html">[[textContent]]</pre>
-          </div> <!-- doc-view -->
+          <designer-ui-editor
+              id="ui-editor"
+              document-info="[[documentInfo]]"
+              client="[[client]]"
+              selection="[[selection]]">
+            <designer-frame
+                id="frame"
+                client-connection="{{clientConnection}}"
+                document-info="[[documentInfo]]">
+            </designer-frame>
+          </designer-ui-editor>
           <template is="dom-if" if="[[documentInfo]]">
             <designer-inspector
                 document-info="[[documentInfo]]"
