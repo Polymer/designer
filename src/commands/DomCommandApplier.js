@@ -127,6 +127,33 @@ define('polymer-designer/commands/DomCommandApplier', [
             this.check(false);
           },
         },
+
+        'newElement': {
+          checkApply(doc, command) {
+            // check that target exists
+            let target = this.getNode(doc, command.targetSourceId);
+            return (target != null);
+          },
+
+          apply: function(doc, command) {
+            let el = doc.createElement(command.tagName);
+            el.setAttribute('style', command.initialStyle);
+            el.setAttribute(nodeIdProperty, command.sourceId);
+            el.innerHTML = command.initialContent;
+            let target = this.getNode(doc, command.targetSourceId);
+            if (command.insertPosition === 'into') {
+              target.appendChild(el);
+            } else {
+              var container = target.parentNode;
+              if (command.position == commands.InsertPosition.before) {
+                container.insertBefore(el, target);
+              } else if (command.position == commands.InsertPosition.after) {
+                target = target.nextSibling;
+                container.insertBefore(el, target);
+              }
+            }
+          },
+        },
       };
     }
 

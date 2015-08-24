@@ -23,13 +23,42 @@ define('polymer-designer/editors/ElementEditor', function() {
    */
   class ElementEditor {
 
-    static getEditor(elementName) {
-      // In the near future we'll do a lookup
+    static getEditor(tagName) {
+      if (builtIns.hasOwnProperty(tagName)) {
+        return builtIns[tagName];
+      }
       return new ElementEditor();
+    }
+
+    static getEditors() {
+      return Object.keys(builtIns).map(function(k) {
+        return builtIns[k];
+      });
+    }
+
+    constructor(tagName, initialStyle, initialContent) {
+      this.tagName = tagName;
+      this.initialStyle = initialStyle;
+      this.initialContent = initialContent;
     }
 
     get inspectors() {
       return ['designer-default-inspector', 'designer-property-inspector'];
+    }
+  }
+
+  let builtIns = {
+    'div': new ElementEditor('div', 'height: 20px;', 'div'),
+    'span': new ElementEditor('span', '', 'span'),
+    'a': new ElementEditor('a', '', 'URL'),
+    'section': new ElementEditor('section', 'height: 20px;', ''),
+    'header': new ElementEditor('header', '', 'Header'),
+    'footer': new ElementEditor('footer', '', 'Footer'),
+  };
+
+  class BuiltinElementEditor extends ElementEditor {
+    constructor(tagName) {
+      super(tagName);
     }
   }
 

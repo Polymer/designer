@@ -23,8 +23,22 @@
     let onDragMove = opts.onDragMove;
     let onDragEnd = opts.onDragEnd;
     let fireDragEvents = opts.fireDragEvents || false;
+    let data = opts.data;
 
-    let onMouseMove = function(e) {
+    let currentTargets = new Set();
+
+    // Because receivers can mutate events, we create a new detail for each
+    // event we fire. This is important for dragging where a receiver might
+    // send data back via the event.
+    let _detail = (e) => ({
+      clientX: e.clientX,
+      clientY: e.clientY,
+      // relatedTarget: element,
+      dragType: opts.dragType,
+      data: data,
+    });
+
+    let onMouseMove = (e) => {
       let deltaX = e.clientX - clientX + startX;
       let deltaY = e.clientY - clientY + startY;
 
@@ -33,31 +47,49 @@
       }
 
       if (fireDragEvents) {
-        var dropTargets = document.elementsFromPoint(e.clientX, e.clientY);
-        for (let i = 0; i < dropTargets.length; i++) {
-          var target = dropTargets[i];
-          if (target.designerDropTarget) {
-            let dragEvent = new CustomEvent('designer-drag-move', {
-              detail: {
-                clientX: e.clientX,
-                clientY: e.clientY,
-              }
-            });
-            target.dispatchEvent(dragEvent);
+
+        var dropTargets = document.elementsFromPoint(e.clientX, e.clientY)
+            .filter((e) => e.designerDropTarget);
+
+        let newTargets = new Set(dropTargets);
+
+        for (let target of currentTargets) {
+          if (!newTargets.has(target)) {
+            target.dispatchEvent(new CustomEvent('designer-drag-leave', {detail: _detail(e)}));
           }
         }
+
+        for (let target of dropTargets) {
+          if (!currentTargets.has(target)) {
+            target.dispatchEvent(new CustomEvent('designer-drag-enter', {detail: _detail(e)}));
+          }
+          target.dispatchEvent(new CustomEvent('designer-drag-move', {detail: _detail(e)}));
+        }
+
+        currentTargets = newTargets;
       }
     };
 
-    let onMouseUp = function(e) {
+    let onMouseUp = (e) => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
       document.removeEventListener('contextmenu', onMouseUp);
-      // this.$.bounds.style.cursor = 'auto';
+
       if (onDragEnd) {
         onDragEnd(e);
       }
+
+      if (fireDragEvents) {
+        for (let target of currentTargets) {
+          target.dispatchEvent(new CustomEvent('designer-drag-drop', {detail: _detail(e)}));
+        }
+        currentTargets = null;
+      }
     };
+
+    let onMouseOver = (e) => {
+
+    }
 
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);

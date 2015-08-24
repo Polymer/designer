@@ -59,8 +59,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <h1>Elements</h1>
     <div id="elements">
       <template is="dom-repeat" items="{{builtIns}}">
-        <div class="element" on-mousedown="_onMouseDown">
-          &lt;<span>{{item}}</span>&gt;
+        <div class="element" on-mousedown="_onMouseDown" item="{{item}}">
+          &lt;<span>{{item.tagName}}</span>&gt;
         </div>
       </template>
     </div>
@@ -75,7 +75,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script>
 
-define(['polymer-designer/dragging'], function(dragging) {
+define([
+      'polymer-designer/dragging',
+      'polymer-designer/editors/ElementEditor'],
+    function(dragging, ElementEditor) {
   'use strict';
 
   Polymer({
@@ -84,14 +87,7 @@ define(['polymer-designer/dragging'], function(dragging) {
     properties: {
       builtIns: {
         type: Array,
-        value: [
-          'div',
-          'span',
-          'a',
-          'section',
-          'header',
-          'footer',
-        ],
+        value: () => ElementEditor.getEditors(),
       },
     },
 
@@ -108,6 +104,7 @@ define(['polymer-designer/dragging'], function(dragging) {
         height: el.offsetHeight,
       });
       this.fire('designer-mini-nav-collapse');
+      let editor = el.item;
       dragging.startDrag(
         bounds.left,
         bounds.top,
@@ -115,6 +112,10 @@ define(['polymer-designer/dragging'], function(dragging) {
         e.clientY,
         {
           fireDragEvents: true,
+          dragType: 'element-palette',
+          data: {
+            editor: editor,
+          },
           onDragMove: (x, y) => {
             this._updateDragProxy({
               left: x,

@@ -138,6 +138,16 @@ define('polymer-designer/commands/ParsedHtmlCommandApplier',[
             this.check(false);
           },
         },
+
+        'newElement': {
+          checkApply(doc, command) {
+            // throw new Error('not implemented');
+            return true;
+          },
+
+          apply() {},
+        },
+
       };
     }
 
