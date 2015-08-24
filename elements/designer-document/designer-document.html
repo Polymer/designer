@@ -264,12 +264,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       let doc = document.implementation.createHTMLDocument();
       doc.documentElement.innerHTML = content;
 
-      let iterator = doc.createNodeIterator(doc, NodeFilter.SHOW_ELEMENT);
-      let node;
-      let nextId = 1;
-      while(node = iterator.nextNode()) {
-        node.setAttribute(sourceIdAttribute, nextId++);
-      }
+      _addDomSourceIds(doc, doc.documentElement, 1);
 
       doc.head.insertBefore(createFrameScriptElement(frameScript, doc),
           doc.head.firstChild);
@@ -277,6 +272,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       // data URIs need a base to be able to resolve relative URLs
       doc.head.insertBefore(createBase(baseUri, doc), doc.head.firstChild);
       return doc;
+    }
+
+    function _addDomSourceIds(doc, startNode, nextId) {
+      let iterator = doc.createNodeIterator(startNode, NodeFilter.SHOW_ELEMENT);
+      let node;
+      while(node = iterator.nextNode()) {
+        node.setAttribute(sourceIdAttribute, nextId++);
+        if (node.tagName.toLowerCase() == 'template') {
+          nextId = _addDomSourceIds(node.content.ownerDocument, node.content, nextId);
+        }
+      }
+      return nextId;
     }
 
   });
