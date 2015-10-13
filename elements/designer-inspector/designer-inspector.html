@@ -14,6 +14,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="designer-inspector-behavior.html">
 <link rel="import" href="designer-property-inspector.html">
+<link rel="import" href="designer-default-inspector.html">
 <link rel="import" href="designer-style-inspector.html">
 
 <!--
@@ -26,32 +27,75 @@ Inspects an element and provides tidbits about its properties, styles, and more.
       @apply(--layout);
       @apply(--layout-vertical);
       @apply(--layout-flex);
+      @apply(--paper-font-body1);
+      /*font-size: 13px;*/
 
       background: var(--designer-background-primary-color, --paper-grey-900);
       box-sizing: border-box;
       color: var(--secondary-text-color);
       display: block;
       overflow: auto;
+
+      --designer-inspector-title: {
+        @apply(--paper-font-title);
+        margin: 0;
+      };
+
+      --designer-inspector-row: {
+        display: flex;
+        align-items: baseline;
+      };
+
+      --designer-inspector-row-label: {
+        flex: 2;
+      };
+
+      --designer-inspector-row-value: {
+        flex: 3;
+      };
+
+      --paper-input-container-input: {
+        @apply(--paper-font-body1);
+        /*font-size: 13px;*/
+      };
+
     }
   </style>
 
-  <template>
-    <designer-property-inspector
-        document-info="[[documentInfo]]"
-        selection="[[selection]]">
-    <!--<designer-style-inspector selection="[[selection]]" source-document=[[source-document]]></designer-style-inspector>-->
-  </template>
+  <template></template>
 
 </dom-module>
 
 <script>
+
+define(['polymer-designer/dom-utils'], function(domUtils) {
   'use strict';
 
   Polymer({
     is: 'designer-inspector',
 
+    properties: {
+      editor: Object,
+    },
+
     behaviors: [
       Polymer.DesignerInspectorBehavior
     ],
+
+    _selectionChanged() {
+      console.assert(this.selection.editor != null);
+      domUtils.clearChildren(this.root);
+
+      let inspectorNames = this.selection.editor.inspectors;
+      for (let inspectorName of inspectorNames) {
+        let inspector = document.createElement(inspectorName);
+        inspector.selection = this.selection;
+        inspector.documentInfo = this.documentInfo;
+        Polymer.dom(this.root).appendChild(inspector);
+      }
+    },
+
   });
+
+});
 </script>

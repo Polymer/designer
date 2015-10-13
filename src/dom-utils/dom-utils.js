@@ -142,8 +142,37 @@ define('polymer-designer/dom-utils', function() {
     element.style.display = 'none';
   }
 
+  function clearChildren(element) {
+    let domApi = Polymer.dom(element);
+    let child;
+    while ((child = domApi.firstChild) != null) {
+      domApi.removeChild(child);
+    }
+  }
+
+  function renameNode(node, newName) {
+    let doc = node.ownerDocument;
+    let parent = node.parentNode;
+    let newNode = doc.createElement(newName);
+    let children = node.childNodes;
+    let attributes = node.attributes;
+
+    for (let i = 0; i < children.length; i++) {
+      let child = children[i];
+      newNode.appendChild(child);
+    }
+
+    for (let i = 0; i < attributes.length; i++) {
+      let attribute = attributes[i];
+      newNode.setAttribute(attribute.name, attribute.value);
+    }
+
+    parent.replaceChild(newNode, node);
+  }
+
   return {
     attributesForElement: attributesForElement,
+    clearChildren: clearChildren,
     designerNodeFilter: designerNodeFilter,
     getAncestors: getAncestors,
     getDocumentElement: getDocumentElement,
@@ -152,6 +181,7 @@ define('polymer-designer/dom-utils', function() {
     isDescendant: isDescendant,
     isDescendant: isDescendant,
     parseQueryString: parseQueryString,
+    renameNode: renameNode,
     setBounds: setBounds,
     show: show,
     sourceIdAttribute: sourceIdAttribute,

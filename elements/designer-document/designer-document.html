@@ -10,7 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../../../core-asset/core-asset.html">
 <link rel="import" href="../../src/commands/commands.html">
-<!-- <link rel="import" href="../../src/hydrolysis/hydrolysis.html"> -->
+<link rel="import" href="../../src/editors/editors.html">
 <link rel="import" href="../../src/protocol/document-client.html">
 <link rel="import" href="../designer-frame/designer-frame.html">
 
@@ -38,19 +38,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <script>
   define([
         'polymer-designer/protocol/DocumentClient',
-        'polymer-designer/protocol/ClientConnection',
         'polymer-designer/commands/DomCommandApplier',
         'polymer-designer/commands/ParsedHtmlCommandApplier',
+        'polymer-designer/editors/ElementEditor',
         'polymer-designer/dom-utils',
-        'polymer-designer/path',
         'dom5'],
       function(
         DocumentClient,
-        ClientConnection,
         DomCommandApplier,
         ParsedHtmlCommandApplier,
+        ElementEditor,
         domUtils,
-        pathLib,
         dom5) {
 
     'use strict';
@@ -178,18 +176,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         } else {
           return this.client.selectElementForSourceId(sourceId)
             .then(function(response) {
-              let tagName = response.elementInfo.tagName;
-              // TODO(justinfagnani): create class for selectino object
-              this.selection = {
-                elementInfo: response.elementInfo,
-                bounds: response.bounds,
-                // TODO(justinfagnani): add method for retrieving elements by id
-                node: this.documentInfo.domDocument.querySelector(
-                    `[${sourceIdAttribute}="${sourceId}"]`),
-                analysisInfo: this._getAnalysisInfo(tagName),
-              };
+              this._updateSelection(response.elementInfo, response.bounds);
             }.bind(this));
         }
+      },
+
+      _updateSelection(elementInfo, bounds) {
+        let tagName = elementInfo.tagName;
+        // TODO(justinfagnani): create class for selection object
+        let selection = {
+          elementInfo: elementInfo,
+          bounds: bounds,
+          // TODO(justinfagnani): add method for retrieving elements by id
+          node: this.documentInfo.domDocument.querySelector(
+              `[${sourceIdAttribute}="${elementInfo.sourceId}"]`),
+          analysisInfo: this._getAnalysisInfo(tagName),
+          editor: ElementEditor.getEditor(tagName),
+        };
+        console.log('new selection', selection);
+        this.selection = selection;
       },
 
       _getAnalysisInfo(tagName) {
@@ -210,11 +215,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       executeCommand(command) {
+        console.log('execute command', command);
         this._domCommandApplier.apply(command);
         this._parsedCommandApplier.apply(command);
         this.set('documentInfo.textContent',
             dom5.serialize(this.documentInfo.astDocument));
         this.client.sendCommand(command).then(function(response) {
+          this._updateSelection(response.elementInfo, response.bounds);
           this.fire('designer-document-update', response);
         }.bind(this));
       },
@@ -257,12 +264,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       let doc = document.implementation.createHTMLDocument();
       doc.documentElement.innerHTML = content;
 
-      let iterator = doc.createNodeIterator(doc, NodeFilter.SHOW_ELEMENT);
-      let node;
-      let nextId = 1;
-      while(node = iterator.nextNode()) {
-        node.setAttribute(sourceIdAttribute, nextId++);
-      }
+      _addDomSourceIds(doc, doc.documentElement, 1);
 
       doc.head.insertBefore(createFrameScriptElement(frameScript, doc),
           doc.head.firstChild);
@@ -270,6 +272,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       // data URIs need a base to be able to resolve relative URLs
       doc.head.insertBefore(createBase(baseUri, doc), doc.head.firstChild);
       return doc;
+    }
+
+    function _addDomSourceIds(doc, startNode, nextId) {
+      let iterator = doc.createNodeIterator(startNode, NodeFilter.SHOW_ELEMENT);
+      let node;
+      while(node = iterator.nextNode()) {
+        node.setAttribute(sourceIdAttribute, nextId++);
+        if (node.tagName.toLowerCase() == 'template') {
+          nextId = _addDomSourceIds(node.content.ownerDocument, node.content, nextId);
+        }
+      }
+      return nextId;
     }
 
   });

@@ -53,13 +53,22 @@ define('polymer-designer/protocol/DocumentServer', [
     }
 
     _onCommand(request) {
-      this.commandApplier.apply(request.message.command);
-      // TODO: how can we tell what non-doc side effects, like the following
-      // need to be propagated?
-      request.reply({
+      let command = request.message.command;
+      this.commandApplier.apply(command);
+
+      // TODO(justinfagnani): we need a better way to know what parts of the
+      // document are invalidated by a command and need to be re-synced to the
+      // client. Here we assume that if a command references an element by
+      // sourceId that it modifies or replaces that element, so we reselect it
+      // and respond with new elementInfo and bounds.
+      if (command.sourceId) {
+        this._selectElementForSourceId(command.sourceId);
+      }
+      let response = {
         bounds: this._elementBounds(this.currentElement),
         elementInfo: this._elementInfo(this.currentElement),
-      });
+      };
+      request.reply(response);
     }
 
     /**
@@ -139,15 +148,18 @@ define('polymer-designer/protocol/DocumentServer', [
     }
 
     selectElementForSourceId(request) {
-      let node = document.querySelector(
-          `[${domUtils.sourceIdAttribute}="${request.message.sourceId}"]`);
-      this.currentElement = node;
-      this.cursorManager = new CursorManager(this.currentElement);
-
+      this._selectElementForSourceId(request.message.sourceId);
       request.reply({
         bounds: this._elementBounds(this.currentElement),
         elementInfo: this._elementInfo(this.currentElement),
       });
+    }
+
+    _selectElementForSourceId(sourceId) {
+      let node = document.querySelector(
+          `[${domUtils.sourceIdAttribute}="${sourceId}"]`);
+      this.currentElement = node;
+      this.cursorManager = new CursorManager(this.currentElement);
     }
 
     selectionBoundsChanged(request) {

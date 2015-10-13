@@ -10,31 +10,42 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../../../paper-input/paper-input.html">
+<link rel="import" href="../../../paper-styles/paper-styles.html">
 <link rel="import" href="designer-inspector-behavior.html">
 <link rel="import" href="designer-property-inspector-editor.html">
 
 <dom-module id="designer-property-inspector">
-  <style>
-    :host {
-      display: block;
-    }
-  </style>
   <template>
+    <style>
+      :host {
+        @apply(--paper-font-body1);
+        display: block;
+        padding: 16px;
+      }
+      h2 {
+        @apply(--designer-inspector-title);
+      }
+      designer-property-inspector-editor {
+        @apply(--designer-inspector-row-value);
+      }
+      label {
+        @apply(--designer-inspector-row-label);
+      }
+      .inspector-row {
+        @apply(--designer-inspector-row);
+      }
+    </style>
     <h2>Properties</h2>
-    <table>
-      <template is="dom-repeat" items="[[_properties]]" as="property">
-        <tr>
-          <td>[[property.name]]</td>
-          <td>
-            <designer-property-inspector-editor
-              selection="[[selection]]"
-              document-info="[[documentInfo]]"
-              property="[[property]]">
-            </designer-property-inspector-editor>
-          </td>
-        </tr>
-      </template>
-    </table>
+    <template is="dom-repeat" items="[[_properties]]" as="property">
+      <div class="inspector-row">
+        <label>[[property.name]]</label>
+        <designer-property-inspector-editor
+            selection="[[selection]]"
+            document-info="[[documentInfo]]"
+            property="[[property]]">
+        </designer-property-inspector-editor>
+      </div>
+    </template>
   </template>
   <script>
     'use strict';
