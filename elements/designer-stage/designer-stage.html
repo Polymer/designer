@@ -85,6 +85,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <designer-selection
           id="selection"
           on-click="_onSelectionClick"
+          on-designer-selection-mousedown="_onSelectionDown"
           on-designer-selection-resize="_onSelectionResize"
           on-designer-selection-move="_onSelectionMove">
       </designer-selection>
@@ -118,6 +119,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         dragging) {
 
     'use strict';
+
+
+    let SELECTION_MOVE = 'selection-move';
+    let SELECTION_RESIZE = 'selection-resize';
 
     /**
      * `<designer-stage>` hanldes user input for WYSIWYG editing.
@@ -180,6 +185,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         size: {
           type: Number,
           observer: '_sizeChanged',
+        },
+
+        /**
+         * The current user operaiton: 'selection-move' or 'selection-resize'.
+         */
+        _operation: {
+          type: String,
+          value: null,
         }
 
       },
@@ -313,6 +326,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         domUtils.hide(this.$.caret);
       },
 
+      _onSelectionDown(e) {
+        this._operation = SELECTION_MOVE;
+      },
+
       _onSelectionResize(e) {
         var bounds = e.detail.bounds;
         this.client.selectionBoundsChanged(bounds)
@@ -361,6 +378,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onMouseDown(e) {
+        console.assert(this._operation == null);
         this._mouseDown = true;
         if (this._mode === 'text') {
           this.exitTextMode();
@@ -399,7 +417,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // operations that are completed with a mouse up. ie: dragging a
         // current element vs. dropping a new one.
         this._mouseDown = false;
-        if (this.hoverSourceId != null && this.insertPosition != null) {
+        this.currentMousePosition = null;
+        if (this._operation == SELECTION_MOVE &&
+            this.hoverSourceId != null &&
+            this.insertPosition != null) {
           this.fire('designer-command',
             commands.moveElement(
               this.selection.elementInfo.sourceId,
@@ -410,6 +431,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         this._hideHover();
         domUtils.hide(this.$.proxy);
+        this._operation = null;
       },
 
       _onDoubleClick(e) {
