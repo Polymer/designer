@@ -334,7 +334,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onDesignerSelectElement(event, detail) {
-        this.$.document.setSourceId(detail.sourceId);
+        detail.complete = this.$.document.setSourceId(detail.sourceId);
       },
 
       _onHydrolysisAnalyzerReady(e) {
