@@ -92,6 +92,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
         },
 
+        _nextSourceId: {
+          type: Number,
+          value: 1,
+        },
+
       },
 
       /**
@@ -125,9 +130,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             let astDocumentElement = domUtils.getDocumentElement(astDocument);
 
             // assign sequential IDs to all elements in the document
-            let nextId = 1;
-            dom5.query(astDocument, function(node) {
-              dom5.setAttribute(node, sourceIdAttribute, `${nextId++}`);
+            this._nextSourceId = 1;
+            dom5.query(astDocument, (node) => {
+              dom5.setAttribute(node, sourceIdAttribute, `${this._nextSourceId++}`);
             });
 
             let elements = metadata.elements;
@@ -182,6 +187,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _updateSelection(elementInfo, bounds) {
+        if (elementInfo == null) {
+          return;
+        }
         let tagName = elementInfo.tagName;
         // TODO(justinfagnani): create class for selection object
         let selection = {
@@ -193,7 +201,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           analysisInfo: this._getAnalysisInfo(tagName),
           editor: ElementEditor.getEditor(tagName),
         };
-        console.log('new selection', selection);
         this.selection = selection;
       },
 
@@ -216,14 +223,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       executeCommand(command) {
         console.log('execute command', command);
+        // commands with a null (not undefined) sourceId are creating a new
+        // element and need to be assigned a fresh sourceId.
+        if (command.sourceId === null) {
+          command.sourceId = `${this._nextSourceId++}`;
+        }
         this._domCommandApplier.apply(command);
         this._parsedCommandApplier.apply(command);
         this.set('documentInfo.textContent',
             dom5.serialize(this.documentInfo.astDocument));
-        this.client.sendCommand(command).then(function(response) {
+        this.client.sendCommand(command).then((response) => {
           this._updateSelection(response.elementInfo, response.bounds);
           this.fire('designer-document-update', response);
-        }.bind(this));
+        });
       },
 
       get _frameScriptAsset() {

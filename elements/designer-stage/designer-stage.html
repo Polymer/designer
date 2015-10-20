@@ -123,6 +123,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     let SELECTION_MOVE = 'selection-move';
     let SELECTION_RESIZE = 'selection-resize';
+    let NEW_ELEMENT = 'new-element';
 
     /**
      * `<designer-stage>` hanldes user input for WYSIWYG editing.
@@ -142,13 +143,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
          */
         currentMousePosition: {
           type: Object,
-          value: null,
+          value: () => {},
         },
 
+        /**
+         * During a drag operation, describes where the dragged element will be
+         * inserted into: "before", "after" or "into".
+         */
         insertPosition: {
           type: String,
           value: null,
         },
+
+        // _isInsertOperation: {
+        //   type: Boolean,
+        //   value: false,
+        // },
 
         hoverSourceId: {
           type: String,
@@ -199,11 +209,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       listeners: {
         'dblclick': '_onDoubleClick',
+        'designer-drag-move': '_onDragMove',
+        'designer-drag-enter': '_onDragEnter',
+        'designer-drag-leave': '_onDragLeave',
+        'designer-drag-drop': '_onDragDrop',
       },
 
       ready() {
         window.addEventListener('mouseup', this._onMouseUp.bind(this));
-        this.addEventListener('designer-drag-move', this._onDragMove.bind(this));
         this._reset();
       },
 
@@ -220,7 +233,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _reset() {
-        this.currentMousePosition = null;
+        this.currentMousePosition = {};
         this.insertPosition = null;
         this.hoverSourceId = null;
         this.mode = 'layout';
@@ -228,6 +241,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.selection.hide();
         domUtils.hide(this.$['text-edit-selection']);
         domUtils.hide(this.$.caret);
+      },
+
+      _dispatchCommand(command) {
+        this.fire('designer-command', command, {bubbles: true});
       },
 
       _updateSelectionBounds(bounds) {
@@ -280,7 +297,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       },
 
-      _updateHoverElement(hoverInfo) {
+      _updateHover(hoverInfo) {
         if (hoverInfo == null) {
           this._hideHover();
           return;
@@ -288,15 +305,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         let hover = this.$.hover;
         hover.setElementInfoAndBounds(hoverInfo);
+        this.hoverSourceId = hoverInfo.elementInfo.sourceId;
         hover.show();
 
-        if (this.selection &&
-            this.selection.elementInfo.position == 'static') {
-          this.insertPosition = hover.showInsertMarker(
-              this.currentMousePosition.x,
-              this.currentMousePosition.y);
-          this.hoverSourceId = hoverInfo.elementInfo.sourceId;
-        }
+        this.insertPosition = hover.showInsertMarker(
+            this.currentMousePosition.x,
+            this.currentMousePosition.y);
+        this.hoverSourceId = hoverInfo.elementInfo.sourceId;
       },
 
       _hideHover() {
@@ -328,6 +343,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _onSelectionDown(e) {
         this._operation = SELECTION_MOVE;
+        this._mouseDown = true;
+      },
+
+      _onSelectionClick(e) {
+        // TODO: need to set this._mouseDown (or better name) = true when moving
+        // a selection so that we trigger the _onMouseUp action
+        let position = domUtils.toLocalPosition(this.$.content, e.clientX, e.clientY);
+        this.client.selectElementAtPoint(position.x, position.y)
+          .then((response) => {
+            this._selectElement(response.elementInfo);
+          });
       },
 
       _onSelectionResize(e) {
@@ -363,7 +389,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               if (response.bounds) {
                 this._updateSelectionBounds(response.bounds);
               }
-              this._updateHoverElement(response.hover);
+              // this._isInsertOperation = this.selection &&
+              //     this.selection.elementInfo.position == 'static';
+              this._updateHover(response.hover);
             }.bind(this));
       },
 
@@ -377,26 +405,42 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      _onMouseDown(e) {
-        console.assert(this._operation == null);
-        this._mouseDown = true;
-        if (this._mode === 'text') {
-          this.exitTextMode();
+      _onDragEnter(e) {
+        if (e.detail.dragType === 'element-palette') {
+          this._operation = NEW_ELEMENT;
+          // this._dragging = true;
+          // this.startOperation(new ElementPaletteOperation());
         }
-        // TODO(justinfagnani): we might want to wait until we know we don't
-        // have a double-click to initiate any action, but the redundant
-        // selection that happens here sometimes is ok for now
-        let position =
-            domUtils.toLocalPosition(this.$.content, e.clientX, e.clientY);
-        this.client.selectElementAtPoint(position.x, position.y)
-            .then((response) => this._selectElement(response.elementInfo))
-            .then(() => {
-              // Start a drag after selection if the mouse is still down.
-              if (this._mouseDown) {
-                this.$.selection._boundsDown(e);
-                console.assert(this._operation === SELECTION_MOVE);
-              }
-            });
+      },
+
+      _onDragLeave(e) {
+        if (e.detail.dragType === 'element-palette') {
+          console.assert(this._operation === NEW_ELEMENT);
+          this._operation = null;
+          // this._dragging = false;
+          this._hideHover();
+          // this.endOperation();
+        }
+      },
+
+      _onDragDrop(e) {
+        if (e.detail.dragType === 'element-palette') {
+          console.assert(this._operation === NEW_ELEMENT);
+          let editor = e.detail.data.editor;
+
+          this._dispatchCommand(commands.newElement(
+              this.hoverSourceId,
+              editor.tagName,
+              editor.initialStyle,
+              editor.initialContent,
+              this.insertPosition));
+
+          // clear operation state
+          this.currentMousePosition = {};
+          this._hideHover();
+          domUtils.hide(this.$.proxy);
+          this._operation = null;
+        }
       },
 
       _onDragMove(e) {
@@ -405,33 +449,76 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         let position = domUtils.toLocalPosition(this.$.content,
             e.detail.clientX, e.detail.clientY);
+        this.currentMousePosition.x = position.x;
+        this.currentMousePosition.y = position.y;
         this.client.getElementsAtPoint(position.x, position.y)
           .then(function(response) {
             let hoverElement = (response.length > 1) ? response[0] : null;
-            this._updateHoverElement(hoverElement);
+            if (hoverElement !== this._lastDragTarget) {
+              // this._isInsertOperation = true;
+              this._updateHover(hoverElement);
+              this._lastDragTarget = hoverElement;
+              // what was I trying to do here?
+              // draw the insert preview!!!
+              // client....
+            }
           }.bind(this));
       },
 
-      _onMouseUp(e) {
-        // TODO(justinfagnani): need a better way to differentiate between
-        // operations that are completed with a mouse up. ie: dragging a
-        // current element vs. dropping a new one.
-        this._mouseDown = false;
-        this.currentMousePosition = null;
-        if (this._operation == SELECTION_MOVE &&
-            this.hoverSourceId != null &&
-            this.insertPosition != null) {
-          this.fire('designer-command',
-            commands.moveElement(
-              this.selection.elementInfo.sourceId,
-              this.hoverSourceId,
-              this.insertPosition), {
-                bubbles: true
-              });
+      _onMouseDown(e) {
+        console.assert(this._operation == null);
+        this._mouseDown = true;
+
+        if (this._mode === 'text') {
+          this.exitTextMode();
         }
-        this._hideHover();
-        domUtils.hide(this.$.proxy);
-        this._operation = null;
+        // TODO(justinfagnani): we might want to wait until we know we don't
+        // have a double-click to initiate any action, but the redundant
+        // selection that happens here sometimes is ok for now
+        let position = domUtils.toLocalPosition(this.$.content, e.clientX, e.clientY);
+        this.client.selectElementAtPoint(position.x, position.y)
+            .then((response) => {
+              if (response.elementInfo.sourceId) {
+                return this._selectElement(response.elementInfo).then(() => {
+                  // Start a drag after selection if the mouse is still down.
+                  if (this._mouseDown) {
+                    this.$.selection._boundsDown(e);
+                    console.assert(this._operation === SELECTION_MOVE);
+                  }
+                })
+              } else {
+                console.warn('no sourceId');
+              }
+            });
+      },
+
+      _onMouseUp(e) {
+        if (!this._mouseDown) {
+          return;
+        }
+        this._mouseDown = false;
+
+        if (this._operation == SELECTION_MOVE) {
+
+          // if we're moving and are over an element, perform the move
+          if (this.hoverSourceId != null &&
+              this.insertPosition != null) {
+
+            this.fire('designer-command',
+              commands.moveElement(
+                this.selection.elementInfo.sourceId,
+                this.hoverSourceId,
+                this.insertPosition), {
+                  bubbles: true
+                });
+          }
+
+          // clear operation state
+          this.currentMousePosition = {};
+          this._hideHover();
+          domUtils.hide(this.$.proxy);
+          this._operation = null;
+        }
       },
 
       _onDoubleClick(e) {
@@ -439,15 +526,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.client.selectElementAtPoint(position.x, position.y)
           .then(function(response) {
             this._selectElement(response.elementInfo);
+            // this.startOperation(new TextEditOperation());
             this.enterTextMode();
-          }.bind(this));
-      },
-
-      _onSelectionClick(e) {
-        let position = domUtils.toLocalPosition(this.$.content, e.clientX, e.clientY);
-        this.client.selectElementAtPoint(position.x, position.y)
-          .then(function(response) {
-            this._selectElement(response.elementInfo);
           }.bind(this));
       },
 
@@ -511,6 +591,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
     });
+
+    class Operation {
+      start(stage) {}
+      end(stage) {}
+    }
+
+    class ElementPaletteOperation extends Operation {
+    }
+
+    class TextEditOperation extends Operation {
+      start(stage) {
+        stage.enterTextMode();
+      }
+
+      end(stage) {
+        stage.exitTextMode();
+      }
+    }
 
   });
 </script>

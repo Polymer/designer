@@ -8,6 +8,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <script>
+'use strict';
 
 // polyfill Array.prototype.find(), from
 // developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find
@@ -34,4 +35,13 @@ if (!Array.prototype.find) {
   };
 }
 
+if (!Object.entries) {
+  Object.entries = function entries(obj) {
+    let e = [];
+    for (let key of Object.keys(obj)) {
+      e.push([key, obj[key]]);
+    }
+    return e;
+  }
+}
 </script>

@@ -64,10 +64,13 @@ define('polymer-designer/protocol/DocumentServer', [
       if (command.sourceId) {
         this._selectElementForSourceId(command.sourceId);
       }
-      let response = {
-        bounds: this._elementBounds(this.currentElement),
-        elementInfo: this._elementInfo(this.currentElement),
-      };
+      let response = {};
+      if (this.currentElement) {
+        response = {
+          bounds: this._elementBounds(this.currentElement),
+          elementInfo: this._elementInfo(this.currentElement),
+        };
+      }
       request.reply(response);
     }
 

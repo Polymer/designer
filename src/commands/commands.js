@@ -22,6 +22,7 @@ define('polymer-designer/commands', function() {
     InsertPosition: {
       before: 'before',
       after: 'after',
+      into: 'into',
     },
 
     setAttribute: function(sourceId, attribute, oldValue, newValue) {
@@ -76,6 +77,21 @@ define('polymer-designer/commands', function() {
         sourceId: sourceId,
         targetSourceId: targetSourceId,
         position: position,
+      };
+    },
+
+    newElement: function(targetSourceId, tagName, initialStyle, initialContent,
+        insertPosition) {
+      return {
+        commandType: 'newElement',
+        // this signifies that the command needs to request a
+        // new sourceId. This is a pretty ad-hoc way to do this... :/
+        sourceId: null,
+        targetSourceId: targetSourceId,
+        tagName: tagName,
+        initialStyle: initialStyle,
+        initialContent: initialContent,
+        insertPosition: insertPosition,
       };
     },
 
