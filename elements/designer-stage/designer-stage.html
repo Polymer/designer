@@ -85,6 +85,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <designer-selection
           id="selection"
           on-click="_onSelectionClick"
+          on-designer-selection-mousedown="_onSelectionDown"
           on-designer-selection-resize="_onSelectionResize"
           on-designer-selection-move="_onSelectionMove">
       </designer-selection>
@@ -118,6 +119,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         dragging) {
 
     'use strict';
+
+
+    let SELECTION_MOVE = 'selection-move';
+    let SELECTION_RESIZE = 'selection-resize';
 
     /**
      * `<designer-stage>` hanldes user input for WYSIWYG editing.
@@ -180,6 +185,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         size: {
           type: Number,
           observer: '_sizeChanged',
+        },
+
+        /**
+         * The current user operaiton: 'selection-move' or 'selection-resize'.
+         */
+        _operation: {
+          type: String,
+          value: null,
         }
 
       },
@@ -223,14 +236,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.selection.show();
       },
 
+      /**
+       * @return {Promise}
+       */
       _selectElement(elementInfo) {
-        this.fire('designer-select-element', {
+        let event = this.fire('designer-select-element', {
           // TODO(justinfagnani): this is a waste of the elementInfo, which
           // will be retreived again by designer-document, but it's a little
           // simpler to reason about elementInfo always coming from one place
           // at the moment.
           sourceId: elementInfo.sourceId,
         }, { bubbles: true, });
+        return event.detail.complete;
       },
 
       _selectionChanged() {
@@ -275,7 +292,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         if (this.selection &&
             this.selection.elementInfo.position == 'static') {
-          console.log('inserting...');
           this.insertPosition = hover.showInsertMarker(
               this.currentMousePosition.x,
               this.currentMousePosition.y);
@@ -308,6 +324,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.selection.show();
         domUtils.hide(this.$['text-edit-selection']);
         domUtils.hide(this.$.caret);
+      },
+
+      _onSelectionDown(e) {
+        this._operation = SELECTION_MOVE;
       },
 
       _onSelectionResize(e) {
@@ -358,6 +378,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onMouseDown(e) {
+        console.assert(this._operation == null);
         this._mouseDown = true;
         if (this._mode === 'text') {
           this.exitTextMode();
@@ -365,15 +386,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // TODO(justinfagnani): we might want to wait until we know we don't
         // have a double-click to initiate any action, but the redundant
         // selection that happens here sometimes is ok for now
-        let position = domUtils.toLocalPosition(this.$.content, e.clientX, e.clientY);
+        let position =
+            domUtils.toLocalPosition(this.$.content, e.clientX, e.clientY);
         this.client.selectElementAtPoint(position.x, position.y)
-            .then(function(response) {
-              this._selectElement(response.elementInfo);
+            .then((response) => this._selectElement(response.elementInfo))
+            .then(() => {
               // Start a drag after selection if the mouse is still down.
               if (this._mouseDown) {
                 this.$.selection._boundsDown(e);
+                console.assert(this._operation === SELECTION_MOVE);
               }
-            }.bind(this));
+            });
       },
 
       _onDragMove(e) {
@@ -394,7 +417,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // operations that are completed with a mouse up. ie: dragging a
         // current element vs. dropping a new one.
         this._mouseDown = false;
-        if (this.hoverSourceId != null && this.insertPosition != null) {
+        this.currentMousePosition = null;
+        if (this._operation == SELECTION_MOVE &&
+            this.hoverSourceId != null &&
+            this.insertPosition != null) {
           this.fire('designer-command',
             commands.moveElement(
               this.selection.elementInfo.sourceId,
@@ -405,6 +431,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         this._hideHover();
         domUtils.hide(this.$.proxy);
+        this._operation = null;
       },
 
       _onDoubleClick(e) {
