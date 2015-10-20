@@ -109,23 +109,25 @@ define(['polymer-designer/dragging'], function(dragging) {
       });
       this.fire('designer-mini-nav-collapse');
       dragging.startDrag(
-        el,
         bounds.left,
         bounds.top,
         e.clientX,
         e.clientY,
-        function(x, y) {
-          this._updateDragProxy({
-            left: x,
-            top: y,
-            width: el.offsetWidth,
-            height: el.offsetHeight,
-          });
-
-        }.bind(this),
-        function() {
-          this._hideDragProxy();
-        }.bind(this));
+        {
+          fireDragEvents: true,
+          onDragMove: (x, y) => {
+            this._updateDragProxy({
+              left: x,
+              top: y,
+              width: el.offsetWidth,
+              height: el.offsetHeight,
+            });
+          },
+          onDragEnd: () => {
+            this._hideDragProxy();
+          },
+        }
+      );
     },
 
     _onProxyMouseOver(e) {

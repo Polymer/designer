@@ -18,23 +18,33 @@
    * initial drag position (startX, startY), onMove is called with new
    * drag position.
    */
-  function startDrag(element, startX, startY, clientX, clientY, onMove, onDragEnd) {
+  function startDrag(startX, startY, clientX, clientY, opts) {
+    opts = opts || {};
+    let onDragMove = opts.onDragMove;
+    let onDragEnd = opts.onDragEnd;
+    let fireDragEvents = opts.fireDragEvents || false;
+
     let onMouseMove = function(e) {
       let deltaX = e.clientX - clientX + startX;
       let deltaY = e.clientY - clientY + startY;
-      onMove(deltaX, deltaY, e);
-      var dropTargets = document.elementsFromPoint(e.clientX, e.clientY);
-      for (let i = 0; i < dropTargets.length; i++) {
-        var target = dropTargets[i];
-        if (target.designerDropTarget) {
-          let dragEvent = new CustomEvent('designer-drag-move', {
-            detail: {
-              test: 'woot',
-              clientX: e.clientX,
-              clientY: e.clientY,
-            }
-          });
-          target.dispatchEvent(dragEvent);
+
+      if (onDragMove) {
+        onDragMove(deltaX, deltaY, e);
+      }
+
+      if (fireDragEvents) {
+        var dropTargets = document.elementsFromPoint(e.clientX, e.clientY);
+        for (let i = 0; i < dropTargets.length; i++) {
+          var target = dropTargets[i];
+          if (target.designerDropTarget) {
+            let dragEvent = new CustomEvent('designer-drag-move', {
+              detail: {
+                clientX: e.clientX,
+                clientY: e.clientY,
+              }
+            });
+            target.dispatchEvent(dragEvent);
+          }
         }
       }
     };
@@ -44,7 +54,9 @@
       window.removeEventListener('mouseup', onMouseUp);
       document.removeEventListener('contextmenu', onMouseUp);
       // this.$.bounds.style.cursor = 'auto';
-      onDragEnd(e);
+      if (onDragEnd) {
+        onDragEnd(e);
+      }
     };
 
     window.addEventListener('mousemove', onMouseMove);

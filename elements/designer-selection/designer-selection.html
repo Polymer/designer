@@ -2,6 +2,7 @@
 <html>
   <head>
     <link rel="import" href="../../../polymer/polymer.html">
+    <link rel="import" href="../../src/dragging/dragging.html">
     <script type="application/javascript" src="ResizeDirection.js"></script>
   </head>
   <body>
@@ -90,9 +91,10 @@
     <script type="text/javascript">
       define([
             'polymer-designer/designer-selection/ResizeDirection',
-            'polymer-designer/dom-utils'],
-          function(ResizeDirection, domUtils) {
-            
+            'polymer-designer/dom-utils',
+            'polymer-designer/dragging'],
+          function(ResizeDirection, domUtils, dragging) {
+
         'use strict';
 
         Polymer({
@@ -136,20 +138,33 @@
           // called for mousedown on the main bounding box div
           _boundsDown(e) {
             this.$.bounds.style.cursor = 'move';
-            this._startDrag(
-              'designer-selection-move',
+            dragging.startDrag(
                 this.offsetLeft,
                 this.offsetTop,
                 e.clientX,
                 e.clientY,
-                function(x, y) {
-                  return {
-                    left: x,
-                    top: y,
-                    width: this.offsetWidth,
-                    height: this.offsetHeight,
-                  };
-                }.bind(this));
+                {
+                  fireDragEvents: false,
+                  onDragMove: (x, y, e) => {
+                    this.fire('designer-selection-move', {
+                      bounds: {
+                        left: x,
+                        top: y,
+                        width: this.offsetWidth,
+                        height: this.offsetHeight,
+                      },
+                      cursor: {
+                        // This is purposefully the client coordinates
+                        x: e.clientX,
+                        y: e.clientY,
+                      },
+                    });
+                  },
+                  onDragEnd: (e) => {
+                    this.$.bounds.style.cursor = 'auto';
+                  },
+                }
+              );
           },
 
           // called for mousedown on one of the resize handle divs
@@ -171,69 +186,46 @@
                 ? offsetTop
                 : offsetBottom;
 
-            this._startDrag(
-              'designer-selection-resize',
+            dragging.startDrag(
               startX,
               startY,
               e.clientX,
               e.clientY,
-              function(x, y) {
-                let newWidth =
-                    direction.resizesLeft() ? offsetRight - x :
-                    direction.resizesRight() ? x - offsetLeft :
-                    offsetWidth;
-                let newHeight =
-                    direction.resizesTop() ? offsetBottom - y :
-                    direction.resizesBottom() ? y - offsetTop:
-                    offsetHeight;
-                let newLeft = direction.resizesLeft() ? x : offsetLeft;
-                let newTop = direction.resizesTop() ? y : offsetTop;
+              {
+                fireDragEvents: false,
+                onDragMove: (x, y, e) => {
+                  let newWidth =
+                      direction.resizesLeft() ? offsetRight - x :
+                      direction.resizesRight() ? x - offsetLeft :
+                      offsetWidth;
+                  let newHeight =
+                      direction.resizesTop() ? offsetBottom - y :
+                      direction.resizesBottom() ? y - offsetTop:
+                      offsetHeight;
+                  let newLeft = direction.resizesLeft() ? x : offsetLeft;
+                  let newTop = direction.resizesTop() ? y : offsetTop;
 
-                return {
-                  left: newLeft,
-                  top: newTop,
-                  width: newWidth,
-                  height: newHeight,
-                };
-              }.bind(this));
-          },
-
-          /**
-           * Starts a mouse drag operation.
-           *
-           * Given an initial client position at (clientX, clientY) and an
-           * initial drag position (startX, startY), onMove is called with new
-           * drag position.
-           */
-          _startDrag(eventName, startX, startY, clientX, clientY, onMove) {
-            let onMouseMove = (function(e) {
-              let deltaX = e.clientX - clientX + startX;
-              let deltaY = e.clientY - clientY + startY;
-              let newBounds = onMove(deltaX, deltaY);
-
-              this.fire(eventName, {
-                bounds: newBounds,
-                cursor: {
-                  // This is purposefully the client coordinates
-                  x: e.clientX,
-                  y: e.clientY,
+                  this.fire('designer-selection-resize', {
+                    bounds: {
+                      left: newLeft,
+                      top: newTop,
+                      width: newWidth,
+                      height: newHeight,
+                    },
+                    cursor: {
+                      // This is purposefully the client coordinates
+                      x: e.clientX,
+                      y: e.clientY,
+                    },
+                  });
                 },
-              });
-            }).bind(this);
-
-            let onMouseUp = (function(e) {
-              window.removeEventListener('mousemove', onMouseMove);
-              window.removeEventListener('mouseup', onMouseUp);
-              document.removeEventListener('contextmenu', onMouseUp);
-              this.$.bounds.style.cursor = 'auto';
-            }).bind(this);
-
-            window.addEventListener('mousemove', onMouseMove);
-            window.addEventListener('mouseup', onMouseUp);
-            // Note document instead of window:
-            // http://www.quirksmode.org/dom/events/contextmenu.html
-            document.addEventListener('contextmenu', onMouseUp);
+                onDragEnd: (e) => {
+                  this.$.bounds.style.cursor = 'auto';
+                },
+              }
+            );
           },
+
         });
       });
     </script>
