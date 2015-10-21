@@ -152,17 +152,25 @@ define('polymer-designer/protocol/DocumentServer', [
 
     selectElementForSourceId(request) {
       this._selectElementForSourceId(request.message.sourceId);
-      request.reply({
-        bounds: this._elementBounds(this.currentElement),
-        elementInfo: this._elementInfo(this.currentElement),
-      });
+      if (this.currentElement) {
+        request.reply({
+          bounds: this._elementBounds(this.currentElement),
+          elementInfo: this._elementInfo(this.currentElement),
+        });
+      } else {
+        request.reply(null);
+      }
     }
 
     _selectElementForSourceId(sourceId) {
       let node = document.querySelector(
           `[${domUtils.sourceIdAttribute}="${sourceId}"]`);
       this.currentElement = node;
-      this.cursorManager = new CursorManager(this.currentElement);
+      if (this.currentElement) {
+        this.cursorManager = new CursorManager(this.currentElement);
+      } else {
+        this.cursorManager = null;
+      }
     }
 
     selectionBoundsChanged(request) {

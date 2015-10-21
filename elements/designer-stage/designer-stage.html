@@ -94,8 +94,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div
           id="text-edit-selection"
           on-click="_textOnClick"
-          on-keydown="_onKeydown"
-          on-keypress="_onKeypress"
           tabindex="0">
       </div>
       <div id="proxy"></div>
@@ -207,8 +205,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       },
 
+      hostAttributes: {
+        tabindex: 0
+      },
+
       listeners: {
         'dblclick': '_onDoubleClick',
+        'keydown': '_onKeydown',
+        'keypress': '_onKeypress',
         'designer-drag-move': '_onDragMove',
         'designer-drag-enter': '_onDragEnter',
         'designer-drag-leave': '_onDragLeave',
@@ -545,6 +549,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         switch(event.keyCode) {
           // TODO(justinfagnani): consider using KeyboardEvent key names
+          case 8: // backspace
+            if (this._mode === 'text') {
+              // send delete text command
+            } else if (this._mode === 'layout') {
+              let sourceId = this.selection.elementInfo.sourceId;
+              this._dispatchCommand(commands.removeElement(sourceId));
+            }
+            break;
           case 37: // left
             if (event.metaKey) {
               event.preventDefault();
@@ -571,23 +583,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             return;
         }
 
-        this.client.moveCursor(move)
-          .then(function(response) {
-            this._updateCaret(response.rect);
-          }.bind(this));
+        if (this._mode === 'text' && move && this.client) {
+          this.client.moveCursor(move)
+            .then((response) => this._updateCaret(response.rect));
+        }
+      },
+
+      _onKeypress(event) {
+
+        if (this._mode === 'text' && this.client) {
+          var keyCode = event.keyCode;
+          var char = String.fromCharCode(keyCode);
+          this.client.insertText(char)
+            .then((response) => this._updateCaret(response.rect));
+        }
       },
 
       _updateCaret(bounds) {
         domUtils.setBounds(this.$.caret, bounds);
-      },
-
-      _onKeypress(event) {
-        var keyCode = event.keyCode;
-        var char = String.fromCharCode(keyCode);
-        this.client.insertText(char)
-          .then(function(response) {
-            this._updateCaret(response.rect);
-          }.bind(this));
       },
 
     });

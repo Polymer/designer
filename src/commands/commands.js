@@ -14,86 +14,73 @@
  * Commands themselves are simple JSON objects so that they can be
  * serialized over postMessage.
  */
-define('polymer-designer/commands', function() {
+define('polymer-designer/commands', () => ({
 
-  // exports
-  return {
+  InsertPosition: {
+    before: 'before',
+    after: 'after',
+    into: 'into',
+  },
 
-    InsertPosition: {
-      before: 'before',
-      after: 'after',
-      into: 'into',
-    },
+  setAttribute: (sourceId, attribute, oldValue, newValue) => ({
+      commandType: 'setAttribute',
+      sourceId,
+      attribute,
+      oldValue,
+      newValue,
+  }),
 
-    setAttribute: function(sourceId, attribute, oldValue, newValue) {
-      return {
-        commandType: 'setAttribute',
-        sourceId: sourceId,
-        attribute: attribute,
-        oldValue: oldValue,
-        newValue: newValue,
-      };
-    },
+  setTextContent: (sourceId, oldValue, newValue) => ({
+    commandType: 'setTextContent',
+    sourceId,
+    oldValue,
+    newValue,
+  }),
 
-    setTextContent: function(sourceId, oldValue, newValue) {
-      return {
-        messageType: 'command',
-        commandType: 'setTextContent',
-        sourceId: sourceId,
-        oldValue: oldValue,
-        newValue: newValue,
-      };
-    },
+  setTagName: (sourceId, oldValue, newValue) => ({
+    commandType: 'setTagName',
+    sourceId,
+    oldValue,
+    newValue,
+  }),
 
-    setTagName: function(sourceId, oldValue, newValue) {
-      return {
-        messageType: 'command',
-        commandType: 'setTagName',
-        sourceId: sourceId,
-        oldValue: oldValue,
-        newValue: newValue,
-      };
-    },
+  /**
+   * [path] and [selector] are used to find the CSS declaration to edit,
+   * which may be:
+   *   - a path to a <style> tag, + the selector of a rule
+   *   - an element path + style attribute
+   *   - a file path?
+   */
+  setCssProperties: (sourceId, selector, properties) => ({
+    commandType: 'setCssProperties',
+    sourceId,
+    selector,
+    properties,
+  }),
 
-    /**
-     * [path] and [selector] are used to find the CSS declaration to edit,
-     * which may be:
-     *   - a path to a <style> tag, + the selector of a rule
-     *   - an element path + style attribute
-     *   - a file path?
-     */
-    setCssProperties: function(sourceId, selector, properties) {
-      return {
-        commandType: 'setCssProperties',
-        sourceId: sourceId,
-        selector: selector,
-        properties: properties,
-      };
-    },
+  moveElement: (sourceId, targetSourceId, position) => ({
+    commandType: 'moveElement',
+    sourceId,
+    targetSourceId,
+    position,
+  }),
 
-    moveElement: function(sourceId, targetSourceId, position) {
-      return {
-        commandType: 'moveElement',
-        sourceId: sourceId,
-        targetSourceId: targetSourceId,
-        position: position,
-      };
-    },
+  newElement: (targetSourceId, tagName, initialStyle, initialContent,
+      insertPosition) => ({
+    commandType: 'newElement',
+    // this signifies that the command needs to request a
+    // new sourceId. This is a pretty ad-hoc way to do this... :/
+    sourceId: null,
+    targetSourceId,
+    tagName,
+    initialStyle,
+    initialContent,
+    insertPosition,
+  }),
 
-    newElement: function(targetSourceId, tagName, initialStyle, initialContent,
-        insertPosition) {
-      return {
-        commandType: 'newElement',
-        // this signifies that the command needs to request a
-        // new sourceId. This is a pretty ad-hoc way to do this... :/
-        sourceId: null,
-        targetSourceId: targetSourceId,
-        tagName: tagName,
-        initialStyle: initialStyle,
-        initialContent: initialContent,
-        insertPosition: insertPosition,
-      };
-    },
+  removeElement: (sourceId) => ({
+    commandType: 'removeElement',
+    sourceId,
+  }),
 
-  };
-});
+}));
