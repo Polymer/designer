@@ -28,29 +28,29 @@ define('polymer-designer/commands/DomCommandApplier', [
       super(doc);
       this.handlers = {
         'setAttribute': {
-          checkApply: function(doc, command) {
+          checkApply(doc, command) {
             let node = this.getNode(doc, command.sourceId);
             this.check(node.getAttribute(command.attribute) === command.oldValue);
           },
 
-          apply: function(doc, command) {
+          apply(doc, command) {
             let node = this.getNode(doc, command.sourceId);
             node.setAttribute(command.attribute, command.newValue);
           },
 
-          checkUndo: function(doc, command) {
+          checkUndo(doc, command) {
             let node = this.getNode(doc, command.sourceId);
             this.check(node.getAttribute(command.attribute) === command.newValue);
           },
 
-          undo: function(doc, command) {
+          undo(doc, command) {
             let node = this.getNode(doc, command.sourceId);
             node.setAttribute(command.attribute, command.oldValue);
           },
         },
 
         'setTextContent': {
-          checkApply: function(doc, command) {
+          checkApply(doc, command) {
             let node = this.getNode(doc, command.sourceId);
             if (!node) return false;
             var hasElementChildren = node.children === 0;
@@ -62,48 +62,48 @@ define('polymer-designer/commands/DomCommandApplier', [
             this.check(!hasElementChildren);
           },
 
-          apply: function(doc, command) {
+          apply(doc, command) {
             let node = this.getNode(doc, command.sourceId);
             node.textContent = command.newValue;
           },
 
-          checkUndo: function(doc, command) {
+          checkUndo(doc, command) {
             let node = this.getNode(doc, command.sourceId);
             this.check(node.textContent === command.newValue);
           },
 
-          undo: function(doc, command) {
+          undo(doc, command) {
             let node = this.getNode(doc, command.sourceId);
             node.textContent = command.oldValue;
           },
         },
 
         'setTagName': {
-          checkApply: function(doc, command) {
+          checkApply(doc, command) {
             let node = this.getNode(doc, command.sourceId);
             this.check(node &&
                 node.tagName.toLowerCase() === command.oldValue.toLowerCase());
           },
 
-          apply: function(doc, command) {
+          apply(doc, command) {
             let node = this.getNode(doc, command.sourceId);
             domUtils.renameNode(node, command.newValue);
           },
 
-          checkUndo: function(doc, command) {
+          checkUndo(doc, command) {
             let node = this.getNode(doc, command.sourceId);
             this.check(node &&
                 node.tagName.toLowerCase() === command.newValue.toLowerCase());
           },
 
-          undo: function(doc, command) {
+          undo(doc, command) {
             let node = this.getNode(doc, command.sourceId);
             domUtils.renameNode(node, command.oldValue);
           },
         },
 
         'moveElement': {
-          checkApply: function(doc, command) {
+          checkApply(doc, command) {
             let el = this.getNode(doc, command.sourceId);
             let target = this.getNode(doc, command.targetSourceId);
             this.check(el != null && target != null &&
@@ -111,7 +111,7 @@ define('polymer-designer/commands/DomCommandApplier', [
                  command.position == commands.InsertPosition.after));
           },
 
-          apply: function(doc, command) {
+          apply(doc, command) {
             let el = this.getNode(doc, command.sourceId);
             let target = this.getNode(doc, command.targetSourceId);
             var container = target.parentNode;
@@ -123,7 +123,7 @@ define('polymer-designer/commands/DomCommandApplier', [
             }
           },
 
-          checkUndo: function(doc, command) {
+          checkUndo(doc, command) {
             this.check(false);
           },
         },
@@ -131,11 +131,10 @@ define('polymer-designer/commands/DomCommandApplier', [
         'newElement': {
           checkApply(doc, command) {
             // check that target exists
-            let target = this.getNode(doc, command.targetSourceId);
-            return (target != null);
+            this.check(this.getNode(doc, command.targetSourceId) != null);
           },
 
-          apply: function(doc, command) {
+          apply(doc, command) {
             let el = doc.createElement(command.tagName);
             el.setAttribute('style', command.initialStyle);
             el.setAttribute(nodeIdProperty, command.sourceId);
@@ -154,6 +153,18 @@ define('polymer-designer/commands/DomCommandApplier', [
             }
           },
         },
+
+        'removeElement': {
+          checkApply(doc, command) {
+            this.check(this.getNode(doc, command.sourceId) != null);
+          },
+
+          apply(doc, command) {
+            let node = this.getNode(doc, command.sourceId);
+            node.remove();
+          },
+        },
+
       };
     }
 

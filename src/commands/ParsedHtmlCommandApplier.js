@@ -148,6 +148,15 @@ define('polymer-designer/commands/ParsedHtmlCommandApplier',[
           apply() {},
         },
 
+        'removeElement': {
+          checkApply(doc, command) {
+            // throw new Error('not implemented');
+            return true;
+          },
+
+          apply() {},
+        },
+
       };
     }
 

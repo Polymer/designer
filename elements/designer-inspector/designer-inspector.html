@@ -74,17 +74,16 @@ define(['polymer-designer/dom-utils'], function(domUtils) {
   Polymer({
     is: 'designer-inspector',
 
-    properties: {
-      editor: Object,
-    },
-
     behaviors: [
       Polymer.DesignerInspectorBehavior
     ],
 
     _selectionChanged() {
-      console.assert(this.selection.editor != null);
       domUtils.clearChildren(this.root);
+
+      if (this.selection == null) {
+        return;
+      }
 
       let inspectorNames = this.selection.editor.inspectors;
       for (let inspectorName of inspectorNames) {

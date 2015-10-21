@@ -188,11 +188,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _updateSelection(elementInfo, bounds) {
         if (elementInfo == null) {
+          this.selection = null;
           return;
         }
         let tagName = elementInfo.tagName;
         // TODO(justinfagnani): create class for selection object
-        let selection = {
+        this.selection = {
           elementInfo: elementInfo,
           bounds: bounds,
           // TODO(justinfagnani): add method for retrieving elements by id
@@ -201,7 +202,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           analysisInfo: this._getAnalysisInfo(tagName),
           editor: ElementEditor.getEditor(tagName),
         };
-        this.selection = selection;
       },
 
       _getAnalysisInfo(tagName) {
