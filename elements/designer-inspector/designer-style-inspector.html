@@ -23,22 +23,22 @@ editing interface for them.
 
   <style>
     :host {
-      box-sizing: border-box;
+      @apply(--paper-font-body1);
       display: block;
-      padding: 0 10px;
+      padding: 16px;
     }
-
-    designer-style-rule-editor {
-      margin: 10px 0;
+    h2 {
+      @apply(--designer-inspector-title);
     }
   </style>
 
   <template>
-    <select>
+    <h2>Styles</h2>
+    <!-- <select>
       <template is="x-repeat" items="{{selectors}}">
         <option>{{item}}</option>
       </template>
-    </select>
+    </select> -->
     <template is="dom-repeat" items="{{_sheets}}">
       <section class="sheet" _sheet="{{item}}">
         <header>{{item.ownerNodePath}}</header>
