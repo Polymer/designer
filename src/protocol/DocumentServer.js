@@ -40,6 +40,7 @@ define('polymer-designer/protocol/DocumentServer', [
       this.nodes = new Map();
       this.nextId = 1;
 
+      connection.on('backspaceText', this.backspaceText.bind(this));
       connection.on('command', this._onCommand.bind(this));
       connection.on('getCaretPosition', this.getCaretPosition.bind(this));
       connection.on('getDocument', this.getDocument.bind(this));
@@ -208,6 +209,19 @@ define('polymer-designer/protocol/DocumentServer', [
       request.reply(message);
     }
 
+    _getCurrentCaretPosition() {
+      let rect = this.cursorManager.walker.getCaretRange()
+          .getBoundingClientRect();
+      return {
+        rect: {
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height,
+        },
+      };
+    }
+
     getCaretPosition(request) {
       // Note: We're assuming Shadow DOM here. This gets much more complicated
       // with Shady DOM!
@@ -218,17 +232,7 @@ define('polymer-designer/protocol/DocumentServer', [
 
       this.cursorManager.setPosition(node, offset);
 
-      let rect = this.cursorManager.walker.getCaretRange()
-          .getBoundingClientRect();
-
-      request.reply({
-        rect: {
-          top: rect.top,
-          left: rect.left,
-          width: rect.width,
-          height: rect.height,
-        },
-      });
+      request.reply(this._getCurrentCaretPosition());
     }
 
     moveCursor(request) {
@@ -255,19 +259,7 @@ define('polymer-designer/protocol/DocumentServer', [
           console.error('Unrecognized cursor move', request.message.move);
       }
 
-      let rect = this.cursorManager.walker.getCaretRange()
-          .getBoundingClientRect();
-      let node = this.cursorManager.walker.currentNode;
-      let offset = this.cursorManager.walker.localOffset;
-
-      request.reply({
-        rect: {
-          top: rect.top,
-          left: rect.left,
-          width: rect.width,
-          height: rect.height,
-        },
-      });
+      request.reply(this._getCurrentCaretPosition());
     }
 
     insertText(request) {
@@ -280,20 +272,17 @@ define('polymer-designer/protocol/DocumentServer', [
       this.cursorManager.walker.refresh();
       this.cursorManager.forward();
 
-      let rect = this.cursorManager.walker.getCaretRange()
-          .getBoundingClientRect();
+      request.reply(this._getCurrentCaretPosition());
+    }
 
-      node = this.cursorManager.walker.currentNode;
-      let offset = this.cursorManager.walker.localOffset;
+    backspaceText(request) {
+      let range = this.cursorManager.walker.getCaretRange();
+      range.deleteContents();
 
-      request.reply({
-        rect: {
-          top: rect.top,
-          left: rect.left,
-          width: rect.width,
-          height: rect.height,
-        },
-      });
+      this.cursorManager.walker.refresh();
+      this.cursorManager.back();
+
+      request.reply(this._getCurrentCaretPosition());
     }
 
     _resizeElement(bounds) {
