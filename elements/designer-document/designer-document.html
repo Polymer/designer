@@ -105,66 +105,87 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        * @param {string} url The document location.
        * @returns {Promise<Document>} The modified document.
        */
-      setDocument(content, url) {
-        // TODO: clone the hydrolysis-analyzer element? maybe include it in a template?
+      setDocument(content, url, useAnalyzer) {
 
-        return Promise.all([
-          this.analyzer.load(url),
-          this._frameScriptAsset.load(),
-        ]).then(function(results) {
-          let analyzedDocument = results[0];
-          let frameScript = results[1];
-
-          Promise.all([
-            analyzedDocument.htmlLoaded,
-            analyzedDocument.metadataLoaded,
-          ]).then(function(results) {
-            let parsedDocument = results[0];
-            let metadata = results[1];
-
+        // TODO: this is a nasty fork in functionality, maybe this should be
+        // two elements, or the analyzer should be factored out somehow
+        if (useAnalyzer === false) {
+          return this._frameScriptAsset.load().then((frameScript) => {
             let domDocument = createDocument(content, frameScript, url);
             let domDocumentElement = domUtils.getDocumentElement(domDocument);
 
-            let astDocument = parsedDocument.ast;
-            let astDocumentElement = domUtils.getDocumentElement(astDocument);
-
-            // assign sequential IDs to all elements in the document
-            this._nextSourceId = 1;
-            dom5.query(astDocument, (node) => {
-              dom5.setAttribute(node, sourceIdAttribute, `${this._nextSourceId++}`);
-            });
-
-            let elements = metadata.elements;
-            let textContent = dom5.serialize(astDocument);
-
-            let splitUrl = url.split('/');
-            let filename = splitUrl[splitUrl.length - 1];
-
             this._domCommandApplier = new DomCommandApplier(domDocument);
-            this._parsedCommandApplier =
-                new ParsedHtmlCommandApplier(astDocument);
+            let splitUrl = url == null ? null : url.split('/');
+            let filename = url == null ? null : splitUrl[splitUrl.length - 1];
 
-            // TODO(justinfagnani): cleanup
-            //   - define a class and jscompiler type?
-            //   - remove document element proeprties
-            //   - add method to query element by sourceId
-            //   - only include one public text document
-            //   - don't include both elements and analyzer?
             this.documentInfo = {
               domDocument: domDocument,
               domDocumentElement: domDocumentElement,
-              astDocument: astDocument,
-              astDocumentElement: astDocumentElement,
-              elements: elements,
-              textContent: textContent,
-              analyzer: this.analyzer,
               source: content,
               url: url,
               filename: filename,
             };
-          }.bind(this));
+          });
+        } else {
+          // TODO: clone the hydrolysis-analyzer element? maybe include it in a template?
+          return Promise.all([
+            this.analyzer.load(url),
+            this._frameScriptAsset.load(),
+          ]).then((results) => {
+            let analyzedDocument = results[0];
+            let frameScript = results[1];
 
-        }.bind(this));
+            Promise.all([
+              analyzedDocument.htmlLoaded,
+              analyzedDocument.metadataLoaded,
+            ]).then((results) => {
+              let parsedDocument = results[0];
+              let metadata = results[1];
+
+              let domDocument = createDocument(content, frameScript, url);
+              let domDocumentElement = domUtils.getDocumentElement(domDocument);
+
+              let astDocument = parsedDocument.ast;
+              let astDocumentElement = domUtils.getDocumentElement(astDocument);
+
+              // assign sequential IDs to all elements in the document
+              this._nextSourceId = 1;
+              dom5.query(astDocument, (node) => {
+                dom5.setAttribute(node, sourceIdAttribute, `${this._nextSourceId++}`);
+              });
+
+              let elements = metadata.elements;
+              let textContent = dom5.serialize(astDocument);
+
+              let splitUrl = url.split('/');
+              let filename = splitUrl[splitUrl.length - 1];
+
+              this._domCommandApplier = new DomCommandApplier(domDocument);
+              this._parsedCommandApplier =
+                  new ParsedHtmlCommandApplier(astDocument);
+
+              // TODO(justinfagnani): cleanup
+              //   - define a class and jscompiler type?
+              //   - remove document element proeprties
+              //   - add method to query element by sourceId
+              //   - only include one public text document
+              //   - don't include both elements and analyzer?
+              this.documentInfo = {
+                domDocument: domDocument,
+                domDocumentElement: domDocumentElement,
+                astDocument: astDocument,
+                astDocumentElement: astDocumentElement,
+                elements: elements,
+                textContent: textContent,
+                analyzer: this.analyzer,
+                source: content,
+                url: url,
+                filename: filename,
+              };
+            });
+
+          });
+        }
       },
 
       /**
@@ -204,7 +225,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _getAnalysisInfo(tagName) {
-        return this.documentInfo.analyzer.elementsByTagName[tagName];
+        if (this.documentInfo.analyzer) {
+          return this.documentInfo.analyzer.elementsByTagName[tagName];
+        }
       },
 
       _clientConnectionChanged() {
