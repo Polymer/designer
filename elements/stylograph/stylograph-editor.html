@@ -8,8 +8,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../../../polymer/polymer.html">
-<link rel="import" href="../../../imd/imd.html">
 <link rel="import" href="../../src/text/cursor-manager.html">
+<link rel="import" href="../designer-document/designer-document.html">
+<link rel="import" href="../designer-frame/designer-frame.html">
+<link rel="import" href="../designer-stage/designer-stage.html">
+<link rel="import" href="../hydrolysis/hydrolysis-analyzer.html">
+<link rel="import" href="../hydrolysis/hydrolysis-loader.html">
+<link rel="import" href="../hydrolysis/hydrolysis-xhr-resolver.html">
 
 <dom-module id="stylograph-editor">
 
@@ -21,39 +26,45 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       border: solid 1px #888;
       position: relative;
     }
-    #glass {
-      opacity: 0.25;
-      background: blue;
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-    }
-    #caret {
-      box-sizing: border-box;
-      position: absolute;
-      background: rgba(32, 32, 255, .4);
-    }
-    #caret.on {
-      border-left: solid 1px black;
-    }
     #content {
+      height: 100%;
+    }
+    designer-stage {
+      flex: 1;
+      position: relative;
+      width: 100%;
       height: 100%;
     }
   </style>
 
   <template>
-    <div id="glass"></div>
-    <div id="caret"></div>
-    <div id="content">Sample Content</div>
+    <div hidden="true">
+      <designer-document
+          id="document"
+          client-connection="[[clientConnection]]"
+          client="{{client}}"
+          document-info="{{documentInfo}}"
+          selection="{{selection}}">
+      </designer-document>
+    </div>
+    <designer-stage
+        id="stage"
+        document-info="[[documentInfo]]"
+        client="[[client]]"
+        selection="[[selection]]">
+      <designer-frame
+          id="frame"
+          client-connection="{{clientConnection}}"
+          document-info="[[documentInfo]]">
+      </designer-frame>
+    </designer-stage>
   </template>
 
 </dom-module>
 
 <script>
 
-define(['polymer-designer/text/CursorManager'], function(CursorManager) {
+define('polymer-designer/stylograph-editor', () => {
   'use strict';
 
   Polymer({
@@ -63,108 +74,24 @@ define(['polymer-designer/text/CursorManager'], function(CursorManager) {
       html: {
         type: String,
         notify: true,
+        observer: '_htmlChanged',
       },
-
-      _textAnchor: {
-        value: function() {
-          return document.createTextNode('\u00A0');
-        },
-      },
-
     },
 
     listeners: {
-      'keydown': 'keydown',
-      'keypress': 'keypress',
-      'click': 'click',
+      'designer-select-element': '_onDesignerSelectElement',
     },
 
     ready() {
-      this.cursorManager = new CursorManager(this.$.content);
-      this.tabIndex = 0;
-      setInterval(function() {
-        this.$.caret.classList.toggle('on');
-      }.bind(this), 1000);
-      this._update();
+
     },
 
-    keydown: function(event) {
-      console.log('keydown', event.keyCode);
-      switch(event.keyCode) {
-        case 37: // left
-          if (event.metaKey) {
-            event.preventDefault();
-            this.cursorManager.beginningOfLine();
-          } else {
-            this.cursorManager.back();
-          }
-          this._update();
-          break;
-        case 38: // up
-          this.cursorManager.up();
-          this._update();
-          break;
-        case 39: // right
-          if (event.metaKey) {
-            event.preventDefault();
-            this.cursorManager.endOfLine();
-          } else {
-            this.cursorManager.forward();
-          }
-          this._update();
-          break;
-        case 40: // down
-          this.cursorManager.down();
-          this._update();
-          break;
-        case 8: // backspace
-        case 46: // delete
-          event.preventDefault();
-          break;
-      }
+    _onDesignerSelectElement(event, detail) {
+      detail.complete = this.$.document.setSourceId(detail.sourceId);
     },
 
-    keypress: function(event) {
-      var keyCode = event.keyCode;
-      var char = String.fromCharCode(keyCode);
-      var range = this.cursorManager.walker.getRange();
-      // console.log('keypress ', char, range);
-      var node = document.createTextNode(char);
-      console.log('before', this.cursorManager.walker);
-      range.insertNode(node);
-      this.cursorManager.walker.refresh();
-      this.cursorManager.forward();
-      console.log('after', this.cursorManager.walker);
-      this._update();
-    },
-
-    _update: function() {
-      var content = this.$.content;
-      var length = content.textContent.length;
-      console.log('_update', length);
-      if (length == 0) {
-        console.log('adding nbsp');
-        content.appendChild(this._textAnchor);
-      }
-
-      // console.log('walker', this.cursorManager.walker);
-      var range = this.cursorManager.walker.getCaretRange();
-      var rects = range.getClientRects();
-      console.log("_update", range, range.cloneContents().textContent, rects);
-      var offsetTop = this.offsetTop;
-      var offsetLeft = this.offsetLeft;
-
-      if (rects.length > 0) {
-        var rBounds = rects[0];
-        caret.style.top = (rBounds.top - offsetTop) + 'px';
-        caret.style.left = (rBounds.left - offsetLeft) + 'px';
-        if (rBounds.width < 2) {
-          caret.style.width = 4 + 'px';
-        } else {
-          caret.style.width = rBounds.width + 'px';
-        }
-        caret.style.height = rBounds.height + 'px';
-      }
+    _htmlChanged() {
+      this.$.document.setDocument(this.html, null, false);
     },
 
   });
