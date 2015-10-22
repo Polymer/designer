@@ -268,6 +268,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           // at the moment.
           sourceId: elementInfo.sourceId,
         }, { bubbles: true, });
+        console.assert(event.detail.complete);
         return event.detail.complete;
       },
 
@@ -556,6 +557,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               let sourceId = this.selection.elementInfo.sourceId;
               this._dispatchCommand(commands.removeElement(sourceId));
             }
+            event.preventDefault();
             break;
           case 37: // left
             if (event.metaKey) {

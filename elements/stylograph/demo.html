@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="import" href="../../../imd/imd.html">
+    <link rel="import" href="stylograph-editor.html">
+    <style>
+      /*designer-selection {
+        min-height: 200px;
+      }*/
+      stylograph-editor {
+        height: 800px;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      Note: You have to right-arrow before you can see the cursor.
+    </p>
+    <stylograph-editor></stylograph-editor>
+    <script>
+      'use strict';
+      let editor = document.querySelector('stylograph-editor');
+      editor.html = "<div>Sample Content</div>";
+    </script>
+  </body>
+</html>

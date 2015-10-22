@@ -187,7 +187,9 @@ define('polymer-designer/text/PositionWalker', function() {
       while (this.currentNode != null) {
         let n = this.currentNode = this.getPreviousNode();
         if (n !== null && n.nodeType === Node.TEXT_NODE) {
-          this.localOffset = n.nodeValue.length - 1;
+          let length = n.nodeValue.length;
+          this.localOffset = length === 0 ? 0 : length - 1;
+          console.assert(this.localOffset >= 0);
           return;
         }
       }
