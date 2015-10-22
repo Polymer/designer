@@ -43,7 +43,11 @@ define('polymer-designer/editors/ElementEditor', function() {
     }
 
     get inspectors() {
-      return ['designer-default-inspector', 'designer-property-inspector'];
+      return [
+          'designer-default-inspector',
+          'designer-property-inspector',
+          'designer-style-inspector',
+      ];
     }
   }
 
