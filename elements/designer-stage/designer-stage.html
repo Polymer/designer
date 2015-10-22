@@ -552,7 +552,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           // TODO(justinfagnani): consider using KeyboardEvent key names
           case 8: // backspace
             if (this._mode === 'text') {
-              // send delete text command
+              move = 'backspace';
             } else if (this._mode === 'layout') {
               let sourceId = this.selection.elementInfo.sourceId;
               this._dispatchCommand(commands.removeElement(sourceId));
@@ -586,13 +586,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
         if (this._mode === 'text' && move && this.client) {
-          this.client.moveCursor(move)
-            .then((response) => this._updateCaret(response.rect));
+          let doMove;
+          if (move === 'backspace') {
+            doMove = this.client.backspaceText();
+          } else {
+            doMove = this.client.moveCursor(move);
+          }
+          doMove.then((response) => this._updateCaret(response.rect));
         }
       },
 
       _onKeypress(event) {
-
         if (this._mode === 'text' && this.client) {
           var keyCode = event.keyCode;
           var char = String.fromCharCode(keyCode);

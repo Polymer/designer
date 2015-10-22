@@ -8,10 +8,10 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-define('polymer-designer/protocol/DocumentClient', function() {
+define('polymer-designer/protocol/DocumentClient', () => {
   'use strict';
 
-  class DocumentClient {
+  return class DocumentClient {
 
     constructor(connection) {
       console.assert(connection != null);
@@ -39,7 +39,7 @@ define('polymer-designer/protocol/DocumentClient', function() {
     sendCommand(command) {
       return this.connection.request({
         messageType: 'command',
-        command: command,
+        command,
       });
     }
 
@@ -51,13 +51,13 @@ define('polymer-designer/protocol/DocumentClient', function() {
     selectElementAtPoint(x, y) {
       return this.connection.request({
         messageType: 'selectElementAtPoint',
-        x: x,
-        y: y,
-      }).then(function(response) {
+        x,
+        y,
+      }).then((response) => {
         let id = response.elementInfo.id;
         this.nodes.set(id, response);
         return response;
-      }.bind(this));
+      });
     }
 
     /**
@@ -66,9 +66,9 @@ define('polymer-designer/protocol/DocumentClient', function() {
     getElementsAtPoint(x, y) {
       return this.connection.request({
         messageType: 'getElementsAtPoint',
-        x: x,
-        y: y,
-      }).then(function(response) {
+        x,
+        y,
+      }).then((response) => {
         let elements = response.elements;
         for (let i in elements) {
           let element = elements[i];
@@ -76,7 +76,7 @@ define('polymer-designer/protocol/DocumentClient', function() {
           this.nodes.set(id, element);
         }
         return response;
-      }.bind(this));
+      });
     }
 
     /**
@@ -87,7 +87,7 @@ define('polymer-designer/protocol/DocumentClient', function() {
     selectElement(id) {
       return this.connection.request({
         messageType: 'selectElement',
-        id: id,
+        id,
       });
     }
 
@@ -104,7 +104,7 @@ define('polymer-designer/protocol/DocumentClient', function() {
       console.assert(sourceId != null);
       return this.connection.request({
         messageType: 'selectElementForSourceId',
-        sourceId: sourceId,
+        sourceId,
       });
     }
 
@@ -114,35 +114,40 @@ define('polymer-designer/protocol/DocumentClient', function() {
      selectionBoundsChanged(bounds, cursor) {
       return this.connection.request({
         messageType: 'selectionBoundsChanged',
-        bounds: bounds,
-        cursor: cursor,
+        bounds,
+        cursor,
       });
     }
 
     getCaretPosition(x, y) {
       return this.connection.request({
         messageType: 'getCaretPosition',
-        x: x,
-        y: y,
+        x,
+        y,
       });
     }
 
     moveCursor(move) {
       return this.connection.request({
         messageType: 'moveCursor',
-        move: move,
+        move,
       });
     }
 
     insertText(text) {
       return this.connection.request({
         messageType: 'insertText',
-        text: text,
+        text,
+      });
+    }
+
+    backspaceText(text) {
+      return this.connection.request({
+        messageType: 'backspaceText',
+        text,
       });
     }
 
   }
-
-  return DocumentClient;
 
 });
