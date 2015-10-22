@@ -8,7 +8,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../../../polymer/polymer.html">
-
+<link rel="import" href="../../../paper-input/paper-input.html">
 <link rel="import" href="../../src/rework-utils/rework-utils.html">
 
 <!--
@@ -21,46 +21,20 @@ editing interface for them.
     :host {
       box-sizing: border-box;
       display: block;
-      font-family: monospace;
-      font-size: 0.8em;
-    }
-
-    .selector:after {
-      content: ' \007b'; /* ' {' - Escaped due to Polymer style parser bug. */
-    }
-    .properties:after {
-      content: ' \007d'; /* '}' - Escaped due to Polymer style parser bug. */
-    }
-
-    .property {
-      padding: 0 10px;
-    }
-    .property .key {
-      font-weight: bold;
-    }
-    .property .key:after {
-      content: ':';
-    }
-    .property .value:after {
-      content: ';';
     }
   </style>
 
-  <!--
-  OMGWTFBBQ contentEditable?!?!?
-
-  Well, yes. It actually gives us the sort of behavior that we want when editing
-  the values of the CSS properties. A nice inline editor, that line wraps and
-  all that jazz. We just have to be careful to
-  -->
   <template>
     <header class="selector">{{rule.selector}}</header>
     <section class="properties">
-      <template is="dom-repeat" items="{{_styles}}">
-        <div class="property">
-          <span class="key">{{item.key}}</span>
-          <span class="value" contentEditable>{{item.value}}</span>
-        </div>
+      <template is="dom-repeat" items="[[_styles]]">
+        <paper-input
+            class="value"
+            value="[[item.value]]"
+            on-value-changed="_onValueChanged"
+            always-float-label
+            label="[[item.key]]">
+        </paper-input>
       </template>
     </section>
   </template>
@@ -68,7 +42,7 @@ editing interface for them.
 </dom-module>
 
 <script>
-define(['polymer-designer/rework-utils'], function(reworkUtils) {
+define(['polymer-designer/rework-utils'], (reworkUtils) => {
   'use strict';
 
   Polymer({
@@ -82,10 +56,6 @@ define(['polymer-designer/rework-utils'], function(reworkUtils) {
         observer: '_ruleChanged',
       },
 
-    },
-
-    listeners: {
-      'input': '_onInput',
     },
 
     _ruleChanged() {
@@ -107,15 +77,14 @@ define(['polymer-designer/rework-utils'], function(reworkUtils) {
       });
     },
 
-    _onInput(event) {
-      let propertyEl = event.target;
-      while (propertyEl && !propertyEl.classList.contains('property')) {
-        propertyEl = propertyEl.parentNode;
-      }
-      if (!propertyEl) return;
+    _onValueChanged(event) {
+      let input = event.target;
+      let key = input.label;
+      let value = input.value;
+      console.log('_onValueChanged', input, key, value);
 
-      let key = propertyEl.querySelector('.key').textContent;
-      let value = propertyEl.querySelector('.value').textContent;
+      // TODO(justinfagnani): this only works for declared properties, not
+      // computed properties
       this.fire('designer-element-style-changed', {
         key: key,
         value: value,

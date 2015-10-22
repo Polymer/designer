@@ -23,17 +23,22 @@ editing interface for them.
 
   <style>
     :host {
-      box-sizing: border-box;
+      @apply(--paper-font-body1);
       display: block;
-      padding: 0 10px;
+      padding: 16px;
     }
-
-    designer-style-rule-editor {
-      margin: 10px 0;
+    h2 {
+      @apply(--designer-inspector-title);
     }
   </style>
 
   <template>
+    <h2>Styles</h2>
+    <!-- <select>
+      <template is="x-repeat" items="{{selectors}}">
+        <option>{{item}}</option>
+      </template>
+    </select> -->
     <template is="dom-repeat" items="{{_sheets}}">
       <section class="sheet" _sheet="{{item}}">
         <header>{{item.ownerNodePath}}</header>
@@ -73,6 +78,16 @@ define([
       /** The document where edits should be made */
       documentInfo: Object,
 
+      _sheets: {
+        type: Array,
+        notify: true,
+      },
+
+      selectors: {
+        type: Array,
+        notify: true,
+      },
+
     },
 
     listeners: {
@@ -83,6 +98,14 @@ define([
       this._sheets = (this.selection &&
           this.selection.elementInfo &&
           this.selection.elementInfo.styles) || [];
+      let selectors = [];
+      for (let sheet of this._sheets) {
+        for (let rule of sheet.rules) {
+          console.log('rule', rule);
+          selectors.push(rule.selector);
+        }
+      }
+      this.selectors = selectors;
     },
 
     _styleChanged(event, info) {
