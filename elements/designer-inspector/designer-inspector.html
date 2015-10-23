@@ -82,7 +82,13 @@ define(['polymer-designer/dom-utils'], function(domUtils) {
       Polymer.DesignerInspectorBehavior
     ],
 
-    _selectionChanged() {
+    _selectionChanged(newValue, oldValue) {
+      // TODO: rather than bail we want to re-render parts that change while
+      // keeping UI state, like the currently selected style selector
+      if (newValue && oldValue &&
+          newValue.elementInfo.sourceId === newValue.elementInfo.sourceId) {
+        return;
+      }
       domUtils.clearChildren(this.root);
 
       if (this.selection == null) {
