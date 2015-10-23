@@ -71,6 +71,7 @@ define('polymer-designer/commands', () => ({
     // this signifies that the command needs to request a
     // new sourceId. This is a pretty ad-hoc way to do this... :/
     sourceId: null,
+    selectElement: true,
     targetSourceId,
     tagName,
     initialStyle,

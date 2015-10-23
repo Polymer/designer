@@ -62,7 +62,7 @@ define('polymer-designer/protocol/DocumentServer', [
       // client. Here we assume that if a command references an element by
       // sourceId that it modifies or replaces that element, so we reselect it
       // and respond with new elementInfo and bounds.
-      if (command.sourceId) {
+      if (command.sourceId && command.selectElement) {
         this._selectElementForSourceId(command.sourceId);
       }
       let response = {};
