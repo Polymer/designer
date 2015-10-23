@@ -128,6 +128,7 @@ define([
         for (let rule of sheet.rules) {
           selectors.push(rule.selector);
           this._rules[rule.selector] = rule;
+          rule._sheet = sheet;
         }
       }
       this.selectors = selectors;
@@ -143,7 +144,7 @@ define([
     _styleChanged(event, info) {
       let rule = event.target.rule;
       let sheet = event.target.parentNode._sheet;
-      this._updateSheet(sheet, rule, info.key, info.value);
+      this._updateSheet(info.rule._sheet, info.rule, info.key, info.value);
     },
 
     _updateSheet(sheet, rule, key, value) {

@@ -48,7 +48,7 @@ define(['polymer-designer/rework-utils'], (reworkUtils) => {
 
     properties: {
 
-      'rule': {
+      rule: {
         type: Object,
         observer: '_ruleChanged',
       },
@@ -75,15 +75,16 @@ define(['polymer-designer/rework-utils'], (reworkUtils) => {
     },
 
     _onChange(event) {
-      let input = event.target;
+      let input = event.currentTarget;
       let key = input.label;
       let value = input.value;
 
-      // TODO(justinfagnani): this only works for declared properties, not
-      // computed properties
+      // TODO(justinfagnani): this only works for originally declared
+      // properties, not computed or expanded (non-shorthand) properties.
       this.fire('designer-element-style-changed', {
         key: key,
         value: value,
+        rule: this.rule,
       });
     },
 
