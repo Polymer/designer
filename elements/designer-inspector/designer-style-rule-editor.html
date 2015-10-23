@@ -9,6 +9,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../../../paper-input/paper-input.html">
+<link rel="import" href="../../../paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../src/rework-utils/rework-utils.html">
 
 <!--
@@ -38,7 +39,8 @@ editing interface for them.
 
     <template is="dom-repeat" items="[[__styles]]">
       <div class="inspector-row">
-        <label>[[item.key]]</label>
+        <label id="[[_id(index)]]">[[item.key]]</label>
+        <paper-tooltip for="[[_id(index)]]">[[item.key]]</paper-tooltip>
         <paper-input
             class="value"
             value="[[item.value]]"
@@ -68,6 +70,10 @@ define(['polymer-designer/rework-utils'], (reworkUtils) => {
 
       __styles: Object,
 
+    },
+
+    _id(i) {
+      return `id-${i}`;
     },
 
     _ruleChanged() {
