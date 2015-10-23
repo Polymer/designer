@@ -17,22 +17,35 @@ editing interface for them.
 -->
 <dom-module id="designer-style-rule-editor">
 
-  <style>
-    :host {
-      box-sizing: border-box;
-      display: block;
-    }
-  </style>
-
   <template>
-    <template is="dom-repeat" items="[[_styles]]">
-      <paper-input
-          class="value"
-          value="[[item.value]]"
-          on-change="_onChange"
-          always-float-label
-          label="[[item.key]]">
-      </paper-input>
+
+    <style>
+      :host {
+        @apply(--paper-font-body1);
+        box-sizing: border-box;
+        display: block;
+      }
+      paper-input {
+        @apply(--designer-inspector-row-value);
+      }
+      label {
+        @apply(--designer-inspector-row-label);
+      }
+      .inspector-row {
+        @apply(--designer-inspector-row);
+      }
+    </style>
+
+    <template is="dom-repeat" items="[[__styles]]">
+      <div class="inspector-row">
+        <label>[[item.key]]</label>
+        <paper-input
+            class="value"
+            value="[[item.value]]"
+            no-label-float
+            on-change="_onChange">
+        </paper-input>
+      </div>
     </template>
   </template>
 
@@ -53,11 +66,13 @@ define(['polymer-designer/rework-utils'], (reworkUtils) => {
         observer: '_ruleChanged',
       },
 
+      __styles: Object,
+
     },
 
     _ruleChanged() {
       if (!this.rule) {
-        this._styles = [];
+        this.__styles = [];
         return;
       }
 
@@ -69,7 +84,7 @@ define(['polymer-designer/rework-utils'], (reworkUtils) => {
         };
       }.bind(this));
       // Hide unspecified (expanded) shorthand properties.
-      this._styles = styles.filter(function (s) {
+      this.__styles = styles.filter(function (s) {
         return s.value !== 'initial';
       });
     },
