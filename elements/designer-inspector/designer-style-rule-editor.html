@@ -25,18 +25,15 @@ editing interface for them.
   </style>
 
   <template>
-    <header class="selector">{{rule.selector}}</header>
-    <section class="properties">
-      <template is="dom-repeat" items="[[_styles]]">
-        <paper-input
-            class="value"
-            value="[[item.value]]"
-            on-value-changed="_onValueChanged"
-            always-float-label
-            label="[[item.key]]">
-        </paper-input>
-      </template>
-    </section>
+    <template is="dom-repeat" items="[[_styles]]">
+      <paper-input
+          class="value"
+          value="[[item.value]]"
+          on-change="_onChange"
+          always-float-label
+          label="[[item.key]]">
+      </paper-input>
+    </template>
   </template>
 
 </dom-module>
@@ -77,11 +74,10 @@ define(['polymer-designer/rework-utils'], (reworkUtils) => {
       });
     },
 
-    _onValueChanged(event) {
+    _onChange(event) {
       let input = event.target;
       let key = input.label;
       let value = input.value;
-      console.log('_onValueChanged', input, key, value);
 
       // TODO(justinfagnani): this only works for declared properties, not
       // computed properties

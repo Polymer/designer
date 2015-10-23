@@ -38,28 +38,22 @@ editing interface for them.
   <template>
     <h2>Styles</h2>
 
-    <ul>
-      <template is="dom-repeat" items="{{selectors}}">
-        <li>{{item}}</li>
-      </template>
-    </ul>
-
-    <paper-dropdown-menu label="Style" always-float-label>
-      <paper-menu class="dropdown-content">
+    <paper-dropdown-menu
+        label="Style"
+        always-float-label>
+      <paper-menu
+          class="dropdown-content"
+          selected="{{_currentSelector}}"
+          attr-for-selected="value">
         <template is="dom-repeat" items="{{selectors}}">
-          <paper-item>{{item}}</paper-item>
+          <paper-item value="{{item}}">{{item}}</paper-item>
         </template>
       </paper-menu>
     </paper-dropdown-menu>
 
-    <template is="dom-repeat" items="{{_sheets}}">
-      <section class="sheet" _sheet="{{item}}">
-        <header>{{item.ownerNodePath}}</header>
-        <template is="dom-repeat" items="{{item.rules}}">
-          <designer-style-rule-editor rule="{{item}}"></designer-style-rule-editor>
-        </template>
-      </section>
-    </template>
+    <designer-style-rule-editor rule="{{_currentRule}}">
+    </designer-style-rule-editor>
+
   </template>
 
 </dom-module>
@@ -101,6 +95,22 @@ define([
         notify: true,
       },
 
+      /**
+       * Map of selector -> rule object
+       */
+      _rules: {
+        type: Object,
+      },
+
+      _currentSelector: {
+        type: String,
+      },
+
+      _currentRule: {
+        type: Object,
+        computed: '_computeCurrentRule(_currentSelector)',
+      },
+
     },
 
     listeners: {
@@ -111,17 +121,23 @@ define([
       this._sheets = (this.selection &&
           this.selection.elementInfo &&
           this.selection.elementInfo.styles) || [];
-      console.log('sheets', this._sheets);
 
       let selectors = [];
+      this._rules = {};
       for (let sheet of this._sheets) {
         for (let rule of sheet.rules) {
-          console.log('rule', rule);
           selectors.push(rule.selector);
+          this._rules[rule.selector] = rule;
         }
       }
-      console.log('selectors', selectors);
       this.selectors = selectors;
+      if (selectors.length > 0) {
+        this._currentSelector = selectors[0];
+      }
+    },
+
+    _computeCurrentRule(_currentSelector) {
+      return this._rules[_currentSelector];
     },
 
     _styleChanged(event, info) {
