@@ -8,6 +8,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../../paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../../../paper-menu/paper-menu.html">
+<link rel="import" href="../../../paper-item/paper-item.html">
 <link rel="import" href="../../src/commands/commands.html">
 <link rel="import" href="../../src/path/path.html">
 <!-- also includes vendor/css -->
@@ -34,19 +37,23 @@ editing interface for them.
 
   <template>
     <h2>Styles</h2>
-    <!-- <select>
-      <template is="x-repeat" items="{{selectors}}">
-        <option>{{item}}</option>
-      </template>
-    </select> -->
-    <template is="dom-repeat" items="{{_sheets}}">
-      <section class="sheet" _sheet="{{item}}">
-        <header>{{item.ownerNodePath}}</header>
-        <template is="dom-repeat" items="{{item.rules}}">
-          <designer-style-rule-editor rule="{{item}}"></designer-style-rule-editor>
+
+    <paper-dropdown-menu
+        label="Style"
+        always-float-label>
+      <paper-menu
+          class="dropdown-content"
+          selected="{{_currentSelector}}"
+          attr-for-selected="value">
+        <template is="dom-repeat" items="{{selectors}}">
+          <paper-item value="{{item}}">{{item}}</paper-item>
         </template>
-      </section>
-    </template>
+      </paper-menu>
+    </paper-dropdown-menu>
+
+    <designer-style-rule-editor rule="{{_currentRule}}">
+    </designer-style-rule-editor>
+
   </template>
 
 </dom-module>
@@ -88,6 +95,22 @@ define([
         notify: true,
       },
 
+      /**
+       * Map of selector -> rule object
+       */
+      _rules: {
+        type: Object,
+      },
+
+      _currentSelector: {
+        type: String,
+      },
+
+      _currentRule: {
+        type: Object,
+        computed: '_computeCurrentRule(_currentSelector)',
+      },
+
     },
 
     listeners: {
@@ -98,14 +121,23 @@ define([
       this._sheets = (this.selection &&
           this.selection.elementInfo &&
           this.selection.elementInfo.styles) || [];
+
       let selectors = [];
+      this._rules = {};
       for (let sheet of this._sheets) {
         for (let rule of sheet.rules) {
-          console.log('rule', rule);
           selectors.push(rule.selector);
+          this._rules[rule.selector] = rule;
         }
       }
       this.selectors = selectors;
+      if (selectors.length > 0) {
+        this._currentSelector = selectors[0];
+      }
+    },
+
+    _computeCurrentRule(_currentSelector) {
+      return this._rules[_currentSelector];
     },
 
     _styleChanged(event, info) {

@@ -15,14 +15,16 @@
     "iron-selector": "PolymerElements/iron-selector#^1.0.0",
     "paper-card": "PolymerElements/paper-card#^1.0.0",
     "paper-ripple": "PolymerElements/paper-ripple#^1.0.0",
-    "paper-styles": "PolymerElements/paper-styles#^1.0.7",
+    "paper-styles": "polymerelements/paper-styles#^1.0.0",
     "paper-tabs": "PolymerElements/paper-tabs#^1.0.0",
     "paper-toolbar": "PolymerElements/paper-toolbar#^1.0.0",
     "polymer": "Polymer/polymer#^1.0.0",
     "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0",
     "web-component-tester": "Polymer/web-component-tester#^3.1.0",
-    "paper-styles": "polymerelements/paper-styles#^1.0.0",
-    "paper-input": "polymerelements/paper-input#^1.0.0"
+    "paper-input": "polymerelements/paper-input#^1.0.0",
+    "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#~1.0.5",
+    "paper-menu": "PolymerElements/paper-menu#~1.1.1",
+    "paper-item": "PolymerElements/paper-item#~1.0.5"
   },
   "devDependencies": {
     "chai": "chaijs/chai#^2.3.0",
