@@ -48,6 +48,9 @@ Inspects an element and provides tidbits about its properties, styles, and more.
 
       --designer-inspector-row-label: {
         flex: 2;
+        text-overflow: ellipsis;
+        overflow-x: hidden;
+        white-space: nowrap;
       };
 
       --designer-inspector-row-value: {
@@ -98,8 +101,12 @@ define(['polymer-designer/dom-utils'], function(domUtils) {
       let inspectorNames = this.selection.editor.inspectors;
       for (let inspectorName of inspectorNames) {
         let inspector = document.createElement(inspectorName);
-        inspector.selection = this.selection;
+
+        // make sure documentInfo is always set first: synchronous
+        // data-binding sucks!
         inspector.documentInfo = this.documentInfo;
+        inspector.selection = this.selection;
+
         Polymer.dom(this.root).appendChild(inspector);
       }
     },

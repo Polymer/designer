@@ -12,10 +12,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../paper-menu/paper-menu.html">
 <link rel="import" href="../../../paper-item/paper-item.html">
 <link rel="import" href="../../src/commands/commands.html">
-<link rel="import" href="../../src/path/path.html">
-<!-- also includes vendor/css -->
+<link rel="import" href="../../src/dom-utils/dom-utils.html">
 <link rel="import" href="../../src/rework-utils/rework-utils.html">
-
+<link rel="import" href="designer-inspector-behavior.html">
 <link rel="import" href="designer-style-rule-editor.html">
 
 <!--
@@ -63,14 +62,15 @@ define([
     'css',
     'polymer-designer/dom-utils',
     'polymer-designer/rework-utils',
-    'polymer-designer/path',
     'polymer-designer/commands'],
-    function(rework, domUtils, reworkUtils, pathLib, commands) {
+    function(rework, domUtils, reworkUtils, commands) {
   'use strict';
 
   Polymer({
 
     is: 'designer-style-inspector',
+
+    behaviors: [Polymer.DesignerInspectorBehavior],
 
     properties: {
 
@@ -125,9 +125,27 @@ define([
       let selectors = [];
       this._rules = {};
       for (let sheet of this._sheets) {
+
+        // find the source sheet
+        let sourceStyle = domUtils.getNodeBySourceId(
+            this.documentInfo.domDocument, sheet.ownerSourceId);
+        // sheet._sourceStyleElement = sourceStyle;
+
+        // parse the sheet
+        let sheetSource = sourceStyle.textContent;
+        let parsedSheet = rework.parse(sheetSource);
+
+        // find the rule in the sheet
         for (let rule of sheet.rules) {
+          let parsedRule =
+              reworkUtils.getRule(parsedSheet, rule.selector, rule.index);
+
+          parsedRule._sheetSource = sheetSource;
+          parsedRule._parsedSheet = parsedSheet;
+          parsedRule._sheet = sheet;
+
           selectors.push(rule.selector);
-          this._rules[rule.selector] = rule;
+          this._rules[rule.selector] = parsedRule;
           rule._sheet = sheet;
         }
       }
@@ -144,28 +162,15 @@ define([
     _styleChanged(event, info) {
       let rule = event.target.rule;
       let sheet = event.target.parentNode._sheet;
-      this._updateSheet(info.rule._sheet, info.rule, info.key, info.value);
+      this._updateSheet(info.rule._sheet, info.rule, info.property, info.value);
     },
 
-    _updateSheet(sheet, rule, key, value) {
-      console.assert(this.documentInfo);
-      console.assert(key);
-      let sheetSourceId = sheet.ownerSourceId;
-      let sourceStyle = this.documentInfo.domDocument
-          .querySelector(`[${domUtils.sourceIdAttribute}="${sheetSourceId}"]`);
-      let sheetSource = sourceStyle.textContent;
-      let parsedSheet = rework.parse(sheetSource);
-
-      let parsedRule =
-          reworkUtils.getRule(parsedSheet, rule.selector, rule.index);
-      console.assert(parsedRule, 'Expected to find a parsed rule matching', rule);
-      // TODO(nevir): We are going to have to support multiple transformations
-      // (addition, deletion).
+    _updateSheet(sheet, rule, property, value) {
       let newSource =
-          reworkUtils.replaceProperty(sheetSource, parsedRule, key, value);
+          reworkUtils.replaceProperty(rule._sheetSource, rule, property, value);
 
       this.fire('designer-command',
-          commands.setTextContent(sheetSourceId, sheetSource, newSource));
+          commands.setTextContent(rule._sheet.ownerSourceId, rule._sheetSource, newSource));
     },
 
   });

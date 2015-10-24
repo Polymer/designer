@@ -24,7 +24,8 @@
     "paper-input": "polymerelements/paper-input#^1.0.0",
     "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#~1.0.5",
     "paper-menu": "PolymerElements/paper-menu#~1.1.1",
-    "paper-item": "PolymerElements/paper-item#~1.0.5"
+    "paper-item": "PolymerElements/paper-item#~1.0.5",
+    "paper-tooltip": "PolymerElements/paper-tooltip#~1.1.1"
   },
   "devDependencies": {
     "chai": "chaijs/chai#^2.3.0",

@@ -22,6 +22,12 @@ define('polymer-designer/dom-utils', function() {
     return element.getAttribute(sourceIdAttribute);
   }
 
+  function getNodeBySourceId(doc, sourceId) {
+    let nodes = doc.querySelectorAll(`[${sourceIdAttribute}="${sourceId}"]`);
+    console.assert(nodes.length === 1);
+    return nodes[0];
+  }
+
   /**
    * @param {Node} node
    * @return {Array<Node>} The ancestors of [node] not including the node's
@@ -176,6 +182,7 @@ define('polymer-designer/dom-utils', function() {
     designerNodeFilter: designerNodeFilter,
     getAncestors: getAncestors,
     getDocumentElement: getDocumentElement,
+    getNodeBySourceId: getNodeBySourceId,
     getSourceId: getSourceId,
     hide: hide,
     isDescendant: isDescendant,
