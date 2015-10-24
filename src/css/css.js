@@ -75,15 +75,10 @@
      * @return {Array<StyleRuleInfo>}
      */
     collectStyleRules(element, rules) {
-      if (!rules) return null;
-
-      var results = [];
-      for (var i = 0, rule; rule = rules[i]; i++) {
-        if (!element.matches(rule.selectorText)) continue;
-
-        results.push(this.getRuleInfo(rule));
-      }
-      return results;
+      if (rules == null) return null;
+      return Array.from(rules)
+          .filter((r) => element.matches(r.selectorText))
+          .map(this.getRuleInfo.bind(this));
     },
 
     getRuleInfo(rule) {
@@ -91,7 +86,7 @@
         selector: rule.selectorText,
         index: 0,  // TODO(nevir): Handle duplicate selectors!
         text: rule.cssText,
-        styles: this.getStyleProperties(rule.style),
+        // styles: this.getStyleProperties(rule.style),
       };
     },
 

@@ -164,9 +164,8 @@ define('polymer-designer/protocol/DocumentServer', [
     }
 
     _selectElementForSourceId(sourceId) {
-      let node = document.querySelector(
-          `[${domUtils.sourceIdAttribute}="${sourceId}"]`);
-      this.currentElement = node;
+      this.currentElement = domUtils.getNodeBySourceId(document, sourceId);
+
       if (this.currentElement) {
         this.cursorManager = new CursorManager(this.currentElement);
       } else {
