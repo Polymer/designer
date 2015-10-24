@@ -101,8 +101,12 @@ define(['polymer-designer/dom-utils'], function(domUtils) {
       let inspectorNames = this.selection.editor.inspectors;
       for (let inspectorName of inspectorNames) {
         let inspector = document.createElement(inspectorName);
-        inspector.selection = this.selection;
+
+        // make sure documentInfo is always set first: synchronous
+        // data-binding sucks!
         inspector.documentInfo = this.documentInfo;
+        inspector.selection = this.selection;
+
         Polymer.dom(this.root).appendChild(inspector);
       }
     },

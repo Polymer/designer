@@ -37,13 +37,14 @@ editing interface for them.
       }
     </style>
 
-    <template is="dom-repeat" items="[[__styles]]">
+    <template is="dom-repeat" items="[[rule.declarations]]">
       <div class="inspector-row">
-        <label id="[[_id(index)]]">[[item.key]]</label>
-        <paper-tooltip for="[[_id(index)]]">[[item.key]]</paper-tooltip>
+        <label id="[[_id(index)]]">[[item.property]]</label>
+        <paper-tooltip for="[[_id(index)]]">[[item.property]]</paper-tooltip>
         <paper-input
             class="value"
             value="[[item.value]]"
+            item="[[item]]"
             no-label-float
             on-change="_onChange">
         </paper-input>
@@ -65,10 +66,7 @@ define(['polymer-designer/rework-utils'], (reworkUtils) => {
 
       rule: {
         type: Object,
-        observer: '_ruleChanged',
       },
-
-      __styles: Object,
 
     },
 
@@ -76,35 +74,17 @@ define(['polymer-designer/rework-utils'], (reworkUtils) => {
       return `id-${i}`;
     },
 
-    _ruleChanged() {
-      if (!this.rule) {
-        this.__styles = [];
-        return;
-      }
-
-      // TODO(nevir): Collapse rules into shorthands.
-      let styles = Object.keys(this.rule.styles).map(function(key) {
-        return {
-          key: key,
-          value: this.rule.styles[key],
-        };
-      }.bind(this));
-      // Hide unspecified (expanded) shorthand properties.
-      this.__styles = styles.filter(function (s) {
-        return s.value !== 'initial';
-      });
-    },
-
     _onChange(event) {
       let input = event.currentTarget;
-      let key = input.label;
-      let value = input.value;
+      let item = input.item;
+      let property = item.property;
+      let newValue = input.value;
 
       // TODO(justinfagnani): this only works for originally declared
       // properties, not computed or expanded (non-shorthand) properties.
       this.fire('designer-element-style-changed', {
-        key: key,
-        value: value,
+        property: property,
+        value: newValue,
         rule: this.rule,
       });
     },
