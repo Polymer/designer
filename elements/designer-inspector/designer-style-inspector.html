@@ -44,7 +44,7 @@ editing interface for them.
           class="dropdown-content"
           selected="{{_currentSelector}}"
           attr-for-selected="value">
-        <template is="dom-repeat" items="{{selectors}}">
+        <template is="dom-repeat" items="{{_selectors}}">
           <paper-item value="{{item}}">{{item}}</paper-item>
         </template>
       </paper-menu>
@@ -64,6 +64,7 @@ define([
     'polymer-designer/rework-utils',
     'polymer-designer/commands'],
     function(rework, domUtils, reworkUtils, commands) {
+
   'use strict';
 
   Polymer({
@@ -85,21 +86,19 @@ define([
       /** The document where edits should be made */
       documentInfo: Object,
 
-      _sheets: {
-        type: Array,
-        notify: true,
-      },
-
-      selectors: {
-        type: Array,
-        notify: true,
-      },
-
       /**
        * Map of selector -> rule object
        */
       _rules: {
         type: Object,
+      },
+
+      /**
+       * @type {Iterator}
+       */
+      _selectors: {
+        type: Object,
+        computed: '_computeSelectors(_rules)',
       },
 
       _currentSelector: {
@@ -108,69 +107,71 @@ define([
 
       _currentRule: {
         type: Object,
-        computed: '_computeCurrentRule(_currentSelector)',
+        computed: '_computeCurrentRule(_rules, _currentSelector)',
       },
 
     },
 
     listeners: {
-      'designer-element-style-changed': '_styleChanged',
+      'designer-element-style-changed': '_onStyleChanged',
     },
 
-    _selectionChanged() {
-      this._sheets = (this.selection &&
+    _selectionChanged(nv, ov) {
+      // TODO: selection is changing twice, what's up w/ that?
+      // styles that match the current element in the live document
+      let liveStyles = (this.selection &&
           this.selection.elementInfo &&
           this.selection.elementInfo.styles) || [];
 
-      let selectors = [];
-      this._rules = {};
-      for (let sheet of this._sheets) {
+      // source rules that match the current element, keyed by selector
+      let rules = new Map();
 
-        // find the source sheet
-        let sourceStyle = domUtils.getNodeBySourceId(
-            this.documentInfo.domDocument, sheet.ownerSourceId);
-        // sheet._sourceStyleElement = sourceStyle;
+      for (let liveStyle of liveStyles) {
+        let styleSourceId = liveStyle.ownerSourceId;
+        let matchedRules = liveStyle.rules;
 
-        // parse the sheet
-        let sheetSource = sourceStyle.textContent;
-        let parsedSheet = rework.parse(sheetSource);
-
-        // find the rule in the sheet
-        for (let rule of sheet.rules) {
-          let parsedRule =
-              reworkUtils.getRule(parsedSheet, rule.selector, rule.index);
-
-          parsedRule._sheetSource = sheetSource;
-          parsedRule._parsedSheet = parsedSheet;
-          parsedRule._sheet = sheet;
-
-          selectors.push(rule.selector);
-          this._rules[rule.selector] = parsedRule;
-          rule._sheet = sheet;
+        for (let matchedRule of matchedRules) {
+          let selector = matchedRule.selector;
+          let rule = this.documentInfo.styles.rules.get(selector);
+          rule._styleSourceId = styleSourceId;
+          rules.set(selector, rule);
         }
       }
-      this.selectors = selectors;
-      if (selectors.length > 0) {
-        this._currentSelector = selectors[0];
+
+      this._rules = rules;
+      if (rules.size === 0) {
+        this._currentSelector = null;
+      } else {
+        // TODO: choose the highest specificy selector?
+        this._currentSelector = rules.keys().next().value;
       }
     },
 
-    _computeCurrentRule(_currentSelector) {
-      return this._rules[_currentSelector];
+    _computeSelectors(rules) {
+      // TODO: remove Array.from() when
+      // https://github.com/Polymer/polymer/issues/800 is fixed
+      return Array.from(rules.keys());
     },
 
-    _styleChanged(event, info) {
-      let rule = event.target.rule;
-      let sheet = event.target.parentNode._sheet;
-      this._updateSheet(info.rule._sheet, info.rule, info.property, info.value);
+    _computeCurrentRule(rules, currentSelector) {
+      return rules.get(currentSelector);
     },
 
-    _updateSheet(sheet, rule, property, value) {
+    _onStyleChanged(event, detail) {
+      let property = detail.property;
+      let value = detail.value;
+      let rule = detail.rule;
+
+      let styleSourceId = rule._styleSourceId;
+      let stylesheet = this.documentInfo.styles.stylesheets.get(styleSourceId);
+      let styleSource = stylesheet.source;
+      console.assert(styleSource);
+
       let newSource =
-          reworkUtils.replaceProperty(rule._sheetSource, rule, property, value);
+          reworkUtils.replaceProperty(styleSource, rule, property, value);
 
       this.fire('designer-command',
-          commands.setTextContent(rule._sheet.ownerSourceId, rule._sheetSource, newSource));
+          commands.setTextContent(styleSourceId, styleSource, newSource));
     },
 
   });

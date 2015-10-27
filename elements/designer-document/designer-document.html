@@ -12,6 +12,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../src/commands/commands.html">
 <link rel="import" href="../../src/editors/editors.html">
 <link rel="import" href="../../src/protocol/document-client.html">
+<link rel="import" href="../../src/rework-utils/rework-utils.html">
 
 <dom-module id="designer-document">
 
@@ -37,18 +38,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <script>
   define([
         'polymer-designer/protocol/DocumentClient',
+        'polymer-designer/protocol/ClientConnection',
         'polymer-designer/commands/DomCommandApplier',
         'polymer-designer/commands/ParsedHtmlCommandApplier',
         'polymer-designer/editors/ElementEditor',
         'polymer-designer/dom-utils',
-        'dom5'],
+        'dom5',
+        'css',
+        'polymer-designer/rework-utils',
+      ],
       function(
         DocumentClient,
+        ClientConnection,
         DomCommandApplier,
         ParsedHtmlCommandApplier,
         ElementEditor,
         domUtils,
-        dom5) {
+        dom5,
+        rework,
+        reworkUtils) {
 
     'use strict';
 
@@ -64,12 +72,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         client: {
-          type: Object,
+          type: DocumentClient,
           notify: true,
         },
 
         clientConnection: {
-          type: Object,
+          type: ClientConnection,
           notify: true,
           observer: '_clientConnectionChanged',
         },
@@ -107,43 +115,71 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        */
       setDocument(content, url, useAnalyzer) {
 
-        // TODO: this is a nasty fork in functionality, maybe this should be
-        // two elements, or the analyzer should be factored out somehow
-        if (useAnalyzer === false) {
-          return this._frameScriptAsset.load().then((frameScript) => {
-            let domDocument = createDocument(content, frameScript, url);
-            let domDocumentElement = domUtils.getDocumentElement(domDocument);
+        let createDocument = this._frameScriptAsset.load().then((frameScript) => {
+          let domDocument = createDomDocument(content, frameScript, url);
+          let domDocumentElement = domUtils.getDocumentElement(domDocument);
 
-            this._domCommandApplier = new DomCommandApplier(domDocument);
-            let splitUrl = url == null ? null : url.split('/');
-            let filename = url == null ? null : splitUrl[splitUrl.length - 1];
+          this._domCommandApplier = new DomCommandApplier(domDocument);
+          let splitUrl = url == null ? null : url.split('/');
+          let filename = url == null ? null : splitUrl[splitUrl.length - 1];
 
-            this.documentInfo = {
-              domDocument: domDocument,
-              domDocumentElement: domDocumentElement,
-              source: content,
-              url: url,
-              filename: filename,
-            };
-          });
-        } else {
-          // TODO: clone the hydrolysis-analyzer element? maybe include it in a template?
-          return Promise.all([
-            this.analyzer.load(url),
-            this._frameScriptAsset.load(),
+          // do css!
+          let stylesheets = new Map();
+          let rules = new Map();
+
+          // TODO: <link rel="stylesheet">
+          let styleElements = Array.from(domDocument.querySelectorAll('style'));
+          for (let styleElement of styleElements) {
+            let styleSourceId = domUtils.getSourceId(styleElement);
+            let styleSource = styleElement.textContent;
+            let parsedSheet = rework.parse(styleSource);
+
+            stylesheets.set(styleSourceId, {
+              sourceId: styleSourceId,
+              source: styleSource,
+              parsedSheet,
+            });
+
+            for (let rule of parsedSheet.stylesheet.rules) {
+              let selectors = rule.selectors;
+              for (let selector of selectors) {
+                if (rules.has(selector)) {
+                  console.warn('selector collision', selector);
+                }
+                rules.set(selector, rule);
+              }
+            }
+          }
+
+          let styles = {
+            stylesheets,
+            rules,
+          }
+
+          return {
+            domDocument,
+            domDocumentElement,
+            source: content,
+            url,
+            filename,
+            styles,
+          };
+        });
+
+        if (useAnalyzer === undefined || useAnalyzer === true) {
+          createDocument = Promise.all([
+              createDocument,
+              this.analyzer.load(url)
           ]).then((results) => {
-            let analyzedDocument = results[0];
-            let frameScript = results[1];
+            let documentInfo = results[0];
+            let analyzedDocument = results[1];
 
-            Promise.all([
+            return Promise.all([
               analyzedDocument.htmlLoaded,
               analyzedDocument.metadataLoaded,
             ]).then((results) => {
               let parsedDocument = results[0];
               let metadata = results[1];
-
-              let domDocument = createDocument(content, frameScript, url);
-              let domDocumentElement = domUtils.getDocumentElement(domDocument);
 
               let astDocument = parsedDocument.ast;
               let astDocumentElement = domUtils.getDocumentElement(astDocument);
@@ -156,36 +192,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
               let elements = metadata.elements;
               let textContent = dom5.serialize(astDocument);
-
-              let splitUrl = url.split('/');
-              let filename = splitUrl[splitUrl.length - 1];
-
-              this._domCommandApplier = new DomCommandApplier(domDocument);
               this._parsedCommandApplier =
                   new ParsedHtmlCommandApplier(astDocument);
 
-              // TODO(justinfagnani): cleanup
-              //   - define a class and jscompiler type?
-              //   - remove document element proeprties
-              //   - add method to query element by sourceId
-              //   - only include one public text document
-              //   - don't include both elements and analyzer?
-              this.documentInfo = {
-                domDocument: domDocument,
-                domDocumentElement: domDocumentElement,
-                astDocument: astDocument,
-                astDocumentElement: astDocumentElement,
-                elements: elements,
-                textContent: textContent,
-                analyzer: this.analyzer,
-                source: content,
-                url: url,
-                filename: filename,
-              };
+              documentInfo.astDocument = astDocument;
+              documentInfo.astDocumentElement = astDocumentElement;
+              documentInfo.elements = elements;
+              documentInfo.textContent = textContent;
+              documentInfo.analyzer = this.analyzer;
+
+              return documentInfo;
             });
 
           });
         }
+
+        return createDocument.then((documentInfo) => {
+          this.documentInfo = documentInfo;
+        });
       },
 
       /**
@@ -217,8 +241,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           elementInfo: elementInfo,
           bounds: bounds,
           // TODO(justinfagnani): add method for retrieving elements by id
-          node: this.documentInfo.domDocument.querySelector(
-              `[${sourceIdAttribute}="${elementInfo.sourceId}"]`),
+          node: domUtils. getNodeBySourceId(
+              this.documentInfo.domDocument, elementInfo.sourceId),
           analysisInfo: this._getAnalysisInfo(tagName),
           editor: ElementEditor.getEditor(tagName),
         };
@@ -294,7 +318,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
      * A `<script>` tag with content from [framescript], and a `<base>` tag
      * with `href` set to [baseUri] are injected into the document's `<head>`.
      */
-    function createDocument(content, frameScript, baseUri) {
+    function createDomDocument(content, frameScript, baseUri) {
       let doc = document.implementation.createHTMLDocument();
       doc.documentElement.innerHTML = content;
 
