@@ -89,7 +89,7 @@ define(['polymer-designer/dom-utils'], function(domUtils) {
       // TODO: rather than bail we want to re-render parts that change while
       // keeping UI state, like the currently selected style selector
       if (newValue && oldValue &&
-          newValue.elementInfo.sourceId === newValue.elementInfo.sourceId) {
+          newValue.elementInfo.sourceId === oldValue.elementInfo.sourceId) {
         return;
       }
       domUtils.clearChildren(this.root);
