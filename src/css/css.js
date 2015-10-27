@@ -8,9 +8,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
- define('polymer-designer/css', [
-   'polymer-designer/path',
-   'polymer-designer/dom-utils'], function(pathLib, domUtils) {
+ define('polymer-designer/css', ['polymer-designer/dom-utils'], function(domUtils) {
 
   'use strict';
 
@@ -97,6 +95,17 @@
     },
 
     // TODO(justinfagnani): normalizeSelector(removeTransientPseudos : boolean)
+    normalizeSelector(selector) {
+      // the following is ripped from rework/css and sucks
+      return selector.replace(/^\s+|\s+$/g, '')
+          .replace(/\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*\/+/g, '')
+          .replace(/"(?:\\"|[^"])*"|'(?:\\'|[^'])*'/g,
+              (m) => m.replace(/,/g, '\u200C'))
+          .split(/\s*(?![^(]*\)),\s*/)
+          .map((s) => s.replace(/\u200C/g, ','))
+          .join(',');
+    },
+
   };
 
 });

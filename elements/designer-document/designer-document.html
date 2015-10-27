@@ -10,6 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../../../core-asset/core-asset.html">
 <link rel="import" href="../../src/commands/commands.html">
+<link rel="import" href="../../src/css/css.html">
 <link rel="import" href="../../src/editors/editors.html">
 <link rel="import" href="../../src/protocol/document-client.html">
 <link rel="import" href="../../src/rework-utils/rework-utils.html">
@@ -46,6 +47,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'dom5',
         'css',
         'polymer-designer/rework-utils',
+        'polymer-designer/css',
       ],
       function(
         DocumentClient,
@@ -56,7 +58,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         domUtils,
         dom5,
         rework,
-        reworkUtils) {
+        reworkUtils,
+        cssLib) {
 
     'use strict';
 
@@ -142,8 +145,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             for (let rule of parsedSheet.stylesheet.rules) {
               let selectors = rule.selectors;
-              // TODO: normalize selector
-              let selector = selectors.join(', ');
+              let selector = cssLib.normalizeSelector(selectors.join(','));
               if (rules.has(selector)) {
                 console.warn('selector collision', selector);
               }
