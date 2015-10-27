@@ -142,12 +142,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             for (let rule of parsedSheet.stylesheet.rules) {
               let selectors = rule.selectors;
-              for (let selector of selectors) {
-                if (rules.has(selector)) {
-                  console.warn('selector collision', selector);
-                }
-                rules.set(selector, rule);
+              // TODO: normalize selector
+              let selector = selectors.join(', ');
+              if (rules.has(selector)) {
+                console.warn('selector collision', selector);
               }
+              rules.set(selector, rule);
             }
           }
 
