@@ -12,6 +12,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../paper-menu/paper-menu.html">
 <link rel="import" href="../../../paper-item/paper-item.html">
 <link rel="import" href="../../src/commands/commands.html">
+<link rel="import" href="../../src/css/css.html">
 <link rel="import" href="../../src/dom-utils/dom-utils.html">
 <link rel="import" href="../../src/rework-utils/rework-utils.html">
 <link rel="import" href="designer-inspector-behavior.html">
@@ -62,8 +63,9 @@ define([
     'css',
     'polymer-designer/dom-utils',
     'polymer-designer/rework-utils',
-    'polymer-designer/commands'],
-    function(rework, domUtils, reworkUtils, commands) {
+    'polymer-designer/commands',
+    'polymer-designer/css'],
+    function(rework, domUtils, reworkUtils, commands, cssLib) {
 
   'use strict';
 
@@ -131,7 +133,7 @@ define([
         let matchedRules = liveStyle.rules;
 
         for (let matchedRule of matchedRules) {
-          let selector = matchedRule.selector;
+          let selector = cssLib.normalizeSelector(matchedRule.selector);
           let rule = this.documentInfo.styles.rules.get(selector);
           rule._styleSourceId = styleSourceId;
           rules.set(selector, rule);
