@@ -7,7 +7,10 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
+<link rel="import" href="../../../iron-icon/iron-icon.html">
 <link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../../paper-button/paper-button.html">
+<link rel="import" href="../../../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../../paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../../../paper-menu/paper-menu.html">
 <link rel="import" href="../../../paper-item/paper-item.html">
@@ -44,6 +47,9 @@ editing interface for them.
     .inspector-row {
       @apply(--designer-inspector-row);
     }
+    #add-container {
+      text-align: center;
+    }
   </style>
 
   <template>
@@ -64,7 +70,7 @@ editing interface for them.
 
     <template
         is="dom-repeat"
-        items="[[_currentRule.declarations]]"
+        items="[[_declarations]]"
         as="declaration">
       <div class="inspector-row">
         <paper-input
@@ -84,8 +90,12 @@ editing interface for them.
       </div>
     </template>
 
-    <!-- <designer-style-rule-editor rule="{{_currentRule}}">
-    </designer-style-rule-editor> -->
+    <div id="add-container">
+      <paper-button on-click="_addDeclaration">
+        <iron-icon icon="add"></iron-icon>
+        Add Property
+      </paper-button>
+    </div>
 
   </template>
 
@@ -135,11 +145,16 @@ define([
 
       _currentSelector: {
         type: String,
+        observer: '_currentSelectorChanged',
       },
 
       _currentRule: {
         type: Object,
-        computed: '_computeCurrentRule(_rules, _currentSelector)',
+        // computed: '_computeCurrentRule(_rules, _currentSelector)',
+      },
+
+      _declarations: {
+        type: Array,
       },
 
     },
@@ -189,9 +204,14 @@ define([
       return Array.from(rules.keys());
     },
 
-    _computeCurrentRule(rules, currentSelector) {
-      return rules.get(currentSelector);
+    _currentSelectorChanged() {
+      this._currentRule = this._rules.get(this._currentSelector);
+      this._declarations = Array.from(this._currentRule.declarations);
     },
+
+    // _computeCurrentRule(rules, currentSelector) {
+    //   return rules.get(currentSelector);
+    // },
 
     _onValueChange(event) {
       let rule = this._currentRule;
@@ -199,6 +219,15 @@ define([
       let property = declaration.property;
       let oldValue = declaration.value;
       let newValue = event.currentTarget.value;
+
+      if (declaration._new) {
+        declaration.value = newValue;
+        if (!property) {
+          return;
+        }
+        this._saveDeclaration(declaration);
+        return;
+      }
 
       let styleSourceId = rule._styleSourceId;
       let stylesheet = this.documentInfo.styles.stylesheets.get(styleSourceId);
@@ -218,6 +247,15 @@ define([
       let oldPropertyName = declaration.property;
       let newPropertyName = event.currentTarget.value;
 
+      if (declaration._new) {
+        declaration.property = newPropertyName;
+        if (!declaration.value) {
+          return;
+        }
+        this._saveDeclaration(declaration);
+        return;
+      }
+
       let styleSourceId = rule._styleSourceId;
       let stylesheet = this.documentInfo.styles.stylesheets.get(styleSourceId);
       let styleSource = stylesheet.source;
@@ -225,6 +263,30 @@ define([
 
       let newSource = reworkUtils.renameProperty(styleSource, rule,
           oldPropertyName, newPropertyName);
+
+      this.fire('designer-command',
+          commands.setTextContent(styleSourceId, styleSource, newSource));
+    },
+
+    _addDeclaration() {
+      this.push('_declarations', {_new: true, property:'', value:''});
+    },
+
+    _saveDeclaration(declaration) {
+      let index = this._declarations.indexOf(declaration);
+      this.splice('_declarations', index, 1);
+
+      let rule = this._currentRule;
+      let property = declaration.property;
+      let value = declaration.value;
+
+      let styleSourceId = rule._styleSourceId;
+      let stylesheet = this.documentInfo.styles.stylesheets.get(styleSourceId);
+      let styleSource = stylesheet.source;
+      console.assert(styleSource);
+
+      let newSource = reworkUtils.setProperty(styleSource, rule,
+          property, value);
 
       this.fire('designer-command',
           commands.setTextContent(styleSourceId, styleSource, newSource));

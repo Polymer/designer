@@ -58,13 +58,9 @@ define('polymer-designer/rework-utils', ['css'], function(rework) {
      */
     replaceProperty(source, rule, key, value) {
       let property = this.getProperty(rule, key);
-      // If you're dealing with shorthand properties, you need to handle that
-      // outside of this helper.
-      console.assert(property);
       let start = this.sourceOffset(source, property.position.start);
       let end = this.sourceOffset(source, property.position.end);
 
-      // Sadly, rework doesn't parse positions for the keys/values as well.
       let propertySource = source.substr(start, end - start);
       let colonMatch = colonRegex.exec(propertySource);
       console.assert(colonMatch, 'Got an invalid CSS property assignment:', propertySource);
@@ -91,22 +87,38 @@ define('polymer-designer/rework-utils', ['css'], function(rework) {
     */
    renameProperty(source, rule, oldPropertyName, newPropertyName) {
      let property = this.getProperty(rule, oldPropertyName);
-     // If you're dealing with shorthand properties, you need to handle that
-     // outside of this helper.
-     console.assert(property);
      let start = this.sourceOffset(source, property.position.start);
      let end = this.sourceOffset(source, property.position.end);
 
-     // Sadly, rework doesn't parse positions for the keys/values as well.
      let propertySource = source.substr(start, end - start);
      let colonMatch = colonRegex.exec(propertySource);
      console.assert(colonMatch, 'Got an invalid CSS property assignment:', propertySource);
      let propertyEnd = start + colonMatch.index;
 
-     // TODO(nevir): We should consider just returning a patch/diff so that we
-     // can perform all sorts of fun operations w/ it.
      return source.substr(0, start) + newPropertyName + source.substr(propertyEnd);
    },
+
+   /**
+   * Given a Rework-parsed `rule` and the `source` corresponding to it, set
+   * the value of `property` to `value`.
+   *
+   * @param {string} source
+   * @param {Rework.AST.Rule} rule
+   * @param {string} property
+   * @param {string} value
+   * @return {string} The new source string
+   */
+  setProperty(source, rule, property, value) {
+    let ruleEnd = this.sourceOffset(source, rule.position.end);
+
+    // TODO(justinfagnani): smarter line-break and indentation aware insert
+    // let declarations = rule.declarations;
+    // let lastDeclarationEnd = declarations
+    //     ? declarations[declarations.length - 1].position.end
+    //     : ruleEnd;
+
+    return source.substr(0, ruleEnd - 1) + `${property}: ${value};` + source.substr(ruleEnd - 1);
+  },
 
     /**
      * Rework's positions deal in lines and columns, but we generally want to
