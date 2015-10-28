@@ -16,7 +16,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../src/dom-utils/dom-utils.html">
 <link rel="import" href="../../src/rework-utils/rework-utils.html">
 <link rel="import" href="designer-inspector-behavior.html">
-<link rel="import" href="designer-style-rule-editor.html">
 
 <!--
 Displays the style rules that currently apply to `element`, and provides an
@@ -33,6 +32,18 @@ editing interface for them.
     h2 {
       @apply(--designer-inspector-title);
     }
+    paper-input.value {
+      @apply(--designer-inspector-row-value);
+    }
+    paper-input.property {
+      @apply(--designer-inspector-row-label);
+      --paper-input-container-underline: {
+        display: none;
+      };
+    }
+    .inspector-row {
+      @apply(--designer-inspector-row);
+    }
   </style>
 
   <template>
@@ -45,14 +56,36 @@ editing interface for them.
           class="dropdown-content"
           selected="{{_currentSelector}}"
           attr-for-selected="value">
-        <template is="dom-repeat" items="{{_selectors}}">
-          <paper-item value="{{item}}">{{item}}</paper-item>
+        <template is="dom-repeat" items="[[_selectors]]">
+          <paper-item value="[[item]]">[[item]]</paper-item>
         </template>
       </paper-menu>
     </paper-dropdown-menu>
 
-    <designer-style-rule-editor rule="{{_currentRule}}">
-    </designer-style-rule-editor>
+    <template
+        is="dom-repeat"
+        items="[[_currentRule.declarations]]"
+        as="declaration">
+      <div class="inspector-row">
+        <paper-input
+            id="[[_id(index)]]"
+            class="property"
+            value="[[declaration.property]]"
+            no-label-float
+            on-change="_onPropertyChange">
+        </paper-input>
+        <paper-tooltip for="[[_id(index)]]">[[item.property]]</paper-tooltip>
+        <paper-input
+            class="value"
+            value="[[declaration.value]]"
+            no-label-float
+            on-change="_onValueChange">
+        </paper-input>
+      </div>
+    </template>
+
+    <!-- <designer-style-rule-editor rule="{{_currentRule}}">
+    </designer-style-rule-editor> -->
 
   </template>
 
@@ -92,14 +125,11 @@ define([
        * Map of selector -> rule object
        */
       _rules: {
-        type: Object,
+        type: Map,
       },
 
-      /**
-       * @type {Iterator}
-       */
       _selectors: {
-        type: Object,
+        type: Array,
         computed: '_computeSelectors(_rules)',
       },
 
@@ -116,6 +146,10 @@ define([
 
     listeners: {
       'designer-element-style-changed': '_onStyleChanged',
+    },
+
+    _id(i) {
+      return `id-${i}`;
     },
 
     _selectionChanged(nv, ov) {
@@ -159,18 +193,38 @@ define([
       return rules.get(currentSelector);
     },
 
-    _onStyleChanged(event, detail) {
-      let property = detail.property;
-      let value = detail.value;
-      let rule = detail.rule;
+    _onValueChange(event) {
+      let rule = this._currentRule;
+      let declaration = event.model.declaration;
+      let property = declaration.property;
+      let oldValue = declaration.value;
+      let newValue = event.currentTarget.value;
 
       let styleSourceId = rule._styleSourceId;
       let stylesheet = this.documentInfo.styles.stylesheets.get(styleSourceId);
       let styleSource = stylesheet.source;
       console.assert(styleSource);
 
-      let newSource =
-          reworkUtils.replaceProperty(styleSource, rule, property, value);
+      let newSource = reworkUtils.replaceProperty(styleSource, rule, property,
+          newValue);
+
+      this.fire('designer-command',
+          commands.setTextContent(styleSourceId, styleSource, newSource));
+    },
+
+    _onPropertyChange(event) {
+      let rule = this._currentRule;
+      let declaration = event.model.declaration;
+      let oldPropertyName = declaration.property;
+      let newPropertyName = event.currentTarget.value;
+
+      let styleSourceId = rule._styleSourceId;
+      let stylesheet = this.documentInfo.styles.stylesheets.get(styleSourceId);
+      let styleSource = stylesheet.source;
+      console.assert(styleSource);
+
+      let newSource = reworkUtils.renameProperty(styleSource, rule,
+          oldPropertyName, newPropertyName);
 
       this.fire('designer-command',
           commands.setTextContent(styleSourceId, styleSource, newSource));

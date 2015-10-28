@@ -11,6 +11,8 @@
 define('polymer-designer/rework-utils', ['css'], function(rework) {
   'use strict';
 
+  const colonRegex = /:\s*/;
+
   return {
 
     /**
@@ -64,14 +66,47 @@ define('polymer-designer/rework-utils', ['css'], function(rework) {
 
       // Sadly, rework doesn't parse positions for the keys/values as well.
       let propertySource = source.substr(start, end - start);
-      let match = /:\s*/.exec(propertySource);
-      console.assert(match, 'Got an invalid CSS property assignment:', propertySource);
-      let valueStart = start + match.index + match[0].length;
+      let colonMatch = colonRegex.exec(propertySource);
+      console.assert(colonMatch, 'Got an invalid CSS property assignment:', propertySource);
+      let valueStart = start + colonMatch.index + colonMatch[0].length;
 
       // TODO(nevir): We should consider just returning a patch/diff so that we
       // can perform all sorts of fun operations w/ it.
       return source.substr(0, valueStart) + value + source.substr(end);
     },
+
+    /**
+    * Given a Rework-parsed `rule` and the `source` corresponding to it, update
+    * the value of a particular property to `value`.
+    *
+    * We _could_ be using Rework's stringification logic to update values, but
+    * it is much less intrusive to make the minimal edit for the user, rather
+    * than potentially reformatting their entire stylesheet.
+    *
+    * @param {string} source
+    * @param {Rework.AST.Rule} rule
+    * @param {string} key
+    * @param {string} value
+    * @return {string}
+    */
+   renameProperty(source, rule, oldPropertyName, newPropertyName) {
+     let property = this.getProperty(rule, oldPropertyName);
+     // If you're dealing with shorthand properties, you need to handle that
+     // outside of this helper.
+     console.assert(property);
+     let start = this.sourceOffset(source, property.position.start);
+     let end = this.sourceOffset(source, property.position.end);
+
+     // Sadly, rework doesn't parse positions for the keys/values as well.
+     let propertySource = source.substr(start, end - start);
+     let colonMatch = colonRegex.exec(propertySource);
+     console.assert(colonMatch, 'Got an invalid CSS property assignment:', propertySource);
+     let propertyEnd = start + colonMatch.index;
+
+     // TODO(nevir): We should consider just returning a patch/diff so that we
+     // can perform all sorts of fun operations w/ it.
+     return source.substr(0, start) + newPropertyName + source.substr(propertyEnd);
+   },
 
     /**
      * Rework's positions deal in lines and columns, but we generally want to
