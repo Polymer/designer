@@ -163,11 +163,22 @@ define([
       'designer-element-style-changed': '_onStyleChanged',
     },
 
+    observers: [
+      '_stylesChanged(documentInfo.styles)',
+    ],
+
     _id(i) {
       return `id-${i}`;
     },
 
-    _selectionChanged(nv, ov) {
+    _stylesChanged(styles) {
+      // TODO: ask for matching styles again, incase there's a new one
+      if (this.selection) {
+        this._selectionChanged();
+      }
+    },
+
+    _selectionChanged() {
       // TODO: selection is changing twice, what's up w/ that?
       // styles that match the current element in the live document
       let liveStyles = (this.selection &&
@@ -190,11 +201,17 @@ define([
       }
 
       this._rules = rules;
+
       if (rules.size === 0) {
         this._currentSelector = null;
       } else {
         // TODO: choose the highest specificy selector?
-        this._currentSelector = rules.keys().next().value;
+        if (!rules.has(this._currentSelector)) {
+          this._currentSelector = rules.keys().next().value;
+        } else {
+          // force an update
+          this._currentSelectorChanged();
+        }
       }
     },
 
@@ -208,10 +225,6 @@ define([
       this._currentRule = this._rules.get(this._currentSelector);
       this._declarations = Array.from(this._currentRule.declarations);
     },
-
-    // _computeCurrentRule(rules, currentSelector) {
-    //   return rules.get(currentSelector);
-    // },
 
     _onValueChange(event) {
       let rule = this._currentRule;

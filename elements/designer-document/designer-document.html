@@ -127,36 +127,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           let filename = url == null ? null : splitUrl[splitUrl.length - 1];
 
           // do css!
-          let stylesheets = new Map();
-          let rules = new Map();
-
-          // TODO: <link rel="stylesheet">
-          let styleElements = Array.from(domDocument.querySelectorAll('style'));
-          for (let styleElement of styleElements) {
-            let styleSourceId = domUtils.getSourceId(styleElement);
-            let styleSource = styleElement.textContent;
-            let parsedSheet = rework.parse(styleSource);
-
-            stylesheets.set(styleSourceId, {
-              sourceId: styleSourceId,
-              source: styleSource,
-              parsedSheet,
-            });
-
-            for (let rule of parsedSheet.stylesheet.rules) {
-              let selectors = rule.selectors;
-              let selector = cssLib.normalizeSelector(selectors.join(','));
-              if (rules.has(selector)) {
-                console.warn('selector collision', selector);
-              }
-              rules.set(selector, rule);
-            }
-          }
-
-          let styles = {
-            stylesheets,
-            rules,
-          }
+          let styles = this._parseStyles(domDocument);
 
           return {
             domDocument,
@@ -232,6 +203,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
+      _parseStyles(domDocument) {
+        let stylesheets = new Map();
+        let rules = new Map();
+
+        // TODO: <link rel="stylesheet">
+        let styleElements = Array.from(domDocument.querySelectorAll('style'));
+        for (let styleElement of styleElements) {
+          let styleSourceId = domUtils.getSourceId(styleElement);
+          let styleSource = styleElement.textContent;
+          let parsedSheet = rework.parse(styleSource);
+
+          stylesheets.set(styleSourceId, {
+            sourceId: styleSourceId,
+            source: styleSource,
+            parsedSheet,
+          });
+
+          for (let rule of parsedSheet.stylesheet.rules) {
+            let selectors = rule.selectors;
+            let selector = cssLib.normalizeSelector(selectors.join(','));
+            if (rules.has(selector)) {
+              console.warn('selector collision', selector);
+            }
+            rules.set(selector, rule);
+          }
+        }
+
+        return {
+          stylesheets,
+          rules,
+        };
+      },
+
       _updateSelection(elementInfo, bounds) {
         if (elementInfo == null) {
           this.selection = null;
@@ -283,6 +287,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.client.sendCommand(command).then((response) => {
           this._updateSelection(response.elementInfo, response.bounds);
           this.fire('designer-document-update', response);
+
+          if (command.sourceId) {
+            let node = domUtils.getNodeBySourceId(this.documentInfo.domDocument,
+                command.sourceId);
+            console.assert(node);
+
+            // TODO: this is a haaaack!
+            if (node.nodeName.toLowerCase() === 'style') {
+              let newStyles = this._parseStyles(this.documentInfo.domDocument);
+              this.set('documentInfo.styles', newStyles);
+            }
+          }
+
         });
       },
 
