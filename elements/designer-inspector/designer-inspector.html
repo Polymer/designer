@@ -85,6 +85,16 @@ define(['polymer-designer/dom-utils'], function(domUtils) {
       Polymer.DesignerInspectorBehavior
     ],
 
+    observers: [
+      '_documentInfoChanged(documentInfo.*)',
+    ],
+
+    _documentInfoChanged(changeRecord) {
+      for (let inspector of Polymer.dom(this.root).children) {
+        inspector.notifyPath(changeRecord.path, changeRecord.value);
+      }
+    },
+
     _selectionChanged(newValue, oldValue) {
       // TODO: rather than bail we want to re-render parts that change while
       // keeping UI state, like the currently selected style selector
