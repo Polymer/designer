@@ -8,17 +8,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../../../iron-icon/iron-icon.html">
-<link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../../../paper-button/paper-button.html">
-<link rel="import" href="../../../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../../paper-dropdown-menu/paper-dropdown-menu.html">
-<link rel="import" href="../../../paper-menu/paper-menu.html">
 <link rel="import" href="../../../paper-item/paper-item.html">
+<link rel="import" href="../../../paper-menu/paper-menu.html">
+<link rel="import" href="../../../paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../../src/commands/commands.html">
 <link rel="import" href="../../src/css/css.html">
 <link rel="import" href="../../src/dom-utils/dom-utils.html">
 <link rel="import" href="../../src/rework-utils/rework-utils.html">
 <link rel="import" href="designer-inspector-behavior.html">
+<link rel="import" href="designer-css-prop-tooltip.html">
 
 <!--
 Displays the style rules that currently apply to `element`, and provides an
@@ -74,13 +75,16 @@ editing interface for them.
         as="declaration">
       <div class="inspector-row">
         <paper-input
-            id="[[_id(index)]]"
+            id$="[[_id(index)]]"
             class="property"
             value="[[declaration.property]]"
             no-label-float
             on-change="_onPropertyChange">
         </paper-input>
-        <paper-tooltip for="[[_id(index)]]">[[item.property]]</paper-tooltip>
+        <paper-tooltip for="[[_id(index)]]">
+          <designer-css-prop-tooltip property="[[declaration.property]]">
+          </designer-css-prop-tooltip>
+        </paper-tooltip>
         <paper-input
             class="value"
             value="[[declaration.value]]"
