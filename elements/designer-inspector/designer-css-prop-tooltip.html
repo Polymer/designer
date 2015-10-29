@@ -1,0 +1,84 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../paper-styles/paper-styles.html">
+<link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../src/css/css.html">
+
+<dom-module id="designer-css-prop-tooltip">
+
+  <style>
+    :host {
+      display: inline-block;
+      @apply(--paper-font-body1);
+    }
+    th, td {
+      text-align: left;
+      vertical-align: top;
+      padding: 4px;
+    }
+  </style>
+
+  <template>
+    <h2>[[property]]</h2>
+    <table>
+      <tr><th>Value</th><td>[[_unescape(_cssData.syntax)]]</td></tr>
+      <tr><th>Initial</th><td>[[_cssData.initial]]</td></tr>
+      <tr><th>Inherited</th><td>[[_yesNo(_cssData.inherited)]]</td></tr>
+      <tr><th>Applies To</th><td>[[_appliesTo(_cssData.appliesto)]]</td></tr>
+      <tr><th>Animatable</th><td>[[_cssData.animatable]]</td></tr>
+    </table>
+  </template>
+
+</dom-module>
+
+<script>
+
+define(['polymer-designer/css/properties'], (cssProperties) => {
+  'use strict';
+
+  Polymer({
+    is: 'designer-css-prop-tooltip',
+
+    properties: {
+      property: String,
+
+      _cssData: {
+        computed: '_computeCssData(property)',
+      },
+    },
+
+    _computeCssData(property) {
+      return cssProperties.properties[property];
+    },
+
+    _unescape(syntax) {
+      return syntax.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+    },
+
+    _yesNo(bool) {
+      return (bool) ? 'yes' : 'no';
+    },
+
+    _appliesTo(s) {
+      switch(s) {
+        case 'allElements':
+          return 'All Elements';
+        case 'allElementsAndPseudos':
+          return 'All Elements and Pseudos';
+        default:
+          return s;
+      }
+    }
+
+  });
+
+});
+</script>
