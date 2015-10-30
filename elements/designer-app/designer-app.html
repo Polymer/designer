@@ -272,10 +272,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </dom-module>
 
 <script>
-
-  define([
-    'polymer-designer/dom-utils'],
-      function(domUtils) {
+  define(['polymer-designer/dom-utils'], (domUtils) => {
     'use strict';
 
     Polymer({
@@ -335,9 +332,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _onDesignerFilesReady(event) {
         this._fileTreeController = event.target;
         this._fileTreeController.getInfo()
-          .then(function(root) {
+          .then((root) => {
             this._rootFile = root;
-          }.bind(this));
+          });
       },
 
       _onDesignerSelectElement(event, detail) {

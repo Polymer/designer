@@ -9,7 +9,7 @@
  */
 
  define('polymer-designer/path', ['polymer-designer/dom-utils'],
-     function(domUtils) {
+     (domUtils) => {
   'use strict';
 
   /**

@@ -34,7 +34,7 @@ function startServer(serverPort, filesPort) {
   console.log('Starting Polymer Designer Server on port ' + designerConfig.server.port);
   console.log('Serving files on port ' + designerConfig.files.port);
 
-  app.get('/', function(req, res) {
+  app.get('/', (req, res) => {
     send(req, path.join(__dirname, 'index.html')).pipe(res);
   });
 

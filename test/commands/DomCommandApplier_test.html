@@ -28,7 +28,7 @@ define([
       'polymer-designer/commands/DomCommandApplier',
       'polymer-designer/commands',
       'polymer-designer/dom-utils'],
-    function(DomCommandApplier, commands, domUtils) {
+    (DomCommandApplier, commands, domUtils) => {
 
   mocha.setup('tdd');
   // mocha.checkLeaks();
@@ -36,13 +36,13 @@ define([
   var assert = chai.assert;
   const sourceIdAttribute = domUtils.sourceIdAttribute;
 
-  suite('DomCommandApplier', function() {
+  suite('DomCommandApplier', () => {
     var testDoc;
     var commandApplier;
 
-    suite('setAttribute comand', function() {
+    suite('setAttribute comand', () => {
 
-      setup(function() {
+      setup(() => {
         testDoc = document.implementation.createHTMLDocument('test');
         testDoc.body.innerHTML =
             `<div id='A' class='test' ${sourceIdAttribute}='1'>
@@ -51,7 +51,7 @@ define([
         commandApplier = new DomCommandApplier(testDoc);
       });
 
-      test('applies a new attribute', function() {
+      test('applies a new attribute', () => {
         var node = testDoc.querySelector('#A');
         var command = commands.setAttribute(
             node.getAttribute(sourceIdAttribute),
@@ -62,7 +62,7 @@ define([
         assert.equal(node.getAttribute('foo'), 'bar');
       });
 
-      test('applies a new value to an existing attribute', function() {
+      test('applies a new value to an existing attribute', () => {
         var node = testDoc.querySelector('#A');
         var command = commands.setAttribute(
             node.getAttribute(sourceIdAttribute),
@@ -73,31 +73,31 @@ define([
         assert.equal(node.getAttribute('class'), 'test2');
       });
 
-      test('fails to apply a new value if the old value is wrong', function() {
+      test('fails to apply a new value if the old value is wrong', () => {
         var node = testDoc.querySelector('#A');
         var command = commands.setAttribute(
             node.getAttribute(sourceIdAttribute),
             'class',
             'test1',
             'test2');
-        assert.throws(function() {
+        assert.throws(() => {
           commandApplier.apply(command);
         });
       });
 
-      test('fails to apply a new value if the old value is null', function() {
+      test('fails to apply a new value if the old value is null', () => {
         var node = testDoc.querySelector('#A');
         var command = commands.setAttribute(
             node.getAttribute(sourceIdAttribute),
             'foo',
             'bar',
             'bar2');
-        assert.throws(function() {
+        assert.throws(() => {
           commandApplier.apply(command);
         });
       });
 
-      test('undoes a new value to an existing attribute', function() {
+      test('undoes a new value to an existing attribute', () => {
         var node = testDoc.querySelector('#A');
         var command = commands.setAttribute(
             node.getAttribute(sourceIdAttribute),

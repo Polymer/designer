@@ -49,7 +49,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'polymer-designer/rework-utils',
         'polymer-designer/css',
       ],
-      function(
+      (
         DocumentClient,
         ClientConnection,
         DomCommandApplier,
@@ -59,7 +59,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         dom5,
         rework,
         reworkUtils,
-        cssLib) {
+        cssLib) => {
 
     'use strict';
 
@@ -97,7 +97,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         _domNodes: {
           type: Map,
-          value: function() {
+          value: () => {
             return new Map();
           },
         },
@@ -197,9 +197,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           return Promise.resolve();
         } else {
           return this.client.selectElementForSourceId(sourceId)
-            .then(function(response) {
+            .then((response) => {
               this._updateSelection(response.elementInfo, response.bounds);
-            }.bind(this));
+            });
         }
       },
 
@@ -263,11 +263,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _clientConnectionChanged() {
         if (this.clientConnection) {
           this.client = new DocumentClient(this.clientConnection);
-          this.client.getDocument().then(function(response) {
+          this.client.getDocument().then((response) => {
             // let id = response.id;
             // console.log('document id', response.id);
             this._domNodes.set(response.id, this.documentInfo.domDocument);
-          }.bind(this));
+          });
         } else {
           this.client = null;
         }

@@ -36,7 +36,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </section>
 
     <script>
-define(['polymer-designer/dragging',], function(dragging) {
+define(['polymer-designer/dragging',], (dragging) => {
   'use strict';
 
   mocha.setup('tdd');
@@ -44,12 +44,12 @@ define(['polymer-designer/dragging',], function(dragging) {
 
   var assert = chai.assert;
 
-  suite('dragging', function() {
+  suite('dragging', () => {
 
 
-    suite('createDragProxy', function() {
+    suite('createDragProxy', () => {
 
-      test('creates a proxy', function() {
+      test('creates a proxy', () => {
         let testNode = document.querySelector('#A');
         let proxy = dragging.createDragProxy(testNode);
         assert.equal(proxy.style.color, 'rgb(255, 0, 0)');

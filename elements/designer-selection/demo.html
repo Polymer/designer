@@ -16,7 +16,7 @@
     <designer-selection></designer-selection>
     <script>
       var selection = document.querySelector('designer-selection');
-      selection.addEventListener('designer-selection-resize', function(event) {
+      selection.addEventListener('designer-selection-resize', (event) => {
         var detail = event.detail;
         var style = selection.style;
         style.left = detail.left + 'px';

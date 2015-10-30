@@ -13,7 +13,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 // polyfill Array.prototype.find(), from
 // developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find
 if (!Array.prototype.find) {
-  Array.prototype.find = function(predicate) {
+  Array.prototype.find = (predicate) => {
     if (this == null) {
       throw new TypeError('Array.prototype.find called on null or undefined');
     }

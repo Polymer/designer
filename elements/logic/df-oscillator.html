@@ -11,7 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script>
 
-(function() {
+(() => {
   'use strict';
 
   Polymer({
@@ -45,12 +45,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     },
 
     attached() {
-      this._callback = function(t) {
+      this._callback = (t) => {
         this.value = Math.sin((t * 2.0 * Math.PI) / this.period);
         if (this.running) {
           requestAnimationFrame(this._callback);
         }
-      }.bind(this);
+      };
       if (this.running) {
         requestAnimationFrame(this._callback);
       }

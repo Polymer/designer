@@ -8,7 +8,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
- define('polymer-designer/css', ['polymer-designer/dom-utils'], function(domUtils) {
+ define('polymer-designer/css', ['polymer-designer/dom-utils'], (domUtils) => {
 
   'use strict';
 

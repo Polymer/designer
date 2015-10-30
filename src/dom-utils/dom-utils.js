@@ -8,7 +8,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-define('polymer-designer/dom-utils', function() {
+define('polymer-designer/dom-utils', () => {
   'use strict';
 
   const sourceIdAttribute = '__designer_node_id__';
@@ -57,7 +57,7 @@ define('polymer-designer/dom-utils', function() {
    */
   function getDocumentElement(doc) {
     return doc.documentElement ||
-        (function() {
+        (() => {
           for (var i = 0; i < doc.childNodes.length; i++) {
             var n = doc.childNodes[i];
             if (n.nodeName.toUpperCase() == 'HTML') {
@@ -77,7 +77,7 @@ define('polymer-designer/dom-utils', function() {
       queryString = queryString.slice(1);
     }
     let params = new Map();
-    queryString.split('&').forEach(function(e) {
+    queryString.split('&').forEach((e) => {
       let keyValue = e.split('=');
       if (keyValue[0]) {
         params.set(keyValue[0], keyValue[1] || true);
@@ -106,7 +106,7 @@ define('polymer-designer/dom-utils', function() {
   }
 
   function attributesForElement(element) {
-    return Array.prototype.reduce.call(element.attributes, function(attributes, attribute) {
+    return Array.prototype.reduce.call(element.attributes, (attributes, attribute) => {
       attributes[attribute.name] = attribute.value;
       return attributes;
     }, {});

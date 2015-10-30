@@ -21,7 +21,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </dom-module>
 
 <script>
-(function(files) {
+((files) => {
   'use strict';
 
   function getFilename(path) {
@@ -53,20 +53,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     getInfo(path) {
       path = ['polymer-designer-demos', path || ''].join('/');
       // console.log('getInfo', path);
-      return fetch(this._lsRoot + path).then(function(response) {
+      return fetch(this._lsRoot + path).then((response) => {
         return response.json();
       });
     },
 
     loadFile(path) {
-      return fetch(this._filesRoot + path).then(function(response) {
+      return fetch(this._filesRoot + path).then((response) => {
         return response.text();
-      }).then(function(file) {
-        return {
+      }).then((file) => ({
           file: file,
           href: this._filesRoot + path,
-        };
-      }.bind(this));
+        }));
     },
 
     getIcon(node) {
@@ -82,10 +80,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return Promise.resolve(null);
       }
       return fetch(this._lsRoot + node.path)
-        .then(function(response) {
+        .then((response) => {
           return response.json();
         })
-        .then(function(json) {
+        .then((json) => {
           return json.files;
         });
     },
@@ -99,13 +97,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     },
 
     onClick(node, event) {
-      this.loadFile(node.path).then(function(fileData) {
+      this.loadFile(node.path).then((fileData) => {
         let loadEvent = new CustomEvent('file-data-load', {
           detail: fileData,
           bubbles: true,
         });
         event.target.dispatchEvent(loadEvent);
-      }.bind(this));
+      });
     },
 
   });

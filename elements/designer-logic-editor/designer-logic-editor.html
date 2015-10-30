@@ -63,7 +63,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script>
 
-define(function() {
+define(() => {
   'use strict';
 
   Polymer({
@@ -78,16 +78,16 @@ define(function() {
 
     attached() {
       let patches = Polymer.dom(this.$.stage).querySelectorAll('logic-patch');
-      patches.forEach(function(p) {
+      patches.forEach((p) => {
         p.editor = this;
-      }.bind(this));
+      });
 
-      this.async(function() {
+      this.async(() => {
         let connections = Polymer.dom(this.$.stage).querySelectorAll('logic-connection');
-        connections.forEach(function(c) {
+        connections.forEach((c) => {
           c.editor = this;
-        }.bind(this));
-      }.bind(this));
+        });
+      });
     },
 
     getNode(id) {
@@ -113,20 +113,20 @@ define(function() {
       Polymer.dom(this.$.stage).appendChild(connection);
       Polymer.dom.flush();
 
-      let moveListener = function(e) {
+      let moveListener = (e) => {
         let bounds = this.getBoundingClientRect();
         connection.dragPosition = {
           x: e.clientX - bounds.left,
           y: e.clientY - bounds.top,
         };
         connection.render();
-      }.bind(this);
+      };
 
-      let upListener = function(e) {
+      let upListener = (e) => {
         // Polymer.dom(this.$.stage).removeChild(connection);
         window.removeEventListener('mousemove', moveListener);
         window.removeEventListener('mouseup', upListener);
-      }.bind(this);
+      };
       window.addEventListener('mousemove', moveListener);
       window.addEventListener('mouseup', upListener);
     }

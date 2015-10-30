@@ -77,10 +77,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         Polymer.dom(this.root).appendChild(this._frame);
         Polymer.dom.flush();
 
-        this._frame.addEventListener('load', function(event) {
+        this._frame.addEventListener('load', (event) => {
           this.clientConnection =
               new ClientConnection(window, this._frame.contentWindow);
-        }.bind(this));
+        });
 
         this._frame.src = getDocumentUrl(this.documentInfo.domDocument);
       },

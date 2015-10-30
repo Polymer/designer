@@ -8,7 +8,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-define('polymer-designer/editors/ElementEditor', function() {
+define('polymer-designer/editors/ElementEditor', () => {
   'use strict';
 
   /**
@@ -31,7 +31,7 @@ define('polymer-designer/editors/ElementEditor', function() {
     }
 
     static getEditors() {
-      return Object.keys(builtIns).map(function(k) {
+      return Object.keys(builtIns).map((k) => {
         return builtIns[k];
       });
     }

@@ -138,7 +138,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </dom-module>
 
 <script>
-define(['polymer-designer/dom-utils'], function(domUtils) {
+define(['polymer-designer/dom-utils'], (domUtils) => {
   'use strict';
 
   Polymer({
@@ -148,7 +148,7 @@ define(['polymer-designer/dom-utils'], function(domUtils) {
 
       breakpoints: {
         type: Array,
-        value: function() {
+        value: () => {
           return [
             {
               size: 480,

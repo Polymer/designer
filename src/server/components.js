@@ -35,7 +35,7 @@ app.use('/', polyserve.makeApp(bowerComponentDir, null, componentHeaders));
  * development.
  */
 function buildFrameScript() {
-  var files = frameScript.dependencies.map(function(p) {
+  var files = frameScript.dependencies.map((p) => {
     return fs.readFileSync(p, {encoding: 'utf-8'});
   });
   return frameScript.buildFrameScript(files);

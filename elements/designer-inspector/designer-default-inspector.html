@@ -52,7 +52,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </div>
   </template>
   <script>
-  define(['polymer-designer/commands'], function(commands) {
+  define(['polymer-designer/commands'], (commands) => {
     'use strict';
 
     Polymer({
@@ -90,9 +90,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             oldValue,
             newValue);
         this.fire('designer-command', command, { bubbles: true });
-        Promise.resolve().then(function() {
+        Promise.resolve().then(() => {
           this._updating = false;
-        }.bind(this));
+        });
       },
 
       _attributeChanged(attribute, event) {
@@ -108,9 +108,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.selection.node.getAttribute(attribute),
             event.detail.value);
         this.fire('designer-command', command, { bubbles: true });
-        Promise.resolve().then(function() {
+        Promise.resolve().then(() => {
           this._updating = false;
-        }.bind(this));
+        });
       },
 
     });

@@ -8,16 +8,16 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
- define('polymer-designer/async', function() {
+ define('polymer-designer/async', () => {
   'use strict';
 
   class Deferred {
 
     constructor () {
-      this.promise = new Promise(function(resolve, reject) {
+      this.promise = new Promise((resolve, reject) => {
         this.resolve = resolve;
         this.reject = reject;
-      }.bind(this));
+      });
     }
 
   }

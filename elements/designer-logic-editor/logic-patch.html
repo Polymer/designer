@@ -78,7 +78,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script>
 
-define(function() {
+define(() => {
   'use strict';
 
   Polymer({
@@ -108,7 +108,7 @@ define(function() {
 
       ports: {
         type: Map,
-        value: function() { return new Map();},
+        value: () => { return new Map();},
       },
 
       name: {
@@ -183,9 +183,9 @@ define(function() {
 
       // this.$['input-repeat'].flush();
       // this.$['output-repeat'].flush();
-      // setTimeout(function() {
+      // setTimeout(() => {
       //   this.fire('patch-move');
-      // }.bind(this), 0);
+      // }, 0);
     },
 
     _onMouseDown(e) {
@@ -193,16 +193,16 @@ define(function() {
       let oy = e.clientY - this.offsetTop;
       e.preventDefault();
 
-      let moveListener = function(e) {
+      let moveListener = (e) => {
         let newX = e.clientX - ox;
         let newY = e.clientY - oy;
         this.style.left = newX + 'px';
         this.style.top = newY + 'px';
         e.preventDefault();
         this.fire('patch-move');
-      }.bind(this);
+      };
 
-      let upListener = function(e) {
+      let upListener = (e) => {
         window.removeEventListener('mousemove', moveListener);
         window.removeEventListener('mouseup', upListener);
       };

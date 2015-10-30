@@ -48,7 +48,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script>
 
-define(function() {
+define(() => {
   'use strict';
 
   Polymer({
@@ -134,9 +134,7 @@ define(function() {
     _update() {
       this.fromPatch = this.editor.getPatch(this.fromPatchRef);
       this.toPatch = this.editor.getPatch(this.toPatchRef);
-      var _render = function() {
-        this.render();
-      }.bind(this);
+      var _render = () => this.render();
       this.fromPatch.addConnection(this.fromPort, this);
       this.toPatch.addConnection(this.toPort, this);
       // TODO(justinfagnani): remove listeners on old patches
@@ -145,9 +143,7 @@ define(function() {
       this.toPatch.addEventListener('patch-move', _render);
       this.render();
       // try to wait for fonts to load
-      setTimeout(function() {
-        this.render();
-      }.bind(this), 500);
+      setTimeout(() => this.render(), 500);
     },
 
   });

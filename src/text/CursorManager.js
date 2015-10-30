@@ -9,7 +9,7 @@
  */
 
 define('polymer-designer/text/CursorManager', ['polymer-designer/text/PositionWalker'],
-    function(PositionWalker) {
+    (PositionWalker) => {
   'use strict';
 
   return class CursorManager {

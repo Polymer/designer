@@ -31,7 +31,7 @@ var componentHeaders = {
 }
 app.use('/files', polyserve.makeApp(bowerDir, null, componentHeaders, './demo'));
 
-app.get('/ls/*', function(req, res) {
+app.get('/ls/*', (req, res) => {
 
   var url = parseUrl(req.path);
   var requestedPath = decodeURIComponent(url.pathname.substring(3));
@@ -48,7 +48,7 @@ app.get('/ls/*', function(req, res) {
     filePath = path.join(bowerDir, requestedPath);
   }
 
-  fs.lstat(filePath, function(err, stat) {
+  fs.lstat(filePath, (err, stat) => {
     if (err) {
       var code = (err.code === 'ENOENT') ? 404 : 500;
       res.status(code).end();
@@ -59,7 +59,7 @@ app.get('/ls/*', function(req, res) {
 
     if (stat.isDirectory()) {
       var files = fs.readdirSync(filePath);
-      statJson.files = files.map(function(f) {
+      statJson.files = files.map((f) => {
         var childPath = path.join(filePath, f);
         var requestedChildPath = path.join(requestedPath, f);
         return statToJson(requestedChildPath, fs.lstatSync(childPath));

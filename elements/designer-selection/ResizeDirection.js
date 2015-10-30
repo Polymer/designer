@@ -7,7 +7,7 @@
  * Code distributed by Google as part of the polymer project is also
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
-define('polymer-designer/designer-selection/ResizeDirection', function() {
+define('polymer-designer/designer-selection/ResizeDirection', () => {
   'use strict';
 
   class ResizeDirection {

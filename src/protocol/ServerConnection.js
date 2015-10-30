@@ -10,7 +10,7 @@
 
 define('polymer-designer/protocol/ServerConnection',
     ['polymer-designer/async', 'polymer-designer/protocol/request'],
-    function(async, Request) {
+    (async, Request) => {
   'use strict';
 
   class ServerConnection {
@@ -28,9 +28,9 @@ define('polymer-designer/protocol/ServerConnection',
        * @type {Promise} A Promise that resolves when the connection is ready to
        * be used.
        */
-      this.ready = new Promise(function(resolve, reject) {
+      this.ready = new Promise((resolve, reject) => {
 
-        var handshakeListener = function(event) {
+        var handshakeListener = (event) => {
           if (event.data == null ||
               event.data.message == null ||
               event.data.message.messageType !== 'handshake') {
@@ -43,11 +43,11 @@ define('polymer-designer/protocol/ServerConnection',
             this.otherWindow.postMessage({messageType: 'handshakeReply'}, '*');
             resolve();
           }
-        }.bind(this);
+        };
 
         this.target.addEventListener('message', handshakeListener);
 
-      }.bind(this));
+      });
     }
 
     _onMessage(event) {
