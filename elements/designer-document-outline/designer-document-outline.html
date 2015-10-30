@@ -32,7 +32,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script>
 
-define(['polymer-designer/dom-utils'], function(domUtils) {
+define(['polymer-designer/dom-utils'], (domUtils) => {
   'use strict';
 
   Polymer({
@@ -50,7 +50,7 @@ define(['polymer-designer/dom-utils'], function(domUtils) {
        */
       _controller: {
         type: Object,
-        value: function() { return new OutlineTreeController(this); },
+        value: () => { return new OutlineTreeController(this); },
       },
 
       /**
@@ -82,7 +82,7 @@ define(['polymer-designer/dom-utils'], function(domUtils) {
     }
 
     _getVisibleChildren(node) {
-      return Array.prototype.slice.call(node.childNodes).filter(function(n) {
+      return Array.prototype.slice.call(node.childNodes).filter((n) => {
         return !n.nodeName.startsWith('#');
       });
     }

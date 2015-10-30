@@ -44,7 +44,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script>
 
-(function() {
+(() => {
   'use strict';
 
   Polymer({
@@ -60,7 +60,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _collapsing: {
         type: Boolean,
-        value: function() { return false; },
+        value: () => { return false; },
       },
 
     },
@@ -74,9 +74,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     _onCollapse() {
       this.expanded = false;
       this._collapsing = true;
-      window.setTimeout(function() {
+      window.setTimeout(() => {
         this._collapsing = false;
-      }.bind(this), 300);
+      }, 300);
     },
 
     _onMouseOver(e) {

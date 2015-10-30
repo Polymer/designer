@@ -16,11 +16,11 @@ var dependencies = [
   'src/protocol/DocumentServer.js',
 ];
 
-var preamble = '(function() {\n';
+var preamble = '(() => {\n';
 
 var postamble = 'define(["polymer-designer/protocol/ServerConnection", ' +
         '"polymer-designer/protocol/DocumentServer"], ' +
-        'function(ServerConnection, DocumentServer) {\n' +
+        '(ServerConnection, DocumentServer) => {\n' +
     '  "use strict";\n' +
     '  window.Polymer = { dom: "shadow" };\n' +
     '  var connection = new ServerConnection(window);\n' +

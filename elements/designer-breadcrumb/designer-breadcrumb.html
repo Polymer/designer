@@ -42,7 +42,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script>
 
-define(['polymer-designer/dom-utils'], function(domUtils) {
+define(['polymer-designer/dom-utils'], (domUtils) => {
   'use strict';
 
   Polymer({
@@ -72,7 +72,7 @@ define(['polymer-designer/dom-utils'], function(domUtils) {
        * @type {Array<String>}
        */
       _tabNames: {
-        value: function() { return []; },
+        value: () => { return []; },
       },
 
       /**
@@ -81,7 +81,7 @@ define(['polymer-designer/dom-utils'], function(domUtils) {
        * @type Array<Element>}
        */
       _nodePath: {
-        value: function() { return []; },
+        value: () => { return []; },
       }
     },
 
@@ -103,7 +103,7 @@ define(['polymer-designer/dom-utils'], function(domUtils) {
       }
 
       this._nodePath = domUtils.getAncestors(node);
-      this._tabNames = this._nodePath.map(function(n) {
+      this._tabNames = this._nodePath.map((n) => {
         let name = n.tagName.toLowerCase();
         let id = n.id;
         if (id) {

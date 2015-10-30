@@ -35,7 +35,7 @@ define(['css', 'polymer-designer/rework-utils'], (rework, reworkUtils) => {
 
     suite('setProperty', () => {
 
-      test('sets a property in an empty rule', function() {
+      test('sets a property in an empty rule', () => {
         let source = '.foo {}';
         let ast = rework.parse(source);
         console.log('ast', ast);
@@ -46,7 +46,7 @@ define(['css', 'polymer-designer/rework-utils'], (rework, reworkUtils) => {
         assert.equal(newSource, '.foo {foo: bar;}');
       });
 
-      test('sets a property in an empty rule with a newline', function() {
+      test('sets a property in an empty rule with a newline', () => {
         let source = '.foo {baz: qux;}';
         let ast = rework.parse(source);
         console.log('ast', ast);

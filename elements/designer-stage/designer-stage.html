@@ -111,11 +111,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'polymer-designer/designer-selection/ResizeDirection',
         'polymer-designer/dom-utils',
         'polymer-designer/dragging'],
-      function(
+      (
         commands,
         ResizeDirection,
         domUtils,
-        dragging) {
+        dragging) => {
 
     'use strict';
 
@@ -365,10 +365,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _onSelectionResize(e) {
         var bounds = e.detail.bounds;
         this.client.selectionBoundsChanged(bounds)
-          .then(function(response) {
+          .then((response) => {
             // TODO(justinfagnani): fire event
             this._updateSelectionBounds(response.bounds);
-          }.bind(this));
+          });
       },
 
       _onSelectionMove(e) {
@@ -381,13 +381,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var bounds = e.detail.bounds;
         this._updateDragProxy(bounds);
         this.client.selectionBoundsChanged(bounds, cursor)
-            .then(function(response) {
+            .then((response) => {
               if (response.commands) {
-                response.commands.forEach(function(command) {
+                response.commands.forEach((command) => {
                   this.fire('designer-command', command, {
                     bubbles: true
                   });
-                }.bind(this));
+                });
               };
               if (response.elementInfo) {
                 this._selectElement(response.elementInfo);
@@ -398,7 +398,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               // this._isInsertOperation = this.selection &&
               //     this.selection.elementInfo.position == 'static';
               this._updateHover(response.hover);
-            }.bind(this));
+            });
       },
 
       _updateDragProxy(bounds) {
@@ -458,7 +458,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.currentMousePosition.x = position.x;
         this.currentMousePosition.y = position.y;
         this.client.getElementsAtPoint(position.x, position.y)
-          .then(function(response) {
+          .then((response) => {
             let hoverElement = (response.length > 1) ? response[0] : null;
             if (hoverElement !== this._lastDragTarget) {
               // this._isInsertOperation = true;
@@ -468,7 +468,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               // draw the insert preview!!!
               // client....
             }
-          }.bind(this));
+          });
       },
 
       _onMouseDown(e) {
@@ -530,20 +530,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _onDoubleClick(e) {
         let position = domUtils.toLocalPosition(this.$.content, e.clientX, e.clientY);
         this.client.selectElementAtPoint(position.x, position.y)
-          .then(function(response) {
+          .then((response) => {
             this._selectElement(response.elementInfo);
             // this.startOperation(new TextEditOperation());
             this.enterTextMode();
-          }.bind(this));
+          });
       },
 
       _textOnClick(e) {
         e.stopPropagation();
         let position = domUtils.toLocalPosition(this.$.content, e.clientX, e.clientY);
         this.client.getCaretPosition(position.x, position.y)
-          .then(function(response) {
+          .then((response) => {
             this._updateCaret(response.rect);
-          }.bind(this));
+          });
       },
 
       _onKeydown(event) {

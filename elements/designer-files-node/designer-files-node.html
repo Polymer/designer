@@ -10,7 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../polymer/polymer.html">
 
 <script>
-(function() {
+(() => {
   'use strict';
 
   let fs = require('q-io/fs');
@@ -41,7 +41,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     getInfo(path) {
       path = pathLib.join(this._rootPath, path || '');
       return fs.stat(path)
-        .then(function(response) {
+        .then((response) => {
           response.path = path;
           return response;
         });
@@ -63,14 +63,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       if (node.isFile()) {
         return Promise.resolve(null);
       }
-      return fs.list(node.path).then(function(result) {
-        let promises = result.filter(function(path) {
-            return !path.startsWith('.');
-          }.bind(this)).map(function(path) {
-            return this.getInfo(pathLib.join(node.path, path));
-          }.bind(this));
-        return Promise.all(promises);
-      }.bind(this));
+      return fs.list(node.path).then((paths) =>
+          Promise.all(paths
+              .filter((path) => !path.startsWith('.'))
+              .map((path) => this.getInfo(pathLib.join(node.path, path)))));
     },
 
     isLeaf(node) {
@@ -82,7 +78,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     },
 
     onClick(node, event) {
-      this.loadFile(node.path).then(function(fileData) {
+      this.loadFile(node.path).then((fileData) => {
         let loadEvent = new CustomEvent('file-data-load', {
           detail: {
             file: fileData,
@@ -91,7 +87,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           bubbles: true,
         });
         event.target.dispatchEvent(loadEvent);
-      }.bind(this));
+      });
     },
 
   });

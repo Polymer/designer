@@ -13,7 +13,7 @@ define('polymer-designer/commands/ParsedHtmlCommandApplier',[
       'polymer-designer/dom-utils',
       'dom5',
       'polymer-designer/commands'],
-    function(CommandApplier, domUtils, dom5, commands) {
+    (CommandApplier, domUtils, dom5, commands) => {
 
   'use strict';
 
@@ -29,78 +29,78 @@ define('polymer-designer/commands/ParsedHtmlCommandApplier',[
       super(doc);
       this.handlers = {
         'setAttribute': {
-          checkApply: function(doc, command) {
+          checkApply: (doc, command) => {
             let node = this.getNode(doc, command.sourceId);
             this.check(dom5.getAttribute(node, command.attribute) == command.oldValue);
           },
 
-          apply: function(doc, command) {
+          apply: (doc, command) => {
             let node = this.getNode(doc, command.sourceId);
             dom5.setAttribute(node, command.attribute, command.newValue);
           },
 
-          checkUndo: function(doc, command) {
+          checkUndo: (doc, command) => {
             let node = this.getNode(doc, command.sourceId);
             this.check(dom5.getAttribute(node, command.attribute) == command.newValue);
           },
 
-          undo: function(doc, command) {
+          undo: (doc, command) => {
             let node = this.getNode(doc, command.sourceId);
             dom5.setAttribute(node, command.attribute, command.oldValue);
           },
         },
 
         'setTextContent': {
-          checkApply: function(doc, command) {
+          checkApply: (doc, command) => {
             let node = this.getNode(doc, command.sourceId);
             // Don't apply if there are element children.
-            this.check(!node.childNodes.some(function(child) {
+            this.check(!node.childNodes.some((child) => {
               return child.nodeName !== '#text';
             }));
           },
 
-          apply: function(doc, command) {
+          apply: (doc, command) => {
             let node = this.getNode(doc, command.sourceId);
             dom5.setTextContent(node, command.newValue);
           },
 
-          checkUndo: function(doc, command) {
+          checkUndo: (doc, command) => {
             let node = this.getNode(doc, command.sourceId);
             this.check(dom5.getTextContent(node) === command.newValue);
           },
 
-          undo: function(doc, command) {
+          undo: (doc, command) => {
             let node = this.getNode(doc, command.sourceId);
             dom5.setTextContent(node, command.oldValue);
           },
         },
 
         'setTagName': {
-          checkApply: function(doc, command) {
+          checkApply: (doc, command) => {
             let node = this.getNode(doc, command.sourceId);
             this.check(node &&
                 node.tagName.toLowerCase() === command.oldValue.toLowerCase());
           },
 
-          apply: function(doc, command) {
+          apply: (doc, command) => {
             let node = this.getNode(doc, command.sourceId);
             node.tagName = node.nodeName = command.newValue;
           },
 
-          checkUndo: function(doc, command) {
+          checkUndo: (doc, command) => {
             let node = this.getNode(doc, command.sourceId);
             this.check(node &&
                 node.tagName.toLowerCase() === command.oldValue.toLowerCase());
           },
 
-          undo: function(doc, command) {
+          undo: (doc, command) => {
             let node = this.getNode(doc, command.sourceId);
             node.tagName = node.nodeName = command.oldValue;
           },
         },
 
         'moveElement': {
-          checkApply: function(doc, command) {
+          checkApply: (doc, command) => {
             let el = this.getNode(doc, command.sourceId);
             let target = this.getNode(doc, command.targetSourceId);
             this.check(el != null && target != null &&
@@ -108,7 +108,7 @@ define('polymer-designer/commands/ParsedHtmlCommandApplier',[
                  command.position === commands.InsertPosition.after));
           },
 
-          apply: function(doc, command) {
+          apply: (doc, command) => {
             let el = this.getNode(doc, command.sourceId);
             let target = this.getNode(doc, command.targetSourceId);
 
@@ -134,7 +134,7 @@ define('polymer-designer/commands/ParsedHtmlCommandApplier',[
 
           },
 
-          checkUndo: function(doc, command) {
+          checkUndo: (doc, command) => {
             this.check(false);
           },
         },

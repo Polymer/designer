@@ -73,7 +73,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script>
 
-(function() {
+(() => {
   'use strict';
 
   Polymer({
@@ -146,11 +146,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.open = false;
         this.expandIcon = isLeaf ? "designer-tree:blank" : "designer-tree:closed";
       } else {
-        this.controller.getChildren(this.data).then(function(results) {
+        this.controller.getChildren(this.data).then((results) => {
           this.children = results;
           this.open = true;
           this.expandIcon = isLeaf ? "designer-tree:blank" : "designer-tree:open";
-        }.bind(this));
+        });
       }
     },
 

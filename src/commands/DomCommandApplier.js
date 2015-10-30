@@ -12,7 +12,7 @@ define('polymer-designer/commands/DomCommandApplier', [
       'polymer-designer/commands/CommandApplier',
       'polymer-designer/dom-utils',
       'polymer-designer/commands'],
-    function(CommandApplier, domUtils, commands) {
+    (CommandApplier, domUtils, commands) => {
 
   'use strict';
 

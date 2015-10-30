@@ -29,7 +29,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </div>
 
     <script>
-define(['polymer-designer/path', 'dom5'], function(path, dom5) {
+define(['polymer-designer/path', 'dom5'], (path, dom5) => {
   'use strict';
 
   mocha.setup('tdd');
@@ -37,7 +37,7 @@ define(['polymer-designer/path', 'dom5'], function(path, dom5) {
 
   var assert = chai.assert;
 
-  suite('path', function() {
+  suite('path', () => {
 
     // We must include the doctype so that
     //   1) parse5 is in standards mode
@@ -60,32 +60,32 @@ define(['polymer-designer/path', 'dom5'], function(path, dom5) {
       var divAText1 = divA.childNodes[0];
       var divAText2 = divA.childNodes[2];
 
-      suite('getNodePath on ' + documentType, function() {
+      suite('getNodePath on ' + documentType, () => {
 
-          test('returns the right path for a top-level element', function() {
+          test('returns the right path for a top-level element', () => {
             assert.equal(path.getNodePath(divA, doc), 'BODY:1/DIV:0');
           });
 
-          test('returns the right path for a nested element', function() {
+          test('returns the right path for a nested element', () => {
             assert.equal(path.getNodePath(divB, doc), 'BODY:1/DIV:0/DIV:1');
           });
 
           test('returns the right path for the first text node in an element',
-              function() {
+              () => {
             assert.equal(
                 path.getNodePath(divAText1, doc),
                 'BODY:1/DIV:0/#TEXT:0');
           });
 
           test('returns the right path for the last text node in an element',
-              function() {
+              () => {
             assert.equal(
                 path.getNodePath(divAText2, doc),
                 'BODY:1/DIV:0/#TEXT:2');
           });
 
-          test('filters nodes', function() {
-            assert.equal(path.getNodePath(divAText2, doc, function(n) {
+          test('filters nodes', () => {
+            assert.equal(path.getNodePath(divAText2, doc, (n) => {
               return !((n.id && n.id === 'B') ||
                   (n.attrs && dom5.getAttribute(n, 'id') === 'B'));
             }), 'BODY:1/DIV:0/#TEXT:1');
@@ -93,47 +93,47 @@ define(['polymer-designer/path', 'dom5'], function(path, dom5) {
 
       });
 
-      suite('getNodeFromPath on ' + documentType, function() {
+      suite('getNodeFromPath on ' + documentType, () => {
 
-        test('returns the node for a path to a top-level element', function() {
+        test('returns the node for a path to a top-level element', () => {
           // console.log(doc);
           assert.equal(path.getNodeFromPath('BODY:1/DIV:0', doc), divA);
         });
 
-        test('returns the node for a path to a nested element', function() {
+        test('returns the node for a path to a nested element', () => {
           assert.equal(path.getNodeFromPath('BODY:1/DIV:0/DIV:1', doc), divB);
         });
 
         test('returns the node for a path to the first text node in an element',
-            function() {
+            () => {
           assert.equal(
               path.getNodeFromPath('BODY:1/DIV:0/#TEXT:0', doc),
               divAText1);
         });
 
         test('returns the node for a path to the last text node in an element',
-            function() {
+            () => {
           assert.equal(
               path.getNodeFromPath('BODY:1/DIV:0/#TEXT:2', doc),
               divAText2);
         });
 
-        test('throws if the node has the wrong name', function() {
+        test('throws if the node has the wrong name', () => {
           assert.throws(function () {
             // The 1th child of body is a DIV
             path.getNodeFromPath('BODY:1/SPAN:0', doc);
           });
         });
 
-        test('throws if an index is out of bounds', function() {
+        test('throws if an index is out of bounds', () => {
           assert.throws(function () {
             path.getNodeFromPath('BODY:3', doc);
           }, RangeError);
         });
 
-        test('filters nodes', function() {
+        test('filters nodes', () => {
           assert.equal(path.getNodeFromPath('BODY:1/DIV:0/#TEXT:1', doc,
-            function(n) {
+            (n) => {
               return !((n.id && n.id === 'B') ||
                   (n.attrs && dom5.getAttribute(n, 'id') === 'B'));
           }), divAText2);

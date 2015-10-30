@@ -78,7 +78,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 define([
       'polymer-designer/dragging',
       'polymer-designer/editors/ElementEditor'],
-    function(dragging, ElementEditor) {
+    (dragging, ElementEditor) => {
   'use strict';
 
   Polymer({
@@ -91,7 +91,7 @@ define([
       },
     },
 
-    _onMouseDown: function(e) {
+    _onMouseDown: (e) => {
       // the palette item has a class of 'element'
       let el = e.target.closest('.element');
       let proxy = dragging.createDragProxy(el, true);

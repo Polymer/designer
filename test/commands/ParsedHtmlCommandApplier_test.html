@@ -31,7 +31,7 @@ define([
       'polymer-designer/commands',
       'dom5',
       'polymer-designer/dom-utils'],
-    function(ParsedHtmlCommandApplier, commands, dom5, domUtils) {
+    (ParsedHtmlCommandApplier, commands, dom5, domUtils) => {
 
   mocha.setup('tdd');
   // mocha.checkLeaks();
@@ -39,13 +39,13 @@ define([
   var assert = chai.assert;
   const sourceIdAttribute = domUtils.sourceIdAttribute;
 
-  suite('ParsedHtmlCommandApplier', function() {
+  suite('ParsedHtmlCommandApplier', () => {
     var testDoc;
     var commandApplier;
 
-    suite('setAttribute comand', function() {
+    suite('setAttribute comand', () => {
 
-      setup(function() {
+      setup(() => {
         var testDocText =
             `<!DOCTYPE html>
              <div id='A' class='test' ${sourceIdAttribute}='1'>
@@ -55,7 +55,7 @@ define([
         commandApplier = new ParsedHtmlCommandApplier(testDoc);
       });
 
-      test('applies a new attribute', function() {
+      test('applies a new attribute', () => {
         //         doc html          body          div#a
         var divA = testDoc.childNodes[1].childNodes[1].childNodes[0];
         var command = commands.setAttribute(
@@ -67,7 +67,7 @@ define([
         assert.equal(dom5.getAttribute(divA, 'foo'), 'bar');
       });
 
-      test('applies a new value to an existing attribute', function() {
+      test('applies a new value to an existing attribute', () => {
         //         doc html          body          div#a
         var divA = testDoc.childNodes[1].childNodes[1].childNodes[0];
         var command = commands.setAttribute(
@@ -79,7 +79,7 @@ define([
         assert.equal(dom5.getAttribute(divA, 'class'), 'test2');
       });
 
-      test('fails to apply a new value if the old value is wrong', function() {
+      test('fails to apply a new value if the old value is wrong', () => {
         //         doc html          body          div#a
         var divA = testDoc.childNodes[1].childNodes[1].childNodes[0];
         var command = commands.setAttribute(
@@ -87,12 +87,12 @@ define([
             'class',
             'test1',
             'test2');
-        assert.throws(function() {
+        assert.throws(() => {
           commandApplier.apply(command);
         });
       });
 
-      test('fails to apply a new value if the old value is null', function() {
+      test('fails to apply a new value if the old value is null', () => {
         //         doc html          body          div#a
         var divA = testDoc.childNodes[1].childNodes[1].childNodes[0];
         var command = commands.setAttribute(
@@ -100,12 +100,12 @@ define([
             'foo',
             'bar',
             'bar2');
-        assert.throws(function() {
+        assert.throws(() => {
           commandApplier.apply(command);
         });
       });
 
-      test('undoes a new value to an existing attribute', function() {
+      test('undoes a new value to an existing attribute', () => {
         //         doc html          body          div#a
         var divA = testDoc.childNodes[1].childNodes[1].childNodes[0];
         var command = commands.setAttribute(

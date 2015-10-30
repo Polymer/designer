@@ -8,7 +8,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-define('polymer-designer/rework-utils', ['css'], function(rework) {
+define('polymer-designer/rework-utils', ['css'], (rework) => {
   'use strict';
 
   const colonRegex = /:\s*/;
@@ -25,7 +25,7 @@ define('polymer-designer/rework-utils', ['css'], function(rework) {
      * @return {Rework.AST.Rule}
      */
     getRule(parsedSheet, selector, offset) {
-      return parsedSheet.stylesheet.rules.find(function(rule) {
+      return parsedSheet.stylesheet.rules.find((rule) => {
         // TODO(nevir): Actually honor offset, and multiple selectors.
         return rule.selectors[0] === selector;
       });
@@ -37,7 +37,7 @@ define('polymer-designer/rework-utils', ['css'], function(rework) {
      * @return {Rework.AST.Declaration}
      */
     getProperty(rule, key) {
-      return rule.declarations.find(function(declaration) {
+      return rule.declarations.find((declaration) => {
         return declaration.property === key;
       });
     },

@@ -87,45 +87,45 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <test-element></test-element>
     </test-element-2>
     <script>
-(function() {
+(() => {
   mocha.setup('tdd');
   // mocha.checkLeaks();
 
   var assert = chai.assert;
 
-  suite('FrameManager', function() {
+  suite('FrameManager', () => {
 
-    suite('selectElement', function() {
+    suite('selectElement', () => {
 
-      test('selects the body', function() {
+      test('selects the body', () => {
         var m = new FrameManager();
         var target = document.body;
         m.selectElement(0, 0);
         assert.equal(m.currentElement, target);
       });
 
-      test('selects a top-level element', function() {
+      test('selects a top-level element', () => {
         var m = new FrameManager();
         var target = document.querySelector('#select_test_1');
         m.selectElement(150, 150);
         assert.equal(m.currentElement, target);
       });
 
-      test('selects a nested element', function() {
+      test('selects a nested element', () => {
         var m = new FrameManager();
         var target = document.querySelector('#inner');
         m.selectElement(350, 150);
         assert.equal(m.currentElement, target);
       });
 
-      test('selects a custom element, not its local nodes', function() {
+      test('selects a custom element, not its local nodes', () => {
         var m = new FrameManager();
         var target = document.querySelector('#custom');
         m.selectElement(550, 150);
         assert.equal(m.currentElement, target);
       });
 
-      test('selects a nested custom element', function() {
+      test('selects a nested custom element', () => {
         var m = new FrameManager();
         var target = document.querySelector('#custom2 > test-element');
         m.selectElement(750, 150);

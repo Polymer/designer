@@ -8,7 +8,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
- define('polymer-designer/dragging', ['polymer-designer/css'], function(css) {
+ define('polymer-designer/dragging', ['polymer-designer/css'], (css) => {
   'use strict';
 
   /**
@@ -122,10 +122,10 @@
       }
       let properties = css.getStyleProperties(style);
       let styleText = Object.keys(properties)
-        .filter(function(prop) {
+        .filter((prop) => {
           return !(stripMargins && prop.startsWith('margin'));
         })
-        .map(function(prop) {
+        .map((prop) => {
           return `${prop}: ${properties[prop]}`;
         })
         .join('; ');

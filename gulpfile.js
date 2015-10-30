@@ -19,14 +19,14 @@ var symlink = require('gulp-symlink');
 
 // make files available at bower_components/polymer-designer/... so that
 // relative html imports work when loaded from disk
-gulp.task('symlink', function() {
+gulp.task('symlink', () => {
   gulp.src('.').pipe(symlink('bower_components/polymer-designer', {
     force: true,
   }));
 });
 
 // builds the JS bundle that's injected into the editor iframe
-gulp.task('frame-script', function() {
+gulp.task('frame-script', () => {
   gulp.src(frameScript.dependencies)
       .pipe(concat('frame.js'))
       .pipe(insert.prepend(frameScript.preamble))
@@ -34,7 +34,7 @@ gulp.task('frame-script', function() {
       .pipe(gulp.dest('./elements/designer-document/'));
 });
 
-gulp.task('browserify-css', function() {
+gulp.task('browserify-css', () => {
   browserify({
     entries: './node_modules/css',
     standalone: 'css',
@@ -44,7 +44,7 @@ gulp.task('browserify-css', function() {
       .pipe(gulp.dest('./vendor'));
 });
 
-gulp.task('browserify-dom5', function() {
+gulp.task('browserify-dom5', () => {
   browserify({
     entries: './node_modules/dom5',
     standalone: 'dom5',
@@ -54,7 +54,7 @@ gulp.task('browserify-dom5', function() {
       .pipe(gulp.dest('./vendor'));
 });
 
-gulp.task('browserify-hydrolysis', ['browserify-dom5'], function() {
+gulp.task('browserify-hydrolysis', ['browserify-dom5'], () => {
   var b = browserify({
     entries: './node_modules/hydrolysis',
     standalone: 'hydrolysis',
@@ -71,13 +71,13 @@ gulp.task('browserify', [
     'browserify-dom5',
     'browserify-hydrolysis']);
 
-gulp.task('browser', ['browserify'], function() {
+gulp.task('browser', ['browserify'], () => {
   // symlink src/hydrolysis-browser.html to vendor/hydrolysis.html
   gulp.src('src/hydrolysis/hydrolysis-browser.html')
       .pipe(symlink('vendor/hydrolysis.html', {force: true}));
 });
 
-gulp.task('electron', ['frame-script', 'symlink', 'browserify'], function() {
+gulp.task('electron', ['frame-script', 'symlink', 'browserify'], () => {
   // symlink src/hydrolysis-electron.html to vendor/hydrolysis.html
   gulp.src('src/hydrolysis/hydrolysis-electron.html')
       .pipe(symlink('vendor/hydrolysis.html', {force: true}));

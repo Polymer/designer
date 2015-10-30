@@ -1,7 +1,7 @@
 <link rel="import" href="../../vendor/hydrolysis.html">
 
 <script>
-define(['hydrolysis'], function(hydrolysis) {
+define(['hydrolysis'], (hydrolysis) => {
   'use strict';
 
   Polymer({
@@ -10,7 +10,7 @@ define(['hydrolysis'], function(hydrolysis) {
     properties: {
       instance: {
         type: Object,
-        value: function() { return new hydrolysis.FSResolver(); },
+        value: () => { return new hydrolysis.FSResolver(); },
       },
     },
 

@@ -14,14 +14,14 @@ var express = require('express');
 function makeApi(designerConfig) {
   var app = express();
 
-  app.post('/bowerInstall', function(req, res) {
+  app.post('/bowerInstall', (req, res) => {
     console.log('starting bower install');
     bower.install();
     console.log('bower install done');
     res.send('OK');
   });
 
-  app.get('/fileService/config', function(req, res) {
+  app.get('/fileService/config', (req, res) => {
     res.json({
       port: designerConfig.files.port
     });
