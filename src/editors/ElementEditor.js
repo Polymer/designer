@@ -45,6 +45,7 @@ define('polymer-designer/editors/ElementEditor', function() {
     get inspectors() {
       return [
           'designer-default-inspector',
+          'designer-attribute-inspector',
           'designer-property-inspector',
           'designer-style-inspector',
       ];

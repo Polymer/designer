@@ -1,0 +1,166 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../iron-icon/iron-icon.html">
+<link rel="import" href="../../../paper-button/paper-button.html">
+<link rel="import" href="../../../paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../../../paper-item/paper-item.html">
+<link rel="import" href="../../../paper-menu/paper-menu.html">
+<link rel="import" href="../../../paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../src/commands/commands.html">
+<link rel="import" href="../../src/dom-utils/dom-utils.html">
+<link rel="import" href="designer-inspector-behavior.html">
+
+<!--
+Displays the style rules that currently apply to `element`, and provides an
+editing interface for them.
+-->
+<dom-module id="designer-attribute-inspector">
+
+  <style>
+    :host {
+      @apply(--paper-font-body1);
+      display: block;
+      padding: 16px;
+    }
+    h2 {
+      @apply(--designer-inspector-title);
+    }
+    paper-input.value {
+      @apply(--designer-inspector-row-value);
+    }
+    paper-input.name {
+      @apply(--designer-inspector-row-label);
+      --paper-input-container-underline: {
+        display: none;
+      };
+    }
+    .inspector-row {
+      @apply(--designer-inspector-row);
+    }
+    #add-container {
+      text-align: center;
+    }
+  </style>
+
+  <template>
+    <h2>Attributes</h2>
+
+    <template
+        is="dom-repeat"
+        items="[[_attributes]]"
+        as="attribute">
+      <div class="inspector-row">
+        <paper-input
+            id$="[[_id(index)]]"
+            class="name"
+            value="[[attribute.name]]"
+            no-label-float
+            on-change="_onNameChange">
+        </paper-input>
+        <paper-tooltip for="[[_id(index)]]">[[attribute.name]]</paper-tooltip>
+        <paper-input
+            class="value"
+            value="[[attribute.value]]"
+            no-label-float
+            on-change="_onValueChange">
+        </paper-input>
+      </div>
+    </template>
+
+    <div id="add-container">
+      <paper-button on-click="_addAttribute">
+        <iron-icon icon="add"></iron-icon>
+        Add Attribute
+      </paper-button>
+    </div>
+
+  </template>
+
+</dom-module>
+
+<script>
+define([
+    'polymer-designer/dom-utils',
+    'polymer-designer/commands'],
+    function(domUtils, commands) {
+
+  'use strict';
+
+  Polymer({
+
+    is: 'designer-attribute-inspector',
+
+    behaviors: [Polymer.DesignerInspectorBehavior],
+
+    properties: {
+
+      /**
+       * Metadata published by the stage about the currently selected element.
+       */
+      selection: {
+        type: Object,
+        observer: '_selectionChanged',
+      },
+
+      /** The document where edits should be made */
+      documentInfo: Object,
+
+      excludedProperties: {
+        type: Array,
+      },
+
+      _attributes: {
+        type: Array,
+      },
+
+    },
+
+    observers: [
+      '_computeAttributes(selection, excludedProperties)',
+    ],
+
+    _id(i) {
+      return `id-${i}`;
+    },
+
+    _computeAttributes(selection, excludedProperties) {
+      this._attributes = Array.from(this.selection.node.attributes).filter(
+          (a) => a.name !== '__designer_node_id__' &&
+              (excludedProperties == null ||
+                  !excludedProperties.has(`attribute.${a.name}`)));
+    },
+
+    _onValueChange(event) {
+      // this.fire('designer-command',
+      //     commands.setTextContent(styleSourceId, styleSource, newSource));
+    },
+
+    _onNameChange(event) {
+      // this.fire('designer-command',
+      //     commands.setTextContent(styleSourceId, styleSource, newSource));
+    },
+
+    _addAttribute() {
+      this.push('_attributes', {_new: true, name:'', value:''});
+    },
+
+    _saveAttribute(attribute) {
+      let index = this._attributes.indexOf(attribute);
+      this.splice('_attributes', index, 1);
+
+      // this.fire('designer-command',
+      //     commands.setTextContent(styleSourceId, styleSource, newSource));
+    },
+
+  });
+
+});
+</script>
