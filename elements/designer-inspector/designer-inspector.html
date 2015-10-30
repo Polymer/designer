@@ -12,9 +12,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../paper-tabs/paper-tabs.html">
 <link rel="import" href="../../../paper-styles/paper-styles.html">
 
+<link rel="import" href="designer-attribute-inspector.html">
+<link rel="import" href="designer-default-inspector.html">
 <link rel="import" href="designer-inspector-behavior.html">
 <link rel="import" href="designer-property-inspector.html">
-<link rel="import" href="designer-default-inspector.html">
 <link rel="import" href="designer-style-inspector.html">
 
 <!--
@@ -109,13 +110,33 @@ define(['polymer-designer/dom-utils'], function(domUtils) {
       }
 
       let inspectorNames = this.selection.editor.inspectors;
-      for (let inspectorName of inspectorNames) {
-        let inspector = document.createElement(inspectorName);
+      let inspectors = inspectorNames.map((n) => document.createElement(n));
 
+      let claimedProperties = new Map();
+      for (let inspector of inspectors) {
+        if (inspector.claimedProperties) {
+          claimedProperties.set(inspector, inspector.claimedProperties);
+        }
+      }
+
+      let getExcludedProperties = (inspector) => {
+        let excludedProperties = new Set();
+        for (let claimed of claimedProperties) {
+          if (claimed[0] !== inspector) {
+            for (let property of claimed[1]) {
+              excludedProperties.add(property);
+            }
+          }
+        }
+        return excludedProperties;
+      };
+
+      for (let inspector of inspectors) {
         // make sure documentInfo is always set first: synchronous
         // data-binding sucks!
         inspector.documentInfo = this.documentInfo;
         inspector.selection = this.selection;
+        inspector.excludedProperties = getExcludedProperties(inspector);
 
         Polymer.dom(this.root).appendChild(inspector);
       }

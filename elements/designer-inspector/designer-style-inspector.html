@@ -124,6 +124,10 @@ define([
 
     properties: {
 
+      claimedProperties: {
+        value: ['attribute.style'],
+      },
+
       /**
        * Metadata published by the stage about the currently selected element.
        */
@@ -161,10 +165,6 @@ define([
         type: Array,
       },
 
-    },
-
-    listeners: {
-      'designer-element-style-changed': '_onStyleChanged',
     },
 
     observers: [
