@@ -22,7 +22,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <designer-tree-item
       controller="[[controller]]"
-      data="[[data]]"
+      data="[[_root]]"
       noicon="[[noicon]]">
     </designer-tree-item>
   </template>
@@ -47,15 +47,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        * getChildren(node) : Promise<Array<Object>>
        * isLeaf(node) : Boolean
        */
-      controller: Object,
+      controller: {
+        type: Object,
+        observer: '_controllerChanged',
+      },
 
-      data: Object,
+      _root: Object,
 
       noicon: {
         type: Boolean,
         value: false,
       },
 
+    },
+
+    _controllerChanged() {
+      this.controller.getInfo().then((root) => {
+        console.log('tree root', root);
+        this._root = root;
+      });
     },
 
   });

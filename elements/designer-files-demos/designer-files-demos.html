@@ -12,11 +12,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="designer-files-demos">
   <template>
-    <iron-ajax
+    <!-- <iron-ajax
         url="/api/fileService/config"
         on-response="_onConfigResponse"
         auto>
-    </iron-ajax>
+    </iron-ajax> -->
   </template>
 </dom-module>
 
@@ -42,17 +42,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     },
 
-    _onConfigResponse(event) {
-      // console.log('_onConfigResponse', event);
-      let port = event.detail.response.port;
-      this._lsRoot = 'http://localhost:' + port + '/ls/';
-      this._filesRoot = 'http://localhost:' + port + '/files/';
+    attached() {
+      this._lsRoot = '/api/files/';
+      this._filesRoot = 'http://localhost:8081/files/';
       this.fire('designer-files-ready');
     },
 
+    // _onConfigResponse(event) {
+    //   // console.log('_onConfigResponse', event);
+    //   let port = event.detail.response.port;
+    //   this._lsRoot = 'http://localhost:' + port + '/ls/';
+    //   this._filesRoot = 'http://localhost:' + port + '/files/';
+    //   this.fire('designer-files-ready');
+    // },
+
     getInfo(path) {
-      path = ['polymer-designer-demos', path || ''].join('/');
-      // console.log('getInfo', path);
+      path = [path || ''].join('/');
+      console.log('getInfo', path);
       return fetch(this._lsRoot + path).then((response) => {
         return response.json();
       });

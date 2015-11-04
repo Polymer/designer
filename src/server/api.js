@@ -8,10 +8,14 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-var bower = require('../bower/bower.js');
-var express = require('express');
+ 'use strict';
 
-function makeApi(designerConfig) {
+let bower = require('../bower/bower.js');
+let express = require('express');
+let files = require('./files');
+let path = require('path');
+
+function makeApiApp(designerConfig) {
   var app = express();
 
   app.post('/bowerInstall', (req, res) => {
@@ -21,13 +25,17 @@ function makeApi(designerConfig) {
     res.send('OK');
   });
 
-  app.get('/fileService/config', (req, res) => {
-    res.json({
-      port: designerConfig.files.port
-    });
-  });
+  // app.get('/fileService/config', (req, res) => {
+  //   res.json({
+  //     port: designerConfig.files.port
+  //   });
+  // });
+
+  let demoDir = path.normalize(path.join(__dirname, '../../demo'));
+
+  app.use('/files', files.makeFilesApp(demoDir));
 
   return app;
 }
 
-module.exports = makeApi;
+module.exports = makeApiApp;

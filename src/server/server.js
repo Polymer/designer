@@ -43,7 +43,7 @@ function startServer(serverPort, filesPort) {
   app.use('/components', components);
 
   var server = app.listen(designerConfig.server.port);
-  files.app.listen(designerConfig.files.port);
+  // files.app.listen(designerConfig.files.port);
 }
 
 module.exports = {

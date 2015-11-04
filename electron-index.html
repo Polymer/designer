@@ -14,6 +14,8 @@
     <link rel="import" href="bower_components/polymer-designer/elements/hydrolysis/hydrolysis-analyzer.html">
     <link rel="import" href="bower_components/polymer-designer/elements/hydrolysis/hydrolysis-loader.html">
     <link rel="import" href="bower_components/polymer-designer/elements/hydrolysis/hydrolysis-fs-resolver.html">
+    <link rel="import" href="bower_components/polymer-designer/elements/designer-project-service/designer-project-service-electron.html">
+
     <style>
       html, body {
         margin: 0;
@@ -30,6 +32,7 @@
   <body>
     <designer-app>
       <designer-files-node files></designer-files-node>
+      <designer-project-service-electron></designer-project-service-electron>
       <hydrolysis-analyzer>
         <hydrolysis-loader>
           <hydrolysis-fs-resolver></hydrolysis-fs-resolver>

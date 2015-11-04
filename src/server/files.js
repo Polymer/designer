@@ -8,77 +8,74 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
+'use strict';
+
 var express = require('express');
 var fs = require('fs');
 var http = require('http');
 var path = require('path');
 var parseUrl = require('url').parse;
-var polyserve = require('polyserve');
+// var polyserve = require('polyserve');
 var send = require('send');
 
-var filesDir = path.normalize(path.join(__dirname, '../../demo'));
-var bowerDir = 'bower_components';
-var packageName = 'polymer-designer-demos';
-var componentDir = path.join(filesDir, bowerDir);
+// var filesDir = path.normalize(path.join(__dirname, '../../demo'));
+// var bowerDir = 'bower_components';
+// var packageName = 'polymer-designer-demos';
+// var componentDir = path.join(filesDir, bowerDir);
 
 // match /packageName or /packageName/.*
-var packageRegex = new RegExp('/' + packageName + '(?=$|/(.*))');
+// var packageRegex = new RegExp('/' + packageName + '(?=$|/(.*))');
 
-var app = express();
+function makeFilesApp(filesDir) {
 
-var componentHeaders = {
-  'Access-Control-Allow-Origin': '*'
-}
-app.use('/files', polyserve.makeApp(bowerDir, null, componentHeaders, './demo'));
+  let app = express();
 
-app.get('/ls/*', (req, res) => {
+  // var componentHeaders = {
+  //   'Access-Control-Allow-Origin': '*',
+  // };
 
-  var url = parseUrl(req.path);
-  var requestedPath = decodeURIComponent(url.pathname.substring(3));
-  var packageMatch = requestedPath.match(packageRegex);
-  var filePath;
+  // app.use('/files', polyserve.makeApp(bowerDir, null, componentHeaders, './demo'));
 
-  if (packageMatch !== null) {
-    if (packageMatch[1]) {
-      filePath = path.join(filesDir, packageMatch[1]);
-    } else {
-      filePath = filesDir;
-    }
-  } else {
-    filePath = path.join(bowerDir, requestedPath);
-  }
+  app.get('/*', (req, res) => {
 
-  fs.lstat(filePath, (err, stat) => {
-    if (err) {
-      var code = (err.code === 'ENOENT') ? 404 : 500;
-      res.status(code).end();
-      return;
-    }
+    let url = parseUrl(req.path);
+    let requestedPath = decodeURIComponent(url.pathname.substring(1));
+    let filePath = path.join(filesDir, requestedPath);
 
-    var statJson = statToJson(requestedPath, stat);
-
-    if (stat.isDirectory()) {
-      var files = fs.readdirSync(filePath);
-      statJson.files = files.map((f) => {
-        var childPath = path.join(filePath, f);
-        var requestedChildPath = path.join(requestedPath, f);
-        return statToJson(requestedChildPath, fs.lstatSync(childPath));
-      });
-      // add the root package to the top level
-      if (requestedPath === '/') {
-        var f = 'polymer-designer-demos';
-        var childPath = path.join(filePath, f);
-        var requestedChildPath = path.join(requestedPath, f);
-        statJson.files.push(
-            statToJson(requestedChildPath, fs.lstatSync(filesDir)));
+    fs.lstat(filePath, (err, stat) => {
+      if (err) {
+        let code = (err.code === 'ENOENT') ? 404 : 500;
+        res.status(code).end();
+        return;
       }
-    }
-    res.type('json');
-    res.append('Access-Control-Allow-Origin', '*');
-    res.send(statJson);
+
+      let statJson = statToJson(requestedPath, stat);
+
+      if (stat.isDirectory()) {
+        let files = fs.readdirSync(filePath);
+        statJson.files = files.map((f) => {
+          let childPath = path.join(filePath, f);
+          let requestedChildPath = path.join(requestedPath, f);
+          return statToJson(requestedChildPath, fs.lstatSync(childPath));
+        });
+        // // add the root package to the top level
+        // if (requestedPath === '/') {
+        //   var f = 'polymer-designer-demos';
+        //   var childPath = path.join(filePath, f);
+        //   var requestedChildPath = path.join(requestedPath, f);
+        //   statJson.files.push(
+        //       statToJson(requestedChildPath, fs.lstatSync(filesDir)));
+        // }
+      }
+      res.type('json');
+      // res.append('Access-Control-Allow-Origin', '*');
+      res.send(statJson);
+    });
+
   });
 
-});
+  return app;
+}
 
 function statToJson(path, stat) {
   return {
@@ -90,5 +87,5 @@ function statToJson(path, stat) {
 }
 
 module.exports = {
-  app: app,
+  makeFilesApp: makeFilesApp,
 };

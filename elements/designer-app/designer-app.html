@@ -18,6 +18,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../designer-inspector/designer-inspector.html">
 <link rel="import" href="../designer-logic-editor/designer-logic-editor.html">
 <link rel="import" href="../designer-mini-nav/designer-mini-nav.html">
+<link rel="import" href="../designer-project-nav/designer-project-nav.html">
 <link rel="import" href="../designer-tree/designer-tree.html">
 <link rel="import" href="../designer-ui-editor/designer-ui-editor.html">
 <link rel="import" href="../paper-tabs-vertical/paper-tabs-vertical.html">
@@ -173,6 +174,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     paper-tab-vertical.iron-selected {
       color: var(--accent-color);
     }
+    #files {
+      text-align: center;
+    }
+    #files paper-button {
+      background: var(--paper-grey-800);
+      color: var(--paper-grey-500);
+    }
   </style>
 
   <template>
@@ -207,12 +215,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div id="nav-detail" class="large">
         <header>Polymer Designer</header>
         <iron-pages selected="{{_selectedNavTab}}">
-          <div>
-            <designer-tree
-                controller="[[_fileTreeController]]"
-                data="[[_rootFile]]"
-                on-file-data-load="_onFileDataLoad">
-            </designer-tree>
+          <div id="files">
+            <paper-button raised on-click="_openProject"><iron-icon icon="folder-open"></iron-icon>Open Project</paper-button>
+            <div id="projects"></div>
           </div>
           <div>
             <h3>Document</h3>
@@ -312,16 +317,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       },
 
-      observers: [
-        // '_initializeDesignerApp(_fileServiceConfig)',
-      ],
-
       listeners: {
         'designer-command': '_onDesignerCommand',
         'designer-select-element': '_onDesignerSelectElement',
-        'designer-files-attached': '_onDesignerFilesAttached',
-        'designer-files-ready': '_onDesignerFilesReady',
         'hydrolysis-analyzer-ready': '_onHydrolysisAnalyzerReady',
+        'designer-project-service-ready': '_onDesignerProjectServiceReady',
+        'designer-open-file': '_onDesignerOpenFile',
       },
 
       ready() {
@@ -329,12 +330,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._showEditors = queryParams.get('show-editors');
       },
 
-      _onDesignerFilesReady(event) {
-        this._fileTreeController = event.target;
-        this._fileTreeController.getInfo()
-          .then((root) => {
-            this._rootFile = root;
+      _onDesignerProjectServiceReady() {
+        this._projectService = event.target;
+      },
+
+      _openProject() {
+        this._projectService.openProject()
+          .then((project) => {
+            let projectNav = document.createElement('designer-project-nav');
+            projectNav.project = project;
+            this.$.projects.appendChild(projectNav);
+            // TODO: implement "close project"
+          })
+          .catch((reason) => {
+            console.warn('open project failed', reason);
           });
+      },
+
+      _onDesignerOpenFile(e) {
+        this.$.document.setDocument(e.detail.file, e.detail.href);
       },
 
       _onDesignerSelectElement(event, detail) {
@@ -347,10 +361,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _onDesignerCommand(event, command) {
         this.$.document.executeCommand(command);
-      },
-
-      _onFileDataLoad(e) {
-        this.$.document.setDocument(e.detail.file, e.detail.href);
       },
 
       _installPackageClick(e) {
