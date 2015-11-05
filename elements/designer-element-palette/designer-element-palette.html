@@ -87,7 +87,7 @@ define([
     properties: {
       builtIns: {
         type: Array,
-        value: () => ElementEditor.getEditors(),
+        value() { return ElementEditor.getEditors(); },
       },
     },
 

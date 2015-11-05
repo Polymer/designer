@@ -10,7 +10,7 @@ define(['hydrolysis'], (hydrolysis) => {
     properties: {
       instance: {
         type: Object,
-        value: () => { return new hydrolysis.FSResolver(); },
+        value() { return new hydrolysis.FSResolver(); },
       },
     },
 

@@ -50,7 +50,7 @@ define(['polymer-designer/dom-utils'], (domUtils) => {
        */
       _controller: {
         type: Object,
-        value: () => { return new OutlineTreeController(this); },
+        value() { return new OutlineTreeController(this); },
       },
 
       /**
