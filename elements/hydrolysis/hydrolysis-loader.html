@@ -11,7 +11,7 @@ define(['hydrolysis'], (hydrolysis) => {
       host: String,
       instance: {
         type: Object,
-        value: () => { return new hydrolysis.Loader(); },
+        value() { return new hydrolysis.Loader(); },
       }
     },
 
