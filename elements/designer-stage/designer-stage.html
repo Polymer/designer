@@ -475,6 +475,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         console.assert(this._operation == null);
         this._mouseDown = true;
 
+        if (!this.client) {
+          return;
+        }
+
         if (this._mode === 'text') {
           this.exitTextMode();
         }

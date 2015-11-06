@@ -184,16 +184,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </style>
 
   <template>
-    <div id="hidden-stuff" hidden="true">
-      <designer-document
-          id="document"
-          client-connection="[[clientConnection]]"
-          client="{{client}}"
-          document-info="{{documentInfo}}"
-          selection="{{selection}}"
-          analyzer="[[analyzer]]">
-      </designer-document>
-      <content></content>
+    <!-- elements projected here should hide themselves -->
+    <content></content>
+    <designer-document
+        id="document"
+        client-connection="[[clientConnection]]"
+        client="{{client}}"
+        document-info="{{documentInfo}}"
+        selection="{{selection}}"
+        analyzer="[[analyzer]]">
+    </designer-document>
     </div>
     <designer-mini-nav>
       <div class="small">
@@ -325,6 +325,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'designer-open-file': '_onDesignerOpenFile',
       },
 
+      created() {
+        Polymer.IronOverlayManager.ensureMinimumZ(1000);
+      },
+
       ready() {
         var queryParams = domUtils.parseQueryString(window.location.search);
         this._showEditors = queryParams.get('show-editors');
@@ -337,6 +341,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _openProject() {
         this._projectService.openProject()
           .then((project) => {
+            // console.log('project opened', project);
             let projectNav = document.createElement('designer-project-nav');
             projectNav.project = project;
             this.$.projects.appendChild(projectNav);

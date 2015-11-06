@@ -122,17 +122,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     ],
 
     _update() {
-      // console.log('_update', this.controller, this.data);
-      let iconName = this.controller.getIcon(this.data);
-      let isLeaf = this.controller.isLeaf(this.data);
-      let isLink = ('isLink' in this.controller) &&
-          this.controller.isLink(this.data);
-      if (isLink) {
-        this.$.name.classList.add('link');
+      if (this.controller) {
+        let iconName = this.controller.getIcon(this.data);
+        let isLeaf = this.controller.isLeaf(this.data);
+        let isLink = ('isLink' in this.controller) &&
+            this.controller.isLink(this.data);
+        if (isLink) {
+          this.$.name.classList.add('link');
+        }
+        this.icon = iconName || "editor:insert-drive-file";
+        this.expandIcon = isLeaf ? "designer-tree:blank" : "designer-tree:closed";
+        this.name = this.controller.getName(this.data);
+      } else {
+        this.$.name.classList.remove('link');
+        this.icon = null;
+        this.expandIcon = null;
+        this.name = null;
       }
-      this.icon = iconName || "editor:insert-drive-file";
-      this.expandIcon = isLeaf ? "designer-tree:blank" : "designer-tree:closed";
-      this.name = this.controller.getName(this.data);
     },
 
     _onClick(e) {
