@@ -1,0 +1,69 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../paper-styles/paper-styles.html">
+<link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../designer-app/designer-app.html">
+
+<link rel="import" href="../designer-project-service/designer-project-service-browser.html">
+<link rel="import" href="../hydrolysis/hydrolysis-analyzer.html">
+<link rel="import" href="../hydrolysis/hydrolysis-loader.html">
+<link rel="import" href="../hydrolysis/hydrolysis-xhr-resolver.html">
+
+<dom-module id="designer-app-browser">
+
+  <template>
+    <style>
+      :host {
+        --dark-primary-color: var(--paper-grey-900);
+        --default-primary-color: var(--paper-grey-800);
+        --light-primary-color: var(--paper-grey-500);
+        --accent-color: var(--paper-yellow-a200);
+        --primary-background-color: var(--paper-grey-800);
+        --primary-text-color: rgba(255, 255, 255, var(--dark-primary-opacity));
+        --secondary-text-color: rgba(255, 255, 255, var(--dark-secondary-opacity));
+        --disabled-text-color: rgba(255, 255, 255, var(--dark-disabled-opacity));
+        --divider-color: rgba(255, 255, 255, var(--dark-divider-opacity));
+        --paper-tooltip: {
+          background: black;
+          opacity: var(--dark-primary-opacity);
+        };
+        color: var(--primary-text-color);
+        box-sizing: border-box;
+        display: block;
+        height: 100%;
+        width: 100%;
+      }
+      designer-app {
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+
+    <designer-app>
+      <designer-project-service-browser></designer-project-service-browser>
+      <hydrolysis-analyzer>
+        <hydrolysis-loader>
+          <hydrolysis-xhr-resolver></hydrolysis-xhr-resolver>
+        </hydrolysis-loader>
+      </hydrolysis-analyzer>
+    </designer-app>
+  </template>
+
+  <script>
+    define(() => {
+      'use strict';
+
+      Polymer({
+        is: 'designer-app-browser',
+      });
+    });
+  </script>
+
+</dom-module>
