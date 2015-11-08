@@ -4,11 +4,7 @@
     <link rel="import" href="/components/imd/imd.html">
     <link rel="import" href="/components/polymer-designer/src/polyfills/polyfills.html">
     <link rel="import" href="/components/font-roboto/roboto.html">
-    <link rel="import" href="/components/polymer-designer/elements/designer-app/designer-app.html">
-    <link rel="import" href="/components/polymer-designer/elements/designer-files-demos/designer-files-demos.html">
-    <link rel="import" href="/components/polymer-designer/elements/hydrolysis/hydrolysis-analyzer.html">
-    <link rel="import" href="/components/polymer-designer/elements/hydrolysis/hydrolysis-loader.html">
-    <link rel="import" href="/components/polymer-designer/elements/hydrolysis/hydrolysis-xhr-resolver.html">
+    <link rel="import" href="/components/polymer-designer/elements/designer-app-browser/designer-app-browser.html">
     <style>
       html, body {
         margin: 0;
@@ -16,20 +12,9 @@
         height: 100%;
         font-family: 'RobotoDraft', sans-serif;
       }
-      designer-app {
-        height: 100%;
-        width: 100%;
-      }
     </style>
   </head>
   <body>
-    <designer-app>
-      <designer-files-demos></designer-files-demos>
-      <hydrolysis-analyzer>
-        <hydrolysis-loader>
-          <hydrolysis-xhr-resolver></hydrolysis-xhr-resolver>
-        </hydrolysis-loader>
-      </hydrolysis-analyzer>
-    </designer-app>
+    <designer-app-browser></designer-app-browser>
   </body>
 </html>

@@ -8,6 +8,8 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
+'use strict';
+
 var express = require('express');
 var path = require('path');
 var send = require('send');
@@ -42,8 +44,24 @@ function startServer(serverPort, filesPort) {
 
   app.use('/components', components);
 
+  var polyserve = require('polyserve');
+
+  // var filesDir = path.normalize(path.join(__dirname, '../../demo'));
+  var bowerDir = 'bower_components';
+  // var packageName = 'polymer-designer-demos';
+  // var componentDir = path.join(filesDir, bowerDir);
+
+  // match /packageName or /packageName/.*
+  // var packageRegex = new RegExp('/' + packageName + '(?=$|/(.*))');
+
+  var componentHeaders = {
+    'Access-Control-Allow-Origin': '*',
+  };
+
+  app.use('/files', polyserve.makeApp(bowerDir, null, componentHeaders, './demo'));
+
   var server = app.listen(designerConfig.server.port);
-  files.app.listen(designerConfig.files.port);
+  // files.app.listen(designerConfig.files.port);
 }
 
 module.exports = {

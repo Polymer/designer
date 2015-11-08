@@ -20,11 +20,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </style>
 
   <template>
-    <designer-tree-item
-      controller="[[controller]]"
-      data="[[data]]"
-      noicon="[[noicon]]">
-    </designer-tree-item>
+    <template is="dom-repeat" items="[[_data]]">
+      <designer-tree-item
+          data="[[item]]"
+          controller="[[controller]]"
+          noicon="[[noicon]]">
+      </designer-tree-item>
+    </template>
   </template>
 
 </dom-module>
@@ -47,15 +49,45 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        * getChildren(node) : Promise<Array<Object>>
        * isLeaf(node) : Boolean
        */
-      controller: Object,
+      controller: {
+        type: Object,
+        observer: '_controllerChanged',
+      },
 
-      data: Object,
+      hideRoot: {
+        type: Boolean,
+        value: false,
+      },
+
+      _data: {
+        type: Array,
+      },
 
       noicon: {
         type: Boolean,
         value: false,
       },
 
+    },
+
+    // It'd be nice if this was a computed value on `controller`, but it's async
+    // and Polymer has no way of returning a Promise from a computed function.
+    _controllerChanged() {
+      // console.log('_controllerChanged', this.controller);
+      if (this.controller) {
+        this.controller.getInfo()
+          .then((root) => {
+            if (this.hideRoot) {
+              return this.controller.getChildren(root)
+                .then((children) => { this._data = children; });
+            } else {
+              this._data = [root];
+            }
+          })
+
+      } else {
+        this._data = null;
+      }
     },
 
   });

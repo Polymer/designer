@@ -9,11 +9,8 @@
       work.
     -->
     <link rel="import" href="bower_components/polymer-designer/src/polyfills/polyfills.html">
-    <link rel="import" href="bower_components/polymer-designer/elements/designer-files-node/designer-files-node.html">
-    <link rel="import" href="bower_components/polymer-designer/elements/designer-app/designer-app.html">
-    <link rel="import" href="bower_components/polymer-designer/elements/hydrolysis/hydrolysis-analyzer.html">
-    <link rel="import" href="bower_components/polymer-designer/elements/hydrolysis/hydrolysis-loader.html">
-    <link rel="import" href="bower_components/polymer-designer/elements/hydrolysis/hydrolysis-fs-resolver.html">
+    <link rel="import" href="bower_components/polymer-designer/elements/designer-app-electron/designer-app-electron.html">
+
     <style>
       html, body {
         margin: 0;
@@ -21,20 +18,9 @@
         height: 100%;
         font-family: 'RobotoDraft', sans-serif;
       }
-      designer-app {
-        height: 100%;
-        width: 100%;
-      }
     </style>
   </head>
   <body>
-    <designer-app>
-      <designer-files-node files></designer-files-node>
-      <hydrolysis-analyzer>
-        <hydrolysis-loader>
-          <hydrolysis-fs-resolver></hydrolysis-fs-resolver>
-        </hydrolysis-loader>
-      </hydrolysis-analyzer>
-    </designer-app>
+    <designer-app-electron></designer-app-electron>
   </body>
 </html>

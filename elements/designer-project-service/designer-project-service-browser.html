@@ -1,0 +1,199 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../../paper-dialog/paper-dialog.html">
+<link rel="import" href="../../../paper-dialog-scrollable/paper-dialog-scrollable.html">
+
+<dom-module id="designer-project-service-browser">
+
+  <template>
+    <style>
+      #files {
+        overflow: auto;
+        width: 480px;
+        height: 480px;
+      }
+    </style>
+    <paper-dialog id="dialog" on-iron-overlay-closed="_onDialogClosed">
+      <h2>Open Project</h2>
+      <div id="files">
+        <designer-tree controller="[[_controller]]">
+        </designer-tree>
+      </div>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+
+  <script>
+  define(['polymer-designer/async'], (async) => {
+    'use strict';
+
+    Polymer({
+      is: 'designer-project-service-browser',
+
+      properties: {
+        _controller: Object,
+      },
+
+      attached() {
+        this.fire('designer-project-service-ready');
+      },
+
+      /**
+       * @returns {Promise<Project>}
+       */
+      openProject() {
+        this._openProjectDeferred = new async.Deferred();
+        this._controller =
+            new OpenProjectTreeController('http://localhost:8080/api/files/');
+        this.$.dialog.open();
+
+        let _finally = (r) => {
+          this._openProjectDeferred = null;
+          this._controller = null;
+          return r;
+        };
+
+        return Promise.race([
+          this._openProjectDeferred.promise,
+          this._controller.projectOpened.then((projectFolder) => {
+            this.$.dialog.close();
+            let project = new BrowserProject(
+                'http://localhost:8080/api/files/',
+                'http://localhost:8080/files/polymer-designer-demos/',
+                projectFolder);
+            return project;
+          }),
+        ]).then(_finally, _finally);
+      },
+
+      _onDialogClosed(e) {
+        if (this._openProjectDeferred) {
+          this._openProjectDeferred.reject();
+        }
+      },
+
+    }); // designer-project-service-browser
+
+    function getFilename(path) {
+      let splitPath = path.split('/');
+      return splitPath[splitPath.length - 1];
+    }
+
+    class ServerFilesTreeController {
+
+      constructor(lsRoot) {
+        if (new.target === ServerFilesTreeController) {
+          throw new TypeError('Illegal constructor call: abstract class');
+        }
+        this._api =
+        this._lsRoot = lsRoot;
+      }
+
+      getFullPath(path) {
+        return [this._lsRoot, path].join('/');
+      }
+
+      getInfo(path) {
+        return fetch(this.getFullPath(path || '')).then((r) => r.json());
+      }
+
+      getIcon(node) {
+        return node.isFile ? 'editor:insert-drive-file' : 'icons:folder';
+      }
+
+      getName(node) {
+        return node.path ? getFilename(node.path) : "Demos";
+      }
+
+      getChildren(node) {
+        return (node.isFile)
+          ? Promise.resolve(null)
+          : fetch(this.getFullPath(node.path))
+              .then((response) => response.json())
+              .then((json) => json.files);
+      }
+
+      isLeaf(node) {
+        return node.isFile;
+      }
+
+      isLink(node) {
+        return true;
+      }
+
+    } // class ServerFilesTreeController
+
+    class OpenProjectTreeController extends ServerFilesTreeController {
+
+      constructor(lsRoot) {
+        super(lsRoot);
+        this._projectOpenedDeferred = new async.Deferred();
+        this.projectOpened = this._projectOpenedDeferred.promise;
+      }
+
+      isLink(node) {
+        return !node.isFile;
+      }
+
+      onClick(node, event) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        this._projectOpenedDeferred.resolve(node.path);
+      }
+    } // class OpenProjectTreeController
+
+
+    class BrowserProject extends ServerFilesTreeController {
+
+      constructor(lsRoot, filesRoot, projectPath) {
+        super(lsRoot);
+        this._filesRoot = filesRoot;
+        this.projectPath = projectPath;
+      }
+
+      getFullPath(path) {
+        return [this._lsRoot, path].join('/');
+      }
+
+      getInfo(path) {
+        return fetch(this.getFullPath(path || this.projectPath)).then((r) => r.json());
+      }
+
+      loadFile(path) {
+        return fetch([this._filesRoot, path].join('/'))
+          .then((response) => response.text())
+          .then((file) => ({
+            file: file,
+            href: this._filesRoot + path,
+          }));
+      }
+
+      isLink(node) {
+        return node.isFile;
+      }
+
+      onClick(node, event) {
+        this.loadFile(node.path).then((fileData) => {
+          event.target.dispatchEvent(
+            new CustomEvent('designer-open-file', {
+              detail: fileData,
+              bubbles: true,
+            }));
+        });
+      }
+    } // class BrowserProject
+
+  });
+  </script>
+</dom-module>
