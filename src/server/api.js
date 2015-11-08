@@ -25,15 +25,9 @@ function makeApiApp(designerConfig) {
     res.send('OK');
   });
 
-  // app.get('/fileService/config', (req, res) => {
-  //   res.json({
-  //     port: designerConfig.files.port
-  //   });
-  // });
-
   let demoDir = path.normalize(path.join(__dirname, '../../demo'));
 
-  app.use('/files', files.makeFilesApp(demoDir));
+  app.use('/files', files.makeFileListingApp(demoDir));
 
   return app;
 }

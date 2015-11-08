@@ -15,26 +15,10 @@ var fs = require('fs');
 var http = require('http');
 var path = require('path');
 var parseUrl = require('url').parse;
-// var polyserve = require('polyserve');
-var send = require('send');
 
-// var filesDir = path.normalize(path.join(__dirname, '../../demo'));
-// var bowerDir = 'bower_components';
-// var packageName = 'polymer-designer-demos';
-// var componentDir = path.join(filesDir, bowerDir);
-
-// match /packageName or /packageName/.*
-// var packageRegex = new RegExp('/' + packageName + '(?=$|/(.*))');
-
-function makeFilesApp(filesDir) {
+function makeFileListingApp(filesDir) {
 
   let app = express();
-
-  // var componentHeaders = {
-  //   'Access-Control-Allow-Origin': '*',
-  // };
-
-  // app.use('/files', polyserve.makeApp(bowerDir, null, componentHeaders, './demo'));
 
   app.get('/*', (req, res) => {
 
@@ -58,17 +42,8 @@ function makeFilesApp(filesDir) {
           let requestedChildPath = path.join(requestedPath, f);
           return statToJson(requestedChildPath, fs.lstatSync(childPath));
         });
-        // // add the root package to the top level
-        // if (requestedPath === '/') {
-        //   var f = 'polymer-designer-demos';
-        //   var childPath = path.join(filePath, f);
-        //   var requestedChildPath = path.join(requestedPath, f);
-        //   statJson.files.push(
-        //       statToJson(requestedChildPath, fs.lstatSync(filesDir)));
-        // }
       }
       res.type('json');
-      // res.append('Access-Control-Allow-Origin', '*');
       res.send(statJson);
     });
 
@@ -77,15 +52,13 @@ function makeFilesApp(filesDir) {
   return app;
 }
 
-function statToJson(path, stat) {
-  return {
-    path: path,
-    isDirectory: stat.isDirectory(),
-    isFile: stat.isFile(),
-    isLink: stat.isSymbolicLink(),
-  };
-}
+let statToJson = (path, stat) => ({
+  path: path,
+  isDirectory: stat.isDirectory(),
+  isFile: stat.isFile(),
+  isLink: stat.isSymbolicLink(),
+});
 
 module.exports = {
-  makeFilesApp: makeFilesApp,
+  makeFileListingApp,
 };
