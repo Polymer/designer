@@ -53,11 +53,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        */
       openProject() {
         this._openProjectDeferred = new async.Deferred();
-        this._controller = new OpenProjectTreeController('http://localhost:8080/api/files/');
+        this._controller =
+            new OpenProjectTreeController('http://localhost:8080/api/files/');
         this.$.dialog.open();
 
         let _finally = (r) => {
-          console.log('finally');
           this._openProjectDeferred = null;
           this._controller = null;
           return r;
@@ -66,9 +66,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return Promise.race([
           this._openProjectDeferred.promise,
           this._controller.projectOpened.then((projectFolder) => {
-            console.log('projectFolder', projectFolder);
             this.$.dialog.close();
-            // TODO: create new BrowserProject
             let project = new BrowserProject(
                 'http://localhost:8080/api/files/',
                 'http://localhost:8080/files/polymer-designer-demos/',
@@ -79,7 +77,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onDialogClosed(e) {
-        console.log('_onDialogClosed');
         if (this._openProjectDeferred) {
           this._openProjectDeferred.reject();
         }
@@ -107,7 +104,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       getInfo(path) {
-        console.log('ServerFilesTreeController.getInfo', this._lsRoot, path);
         return fetch(this.getFullPath(path || '')).then((r) => r.json());
       }
 
@@ -116,11 +112,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       getName(node) {
-        return getFilename(node.path);
+        return node.path ? getFilename(node.path) : "Demos";
       }
 
       getChildren(node) {
-        console.log('ServerFilesTreeController.getChildren', this._lsRoot, node.path);
         return (node.isFile)
           ? Promise.resolve(null)
           : fetch(this.getFullPath(node.path))
