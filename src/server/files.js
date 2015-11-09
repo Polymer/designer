@@ -16,6 +16,11 @@ var http = require('http');
 var path = require('path');
 var parseUrl = require('url').parse;
 
+/**
+ * Simple file listing service.
+ *
+ * @param {string} filesDir The root directory to list files from
+ */
 function makeFileListingApp(filesDir) {
 
   let app = express();
@@ -36,12 +41,13 @@ function makeFileListingApp(filesDir) {
       let statJson = statToJson(requestedPath, stat);
 
       if (stat.isDirectory()) {
-        let files = fs.readdirSync(filePath);
-        statJson.files = files.map((f) => {
-          let childPath = path.join(filePath, f);
-          let requestedChildPath = path.join(requestedPath, f);
-          return statToJson(requestedChildPath, fs.lstatSync(childPath));
-        });
+        statJson.files = fs.readdirSync(filePath)
+          .filter((f) => !f.startsWith('.') && f !== 'bower_components')
+          .map((f) => {
+            let childPath = path.join(filePath, f);
+            let requestedChildPath = path.join(requestedPath, f);
+            return statToJson(requestedChildPath, fs.lstatSync(childPath));
+          });
       }
       res.type('json');
       res.send(statJson);
