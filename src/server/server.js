@@ -10,23 +10,23 @@
 
 'use strict';
 
-var api = require('./api');
-var components = require('./components');
-var express = require('express');
-var files = require('./files');
-var path = require('path');
-var polyserve = require('polyserve');
-var send = require('send');
+let api = require('./api');
+let components = require('./components');
+let express = require('express');
+let files = require('./files');
+let path = require('path');
+let polyserve = require('polyserve');
+let send = require('send');
 
-var bowerDir = 'bower_components';
+let bowerDir = 'bower_components';
 
-var componentHeaders = {
+let componentHeaders = {
   'Access-Control-Allow-Origin': '*',
 };
 
 function startServer(serverPort, filesPort) {
-  var app = express();
-  var designerConfig;
+  let app = express();
+  let designerConfig;
 
   serverPort = parseInt(serverPort || 8080, 10);
   filesPort = parseInt(filesPort || (serverPort + 1), 10);
@@ -40,8 +40,8 @@ function startServer(serverPort, filesPort) {
     }
   };
 
-  console.log('Starting Polymer Designer Server on port ' + designerConfig.server.port);
-  console.log('Serving files on port ' + designerConfig.files.port);
+  console.log(`Starting Polymer Designer Server on port ${designerConfig.server.port}`);
+  console.log(`Serving files on port ${designerConfig.files.port}`);
 
   app.get('/', (req, res) => {
     send(req, path.join(__dirname, 'index.html')).pipe(res);

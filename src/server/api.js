@@ -8,15 +8,18 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
- 'use strict';
+'use strict';
 
 let bower = require('../bower/bower.js');
 let express = require('express');
 let files = require('./files');
 let path = require('path');
 
+/**
+ * Creates an Express app to handle Designer's server API.
+ */
 function makeApiApp(designerConfig) {
-  var app = express();
+  let app = express();
 
   app.post('/bowerInstall', (req, res) => {
     console.log('starting bower install');

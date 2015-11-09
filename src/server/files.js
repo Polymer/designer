@@ -10,11 +10,11 @@
 
 'use strict';
 
-var express = require('express');
-var fs = require('fs');
-var http = require('http');
-var path = require('path');
-var parseUrl = require('url').parse;
+let express = require('express');
+let fs = require('fs');
+let http = require('http');
+let path = require('path');
+let parseUrl = require('url').parse;
 
 /**
  * Simple file listing service.

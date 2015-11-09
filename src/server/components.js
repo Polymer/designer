@@ -8,18 +8,21 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-var express = require('express');
-var fs = require('fs');
-var path = require('path');
-var polyserve = require('polyserve');
-var send = require('send');
-var frameScript = require('../../tools/frame-script');
+'use strict';
 
-var bowerComponentDir = 'bower_components';
-var componentHeaders = {
+let express = require('express');
+let frameScript = require('../../tools/frame-script');
+let fs = require('fs');
+let path = require('path');
+let polyserve = require('polyserve');
+let send = require('send');
+
+let bowerComponentDir = 'bower_components';
+let componentHeaders = {
   'Access-Control-Allow-Origin': '*'
 };
-var app = express();
+
+let app = express();
 
 // dynamically build frame.js for edit-refresh goodness
 app.get('/polymer-designer/elements/designer-document/frame.js',
@@ -35,9 +38,8 @@ app.use('/', polyserve.makeApp(bowerComponentDir, null, componentHeaders));
  * development.
  */
 function buildFrameScript() {
-  var files = frameScript.dependencies.map((p) => {
-    return fs.readFileSync(p, {encoding: 'utf-8'});
-  });
+  var files = frameScript.dependencies.map(
+      (p) => fs.readFileSync(p, {encoding: 'utf-8'}));
   return frameScript.buildFrameScript(files);
 }
 
