@@ -47,11 +47,15 @@ function startServer(serverPort, filesPort) {
     send(req, path.join(__dirname, 'index.html')).pipe(res);
   });
 
-  app.use('/api', api(designerConfig));
+  app.use('/api', api.makeApiApp());
 
   app.use('/components', components);
 
-  app.use('/files', polyserve.makeApp(bowerDir, null, componentHeaders, './demo'));
+  app.use('/files', polyserve.makeApp({
+    componentDir: bowerDir,
+    headers: componentHeaders,
+    root: './demo',
+  }));
 
   app.listen(designerConfig.server.port);
 }

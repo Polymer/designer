@@ -15,6 +15,23 @@ let fs = require('fs');
 let http = require('http');
 let path = require('path');
 let parseUrl = require('url').parse;
+let polyserve = require('polyserve');
+
+/**
+ *
+ */
+function makeFileServingApp(filesDir) {
+  let app = express();
+  app.use('/files', polyserve.makeApp({
+    componentDir: 'bower_components',
+    root: filesDir,
+    packageName: '__project__',
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
+  }));
+  return app;
+}
 
 /**
  * Simple file listing service.
@@ -67,4 +84,5 @@ let statToJson = (path, stat) => ({
 
 module.exports = {
   makeFileListingApp,
+  makeFileServingApp,
 };

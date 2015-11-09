@@ -31,7 +31,10 @@ app.get('/polymer-designer/elements/designer-document/frame.js',
   }
 );
 
-app.use('/', polyserve.makeApp(bowerComponentDir, null, componentHeaders));
+app.use('/', polyserve.makeApp({
+  componentDir: bowerComponentDir,
+  componentHeaders: componentHeaders,
+}));
 
 /**
  * Dynamically build the frame.js script so that we have edit-refresh
