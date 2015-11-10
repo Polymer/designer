@@ -20,7 +20,7 @@
     "hydrolysis": "^1.0.0",
     "minimist": "^1.1.1",
     "parse5": "^1.4.0",
-    "polyserve": "^0.4.0",
+    "polyserve": "^0.5.0",
     "q-io": "^1.13.1",
     "resolve": "^1.0.0",
     "send": "^0.10.1",
