@@ -36,7 +36,6 @@ function makeApiApp() {
 
     // create new file and ls server
     let projectDirectory = req.query.path;
-    console.log('opening project at', projectDirectory);
     let fullPath = path.join(demoDir, projectDirectory);
 
     let filesApp = files.makeFileServingApp(fullPath);
