@@ -10,60 +10,29 @@
 
 'use strict';
 
-var express = require('express');
-var path = require('path');
-var send = require('send');
-var files = require('./files');
-var api = require('./api');
-var components = require('./components');
+let api = require('./api');
+let components = require('./components');
+let express = require('express');
+let path = require('path');
+let send = require('send');
 
 function startServer(serverPort, filesPort) {
-  var app = express();
-  var designerConfig;
-
+  let app = express();
   serverPort = parseInt(serverPort || 8080, 10);
-  filesPort = parseInt(filesPort || (serverPort + 1), 10);
 
-  designerConfig = {
-    server: {
-      port: serverPort
-    },
-    files: {
-      port: filesPort
-    }
-  };
-
-  console.log('Starting Polymer Designer Server on port ' + designerConfig.server.port);
-  console.log('Serving files on port ' + designerConfig.files.port);
+  console.log(`Starting Polymer Designer Server on port ${serverPort}`);
 
   app.get('/', (req, res) => {
     send(req, path.join(__dirname, 'index.html')).pipe(res);
   });
 
-  app.use('/api', api(designerConfig));
+  app.use('/api', api.makeApiApp());
 
   app.use('/components', components);
 
-  var polyserve = require('polyserve');
-
-  // var filesDir = path.normalize(path.join(__dirname, '../../demo'));
-  var bowerDir = 'bower_components';
-  // var packageName = 'polymer-designer-demos';
-  // var componentDir = path.join(filesDir, bowerDir);
-
-  // match /packageName or /packageName/.*
-  // var packageRegex = new RegExp('/' + packageName + '(?=$|/(.*))');
-
-  var componentHeaders = {
-    'Access-Control-Allow-Origin': '*',
-  };
-
-  app.use('/files', polyserve.makeApp(bowerDir, null, componentHeaders, './demo'));
-
-  var server = app.listen(designerConfig.server.port);
-  // files.app.listen(designerConfig.files.port);
+  app.listen(serverPort);
 }
 
 module.exports = {
-  startServer: startServer
+  startServer,
 };

@@ -10,31 +10,37 @@
 
 'use strict';
 
-var express = require('express');
-var fs = require('fs');
-var http = require('http');
-var path = require('path');
-var parseUrl = require('url').parse;
-// var polyserve = require('polyserve');
-var send = require('send');
+let express = require('express');
+let fs = require('fs');
+let http = require('http');
+let path = require('path');
+let parseUrl = require('url').parse;
+let polyserve = require('polyserve');
 
-// var filesDir = path.normalize(path.join(__dirname, '../../demo'));
-// var bowerDir = 'bower_components';
-// var packageName = 'polymer-designer-demos';
-// var componentDir = path.join(filesDir, bowerDir);
+/**
+ *
+ */
+function makeFileServingApp(filesDir) {
+  let app = express();
+  app.use('/files', polyserve.makeApp({
+    componentDir: 'bower_components',
+    root: filesDir,
+    packageName: '__project__',
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
+  }));
+  return app;
+}
 
-// match /packageName or /packageName/.*
-// var packageRegex = new RegExp('/' + packageName + '(?=$|/(.*))');
-
-function makeFilesApp(filesDir) {
+/**
+ * Simple file listing service.
+ *
+ * @param {string} filesDir The root directory to list files from
+ */
+function makeFileListingApp(filesDir) {
 
   let app = express();
-
-  // var componentHeaders = {
-  //   'Access-Control-Allow-Origin': '*',
-  // };
-
-  // app.use('/files', polyserve.makeApp(bowerDir, null, componentHeaders, './demo'));
 
   app.get('/*', (req, res) => {
 
@@ -52,23 +58,15 @@ function makeFilesApp(filesDir) {
       let statJson = statToJson(requestedPath, stat);
 
       if (stat.isDirectory()) {
-        let files = fs.readdirSync(filePath);
-        statJson.files = files.map((f) => {
-          let childPath = path.join(filePath, f);
-          let requestedChildPath = path.join(requestedPath, f);
-          return statToJson(requestedChildPath, fs.lstatSync(childPath));
-        });
-        // // add the root package to the top level
-        // if (requestedPath === '/') {
-        //   var f = 'polymer-designer-demos';
-        //   var childPath = path.join(filePath, f);
-        //   var requestedChildPath = path.join(requestedPath, f);
-        //   statJson.files.push(
-        //       statToJson(requestedChildPath, fs.lstatSync(filesDir)));
-        // }
+        statJson.files = fs.readdirSync(filePath)
+          .filter((f) => !f.startsWith('.') && f !== 'bower_components')
+          .map((f) => {
+            let childPath = path.join(filePath, f);
+            let requestedChildPath = path.join(requestedPath, f);
+            return statToJson(requestedChildPath, fs.lstatSync(childPath));
+          });
       }
       res.type('json');
-      // res.append('Access-Control-Allow-Origin', '*');
       res.send(statJson);
     });
 
@@ -77,15 +75,14 @@ function makeFilesApp(filesDir) {
   return app;
 }
 
-function statToJson(path, stat) {
-  return {
-    path: path,
-    isDirectory: stat.isDirectory(),
-    isFile: stat.isFile(),
-    isLink: stat.isSymbolicLink(),
-  };
-}
+let statToJson = (path, stat) => ({
+  path: path,
+  isDirectory: stat.isDirectory(),
+  isFile: stat.isFile(),
+  isLink: stat.isSymbolicLink(),
+});
 
 module.exports = {
-  makeFilesApp: makeFilesApp,
+  makeFileListingApp,
+  makeFileServingApp,
 };
