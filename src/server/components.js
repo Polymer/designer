@@ -34,6 +34,7 @@ app.get('/polymer-designer/elements/designer-document/frame.js',
 app.use('/', polyserve.makeApp({
   componentDir: bowerComponentDir,
   componentHeaders: componentHeaders,
+  root: process.cwd(),
 }));
 
 /**
