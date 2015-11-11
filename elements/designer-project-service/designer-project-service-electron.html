@@ -17,8 +17,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     let fs = require('q-io/fs');
     let fsSync = require('fs');
     let pathLib = require('path');
-    var remote = require('remote');
-    var dialog = remote.require('dialog');
+    let project = require('./src/server/project');
+    let remote = require('remote');
+
+    let dialog = remote.require('dialog');
 
     Polymer({
       is: 'designer-project-service-electron',
@@ -36,7 +38,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             properties: ['openDirectory', 'createDirectory'],
           });
           if (directories && directories.length === 1) {
-            resolve(new ElectronProject(directories[0]));
+            let directory = directories[0];
+            project.makeProjectServer(directory)
+              .then((server) => {
+                resolve(new ElectronProject(directory, server));
+              });
           } else {
             reject();
           }
@@ -52,17 +58,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     class ElectronProject {
 
-      constructor(rootPath) {
+      constructor(rootPath, server) {
         this._rootPath = rootPath;
+        this._server = server;
       }
 
-      getFullPath(path) {
+      getInfoPath(path) {
         return pathLib.join(this._rootPath, path);
       }
 
       getInfo(path) {
         path = path || '';
-        return fs.stat(this.getFullPath(path))
+        return fs.stat(this.getInfoPath(path))
           .then((response) => {
             response.path = path;
             return response;
@@ -70,7 +77,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       loadFile(path) {
-        return fs.read(path);
+        let port = this._server.address().port;
+        let filePath = `http://localhost:${port}/files/__project__/${path}`;
+        return fetch(filePath)
+          .then((response) => response.text())
+          .then((file) => ({
+            file: file,
+            href: filePath,
+          }));
       }
 
       getIcon(node) {
@@ -78,14 +92,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       getName(node) {
-        return getFilename(this.getFullPath(node.path));
+        return getFilename(this.getInfoPath(node.path));
       }
 
       getChildren(node) {
         if (node.isFile()) {
           return Promise.resolve(null);
         }
-        return fs.list(this.getFullPath(node.path)).then((paths) =>
+        return fs.list(this.getInfoPath(node.path)).then((paths) =>
             Promise.all(paths
                 .filter((path) => !path.startsWith('.'))
                 .map((path) => this.getInfo(pathLib.join(node.path, path)))));
@@ -100,15 +114,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       onClick(node, event) {
-        let fullPath = this.getFullPath(node.path);
-        this.loadFile(fullPath)
+        this.loadFile(node.path)
           .then((fileData) => {
             event.target.dispatchEvent(
               new CustomEvent('designer-open-file', {
-                detail: {
-                  file: fileData,
-                  href: fullPath,
-                },
+                detail: fileData,
                 bubbles: true,
               }));
           });
