@@ -82,7 +82,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               new ClientConnection(window, this._frame.contentWindow);
         });
 
-        this._frame.src = getDocumentUrl(this.documentInfo.domDocument);
+        // TODO(justinfagnani): don't fetch document 3 times!
+        this._frame.src = this.documentInfo.url;
       },
 
     });

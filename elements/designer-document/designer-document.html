@@ -8,7 +8,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../../../polymer/polymer.html">
-<link rel="import" href="../../../core-asset/core-asset.html">
 <link rel="import" href="../../src/commands/commands.html">
 <link rel="import" href="../../src/css/css.html">
 <link rel="import" href="../../src/editors/editors.html">
@@ -31,8 +30,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       box-sizing: border-box;
     }
   </style>
-
-  <core-asset id="frame-script" href="frame.js"></core-asset>
 
 </dom-module>
 
@@ -108,79 +105,66 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       /**
-       * Sets the current document and injects the message handler script.
+       * Sets the current document.
        *
        * @param {string} content The document source.
        * @param {string} url The document location.
-       * @returns {Promise<Document>} The modified document.
+       * @returns {Promise<DocumentInfo>}
        */
       setDocument(content, url, useAnalyzer) {
 
-        let createDocument = this._frameScriptAsset.load().then((frameScript) => {
-          let domDocument = createDomDocument(content, frameScript, url);
-          let domDocumentElement = domUtils.getDocumentElement(domDocument);
+        let domDocument = document.implementation.createHTMLDocument();
+        let domDocumentElement = domUtils.getDocumentElement(domDocument);
+        domDocumentElement.innerHTML = content;
+        // TODO: copy attributes on document element
 
-          this._domCommandApplier = new DomCommandApplier(domDocument);
-          let splitUrl = url == null ? null : url.split('/');
-          let filename = url == null ? null : splitUrl[splitUrl.length - 1];
+        this._domCommandApplier = new DomCommandApplier(domDocument);
+        let splitUrl = url == null ? null : url.split('/');
+        let filename = url == null ? null : splitUrl[splitUrl.length - 1];
 
-          // do css!
-          let styles = this._parseStyles(domDocument);
+        // do css!
+        let styles = this._parseStyles(domDocument);
 
-          return {
-            domDocument,
-            domDocumentElement,
-            source: content,
-            url,
-            filename,
-            styles,
-          };
-        });
+        let documentInfo = {
+          domDocument,
+          domDocumentElement,
+          source: content,
+          url,
+          filename,
+          styles,
+        };
 
-        if (useAnalyzer === undefined || useAnalyzer === true) {
-          createDocument = Promise.all([
-              createDocument,
-              this.analyzer.load(url)
-          ]).then((results) => {
-            let documentInfo = results[0];
-            let analyzedDocument = results[1];
-
-            return Promise.all([
-              analyzedDocument.htmlLoaded,
-              analyzedDocument.metadataLoaded,
-            ]).then((results) => {
-              let parsedDocument = results[0];
-              let metadata = results[1];
-
-              let astDocument = parsedDocument.ast;
-              let astDocumentElement = domUtils.getDocumentElement(astDocument);
-
-              // assign sequential IDs to all elements in the document
-              this._nextSourceId = 1;
-              dom5.query(astDocument, (node) => {
-                dom5.setAttribute(node, sourceIdAttribute, `${this._nextSourceId++}`);
-              });
-
-              let elements = metadata.elements;
-              let textContent = dom5.serialize(astDocument);
-              this._parsedCommandApplier =
-                  new ParsedHtmlCommandApplier(astDocument);
-
-              documentInfo.astDocument = astDocument;
-              documentInfo.astDocumentElement = astDocumentElement;
-              documentInfo.elements = elements;
-              documentInfo.textContent = textContent;
-              documentInfo.analyzer = this.analyzer;
-
-              return documentInfo;
-            });
-
-          });
+        if (useAnalyzer !== undefined && useAnalyzer !== true) {
+          this.documentInfo = documentInfo;
+          return Promise.resolve(documentInfo);
         }
 
-        return createDocument.then((documentInfo) => {
-          this.documentInfo = documentInfo;
-        });
+        return this.analyzer.load(url)
+          .then((analyzedDocument) => Promise.all([
+              analyzedDocument.htmlLoaded,
+              analyzedDocument.metadataLoaded,
+            ]))
+          .then((results) => {
+            let parsedDocument = results[0];
+            let metadata = results[1];
+
+            let astDocument = parsedDocument.ast;
+            let astDocumentElement = domUtils.getDocumentElement(astDocument);
+
+            let elements = metadata.elements;
+            let textContent = dom5.serialize(astDocument);
+            this._parsedCommandApplier =
+                new ParsedHtmlCommandApplier(astDocument);
+
+            documentInfo.astDocument = astDocument;
+            documentInfo.astDocumentElement = astDocumentElement;
+            documentInfo.elements = elements;
+            documentInfo.textContent = textContent;
+            documentInfo.analyzer = this.analyzer;
+
+            this.documentInfo = documentInfo;
+            return documentInfo;
+          });
       },
 
       /**
@@ -301,65 +285,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
       },
 
-      get _frameScriptAsset() {
-        return (document
-            .createElement('dom-module')
-            .import('designer-document', '#frame-script'));
-      },
-
     });
-
-    /**
-     * @returns {ScriptElement} a new `<script>` element with the content of
-     * [frameScript].
-     */
-    function createFrameScriptElement(frameScript, doc) {
-      let frameScriptElement = doc.createElement('script');
-      frameScriptElement.textContent = frameScript;
-      frameScriptElement.setAttribute('designer-exclude', '');
-      return frameScriptElement
-    }
-
-    /**
-     * @returns a <base> tag with the given [href].
-     */
-    function createBase(href, doc) {
-      let base = doc.createElement('base');
-      base.setAttribute('href', href);
-      base.setAttribute('designer-exclude', '');
-      return base;
-    }
-
-    /**
-     * @returns {HTMLDocument} a HTML document with the given [content].
-     * A `<script>` tag with content from [framescript], and a `<base>` tag
-     * with `href` set to [baseUri] are injected into the document's `<head>`.
-     */
-    function createDomDocument(content, frameScript, baseUri) {
-      let doc = document.implementation.createHTMLDocument();
-      doc.documentElement.innerHTML = content;
-
-      _addDomSourceIds(doc, doc.documentElement, 1);
-
-      doc.head.insertBefore(createFrameScriptElement(frameScript, doc),
-          doc.head.firstChild);
-
-      // data URIs need a base to be able to resolve relative URLs
-      doc.head.insertBefore(createBase(baseUri, doc), doc.head.firstChild);
-      return doc;
-    }
-
-    function _addDomSourceIds(doc, startNode, nextId) {
-      let iterator = doc.createNodeIterator(startNode, NodeFilter.SHOW_ELEMENT);
-      let node;
-      while(node = iterator.nextNode()) {
-        node.setAttribute(sourceIdAttribute, nextId++);
-        if (node.tagName.toLowerCase() == 'template') {
-          nextId = _addDomSourceIds(node.content.ownerDocument, node.content, nextId);
-        }
-      }
-      return nextId;
-    }
 
   });
 </script>
