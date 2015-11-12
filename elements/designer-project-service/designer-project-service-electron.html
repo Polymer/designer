@@ -78,7 +78,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       loadFile(path) {
         let port = this._server.address().port;
-        let filePath = `http://localhost:${port}/files/__project__/${path}`;
+        let filePath = `http://localhost:${port}/files/__project__/${path}?inject_frame_script=true`;
         return fetch(filePath)
           .then((response) => response.text())
           .then((file) => ({

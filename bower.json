@@ -3,7 +3,6 @@
   "version": "0.8.0",
   "private": true,
   "dependencies": {
-    "core-asset": "PolymerLabs/core-asset#^0.3.0",
     "font-roboto": "PolymerLabs/font-roboto-static",
     "imd": "PolymerLabs/IMD#master",
     "iron-ajax": "PolymerElements/iron-ajax#^1.0.0",

@@ -18,22 +18,6 @@ let parseUrl = require('url').parse;
 let polyserve = require('polyserve');
 
 /**
- *
- */
-function makeFileServingApp(filesDir) {
-  let app = express();
-  app.use('/files', polyserve.makeApp({
-    componentDir: 'bower_components',
-    root: filesDir,
-    packageName: '__project__',
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-    },
-  }));
-  return app;
-}
-
-/**
  * Simple file listing service.
  *
  * @param {string} filesDir The root directory to list files from
@@ -84,5 +68,4 @@ let statToJson = (path, stat) => ({
 
 module.exports = {
   makeFileListingApp,
-  makeFileServingApp,
 };

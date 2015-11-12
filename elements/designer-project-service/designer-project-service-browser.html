@@ -183,9 +183,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return infoPath.toString();
       }
 
-      getFilePath(path) {
+      getFilePath(path, injectFrameScript) {
         let filePath = this._filesRoot.clone();
         filePath.segment(this.getRelativePath(path));
+        if (injectFrameScript) {
+          filePath.addQuery('inject_frame_script', 'true');
+        }
         filePath.normalize();
         return filePath.toString();
       }
@@ -214,7 +217,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       loadFile(path) {
-        let filePath = this.getFilePath(path);
+        let filePath = this.getFilePath(path, true);
         return fetch(filePath)
           .then((response) => response.text())
           .then((file) => ({
