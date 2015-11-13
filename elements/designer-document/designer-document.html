@@ -13,6 +13,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../src/editors/editors.html">
 <link rel="import" href="../../src/protocol/document-client.html">
 <link rel="import" href="../../src/rework-utils/rework-utils.html">
+<link rel="import" href="../../src/uri/uri.html">
 
 <dom-module id="designer-document">
 
@@ -45,6 +46,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'css',
         'polymer-designer/rework-utils',
         'polymer-designer/css',
+        'uri',
       ],
       (
         DocumentClient,
@@ -56,7 +58,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         dom5,
         rework,
         reworkUtils,
-        cssLib) => {
+        cssLib,
+        URI) => {
 
     'use strict';
 
@@ -119,8 +122,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // TODO: copy attributes on document element
 
         this._domCommandApplier = new DomCommandApplier(domDocument);
-        let splitUrl = url == null ? null : url.split('/');
-        let filename = url == null ? null : splitUrl[splitUrl.length - 1];
+        let _url = new URI(url);
+        let filename = _url.filename();
 
         // do css!
         let styles = this._parseStyles(domDocument);

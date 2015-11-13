@@ -18,44 +18,48 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       box-sizing: border-box;
       overflow: hidden;
       position: relative;
+      height: 24px;
+      --designer-breakpoint-selector-hover-background: var(--light-primary-color);
+      --designer-breakpoint-selector-selected-background: var(--accent-color);
+      @apply(--designer-breakpoint-selector);
     }
 
     #label-size {
       position: absolute;
       top: 0;
+      bottom: 0;
       width: 200px;
       z-index: 10000;
       color: white;
       left: 50%;
       margin-left: -100px;
-      line-height: 40px;
+      line-height: 20px;
       text-align: center;
-      pointer-events:none;
+      pointer-events: none;
+      @apply(--paper-font-body1);
     }
 
     #size-selector-topbar {
-      background: #333;
-      color: #666;
-      height: 40px;
       white-space: nowrap;
-      border-bottom: 1px solid rgba(0,0,0,.15);
       overflow: hidden;
       position: absolute;
+      top: 0;
       left: 0;
+      bottom: 0;
       right: 0;
     }
 
     .item:hover {
-      background: #000;
+      background: var(--designer-breakpoint-selector-hover-background);
     }
 
     .item {
-      border-right: 1px solid #666;
-      border-left: 1px solid #666;
-      height: 40px;
+      border-right: var(--divider);
+      border-left: var(--divider);
       position: absolute;
       left: 0;
       top: 0;
+      height: 100%;
       cursor: pointer;
       font-size: 12px;
       font-weight: 500;
@@ -69,9 +73,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     .item.iron-selected {
-      border-right: 1px solid #ccc;
-      border-left: 1px solid #ccc;
-      background: #000;
+      border-right: var(--divider);
+      border-left: var(--divider);
+      background: var(--designer-breakpoint-selector-selected-background);
     }
 
     .item.iron-selected .px:before {
@@ -83,8 +87,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     .item .px {
-      margin-right: 12px;
-      margin-left: 12px;
+      margin: 0 6px;
     }
 
     .right {
@@ -95,26 +98,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       float: left;
     }
 
-    .item .px.right:before {
-      position: absolute;
-      content: "";
-      right: -5px;
-      width: 0;
-    	height: 0;
-    	border-left: 5px solid transparent;
-    	border-right: 5px solid transparent;
-    	border-top: 5px solid #666;/*rgba(255,255,255,.6)*/
-    }
-
+    .item .px.right:before,
     .item .px.left:before {
       position: absolute;
       content: "";
-      left: -5px;
       width: 0;
     	height: 0;
     	border-left: 5px solid transparent;
     	border-right: 5px solid transparent;
-    	border-top: 5px solid #666;/*rgba(255,255,255,.6)*/
+    	border-top: 5px solid var(--light-primary-color);
+    }
+
+    .item .px.right:before {
+      right: -5px;
+    }
+
+    .item .px.left:before {
+      left: -5px;
     }
   </style>
   <template>
