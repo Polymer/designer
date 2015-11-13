@@ -30,7 +30,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       justify-content: center;
       width: 78px;
       height: 32px;
-      background: #424242;
+      /*background: #424242;*/
       box-sizing: border-box;
       margin: 1px;
       cursor: default;
@@ -91,7 +91,7 @@ define([
       },
     },
 
-    _onMouseDown: (e) => {
+    _onMouseDown: function(e) {
       // the palette item has a class of 'element'
       let el = e.target.closest('.element');
       let proxy = dragging.createDragProxy(el, true);

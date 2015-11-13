@@ -31,14 +31,16 @@ Inspects an element and provides tidbits about its properties, styles, and more.
       @apply(--paper-font-body1);
       /*font-size: 13px;*/
 
-      background: var(--designer-background-primary-color, --paper-grey-900);
+      background: var(--primary-background-color);
+      /*background: var(--designer-background-primary-color, --paper-grey-900);*/
       box-sizing: border-box;
-      color: var(--secondary-text-color);
+      /*color: var(--secondary-text-color);*/
       display: block;
       overflow: auto;
 
       --designer-inspector-title: {
-        @apply(--paper-font-title);
+        @apply(--paper-font-subhead);
+        font-weight: bold;
         margin: 0;
       };
 

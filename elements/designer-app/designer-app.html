@@ -10,6 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../iron-pages/iron-pages.html">
 <link rel="import" href="../../../paper-styles/paper-styles.html">
 <link rel="import" href="../../../paper-toolbar/paper-toolbar.html">
+<link rel="import" href="../../../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../designer-document/designer-document.html">
 <link rel="import" href="../designer-frame/designer-frame.html">
@@ -28,62 +29,67 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <style>
     :root {
+      --paper-grey-850: #303030;
+
+      /* primary */
       --dark-primary-color: var(--paper-grey-900);
       --default-primary-color: var(--paper-grey-800);
-      --light-primary-color: var(--paper-grey-500);
-      --accent-color: var(--paper-yellow-a200);
-      --primary-background-color: var(--paper-grey-800);
-      --primary-text-color: rgba(255, 255, 255, var(--dark-primary-opacity));
-      --secondary-text-color: rgba(255, 255, 255, var(--dark-secondary-opacity));
+      --light-primary-color: var(--paper-grey-700);
+      --text-primary-color: #ffffff;
+
+      --accent-color: var(--paper-blue-500);
+      --primary-background-color: var(--paper-grey-100);
+      --primary-text-color: rgba(0, 0, 0, var(--light-primary-opacity));
+      --secondary-text-color: rgba(0, 0, 0, var(--light-secondary-opacity));
+
       --disabled-text-color: rgba(255, 255, 255, var(--dark-disabled-opacity));
-      --divider-color: rgba(255, 255, 255, var(--dark-divider-opacity));
+      --divider-color: rgba(0, 0, 0, var(--dark-divider-opacity));
       color: var(--primary-text-color);
+
       --paper-tooltip: {
         background: black;
         opacity: var(--dark-primary-opacity);
       };
+
+      --shadow-elevation-2dp-inset: {
+        box-shadow: inset 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+                    inset 0 1px 5px 0 rgba(0, 0, 0, 0.12),
+                    inset 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      };
+
+      --shadow-elevation-4dp-inset: {
+        box-shadow: inset 0 4px 5px 0 rgba(0, 0, 0, 0.14),
+                    inset 0 1px 10px 0 rgba(0, 0, 0, 0.12),
+                    inset 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+      };
+
+      --divider: solid 1px var(--divider-color);
+
+      --paper-tabs-selection-bar-color: var(--accent-color);
+
+      --paper-tabs: {
+        border-bottom: var(--divider);
+      };
+
+      --designer-stage: {
+        @apply(--shadow-elevation-4dp-inset);
+      };
+
+      --designer-frame: {
+        @apply(--shadow-elevation-4dp);
+      };
+
     }
     :host {
       background: #eee;
       box-sizing: border-box;
       display: flex;
-    }
-    designer-mini-nav {
-      width: 64px;
-      height: 100%;
-      position: relative;
-      z-index: 200;
-      flex: 0 0 64px;
-    }
-    designer-mini-nav .small {
-      background: var(--default-primary-color);
-      text-align: center;
-      height: 100%;
-      flex: 0 0 64px;
-    }
-    designer-mini-nav .large {
-      background: var(--dark-primary-color);
-      color: var(--secondary-text-color);
-      height: 100%;
-      width: 100%;
-      box-sizing: border-box;
-      font-size: 13px;
-    }
-    #nav-detail > header {
-      height: 64px;
-      border-bottom: solid 1px var(--divider-color);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-    }
-    designer-mini-nav .large iron-pages {
-      padding: 8px;
+      flex-direction: column;
     }
     #main {
       display: flex;
       flex: 1 1 0;
-      flex-direction: column;
+      flex-direction: row;
       height: 100%;
     }
     #editor {
@@ -96,10 +102,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       flex-direction: column;
       flex: 1;
     }
-    paper-toolbar#toolbar {
+    paper-toolbar#header {
+      @apply(--shadow-elevation-2dp);
       background: var(--default-primary-color);
-      color: var(--primary-text-color);;
-      flex: 0 0;
+      flex: 0 0 auto;
+    }
+    #filename {
+
+    }
+    #toolbar {
+      background: var(--primary-background-color);
+      color: var(--secondary-text-color);
+      flex: 0 0 auto;
+      border-bottom: var(--divider);
     }
     #logo {
       width: 64px;
@@ -112,14 +127,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       height: 48px;
     }
     nav {
-      background: var(--dark-primary-color);
       color: var(--secondary-text-color);
       display: flex;
-      flex: 0 0 200px;
+      flex: 0 0 240px;
       flex-direction: column;
       font-size: 13px;
       letter-spacing: .2px;
       line-height: 24px;
+    }
+    nav#left-nav {
+      background: var(--primary-background-color);
+      border-right: var(--divider);
+      overflow: hidden;
+    }
+    nav#left-nav {
+      flex-basis: 0;
+      transition: flex-basis ease-in-out 0.38s;
+    }
+    nav#left-nav.open {
+      flex: 0 0 240px;
+    }
+    nav#left-nav .window {
+      width: 240px;
+    }
+    nav#left-nav iron-pages {
+      padding: 8px;
     }
     nav > #files > a {
       display: block;
@@ -159,21 +191,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     designer-file-tree {
       padding: 4px 16px;
     }
-    paper-tabs-vertical {
-      width: 64px;
-      height: 100%;
-    }
-    paper-tab-vertical:first-of-type {
-      border-top: solid 1px var(--divider-color);
-    }
-    paper-tab-vertical {
-      height: 64px;
-      box-sizing: border-box;
-      border-bottom: solid 1px var(--divider-color);
-    }
-    paper-tab-vertical.iron-selected {
-      color: var(--accent-color);
-    }
     #files {
       text-align: center;
     }
@@ -194,58 +211,56 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         selection="{{selection}}"
         analyzer="[[analyzer]]">
     </designer-document>
+    <paper-toolbar id="header">
+      <span id="filename">[[filename]]</span>
+      <template is="dom-if" if="[[_showEditors]]">
+        <paper-tabs selected="{{_selectedEditor}}" noink>
+          <paper-tab>Storyboard</paper-tab>
+          <paper-tab>Layout</paper-tab>
+          <paper-tab>Logic</paper-tab>
+        </paper-tabs>
+      </template>
+    </paper-toolbar>
+    <div id="toolbar" class$="_computeLeftNavClass(_leftNavOpen)">
+      <paper-icon-button icon="more-vert" on-click="_toggleLeftNav"></paper-icon-button>
+      <paper-icon-button icon="folder" on-click="_openProject"></paper-icon-button>
+      <paper-icon-button icon="undo"></paper-icon-button>
+      <paper-icon-button icon="redo"></paper-icon-button>
     </div>
-    <designer-mini-nav>
-      <div class="small">
-        <div id="logo">
-          <img class="d-logo" src="PolymerLabs.png">
-        </div>
-        <paper-tabs-vertical selected="{{_selectedNavTab}}" noink noslide nobar>
-          <paper-tab-vertical>
-            <iron-icon icon="icons:folder-open"></iron-icon>
-          </paper-tab-vertical>
-          <paper-tab-vertical>
-            <iron-icon icon="editor:format-list-bulleted"></iron-icon>
-          </paper-tab-vertical>
-          <paper-tab-vertical>
-            <iron-icon icon="icons:polymer"></iron-icon>
-          </paper-tab-vertical>
-        </paper-tabs-vertical>
-      </div>
-      <div id="nav-detail" class="large">
-        <header>Polymer Designer</header>
-        <iron-pages selected="{{_selectedNavTab}}">
-          <div id="files">
-            <paper-button raised on-click="_openProject"><iron-icon icon="folder-open"></iron-icon>Open Project</paper-button>
-            <div id="projects"></div>
-          </div>
-          <div>
-            <h3>Document</h3>
-            <designer-document-outline
-                root-node=[[documentInfo.domDocumentElement]]>
-            </designer-document-outline>
-            <h3>Elements</h3>
-            <ul>
-              <template is="dom-repeat" items="[[documentInfo.elements]]">
-                <li>[[item.is]]</li>
-              </template>
-            </ul>
-          </div>
-          <designer-element-palette></designer-element-palette>
-        </iron-pages>
-      </div>
-    </designer-mini-nav>
     <div id="main">
-      <paper-toolbar id="toolbar" class="paper-header">
-        <span>[[filename]]</span>
-        <template is="dom-if" if="[[_showEditors]]">
-          <paper-tabs selected="{{_selectedEditor}}" noink>
-            <paper-tab>Storyboard</paper-tab>
-            <paper-tab>Layout</paper-tab>
-            <paper-tab>Logic</paper-tab>
+      <nav id="left-nav" class="open">
+        <div class="window">
+          <paper-tabs selected="{{_selectedNavTab}}" noink noslide nobar>
+            <paper-tab>
+              <iron-icon icon="icons:folder-open"></iron-icon>
+            </paper-tab>
+            <paper-tab>
+              <iron-icon icon="editor:format-list-bulleted"></iron-icon>
+            </paper-tab>
+            <paper-tab>
+              <iron-icon icon="icons:polymer"></iron-icon>
+            </paper-tab>
           </paper-tabs>
-        </template>
-      </paper-toolbar>
+          <iron-pages selected="{{_selectedNavTab}}">
+            <div id="files">
+              <div id="projects"></div>
+            </div>
+            <div>
+              <h3>Document</h3>
+              <designer-document-outline
+                  root-node=[[documentInfo.domDocumentElement]]>
+              </designer-document-outline>
+              <h3>Elements</h3>
+              <ul>
+                <template is="dom-repeat" items="[[documentInfo.elements]]">
+                  <li>[[item.is]]</li>
+                </template>
+              </ul>
+            </div>
+            <designer-element-palette></designer-element-palette>
+          </iron-pages>
+        </div>
+      </nav>
       <iron-pages class="flex" selected="[[_selectedEditor]]">
         <div id="storyboard">
           Storyboard
@@ -303,6 +318,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Object,
         },
 
+        filename: {
+          type: String,
+          value: 'Untitled Document',
+          computed: '_computeFilename(documentInfo)',
+        },
+
         _selectedNavTab: {
           type: Number,
           value: 0,
@@ -313,6 +334,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           // 1: layout
           // 2: logic
           value: 1,
+        },
+
+        _leftNavOpen: {
+          type: Boolean,
+          value: true,
+          observer: '_leftNavOpenChanged',
         },
 
       },
@@ -332,6 +359,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       ready() {
         var queryParams = domUtils.parseQueryString(window.location.search);
         this._showEditors = queryParams.get('show-editors');
+      },
+
+      _computeFilename(documentInfo) {
+        return (documentInfo && documentInfo.filename)
+          ? documentInfo.filename
+          : "Untitled Document";
+      },
+
+      _leftNavOpenChanged(_leftNavOpen) {
+        console.log('_leftNavOpenChanged', _leftNavOpen);
+        this.$['left-nav'].classList.toggle('open', _leftNavOpen);
+      },
+
+      _toggleLeftNav() {
+        this._leftNavOpen = !this._leftNavOpen;
       },
 
       _onDesignerProjectServiceReady() {
