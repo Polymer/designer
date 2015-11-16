@@ -38,6 +38,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   define(['polymer-designer/async', 'uri'], (async, URI) => {
     'use strict';
 
+    const _openProjectUri = new URI('http://localhost:8080/api/openProject');
+    const _fileListingUri = 'http://localhost:8080/api/files/';
+
     Polymer({
       is: 'designer-project-service-browser',
 
@@ -50,39 +53,56 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       /**
-       * @returns {Promise<Project>}
+       * @returns {Promise<string>}
        */
-      openProject() {
+      chooseProject() {
         this._openProjectDeferred = new async.Deferred();
         this._controller =
-            new OpenProjectTreeController('http://localhost:8080/api/files/');
+            new OpenProjectTreeController(_fileListingUri);
         this.$.dialog.open();
 
-        let _finally = (r) => {
+        let cleanUp = () => {
           this._openProjectDeferred = null;
           this._controller = null;
-          return r;
+          // this.async(() => this.$.dialog.close());
+          this.$.dialog.close();
         };
 
         return Promise.race([
           this._openProjectDeferred.promise,
-          this._controller.projectOpened
-            .then((projectFolder) =>
-              fetch(`http://localhost:8080/api/openProject?path=${projectFolder}`, {
-                  method: 'PUT',
-              }))
-            .then((response) => response.json())
-            .then((projectData) => {
-              let port = projectData.port;
-              let directory = projectData.directory;
-              let project = new BrowserProject(
-                  'http://localhost:8080/api/files/',
-                  `http://localhost:${port}/files/__project__/`,
-                  directory);
-              this.async(() => this.$.dialog.close());
-              return project;
-            }),
-        ]).then(_finally, _finally);
+          this._controller.projectOpened,
+        ]).then((path) => {
+          cleanUp();
+          console.assert(path.startsWith('/'));
+          return path;
+        }).catch((e) => {
+          cleanUp();
+          throw e;
+        });
+      },
+
+      /**
+       * @returns {Promise<Project>}
+       */
+      openProject(projectPath) {
+        console.assert(projectPath != null);
+        console.assert(projectPath.startsWith('/'));
+
+        let uri = _openProjectUri.clone();
+        uri.setQuery('path', projectPath);
+
+        return fetch(uri.toString(), {method: 'PUT'})
+          .then((response) => response.json())
+          .then((projectData) => {
+            let port = projectData.port;
+            let directory = projectData.directory;
+            let project = new BrowserProject(
+                this,
+                _fileListingUri,
+                `http://localhost:${port}/files/__project__/`,
+                directory);
+            return project;
+          });
       },
 
       _onDialogClosed(e) {
@@ -94,8 +114,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }); // designer-project-service-browser
 
     function getFilename(path) {
+      if (path === '/') {
+        return '';
+      }
       let splitPath = path.split('/');
-      return splitPath[splitPath.length - 1];
+      let name = splitPath[splitPath.length - 1];
+      if (name == '') {
+        name = splitPath[splitPath.length - 2];
+      }
+      return name;
     }
 
     class ServerFilesTreeController {
@@ -116,7 +143,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       getInfo(path) {
-        return fetch(this.getInfoPath(path || '')).then((r) => r.json());
+        path = path || '/';
+        console.assert(path.startsWith('/'));
+        return fetch(this.getInfoPath(path))
+            .then((r) => r.json())
+            .then((info) => {
+              console.assert(info.path.startsWith('/'));
+              return info;
+            });
       }
 
       getIcon(node) {
@@ -124,7 +158,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       getName(node) {
-        return node.path ? getFilename(node.path) : "Demos";
+        return node.path == '/' ? "Demos" : getFilename(node.path);
       }
 
       getChildren(node) {
@@ -162,6 +196,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
+        console.assert(node.path.startsWith('/'));
         this._projectOpenedDeferred.resolve(node.path);
       }
     } // class OpenProjectTreeController
@@ -169,10 +204,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     class BrowserProject extends ServerFilesTreeController {
 
-      constructor(lsRoot, filesRoot, projectPath) {
+      constructor(projectService, lsRoot, filesRoot, projectPath) {
         super(lsRoot);
+        this._projectService = projectService;
         this._filesRoot = new URI(filesRoot);
         this.projectPath = projectPath;
+        console.assert(projectPath.endsWith('/'));
       }
 
       getInfoPath(path) {
@@ -184,8 +221,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       getFilePath(path, injectFrameScript) {
+        let relativePath = this.getRelativePath(path);
         let filePath = this._filesRoot.clone();
-        filePath.segment(this.getRelativePath(path));
+        filePath.segment(relativePath);
+        let s = filePath.toString();
         if (injectFrameScript) {
           filePath.addQuery('inject_frame_script', 'true');
         }
@@ -195,11 +234,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       getRelativePath(path) {
         // make the path be relative to the project
-        return path.substring(this.projectPath.length);
+        return new URI(path).relativeTo(new URI(this.projectPath)).toString();
       }
 
       getName(node) {
-        return node.path ? getFilename(node.path) : this.projectPath || "Demos";
+        return node.path
+          ? getFilename(node.path)
+          : getFilename(this.projectPath) || "Demos";
       }
 
       getInfo(path) {
@@ -216,14 +257,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             });
       }
 
-      loadFile(path) {
+      openFile(path) {
         let filePath = this.getFilePath(path, true);
         return fetch(filePath)
           .then((response) => response.text())
-          .then((file) => ({
-            file: file,
-            href: filePath,
-          }));
+          .then((file) => {
+            let event = new CustomEvent('designer-open-file', {
+              detail: {
+                file: file,
+                href: filePath,
+              },
+              bubbles: true,
+            });
+            this._projectService.dispatchEvent(event);
+            return Promise.resolve(event.detail.promise);
+          });
       }
 
       isLink(node) {
@@ -231,13 +279,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       onClick(node, event) {
-        this.loadFile(node.path).then((fileData) => {
-          event.target.dispatchEvent(
-            new CustomEvent('designer-open-file', {
-              detail: fileData,
-              bubbles: true,
-            }));
-        });
+        this.openFile(node.path);
       }
     } // class BrowserProject
 

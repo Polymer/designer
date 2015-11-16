@@ -32,21 +32,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       /**
        * @returns {Promise<Project>}
        */
-      openProject() {
+      chooseProject() {
         return new Promise((resolve, reject) => {
           var directories = dialog.showOpenDialog({
             properties: ['openDirectory', 'createDirectory'],
           });
           if (directories && directories.length === 1) {
             let directory = directories[0];
-            project.makeProjectServer(directory)
-              .then((server) => {
-                resolve(new ElectronProject(directory, server));
-              });
+            resolve(directory);
           } else {
             reject();
           }
         });
+      },
+
+      openProject(projectPath) {
+        return project.makeProjectServer(projectPath)
+          .then((server) => new ElectronProject(projectPath, server));
       },
 
     }); // designer-project-service-electron
