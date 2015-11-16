@@ -223,7 +223,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </paper-toolbar>
     <div id="toolbar" class$="_computeLeftNavClass(_leftNavOpen)">
       <paper-icon-button icon="more-vert" on-click="_toggleLeftNav"></paper-icon-button>
-      <paper-icon-button icon="folder" on-click="_openProject"></paper-icon-button>
+      <paper-icon-button icon="folder" on-click="_chooseProject"></paper-icon-button>
       <paper-icon-button icon="undo"></paper-icon-button>
       <paper-icon-button icon="redo"></paper-icon-button>
     </div>
@@ -292,7 +292,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </dom-module>
 
 <script>
-  define(['polymer-designer/dom-utils'], (domUtils) => {
+  define(['polymer-designer/dom-utils', 'uri'], (domUtils, URI) => {
     'use strict';
 
     Polymer({
@@ -368,7 +368,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _leftNavOpenChanged(_leftNavOpen) {
-        console.log('_leftNavOpenChanged', _leftNavOpen);
         this.$['left-nav'].classList.toggle('open', _leftNavOpen);
       },
 
@@ -376,26 +375,58 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._leftNavOpen = !this._leftNavOpen;
       },
 
-      _onDesignerProjectServiceReady() {
+      _onDesignerProjectServiceReady(event) {
         this._projectService = event.target;
+        var locationUri = new URI(window.location);
+        let queryParams = locationUri.query(true);
+        let projectPath = queryParams['project'];
+        let filePath = queryParams['file'];
+        let selectedSourceId = queryParams['selection'];
+
+        if (projectPath) {
+          this._openProject(projectPath).then((project) => {
+            if (filePath) {
+              project.openFile(filePath).then((doc) => {
+                if (selectedSourceId) {
+                  // need to wait for iframe to load
+                  // TODO: thread promises all the way back to here
+                  setTimeout(() => {
+                    this.$.document.setSourceId(selectedSourceId);
+                  }, 500);
+                }
+              });
+            }
+          });
+        }
       },
 
-      _openProject() {
-        this._projectService.openProject()
+      _chooseProject() {
+        return this._projectService.chooseProject()
+            .then((path) => this._openProject(path));
+      },
+
+      _openProject(path) {
+        return this._projectService.openProject(path)
           .then((project) => {
-            // console.log('project opened', project);
-            let projectNav = document.createElement('designer-project-nav');
-            projectNav.project = project;
-            this.$.projects.appendChild(projectNav);
-            // TODO: implement "close project"
+            this._addProject(project);
+            return project;
           })
           .catch((reason) => {
             console.warn('open project failed', reason);
           });
       },
 
+      _addProject(project) {
+        let projectNav = document.createElement('designer-project-nav');
+        projectNav.project = project;
+        this.$.projects.appendChild(projectNav);
+      },
+
       _onDesignerOpenFile(e) {
-        this.$.document.setDocument(e.detail.file, e.detail.href);
+        // add a promise that resolves when the document is loaded
+        // note: setDocument doesn't wait for the iframe to load yet
+        e.detail.promise =
+            this.$.document.setDocument(e.detail.file, e.detail.href);
       },
 
       _onDesignerSelectElement(event, detail) {
