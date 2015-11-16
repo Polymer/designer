@@ -430,6 +430,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onDesignerSelectElement(event, detail) {
+        // 1. get node info
+        // 2. pick editor?
         detail.complete = this.$.document.setSourceId(detail.sourceId);
       },
 

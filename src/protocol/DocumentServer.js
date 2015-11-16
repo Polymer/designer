@@ -319,7 +319,8 @@ define('polymer-designer/protocol/DocumentServer', [
     // TODO(justinfagnani): break element info into two parts: static,
     // unchanging (id, tagName), and dynamic: parent, attributes, style...
     _elementInfo(element) {
-      var style = window.getComputedStyle(element);
+      let style = window.getComputedStyle(element);
+      let dragProxy = dragging.createDragProxy(element, true);
       return {
         id: this._getId(element),
         sourceId: this._getSourceId(element),
@@ -328,7 +329,7 @@ define('polymer-designer/protocol/DocumentServer', [
         position: style.position,
         styles: cssLib.collectStyles(element),
         computedStyle: cssLib.getStyleProperties(style),
-        proxy: dragging.createDragProxy(element, true).outerHTML,
+        proxy: dragProxy ? dragProxy.outerHTML : null,
         bounds: this._elementBounds(element),
       };
     }

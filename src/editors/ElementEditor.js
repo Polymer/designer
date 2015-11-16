@@ -52,6 +52,17 @@ define('polymer-designer/editors/ElementEditor', () => {
     }
   }
 
+  class TemplateEditor extends ElementEditor {
+
+    constructor() {
+      super('template', '', 'template');
+    }
+
+    get inspectors() {
+      return super.inspectors.concat('designer-template-inspector');
+    }
+  }
+
   let builtIns = {
     'div': new ElementEditor('div', 'height: 20px;', 'div'),
     'span': new ElementEditor('span', '', 'span'),
@@ -59,6 +70,7 @@ define('polymer-designer/editors/ElementEditor', () => {
     'section': new ElementEditor('section', 'height: 20px;', ''),
     'header': new ElementEditor('header', '', 'Header'),
     'footer': new ElementEditor('footer', '', 'Footer'),
+    'template': new TemplateEditor(),
   };
 
   class BuiltinElementEditor extends ElementEditor {
