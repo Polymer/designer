@@ -29,7 +29,7 @@ function makeFileListingApp(filesDir) {
   app.get('/*', (req, res) => {
 
     let url = parseUrl(req.path);
-    let requestedPath = decodeURIComponent(url.pathname.substring(1));
+    let requestedPath = decodeURIComponent(url.pathname);
     let filePath = path.join(filesDir, requestedPath);
 
     fs.lstat(filePath, (err, stat) => {
@@ -59,12 +59,20 @@ function makeFileListingApp(filesDir) {
   return app;
 }
 
-let statToJson = (path, stat) => ({
-  path: path,
-  isDirectory: stat.isDirectory(),
-  isFile: stat.isFile(),
-  isLink: stat.isSymbolicLink(),
-});
+function statToJson(path, stat) {
+  // ensure that all directory paths have a trailing /
+  // URLs with and without trailing / are different resources
+  // and causes relative paths to be resolved differently
+  if (stat.isDirectory() && !path.endsWith('/')) {
+    path = path + '/';
+  }
+  return {
+    path: path,
+    isDirectory: stat.isDirectory(),
+    isFile: stat.isFile(),
+    isLink: stat.isSymbolicLink(),
+  };
+};
 
 module.exports = {
   makeFileListingApp,
