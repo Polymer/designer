@@ -13,7 +13,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../designer-document/designer-document.html">
-<link rel="import" href="../designer-frame/designer-frame.html">
+<link rel="import" href="../designer-iframe/designer-iframe.html">
 <link rel="import" href="../designer-document-outline/designer-document-outline.html">
 <link rel="import" href="../designer-element-palette/designer-element-palette.html">
 <link rel="import" href="../designer-inspector/designer-inspector.html">
@@ -24,6 +24,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../designer-ui-editor/designer-ui-editor.html">
 <link rel="import" href="../paper-tabs-vertical/paper-tabs-vertical.html">
 <link rel="import" href="../paper-tabs-vertical/paper-tab-vertical.html">
+<link rel="import" href="../../src/uri/uri.html">
 
 <dom-module id="designer-app">
 
@@ -179,7 +180,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       flex: 0 0 280px;
       overflow-y: auto;
     }
-    #frame {
+    designer-iframe {
       position: absolute;
       top: 0;
       left: 0;
@@ -271,11 +272,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               document-info="[[documentInfo]]"
               client="[[client]]"
               selection="[[selection]]">
-            <designer-frame
-                id="frame"
-                client-connection="{{clientConnection}}"
-                document-info="[[documentInfo]]">
-            </designer-frame>
+            <!-- insert designer-frame here -->
           </designer-ui-editor>
           <template is="dom-if" if="[[documentInfo]]">
             <designer-inspector
@@ -316,6 +313,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         documentInfo: {
           type: Object,
+          observer: '_onDocumentInfoChange',
         },
 
         filename: {
@@ -342,6 +340,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           observer: '_leftNavOpenChanged',
         },
 
+        /**
+         * The main designer-frame containing the live original document.
+         */
+        _mainFrame: {
+          type: HTMLElement,
+        },
+
+        /**
+         * The secondary designer-frame containing a synthetic document, such as
+         * a template editing document, or Polymer element editing document.
+         */
+        _auxFrame: {
+          type: HTMLElement,
+        },
+
+        // ... programatically create _mainFrame on documentInfo change ...
+
       },
 
       listeners: {
@@ -350,6 +365,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'hydrolysis-analyzer-ready': '_onHydrolysisAnalyzerReady',
         'designer-project-service-ready': '_onDesignerProjectServiceReady',
         'designer-open-file': '_onDesignerOpenFile',
+        'designer-edit-template': '_onDesignerEditTemplate',
+      },
+
+      _onDocumentInfoChange() {
+        // create a new frame to host the document.
+        // TODO: should this go in a different place? Maybe with
+        // designer-document?
+        this._mainFrame = this._createDocumentFrame(this.documentInfo.url);
+      },
+
+      _onDesignerEditTemplate(e) {
+        let editor = this.selection.editor;
+        console.assert(editor.__proto__.constructor.name === 'TemplateEditor');
+        let templateUri = editor.getTemplateDocumentUri(this.documentInfo.url, e.detail.sourceId);
+        this._auxFrame = this._createDocumentFrame(templateUri);
+      },
+
+      _createDocumentFrame(uri) {
+        // clear the editor
+        let uiEditor = this.$['ui-editor'];
+        domUtils.clearChildren(uiEditor);
+
+        // create new designer-iframe
+        let frame = document.createElement('designer-iframe');
+        let _listener = (e) => {
+          let connection = e.detail.value;
+          this.clientConnection = connection;
+          frame.removeEventListener('client-connection-changed', _listener);
+        };
+        frame.addEventListener('client-connection-changed', _listener);
+        frame.setSource(uri);
+
+        // attach as child of designer-ui-editor
+        Polymer.dom(uiEditor).appendChild(frame);
+        return frame;
       },
 
       created() {
@@ -422,11 +472,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.projects.appendChild(projectNav);
       },
 
+      /**
+       * Handle the designer-open-file event, fired by the project service.
+       *
+       * event.detail.promise must be set to a Promise<>
+       */
       _onDesignerOpenFile(e) {
         // add a promise that resolves when the document is loaded
-        // note: setDocument doesn't wait for the iframe to load yet
-        e.detail.promise =
-            this.$.document.setDocument(e.detail.file, e.detail.href);
+        e.detail.promise = this.$.document
+            .setDocument(e.detail.file, e.detail.href)
       },
 
       _onDesignerSelectElement(event, detail) {

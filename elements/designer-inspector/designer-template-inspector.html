@@ -92,7 +92,10 @@ define([
     },
 
     _editTemplate() {
-      //
+      console.log('_editTemplate', this.selection.elementInfo.sourceId);
+      this.fire('designer-edit-template', {
+        sourceId: this.selection.elementInfo.sourceId,
+      });
     },
 
   });

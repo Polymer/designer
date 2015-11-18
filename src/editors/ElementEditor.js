@@ -8,7 +8,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-define('polymer-designer/editors/ElementEditor', () => {
+define('polymer-designer/editors/ElementEditor', ['uri'], (URI) => {
   'use strict';
 
   /**
@@ -61,6 +61,16 @@ define('polymer-designer/editors/ElementEditor', () => {
     get inspectors() {
       return super.inspectors.concat('designer-template-inspector');
     }
+
+    getTemplateDocumentUri(url, templateSourceId) {
+      console.assert(url);
+      console.assert(templateSourceId);
+      let templateUrl = new URI(url);
+      templateUrl.setQuery('edit_template', templateSourceId);
+      console.log(templateSourceId, templateUrl.toString());
+      return templateUrl;
+    }
+
   }
 
   let builtIns = {

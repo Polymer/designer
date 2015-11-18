@@ -120,6 +120,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         let domDocumentElement = domUtils.getDocumentElement(domDocument);
         domDocumentElement.innerHTML = content;
         // TODO: copy attributes on document element
+        // TODO: this is a hack
+        domDocumentElement.setAttribute(sourceIdAttribute, '1');
+        // TODO: drop the domDocument alltogether
 
         this._domCommandApplier = new DomCommandApplier(domDocument);
         let _url = new URI(url);
@@ -188,6 +191,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
+      // loadTemplateDocument(templateSourceId) {
+      //   let currentUrl = this.documentInfo.url;
+      //   let uri = new URI(currentUrl);
+      //   uri.setQuery('edit_template', templateSourceId);
+      //   console.log(templateSourceId, uri.toString());
+      // },
+
       _parseStyles(domDocument) {
         let stylesheets = new Map();
         let rules = new Map();
@@ -231,8 +241,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.selection = {
           elementInfo: elementInfo,
           bounds: bounds,
-          // TODO(justinfagnani): add method for retrieving elements by id
-          node: domUtils. getNodeBySourceId(
+          node: domUtils.getNodeBySourceId(
               this.documentInfo.domDocument, elementInfo.sourceId),
           analysisInfo: this._getAnalysisInfo(tagName),
           editor: ElementEditor.getEditor(tagName),

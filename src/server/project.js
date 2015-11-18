@@ -31,64 +31,125 @@ function buildFrameScript() {
   return frameScript.buildFrameScript(files);
 }
 
-let frameScriptInterceptor = interceptor((req, res) => ({
-
-  isInterceptable() {
-    let contentTypeHeader = res.get('Content-Type');
-    let injectFrameScript = req.query['inject_frame_script'];
-    return !!injectFrameScript &&
-        (contentTypeHeader)
-            ? contentType.parse(contentTypeHeader).type === 'text/html'
-            : false;
-  },
-
-  intercept(body, send) {
-    let parser = new parse5.Parser();
-    let serializer = new parse5.Serializer();
-
-    let doc = parser.parse(body);
-
-    // assign sequential IDs to all elements in the document
-    let nextSourceId = 1;
-    dom5.query(doc, (node) => {
+// assign sequential IDs to all elements in the document
+function addSourceIds(sourceDocument, templateId) {
+  let nextSourceId = 1;
+  dom5.query(sourceDocument, (node) => {
+    // if (!dom5.getAttribute(node, 'designer-exclude')) {
       dom5.setAttribute(node, '__designer_node_id__', `${nextSourceId++}`);
+    // }
+  });
+}
+
+function injectFrameScript(sourceDocument) {
+  let fs = buildFrameScript();
+  let scriptTag = dom5.constructors.element('script');
+  dom5.setAttribute(scriptTag, 'designer-exclude', '');
+
+  dom5.setTextContent(scriptTag, fs);
+  let head = dom5.query(sourceDocument, dom5.predicates.hasTagName('head'));
+  if (head) {
+    // inject into <head>
+    if (head.childNodes) {
+      let firstChild = head.childNodes[0];
+      dom5.insertBefore(head, firstChild, scriptTag);
+    } else {
+      dom5.append(head, scriptTag);
+    }
+  } else {
+    // add to top of doc, below doctype
+    let firstNonDoctype = dom5.nodeWalk(doc,
+        (n) => n.nodeName !== '#documentType');
+    dom5.insertBefore(sourceDocument, firstNonDoctype, scriptTag);
+  }
+}
+
+function generateTemplateDocument(sourceDocument, templateSourceId) {
+  if (templateSourceId == null) {
+    return;
+  }
+
+  let template = dom5.query(sourceDocument,
+      dom5.predicates.hasAttrValue('__designer_node_id__', templateSourceId));
+  // TODO(justinfagnani): need to check that template is not nested, and do more
+  // interesting things if it's not
+
+  if (template) {
+    // templates should always have one child - their content fragment
+    let content = template.childNodes[0];
+    let contentClone = dom5.cloneNode(content);
+
+    // mark cloned nodes as editable. other nodes won't be
+    let templateNodes = [];
+    dom5.nodeWalkAll(sourceDocument, (node) => {
+      if (dom5.isElement(node)) {
+        dom5.setAttribute(node, 'designer-exclude', '');
+      }
     });
 
-    let fs = buildFrameScript();
-    let scriptTag = dom5.constructors.element('script');
-    dom5.setAttribute(scriptTag, 'designer-exclude', '');
+    // this empties the document fragment
+    dom5.insertBefore(template.parentNode, template, contentClone);
+  }
+  return sourceDocument;
+}
 
-    dom5.setTextContent(scriptTag, fs);
-    let head = dom5.query(doc, dom5.predicates.hasTagName('head'));
-    if (head) {
-      // inject into <head>
-      if (head.childNodes) {
-        let firstChild = head.childNodes[0];
-        dom5.insertBefore(head, firstChild, scriptTag);
-      } else {
-        dom5.append(head, scriptTag);
+let frameScriptInterceptor = interceptor((req, res) => {
+
+  let contentTypeHeader = res.get('Content-Type');
+  let injectFrameScriptParam = req.query['inject_frame_script'];
+  let editTemplateParam = req.query['edit_template'];
+  let addSourceIdsParam = req.query['add_source_ids'];
+
+  let doEditTemplate = editTemplateParam != null;
+  let doInjectFrameScript = (injectFrameScriptParam != null) || doEditTemplate;
+  let doAddSourceIds = (addSourceIdsParam != null) || doInjectFrameScript;
+
+
+  return {
+    isInterceptable() {
+      let isHtml = req.path.endsWith('.html');
+      let mimeType = contentTypeHeader && contentType.parse(contentTypeHeader).type;
+      let intercept = doAddSourceIds || doInjectFrameScript && isHtml;
+      return intercept;
+    },
+
+    intercept(body, send) {
+      let parser = new parse5.Parser();
+      let serializer = new parse5.Serializer();
+
+      // Create the source document. We need this even if we generate a synthetic
+      // document
+      let document = parser.parse(body);
+      if (doAddSourceIds) {
+        addSourceIds(document, editTemplateParam);
       }
-    } else {
-      // add to top of doc, below doctype
-      let firstNonDoctype = dom5.nodeWalk(doc,
-          (n) => n.nodeName !== '#documentType');
-      dom5.insertBefore(doc, firstNonDoctype, scriptTag);
-    }
 
-    let text = serializer.serialize(doc);
-    send(text);
-  },
+      if (doEditTemplate) {
+        document = generateTemplateDocument(document, editTemplateParam);
+      }
 
-}));
+      if (doInjectFrameScript) {
+        injectFrameScript(document);
+      }
+
+      let text = serializer.serialize(document);
+      send(text);
+    },
+  }
+});
 
 /**
  * Creates an Express app to handle Designer's server API.
  *
  * @return {Promise<http.Server>}
  */
-function makeProjectServer(projectDirectory) {
+function makeProjectServer(projectDirectory, port) {
+
+  console.log('making project server', projectDirectory);
 
   return new Promise((resolve, reject) => {
+    port = port || 0;
+
     let app = express();
 
     app.use(frameScriptInterceptor);
@@ -104,10 +165,12 @@ function makeProjectServer(projectDirectory) {
 
     let fileServer = http.createServer(app);
 
-    fileServer.listen(0, () => resolve(fileServer));
+    fileServer.listen(port, () => resolve(fileServer));
   });
 }
 
 module.exports = {
   makeProjectServer,
+  generateTemplateDocument,
+  addSourceIds,
 };

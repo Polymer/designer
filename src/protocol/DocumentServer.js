@@ -112,11 +112,14 @@ define('polymer-designer/protocol/DocumentServer', [
     selectElementAtPoint(request) {
       var x = request.message.x;
       var y = request.message.y;
-      this.currentElement = document.elementFromPoint(x, y);
-      this.cursorManager = new CursorManager(this.currentElement);
+      let elements = Array.from(document.elementsFromPoint(x, y));
+      this.currentElement = elements.find((e) => e.getAttribute('designer-exclude') == null);
+      this.cursorManager = this.currentElement
+          ? new CursorManager(this.currentElement)
+          : null;
       request.reply({
-        bounds: this._elementBounds(this.currentElement),
-        elementInfo: this._elementInfo(this.currentElement),
+        bounds: this.currentElement ? this._elementBounds(this.currentElement) : null,
+        elementInfo: this.currentElement ? this._elementInfo(this.currentElement) : null,
       });
     }
 
