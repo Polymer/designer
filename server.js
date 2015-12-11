@@ -9,7 +9,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 var argv = require('minimist')(process.argv.slice(2));
-require('./src/server/server').startServer(
-  argv.port || argv.p,
-  argv['files-port'] || argv.f
-);
+require('./src/server/server').startServer({
+  serverPort: argv.port || argv.p,
+  testProject: argv['test-project'],
+});

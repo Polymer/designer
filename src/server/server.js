@@ -14,11 +14,14 @@ let api = require('./api');
 let components = require('./components');
 let express = require('express');
 let path = require('path');
+let project = require('./project');
 let send = require('send');
 
-function startServer(serverPort, filesPort) {
+function startServer(opts) {
+  opts = opts || {};
   let app = express();
-  serverPort = parseInt(serverPort || 8080, 10);
+  let serverPort = parseInt(opts.serverPort || 8080, 10);
+  let testProject = opts.testProject;
 
   console.log(`Starting Polymer Designer Server on port ${serverPort}`);
 
@@ -29,6 +32,15 @@ function startServer(serverPort, filesPort) {
   app.use('/api', api.makeApiApp());
 
   app.use('/components', components);
+
+  if (testProject) {
+    let p = testProject.split(':');
+    let projectDir = p[0];
+    let port = p[1];
+    projectDir = path.join(process.cwd(), projectDir);
+    console.log('starting test project server', projectDir, port);
+    project.makeProjectServer(projectDir, port);
+  }
 
   app.listen(serverPort);
 }
