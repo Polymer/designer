@@ -132,7 +132,7 @@ define([
     },
 
     _computeAttributes(selection, excludedProperties) {
-      this._attributes = Array.from(this.selection.node.attributes).filter(
+      this._attributes = this.selection.node.attrs.filter(
           (a) => a.name !== '__designer_node_id__' &&
               (excludedProperties == null ||
                   !excludedProperties.has(`attribute.${a.name}`)));
