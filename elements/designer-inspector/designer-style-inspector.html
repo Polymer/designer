@@ -227,7 +227,9 @@ define([
 
     _currentSelectorChanged() {
       this._currentRule = this._rules.get(this._currentSelector);
-      this._declarations = Array.from(this._currentRule.declarations);
+      this._declarations = this._currentRule
+          ? Array.from(this._currentRule.declarations)
+          : [];
     },
 
     _onValueChange(event) {

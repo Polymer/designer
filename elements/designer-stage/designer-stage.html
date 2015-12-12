@@ -490,7 +490,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         let position = domUtils.toLocalPosition(this.$.content, e.clientX, e.clientY);
         this.client.selectElementAtPoint(position.x, position.y)
             .then((response) => {
-              if (response.elementInfo.sourceId) {
+              if (response.elementInfo && response.elementInfo.sourceId) {
                 return this._selectElement(response.elementInfo).then(() => {
                   // Start a drag after selection if the mouse is still down.
                   if (this._mouseDown) {
@@ -500,6 +500,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 })
               } else {
                 console.warn('no sourceId');
+                // TODO: de-select element
               }
             });
       },

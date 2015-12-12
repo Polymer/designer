@@ -54,8 +54,10 @@ define('polymer-designer/protocol/DocumentClient', () => {
         x,
         y,
       }).then((response) => {
-        let id = response.elementInfo.id;
-        this.nodes.set(id, response);
+        if (response.elementInfo) {
+          let id = response.elementInfo.id;
+          this.nodes.set(id, response);
+        }
         return response;
       });
     }

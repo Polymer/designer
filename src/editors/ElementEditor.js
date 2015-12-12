@@ -8,7 +8,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-define('polymer-designer/editors/ElementEditor', () => {
+define('polymer-designer/editors/ElementEditor', ['uri'], (URI) => {
   'use strict';
 
   /**
@@ -52,6 +52,27 @@ define('polymer-designer/editors/ElementEditor', () => {
     }
   }
 
+  class TemplateEditor extends ElementEditor {
+
+    constructor() {
+      super('template', '', 'template');
+    }
+
+    get inspectors() {
+      return super.inspectors.concat('designer-template-inspector');
+    }
+
+    getTemplateDocumentUri(url, templateSourceId) {
+      console.assert(url);
+      console.assert(templateSourceId);
+      let templateUrl = new URI(url);
+      templateUrl.setQuery('edit_template', templateSourceId);
+      console.log(templateSourceId, templateUrl.toString());
+      return templateUrl;
+    }
+
+  }
+
   let builtIns = {
     'div': new ElementEditor('div', 'height: 20px;', 'div'),
     'span': new ElementEditor('span', '', 'span'),
@@ -59,6 +80,7 @@ define('polymer-designer/editors/ElementEditor', () => {
     'section': new ElementEditor('section', 'height: 20px;', ''),
     'header': new ElementEditor('header', '', 'Header'),
     'footer': new ElementEditor('footer', '', 'Footer'),
+    'template': new TemplateEditor(),
   };
 
   class BuiltinElementEditor extends ElementEditor {

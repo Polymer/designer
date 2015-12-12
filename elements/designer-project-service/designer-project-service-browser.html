@@ -257,8 +257,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             });
       }
 
+      /**
+       * @return {Promise<DocumentInfo>}
+       */
       openFile(path) {
         let filePath = this.getFilePath(path, true);
+        // TODO: we don't need to fetch the file, we need the URL for
+        // designer-frame and for hydrolysis
         return fetch(filePath)
           .then((response) => response.text())
           .then((file) => {

@@ -1,0 +1,108 @@
+<!--
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../src/async/async.html">
+<link rel="import" href="../../src/protocol/document-client.html">
+
+<!--
+  <designer-frame> manages the <iframe> that hosts the live edited document, and
+  provides a [DocumentClient] for interacting with it.
+-->
+<dom-module id="designer-iframe">
+
+  <style>
+    :host {
+      display: block;
+    }
+    iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      box-sizing: border-box;
+    }
+  </style>
+
+  <template><iframe id="frame" sandbox="allow-scripts"></iframe></template>
+
+</dom-module>
+
+<script>
+  define([
+      'polymer-designer/async',
+      'polymer-designer/protocol/DocumentClient',
+      'polymer-designer/protocol/ClientConnection',
+    ], function(
+      async,
+      DocumentClient,
+      ClientConnection) {
+    'use strict';
+
+    Polymer({
+      is: 'designer-iframe',
+
+      properties: {
+
+        src: {
+          type: String,
+          observer: '_srcChanged',
+        },
+
+        clientConnection: {
+          type: Object,
+          notify: true,
+          readOnly: true,
+        },
+
+      },
+
+      detached() {
+        this._cleanup();
+      },
+
+      /**
+       * @returns {Promise<ClientConnection>}
+       */
+      setSource(src) {
+        // store a Deferred where _srcChanged can get to it
+        let deferred = this._deferred = new async.Deferred();
+        // this will trigger _srcChanged, which resolves the deferred
+        this.src = src;
+        this._deferred = null;
+        return deferred.promise;
+      },
+
+      _srcChanged() {
+        let deferred = this._deferred;
+        this._cleanup();
+        this.$.frame.addEventListener('load', (event) => {
+          let c = new ClientConnection(window, this.$.frame.contentWindow);
+          console.log('clientConnection', c);
+          this._setClientConnection(c);
+          if (deferred) {
+            deferred.resolve(c);
+          }
+        });
+        this.$.frame.src = this.src;
+      },
+
+      _cleanup() {
+        if (this.clientConnection != null) {
+          this.clientConnection.disconnect();
+        }
+      },
+
+    });
+
+  });
+
+</script>
