@@ -479,8 +479,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        */
       _onDesignerOpenFile(e) {
         // add a promise that resolves when the document is loaded
-        e.detail.promise = this.$.document
-            .setDocument(e.detail.file, e.detail.href)
+        e.detail.promise = this.$.document.setDocument(e.detail.href);
       },
 
       _onDesignerSelectElement(event, detail) {

@@ -107,7 +107,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        * @param {string} url The document location.
        * @returns {Promise<DocumentInfo>}
        */
-      setDocument(content, url, useAnalyzer) {
+      setDocument(url, useAnalyzer) {
         return this.analyzer.load(url)
           .then((analyzedDocument) => Promise.all([
               analyzedDocument.htmlLoaded,

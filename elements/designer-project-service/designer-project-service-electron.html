@@ -78,17 +78,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           });
       }
 
-      loadFile(path) {
-        let port = this._server.address().port;
-        let filePath = `http://localhost:${port}/files/__project__/${path}?inject_frame_script=true`;
-        return fetch(filePath)
-          .then((response) => response.text())
-          .then((file) => ({
-            file: file,
-            href: filePath,
-          }));
-      }
-
       getIcon(node) {
         return node.isFile() ? 'editor:insert-drive-file' : 'icons:folder';
       }
@@ -115,15 +104,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return true;
       }
 
+      openFile(path) {
+        let port = this._server.address().port;
+        let filePath = `http://localhost:${port}/files/__project__/${path}?inject_frame_script=true`;
+        let event = new CustomEvent('designer-open-file', {
+          detail: {
+            href: filePath,
+          },
+          bubbles: true,
+        });
+        this._projectService.dispatchEvent(event);
+        return Promise.resolve(event.detail.promise);
+      }
+
       onClick(node, event) {
-        this.loadFile(node.path)
-          .then((fileData) => {
-            event.target.dispatchEvent(
-              new CustomEvent('designer-open-file', {
-                detail: fileData,
-                bubbles: true,
-              }));
-          });
+        this.openFile(node.path);
       }
     } // class ElectronProject
 
