@@ -23,7 +23,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
   <script>
 
-    define(['polymer-designer/commands'], (commands) => {
+    define(['polymer-designer/commands', 'dom5'], (commands, dom5) => {
       'use strict';
 
       Polymer({
@@ -64,7 +64,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           // prevent processing input value changes caused by this method
           this._updatingInputValue = true;
 
-          if (selection.node.hasAttribute(this._kebabPropertyName)) {
+          if (dom5.hasAttribute(selection.node, this._kebabPropertyName)) {
             this.$.input.value = this._attributeValueForProperty;
           } else {
             this.$.input.value = this._defaultValueForProperty;
@@ -74,7 +74,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         get _attributeValueForProperty() {
-          return this.selection.node.getAttribute(this._kebabPropertyName);
+          return dom5.getAttribute(this.selection.node, this._kebabPropertyName);
         },
 
         get _defaultValueForProperty() {
