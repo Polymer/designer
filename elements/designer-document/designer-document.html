@@ -138,7 +138,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               astDocumentElement,
               elements,
               textContent,
-              analyzer: this.analyzer,
             };
             return this.documentInfo;
           });
@@ -224,8 +223,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _getAnalysisInfo(tagName) {
-        if (this.documentInfo.analyzer) {
-          return this.documentInfo.analyzer.elementsByTagName[tagName];
+        if (this.analyzer) {
+          return this.analyzer.elementsByTagName[tagName];
         }
       },
 
