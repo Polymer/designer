@@ -38,7 +38,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   define([
         'polymer-designer/protocol/DocumentClient',
         'polymer-designer/protocol/ClientConnection',
-        'polymer-designer/commands/DomCommandApplier',
         'polymer-designer/commands/ParsedHtmlCommandApplier',
         'polymer-designer/editors/ElementEditor',
         'polymer-designer/dom-utils',
@@ -51,7 +50,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       (
         DocumentClient,
         ClientConnection,
-        DomCommandApplier,
         ParsedHtmlCommandApplier,
         ElementEditor,
         domUtils,
@@ -95,11 +93,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           notify: true,
         },
 
-        _domNodes: {
-          type: Map,
-          value() { return new Map(); },
-        },
-
         _nextSourceId: {
           type: Number,
           value: 1,
@@ -115,61 +108,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        * @returns {Promise<DocumentInfo>}
        */
       setDocument(content, url, useAnalyzer) {
-
-        let domDocument = document.implementation.createHTMLDocument();
-        let domDocumentElement = domUtils.getDocumentElement(domDocument);
-        domDocumentElement.innerHTML = content;
-        // TODO: copy attributes on document element
-        // TODO: this is a hack
-        domDocumentElement.setAttribute(sourceIdAttribute, '1');
-        // TODO: drop the domDocument alltogether
-
-        this._domCommandApplier = new DomCommandApplier(domDocument);
-        let _url = new URI(url);
-        let filename = _url.filename();
-
-        // do css!
-        let styles = this._parseStyles(domDocument);
-
-        let documentInfo = {
-          domDocument,
-          domDocumentElement,
-          source: content,
-          url,
-          filename,
-          styles,
-        };
-
-        if (useAnalyzer !== undefined && useAnalyzer !== true) {
-          this.documentInfo = documentInfo;
-          return Promise.resolve(documentInfo);
-        }
-
         return this.analyzer.load(url)
           .then((analyzedDocument) => Promise.all([
               analyzedDocument.htmlLoaded,
               analyzedDocument.metadataLoaded,
             ]))
           .then((results) => {
+            let _url = new URI(url);
             let parsedDocument = results[0];
+            console.log('parsedDocument', parsedDocument);
             let metadata = results[1];
 
             let astDocument = parsedDocument.ast;
             let astDocumentElement = domUtils.getDocumentElement(astDocument);
-
+            let filename = _url.filename();
             let elements = metadata.elements;
+            let styles = this._parseStyles(astDocument);
+
             let textContent = dom5.serialize(astDocument);
             this._parsedCommandApplier =
                 new ParsedHtmlCommandApplier(astDocument);
 
-            documentInfo.astDocument = astDocument;
-            documentInfo.astDocumentElement = astDocumentElement;
-            documentInfo.elements = elements;
-            documentInfo.textContent = textContent;
-            documentInfo.analyzer = this.analyzer;
-
-            this.documentInfo = documentInfo;
-            return documentInfo;
+            this.documentInfo = {
+              source: content,
+              url,
+              filename,
+              styles,
+              astDocument,
+              astDocumentElement,
+              elements,
+              textContent,
+              analyzer: this.analyzer,
+            };
+            return this.documentInfo;
           });
       },
 
@@ -198,15 +169,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       //   console.log(templateSourceId, uri.toString());
       // },
 
-      _parseStyles(domDocument) {
+      getNodeBySourceId(sourceId) {
+        return dom5.query(this.documentInfo.astDocument,
+            dom5.predicates.hasAttrValue(sourceIdAttribute, sourceId));
+      },
+
+      _parseStyles(doc) {
         let stylesheets = new Map();
         let rules = new Map();
 
         // TODO: <link rel="stylesheet">
-        let styleElements = Array.from(domDocument.querySelectorAll('style'));
+        let styleElements = dom5.queryAll(doc, dom5.predicates.hasTagName('style'));
         for (let styleElement of styleElements) {
-          let styleSourceId = domUtils.getSourceId(styleElement);
-          let styleSource = styleElement.textContent;
+          let styleSourceId = dom5.getAttribute(styleElement, sourceIdAttribute);
+          let styleSource = dom5.getTextContent(styleElement);
           let parsedSheet = rework.parse(styleSource);
 
           stylesheets.set(styleSourceId, {
@@ -241,8 +217,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.selection = {
           elementInfo: elementInfo,
           bounds: bounds,
-          node: domUtils.getNodeBySourceId(
-              this.documentInfo.domDocument, elementInfo.sourceId),
+          node: this.getNodeBySourceId(elementInfo.sourceId),
           analysisInfo: this._getAnalysisInfo(tagName),
           editor: ElementEditor.getEditor(tagName),
         };
@@ -258,9 +233,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (this.clientConnection) {
           this.client = new DocumentClient(this.clientConnection);
           this.client.getDocument().then((response) => {
-            // let id = response.id;
-            // console.log('document id', response.id);
-            this._domNodes.set(response.id, this.documentInfo.domDocument);
+            // TODO: remember node protocol IDs to track node instances when
+            // there is no source ID, or a non-unique source ID due to cloning
           });
         } else {
           this.client = null;
@@ -274,7 +248,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (command.sourceId === null) {
           command.sourceId = `${this._nextSourceId++}`;
         }
-        this._domCommandApplier.apply(command);
         this._parsedCommandApplier.apply(command);
         this.set('documentInfo.textContent',
             dom5.serialize(this.documentInfo.astDocument));
@@ -283,13 +256,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.fire('designer-document-update', response);
 
           if (command.sourceId) {
-            let node = domUtils.getNodeBySourceId(this.documentInfo.domDocument,
-                command.sourceId);
+            let node = this.getNodeBySourceId(command.sourceId);
             console.assert(node);
 
             // TODO: this is a haaaack!
+            // if we edited a style node, refresh the document styles
             if (node.nodeName.toLowerCase() === 'style') {
-              let newStyles = this._parseStyles(this.documentInfo.domDocument);
+              let newStyles = this._parseStyles(this.documentInfo.astDocument);
               this.set('documentInfo.styles', newStyles);
             }
           }
