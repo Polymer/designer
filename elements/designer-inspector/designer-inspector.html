@@ -63,8 +63,8 @@ Inspects an element and provides tidbits about its properties, styles, and more.
 
       --paper-input-container-input: {
         @apply(--paper-font-body1);
-        /*font-size: 13px;*/
       };
+
     }
 
     * {
@@ -79,73 +79,7 @@ Inspects an element and provides tidbits about its properties, styles, and more.
 
 <script>
 
-define(['polymer-designer/dom-utils'], (domUtils) => {
-  'use strict';
-
-  Polymer({
-    is: 'designer-inspector',
-
-    behaviors: [
-      Polymer.DesignerInspectorBehavior
-    ],
-
-    observers: [
-      '_documentInfoChanged(documentInfo.*)',
-    ],
-
-    _documentInfoChanged(changeRecord) {
-      for (let inspector of Polymer.dom(this.root).children) {
-        inspector.notifyPath(changeRecord.path, changeRecord.value);
-      }
-    },
-
-    _selectionChanged(newValue, oldValue) {
-      // TODO: rather than bail we want to re-render parts that change while
-      // keeping UI state, like the currently selected style selector
-      if (newValue && oldValue &&
-          newValue.elementInfo.sourceId === oldValue.elementInfo.sourceId) {
-        return;
-      }
-      domUtils.clearChildren(this.root);
-
-      if (this.selection == null) {
-        return;
-      }
-
-      let inspectorNames = this.selection.editor.inspectors;
-      let inspectors = inspectorNames.map((n) => document.createElement(n));
-
-      let claimedProperties = new Map();
-      for (let inspector of inspectors) {
-        if (inspector.claimedProperties) {
-          claimedProperties.set(inspector, inspector.claimedProperties);
-        }
-      }
-
-      let getExcludedProperties = (inspector) => {
-        let excludedProperties = new Set();
-        for (let claimed of claimedProperties) {
-          if (claimed[0] !== inspector) {
-            for (let property of claimed[1]) {
-              excludedProperties.add(property);
-            }
-          }
-        }
-        return excludedProperties;
-      };
-
-      for (let inspector of inspectors) {
-        // make sure documentInfo is always set first: synchronous
-        // data-binding sucks!
-        inspector.documentInfo = this.documentInfo;
-        inspector.selection = this.selection;
-        inspector.excludedProperties = getExcludedProperties(inspector);
-
-        Polymer.dom(this.root).appendChild(inspector);
-      }
-    },
-
-  });
-
+Polymer({
+  is: 'designer-inspector',
 });
 </script>

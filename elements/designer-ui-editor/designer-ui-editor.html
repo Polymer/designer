@@ -34,7 +34,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       font-weight: normal;
       width: 100%
     }
+    designer-iframe {
+      flex: 1;
+    }
     designer-stage {
+      display: flex;
       flex: 1;
       position: relative;
       width: 100%;
@@ -49,10 +53,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         client="[[client]]"
         selection="[[selection]]"
         size="{{breakpoint.size}}">
-      <content></content>
     </designer-stage>
-    <designer-breadcrumb node="[[selection.node]]">
-    </designer-breadcrumb>
+    <designer-breadcrumb node="[[selection.node]]"></designer-breadcrumb>
   </template>
 </dom-module>
 <script>
@@ -64,14 +66,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       properties: {
 
+        name: {
+          type: String,
+          notify: true,
+        },
+
+        app: {
+          type: Object,
+          observer: '_appChanged',
+        },
+
+        document: {
+          type: Object,
+          observer: '_documentChanged',
+        },
+
         selection: {
           type: Object,
           observer: '_selectionChanged',
-        },
-
-        documentInfo: {
-          type: Object,
-          observer: '_documentInfoChanged',
         },
 
         client: {
@@ -85,21 +97,132 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         breakpoint: {
           type: Object,
-        }
+        },
 
       },
 
-      _selectionChanged() {
-        this._hideBreadcrumb = this.selection == null;
+      listeners: {
+        'designer-command': '_onDesignerCommand',
+        'designer-edit-template': '_onDesignerEditTemplate',
+        'designer-select-element': '_onDesignerSelectElement',
       },
 
-      _documentInfoChanged() {
+      _appChanged() {
         this._reset();
+        this.app.showInspectorPanel();
+      },
+
+      _documentChanged(doc) {
+        this._reset();
+
+        doc.addEventListener('designer-document-frame', (e) => {
+          this._setFrame(e.detail.frame);
+        });
+        this._setFrame(this.document.frame);
+
+        // TODO: move to ui-editor
+        doc.addEventListener('client-changed', (event) => {
+          this.client = event.detail.value;
+        });
+
+        doc.addEventListener('selection-changed', (event) => {
+          this.selection = event.detail.value;
+        });
+
+        doc.addEventListener('filename-changed', (event) => {
+          this.name = event.detail.value;
+        });
+        this.name = doc.filename;
+      },
+
+      _selectionChanged(newValue, oldValue) {
+        this._hideBreadcrumb = this.selection == null;
+        if (newValue) {
+          if (oldValue &&
+              newValue.elementInfo.sourceId === oldValue.elementInfo.sourceId) {
+            return;
+          }
+          this.app.setInspectors(this._getInspectors());
+        }
+      },
+
+      _setFrame(frame) {
+        domUtils.clearChildren(this.$.stage);
+        if (frame) {
+          Polymer.dom(this.$.stage).appendChild(frame);
+        }
+      },
+
+      _onDesignerSelectElement(event, detail) {
+        detail.complete = this.document.setSourceId(detail.sourceId);
+      },
+
+      _onDesignerCommand(event, command) {
+        this.document.executeCommand(command);
+        event.stopPropagation();
+      },
+
+      _onDesignerEditTemplate(e) {
+        // get the element editor
+        let editor = this.selection.editor;
+        console.assert(editor.__proto__.constructor.name === 'TemplateEditor');
+        let templateUri = editor.getTemplateDocumentUri(this.documentInfo.url,
+            e.detail.sourceId);
+        this._auxFrame = this._createDocumentFrame(templateUri);
       },
 
       _reset() {
         this._hideBreadcrumb = true;
       },
+
+      _getInspectors() {
+        if (this.selection == null) {
+          return [];
+        }
+
+        let inspectorNames = this.selection.editor.inspectors;
+        let inspectors = inspectorNames.map((n) => document.createElement(n));
+
+        let claimedProperties = new Map();
+        for (let inspector of inspectors) {
+          if (inspector.claimedProperties) {
+            claimedProperties.set(inspector, inspector.claimedProperties);
+          }
+        }
+
+        let getExcludedProperties = (inspector) => {
+          let excludedProperties = new Set();
+          for (let claimed of claimedProperties) {
+            if (claimed[0] !== inspector) {
+              for (let property of claimed[1]) {
+                excludedProperties.add(property);
+              }
+            }
+          }
+          return excludedProperties;
+        };
+
+        for (let inspector of inspectors) {
+          // make sure documentInfo is always set first: synchronous
+          // data-binding! :(
+          inspector.documentInfo = this.document.documentInfo;
+          inspector.selection = this.selection;
+          inspector.excludedProperties = getExcludedProperties(inspector);
+        }
+        return inspectors;
+      },
+
+      // vestigal bower integration...
+      _installPackageClick(e) {
+        var request = document.createElement('iron-request');
+        request.send({
+          url: '/api/bowerInstall',
+          method: "POST",
+          headers: {},
+          async: true,
+        });
+      },
+
 
     });
 

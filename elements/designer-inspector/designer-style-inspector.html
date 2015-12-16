@@ -137,7 +137,10 @@ define([
       },
 
       /** The document where edits should be made */
-      documentInfo: Object,
+      documentInfo: {
+        type: Object,
+        observer: '_documentInfoChanged',
+      },
 
       /**
        * Map of selector -> rule object
@@ -173,6 +176,11 @@ define([
 
     _id(i) {
       return `id-${i}`;
+    },
+
+    _documentInfoChanged() {
+      this._rules = null;
+      this._currentSelector = null;
     },
 
     _stylesChanged(styles) {
@@ -222,11 +230,11 @@ define([
     _computeSelectors(rules) {
       // TODO: remove Array.from() when
       // https://github.com/Polymer/polymer/issues/800 is fixed
-      return Array.from(rules.keys());
+      return rules ? Array.from(rules.keys()) : null;
     },
 
     _currentSelectorChanged() {
-      this._currentRule = this._rules.get(this._currentSelector);
+      this._currentRule = this._rules ? this._rules.get(this._currentSelector) : null;
       this._declarations = this._currentRule
           ? Array.from(this._currentRule.declarations)
           : [];

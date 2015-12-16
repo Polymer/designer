@@ -50,19 +50,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     Polymer({
       is: 'designer-iframe',
 
-      properties: {
-
-        src: {
-          type: String,
-          observer: '_srcChanged',
-        },
-
-        clientConnection: {
-          type: Object,
-          notify: true,
-          readOnly: true,
-        },
-
+      ready() {
+        this._connectionDeferred = new async.Deferred();
+        this.$.frame.addEventListener('load', (event) => {
+          this._connection = new ClientConnection(window, this.$.frame.contentWindow);
+          this._connectionDeferred.resolve(this._connection);
+        });
       },
 
       detached() {
@@ -72,32 +65,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       /**
        * @returns {Promise<ClientConnection>}
        */
-      setSource(src) {
-        // store a Deferred where _srcChanged can get to it
-        let deferred = this._deferred = new async.Deferred();
-        // this will trigger _srcChanged, which resolves the deferred
-        this.src = src;
-        this._deferred = null;
-        return deferred.promise;
+      getConnection() {
+        return this._connectionDeferred.promise;
       },
 
-      _srcChanged() {
-        let deferred = this._deferred;
-        this._cleanup();
-        this.$.frame.addEventListener('load', (event) => {
-          let c = new ClientConnection(window, this.$.frame.contentWindow);
-          console.log('clientConnection', c);
-          this._setClientConnection(c);
-          if (deferred) {
-            deferred.resolve(c);
-          }
-        });
-        this.$.frame.src = this.src;
+      setSource(src) {
+        if (this.$.frame.src != null && this.$.frame.src != '') {
+          throw new Error('designer-iframe source can only be set once');
+        }
+        this.$.frame.src = src;
       },
 
       _cleanup() {
-        if (this.clientConnection != null) {
-          this.clientConnection.disconnect();
+        if (this._connection != null) {
+          this._connection.disconnect();
         }
       },
 

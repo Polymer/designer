@@ -37,7 +37,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <script>
   define([
         'polymer-designer/protocol/DocumentClient',
-        'polymer-designer/protocol/ClientConnection',
+        // 'polymer-designer/protocol/ClientConnection',
         'polymer-designer/commands/ParsedHtmlCommandApplier',
         'polymer-designer/editors/ElementEditor',
         'polymer-designer/dom-utils',
@@ -49,7 +49,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       ],
       (
         DocumentClient,
-        ClientConnection,
+        // ClientConnection,
         ParsedHtmlCommandApplier,
         ElementEditor,
         domUtils,
@@ -77,11 +77,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           notify: true,
         },
 
-        clientConnection: {
-          type: ClientConnection,
-          notify: true,
-          observer: '_clientConnectionChanged',
-        },
+        // clientConnection: {
+        //   type: ClientConnection,
+        //   notify: true,
+        //   observer: '_clientConnectionChanged',
+        // },
 
         selection: {
           type: Object,
@@ -98,6 +98,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: 1,
         },
 
+        url: {
+          type: String,
+          observer: '_onUrlChanged',
+        },
+
+        filename: {
+          type: String,
+          computed: '_computeFilename(documentInfo)',
+          notify: true,
+        },
+
+      },
+
+      detached() {
+        this.frame.getConnection().then((c) => c.disconnect());
+      },
+
+      _onUrlChanged() {
+        this.setDocument(this.url);
+        this.frame = document.createElement('designer-iframe');
+        this.frame.setSource(this.url);
+        this.frame.getConnection().then((conn) => {
+          this._setConnection(conn);
+        });
+        this.dispatchEvent(new CustomEvent('designer-document-frame', {
+          detail: {
+            frame: this.frame,
+          },
+        }));
       },
 
       /**
@@ -116,7 +145,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           .then((results) => {
             let _url = new URI(url);
             let parsedDocument = results[0];
-            console.log('parsedDocument', parsedDocument);
             let metadata = results[1];
 
             let astDocument = parsedDocument.ast;
@@ -160,13 +188,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             });
         }
       },
-
-      // loadTemplateDocument(templateSourceId) {
-      //   let currentUrl = this.documentInfo.url;
-      //   let uri = new URI(currentUrl);
-      //   uri.setQuery('edit_template', templateSourceId);
-      //   console.log(templateSourceId, uri.toString());
-      // },
 
       getNodeBySourceId(sourceId) {
         return dom5.query(this.documentInfo.astDocument,
@@ -228,9 +249,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      _clientConnectionChanged() {
-        if (this.clientConnection) {
-          this.client = new DocumentClient(this.clientConnection);
+      _setConnection(connection) {
+        if (connection) {
+          this.client = new DocumentClient(connection);
           this.client.getDocument().then((response) => {
             // TODO: remember node protocol IDs to track node instances when
             // there is no source ID, or a non-unique source ID due to cloning
@@ -241,7 +262,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       executeCommand(command) {
-        console.log('execute command', command);
         // commands with a null (not undefined) sourceId are creating a new
         // element and need to be assigned a fresh sourceId.
         if (command.sourceId === null) {
@@ -267,6 +287,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
 
         });
+      },
+
+      _computeFilename(documentInfo) {
+        return (documentInfo && documentInfo.filename)
+          ? documentInfo.filename
+          : "Untitled Document";
       },
 
     });
