@@ -31,6 +31,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     #content {
       width: 100%;
       display: flex;
+      position: relative;
     }
     #glass {
       position: absolute;
@@ -84,23 +85,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </style>
 
   <template>
-    <designer-selection
-        id="selection"
-        on-click="_onSelectionClick"
-        on-designer-selection-mousedown="_onSelectionDown"
-        on-designer-selection-resize="_onSelectionResize"
-        on-designer-selection-move="_onSelectionMove">
-    </designer-selection>
-    <designer-element-highlight id="hover"></designer-element-highlight>
-    <div id="caret"></div>
-    <div
-        id="text-edit-selection"
-        on-click="_textOnClick"
-        tabindex="0">
+    <div id="content">
+      <designer-selection
+          id="selection"
+          on-click="_onSelectionClick"
+          on-designer-selection-mousedown="_onSelectionDown"
+          on-designer-selection-resize="_onSelectionResize"
+          on-designer-selection-move="_onSelectionMove">
+      </designer-selection>
+      <designer-element-highlight id="hover"></designer-element-highlight>
+      <div id="caret"></div>
+      <div
+          id="text-edit-selection"
+          on-click="_textOnClick"
+          tabindex="0">
+      </div>
+      <div id="proxy"></div>
+      <div id="glass" on-mousedown="_onMouseDown" on-dblclick="_onDoubleClick"></div>
+      <content></content>
     </div>
-    <div id="proxy"></div>
-    <div id="glass" on-mousedown="_onMouseDown" on-dblclick="_onDoubleClick"></div>
-    <div id="content"><content></content></div>
   </template>
 
 </dom-module>
