@@ -240,18 +240,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div id="files">
               <div id="projects"></div>
             </div>
-            <div>
-              <h3>Document</h3>
-              <designer-document-outline
-                  root-node=[[documentInfo.astDocumentElement]]>
-              </designer-document-outline>
-              <h3>Elements</h3>
-              <ul>
-                <template is="dom-repeat" items="[[documentInfo.elements]]">
-                  <li>[[item.is]]</li>
-                </template>
-              </ul>
-            </div>
+            <div id="navigators"></div>
             <designer-element-palette></designer-element-palette>
           </iron-pages>
         </div>
@@ -299,6 +288,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'designer-command': '_onDesignerCommand',
         'designer-open-file': '_onDesignerOpenFile',
         'designer-project-service-ready': '_onDesignerProjectServiceReady',
+        'designer-select-element': '_onDesignerSelectElement',
         'hydrolysis-analyzer-ready': '_onHydrolysisAnalyzerReady',
       },
 
@@ -314,6 +304,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         domUtils.clearChildren(this.$.inspectors.root);
         for (let inspector of inspectors) {
           Polymer.dom(this.$.inspectors.root).appendChild(inspector);
+        }
+      },
+
+      setNavigators(navigators) {
+        domUtils.clearChildren(this.$.navigators);
+        for (let navigator of navigators) {
+          Polymer.dom(this.$.navigators).appendChild(navigator);
         }
       },
 
@@ -404,6 +401,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _onDesignerCommand(e) {
         if (this._currentEditor) {
           let e2 = new CustomEvent('designer-command', {
+            detail: e.detail,
+          });
+          this._currentEditor.dispatchEvent(e2);
+        }
+      },
+
+      _onDesignerSelectElement(e) {
+        if (this._currentEditor) {
+          let e2 = new CustomEvent('designer-select-element', {
             detail: e.detail,
           });
           this._currentEditor.dispatchEvent(e2);

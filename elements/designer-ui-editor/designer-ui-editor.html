@@ -13,6 +13,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../designer-breakpoint-selector/designer-breakpoint-selector.html">
 <link rel="import" href="../designer-stage/designer-stage.html">
 
+<link rel="import" href="designer-document-navigator.html">
+<link rel="import" href="designer-elements-navigator.html">
+
 <dom-module id="designer-ui-editor">
 
   <style>
@@ -133,6 +136,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.name = event.detail.value;
         });
         this.name = doc.filename;
+
+        doc.addEventListener('document-info-changed', (event) => {
+          this.app.setNavigators(this._getNavigators());
+        });
       },
 
       _selectionChanged(newValue, oldValue) {
@@ -173,6 +180,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _reset() {
         this._hideBreadcrumb = true;
+      },
+
+      _getNavigators() {
+        let outline = document.createElement('designer-document-navigator')
+        outline.rootNode = this.document.documentInfo.astDocumentElement;
+
+        let elements = document.createElement('designer-elements-navigator')
+        elements.elements = this.document.documentInfo.elements;
+        return [outline, elements];
       },
 
       _getInspectors() {
