@@ -81,6 +81,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       };
 
     }
+
     :host {
       background: #eee;
       box-sizing: border-box;
@@ -173,14 +174,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       display: flex;
       flex: 1;
     }
-    designer-ui-editor {
-      flex: 1;
-    }
     designer-inspector {
       flex: 0 0 280px;
       overflow-y: auto;
     }
-    designer-iframe {
+    /*designer-iframe {
       position: absolute;
       top: 0;
       left: 0;
@@ -188,7 +186,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       height: 100%;
       border: none;
       box-sizing: border-box;
-    }
+    }*/
     designer-file-tree {
       padding: 4px 16px;
     }
@@ -199,28 +197,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       background: var(--paper-grey-800);
       color: var(--paper-grey-500);
     }
+    #documents {
+      display: none;
+    }
+    #editor-panel {
+      display: flex;
+      flex: 1;
+    }
+    #editor-panel > * {
+      flex: 1;
+    }
   </style>
 
   <template>
     <!-- elements projected here should hide themselves -->
     <content></content>
-    <designer-document
-        id="document"
-        client-connection="[[clientConnection]]"
-        client="{{client}}"
-        document-info="{{documentInfo}}"
-        selection="{{selection}}"
-        analyzer="[[analyzer]]">
-    </designer-document>
+    <div id="documents"></div>
     <paper-toolbar id="header">
-      <span id="filename">[[filename]]</span>
-      <template is="dom-if" if="[[_showEditors]]">
-        <paper-tabs selected="{{_selectedEditor}}" noink>
-          <paper-tab>Storyboard</paper-tab>
-          <paper-tab>Layout</paper-tab>
-          <paper-tab>Logic</paper-tab>
-        </paper-tabs>
-      </template>
+      <span id="filename">[[editorName]]</span>
     </paper-toolbar>
     <div id="toolbar" class$="_computeLeftNavClass(_leftNavOpen)">
       <paper-icon-button icon="more-vert" on-click="_toggleLeftNav"></paper-icon-button>
@@ -246,43 +240,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div id="files">
               <div id="projects"></div>
             </div>
-            <div>
-              <h3>Document</h3>
-              <designer-document-outline
-                  root-node=[[documentInfo.astDocumentElement]]>
-              </designer-document-outline>
-              <h3>Elements</h3>
-              <ul>
-                <template is="dom-repeat" items="[[documentInfo.elements]]">
-                  <li>[[item.is]]</li>
-                </template>
-              </ul>
-            </div>
+            <div id="navigators"></div>
             <designer-element-palette></designer-element-palette>
           </iron-pages>
         </div>
       </nav>
-      <iron-pages class="flex" selected="[[_selectedEditor]]">
-        <div id="storyboard">
-          Storyboard
-        </div>
-        <div id="editor">
-          <designer-ui-editor
-              id="ui-editor"
-              document-info="[[documentInfo]]"
-              client="[[client]]"
-              selection="[[selection]]">
-            <!-- insert designer-frame here -->
-          </designer-ui-editor>
-          <template is="dom-if" if="[[documentInfo]]">
-            <designer-inspector
-                document-info="[[documentInfo]]"
-                selection="[[selection]]">
-            </designer-inspector>
-          </template>
-        </div>
-        <designer-logic-editor></designer-logic-editor>
-      </iron-pages>
+      <div id="editor-panel"></div>
+      <designer-inspector id="inspectors"></designer-inspector>
     </div>
   </template>
 
@@ -297,41 +261,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       properties: {
 
-        client: {
-          type: Object,
-          notify: true,
-        },
-
-        clientConnection: {
-          type: Object,
-          notify: true,
-        },
-
-        selection: {
-          type: Object,
-        },
-
-        documentInfo: {
-          type: Object,
-          observer: '_onDocumentInfoChange',
-        },
-
-        filename: {
+        editorName: {
           type: String,
-          value: 'Untitled Document',
-          computed: '_computeFilename(documentInfo)',
+          // value: 'Polymer Designer',
+        },
+
+        _showInspectorPanel: {
+          type: Boolean,
+          value: true,
         },
 
         _selectedNavTab: {
           type: Number,
           value: 0,
-        },
-
-        _selectedEditor: {
-          // 0: storyboard
-          // 1: layout
-          // 2: logic
-          value: 1,
         },
 
         _leftNavOpen: {
@@ -340,81 +282,36 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           observer: '_leftNavOpenChanged',
         },
 
-        /**
-         * The main designer-frame containing the live original document.
-         */
-        _mainFrame: {
-          type: HTMLElement,
-        },
-
-        /**
-         * The secondary designer-frame containing a synthetic document, such as
-         * a template editing document, or Polymer element editing document.
-         */
-        _auxFrame: {
-          type: HTMLElement,
-        },
-
-        // ... programatically create _mainFrame on documentInfo change ...
-
       },
 
       listeners: {
         'designer-command': '_onDesignerCommand',
+        'designer-open-file': '_onDesignerOpenFile',
+        'designer-project-service-ready': '_onDesignerProjectServiceReady',
         'designer-select-element': '_onDesignerSelectElement',
         'hydrolysis-analyzer-ready': '_onHydrolysisAnalyzerReady',
-        'designer-project-service-ready': '_onDesignerProjectServiceReady',
-        'designer-open-file': '_onDesignerOpenFile',
-        'designer-edit-template': '_onDesignerEditTemplate',
-      },
-
-      _onDocumentInfoChange() {
-        // create a new frame to host the document.
-        // TODO: should this go in a different place? Maybe with
-        // designer-document?
-        this._mainFrame = this._createDocumentFrame(this.documentInfo.url);
-      },
-
-      _onDesignerEditTemplate(e) {
-        let editor = this.selection.editor;
-        console.assert(editor.__proto__.constructor.name === 'TemplateEditor');
-        let templateUri = editor.getTemplateDocumentUri(this.documentInfo.url, e.detail.sourceId);
-        this._auxFrame = this._createDocumentFrame(templateUri);
-      },
-
-      _createDocumentFrame(uri) {
-        // clear the editor
-        let uiEditor = this.$['ui-editor'];
-        domUtils.clearChildren(uiEditor);
-
-        // create new designer-iframe
-        let frame = document.createElement('designer-iframe');
-        let _listener = (e) => {
-          let connection = e.detail.value;
-          this.clientConnection = connection;
-          frame.removeEventListener('client-connection-changed', _listener);
-        };
-        frame.addEventListener('client-connection-changed', _listener);
-        frame.setSource(uri);
-
-        // attach as child of designer-ui-editor
-        Polymer.dom(uiEditor).appendChild(frame);
-        return frame;
       },
 
       created() {
         Polymer.IronOverlayManager.ensureMinimumZ(1000);
       },
 
-      ready() {
-        var queryParams = domUtils.parseQueryString(window.location.search);
-        this._showEditors = queryParams.get('show-editors');
+      showInspectorPanel() {
+        this._showInspectorPanel = true;
       },
 
-      _computeFilename(documentInfo) {
-        return (documentInfo && documentInfo.filename)
-          ? documentInfo.filename
-          : "Untitled Document";
+      setInspectors(inspectors) {
+        domUtils.clearChildren(this.$.inspectors.root);
+        for (let inspector of inspectors) {
+          Polymer.dom(this.$.inspectors.root).appendChild(inspector);
+        }
+      },
+
+      setNavigators(navigators) {
+        domUtils.clearChildren(this.$.navigators);
+        for (let navigator of navigators) {
+          Polymer.dom(this.$.navigators).appendChild(navigator);
+        }
       },
 
       _leftNavOpenChanged(_leftNavOpen) {
@@ -441,7 +338,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   // need to wait for iframe to load
                   // TODO: thread promises all the way back to here
                   setTimeout(() => {
-                    this.$.document.setSourceId(selectedSourceId);
+                    this._currentDocument.setSourceId(selectedSourceId);
                   }, 500);
                 }
               });
@@ -478,34 +375,51 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        * event.detail.promise must be set to a Promise<>
        */
       _onDesignerOpenFile(e) {
-        // add a promise that resolves when the document is loaded
-        e.detail.promise = this.$.document
-            .setDocument(e.detail.file, e.detail.href)
+        // close current document and editor (for now)
+        domUtils.clearChildren(this.$.documents);
+        domUtils.clearChildren(this.$['editor-panel']);
+
+        // create new document element
+        let doc = document.createElement('designer-document');
+        doc.analyzer = this.analyzer;
+        doc.url = e.detail.href;
+        this._currentDocument = doc;
+        Polymer.dom(this.$.documents).appendChild(doc);
+
+        // create new editor
+        let editor = document.createElement('designer-ui-editor');
+        editor.app = this;
+        editor.document = doc;
+        this._currentEditor = editor;
+        Polymer.dom(this.$['editor-panel']).appendChild(editor);
+
+        editor.addEventListener('name-changed', (event) => {
+          this.editorName = event.detail.value;
+        });
       },
 
-      _onDesignerSelectElement(event, detail) {
-        // 1. get node info
-        // 2. pick editor?
-        detail.complete = this.$.document.setSourceId(detail.sourceId);
+      _onDesignerCommand(e) {
+        if (this._currentEditor) {
+          let e2 = new CustomEvent('designer-command', {
+            detail: e.detail,
+          });
+          this._currentEditor.dispatchEvent(e2);
+        }
+      },
+
+      _onDesignerSelectElement(e) {
+        if (this._currentEditor) {
+          let e2 = new CustomEvent('designer-select-element', {
+            detail: e.detail,
+          });
+          this._currentEditor.dispatchEvent(e2);
+        }
       },
 
       _onHydrolysisAnalyzerReady(e) {
         this.analyzer = e.target.instance;
       },
 
-      _onDesignerCommand(event, command) {
-        this.$.document.executeCommand(command);
-      },
-
-      _installPackageClick(e) {
-        var request = document.createElement('iron-request');
-        request.send({
-          url: '/api/bowerInstall',
-          method: "POST",
-          headers: {},
-          async: true,
-        });
-      },
     });
 
   });

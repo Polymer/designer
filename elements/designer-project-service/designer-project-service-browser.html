@@ -262,21 +262,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        */
       openFile(path) {
         let filePath = this.getFilePath(path, true);
-        // TODO: we don't need to fetch the file, we need the URL for
-        // designer-frame and for hydrolysis
-        return fetch(filePath)
-          .then((response) => response.text())
-          .then((file) => {
-            let event = new CustomEvent('designer-open-file', {
-              detail: {
-                file: file,
-                href: filePath,
-              },
-              bubbles: true,
-            });
-            this._projectService.dispatchEvent(event);
-            return Promise.resolve(event.detail.promise);
-          });
+        let event = new CustomEvent('designer-open-file', {
+          detail: {
+            href: filePath,
+          },
+          bubbles: true,
+        });
+        this._projectService.dispatchEvent(event);
+        return Promise.resolve(event.detail.promise);
       }
 
       isLink(node) {

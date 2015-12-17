@@ -91,6 +91,7 @@ define('polymer-designer/stylograph-editor', () => {
     },
 
     _htmlChanged() {
+      throw "needs update";
       this.$.document.setDocument(this.html, null, false);
     },
 
