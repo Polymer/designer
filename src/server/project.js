@@ -75,9 +75,7 @@ function generateTemplateDocument(sourceDocument, templateSourceId) {
   // interesting things if it's not
 
   if (template) {
-    // templates should always have one child - their content fragment
-    let content = template.childNodes[0];
-    let contentClone = dom5.cloneNode(content);
+    let contentClone = dom5.cloneNode(template.content);
 
     // mark cloned nodes as editable. other nodes won't be
     let templateNodes = [];
