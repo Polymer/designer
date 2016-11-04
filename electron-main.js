@@ -8,8 +8,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-var app = require('app');
-var BrowserWindow = require('browser-window');
+const {app, BrowserWindow} = require('electron');
 
 // Report crashes to our server.
 // require('crash-reporter').start();
@@ -27,7 +26,7 @@ app.on('window-all-closed', () => {
 
 app.on('ready', () => {
   mainWindow = new BrowserWindow({width: 1200, height: 800});
-  mainWindow.loadUrl(`file://${__dirname}/electron-index.html`);
+  mainWindow.loadURL(`file://${__dirname}/electron-index.html`);
 
   mainWindow.openDevTools();
 

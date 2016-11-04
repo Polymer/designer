@@ -18,9 +18,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     let fsSync = require('fs');
     let pathLib = require('path');
     let project = require('./src/server/project');
-    let remote = require('remote');
 
-    let dialog = remote.require('dialog');
+    const {dialog} = require('electron').remote;
 
     Polymer({
       is: 'designer-project-service-electron',
@@ -48,7 +47,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       openProject(projectPath) {
         return project.makeProjectServer(projectPath)
-          .then((server) => new ElectronProject(projectPath, server));
+          .then((server) => new ElectronProject(this, projectPath, server));
       },
 
     }); // designer-project-service-electron
@@ -60,7 +59,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     class ElectronProject {
 
-      constructor(rootPath, server) {
+      constructor(service, rootPath, server) {
+        this._projectService = service;
         this._rootPath = rootPath;
         this._server = server;
       }

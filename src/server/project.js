@@ -114,12 +114,9 @@ let frameScriptInterceptor = interceptor((req, res) => {
     },
 
     intercept(body, send) {
-      let parser = new parse5.Parser();
-      let serializer = new parse5.Serializer();
-
       // Create the source document. We need this even if we generate a synthetic
       // document
-      let document = parser.parse(body);
+      let document = parse5.parse(body);
       if (doAddSourceIds) {
         addSourceIds(document, editTemplateParam);
       }
@@ -132,7 +129,7 @@ let frameScriptInterceptor = interceptor((req, res) => {
         injectFrameScript(document);
       }
 
-      let text = serializer.serialize(document);
+      let text = parse5.serialize(document);
       send(text);
     },
   }
