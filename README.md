@@ -18,7 +18,6 @@ still available in the designer1 branch.
 
         $ npm install -g bower
         $ npm install -g gulp
-        $ npm install -g electron-prebuilt
 
   * Install Bower and npm Dependencies:
 
@@ -28,7 +27,7 @@ still available in the designer1 branch.
   * Build and run the desktop app in Electron
 
         $ gulp electron
-        $ electron .
+        $ npm run electron
 
   * Build and run the browser app with the local server:
 
