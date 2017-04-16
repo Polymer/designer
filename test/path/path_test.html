@@ -19,6 +19,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <link rel="import" href="../../../polymer/polymer.html"/>
     <link rel="import" href="../../src/path/path.html"/>
     <link rel="import" href="../../src/dom5/dom5.html"/>
+    <link rel="import" href="../../vendor/parse5.html">
   </head>
   <body>
     <div id="mocha"></div>
@@ -29,7 +30,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </div>
 
     <script>
-define(['polymer-designer/path', 'dom5'], (path, dom5) => {
+define(['polymer-designer/path', 'dom5', 'parse5'], (path, dom5, parse5) => {
   'use strict';
 
   mocha.setup('tdd');
@@ -50,7 +51,7 @@ define(['polymer-designer/path', 'dom5'], (path, dom5) => {
     // Sanity check that the parsed docs are the same
     assert.equal(
         '<!DOCTYPE html>'+domDoc.documentElement.outerHTML,
-        dom5.serialize(parsedDoc));
+        parse5.serialize(parsedDoc));
 
     function doTests(documentType, doc) {
 

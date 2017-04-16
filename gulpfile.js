@@ -44,12 +44,24 @@ gulp.task('browserify-css', () => {
       .pipe(gulp.dest('./vendor'));
 });
 
-gulp.task('browserify-dom5', () => {
-  browserify({
+gulp.task('browserify-dom5', ['browserify-parse5'], () => {
+  var b = browserify({
     entries: './node_modules/dom5',
     standalone: 'dom5',
-  }).bundle()
+  });
+  b.external('vendor/parse5.js');  
+  b.bundle()
       .pipe(source('dom5.js'))
+      .pipe(buffer())
+      .pipe(gulp.dest('./vendor'));
+});
+
+gulp.task('browserify-parse5', () => {
+  browserify({
+    entries: './node_modules/parse5',
+    standalone: 'parse5',
+  }).bundle()
+      .pipe(source('parse5.js'))
       .pipe(buffer())
       .pipe(gulp.dest('./vendor'));
 });

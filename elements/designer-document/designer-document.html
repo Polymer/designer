@@ -14,6 +14,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../src/protocol/document-client.html">
 <link rel="import" href="../../src/rework-utils/rework-utils.html">
 <link rel="import" href="../../src/uri/uri.html">
+<link rel="import" href="../../vendor/parse5.html">
 
 <dom-module id="designer-document">
 
@@ -46,6 +47,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'polymer-designer/rework-utils',
         'polymer-designer/css',
         'uri',
+        'parse5',
       ],
       (
         DocumentClient,
@@ -57,7 +59,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         rework,
         reworkUtils,
         cssLib,
-        URI) => {
+        URI,
+        parse5) => {
 
     'use strict';
 
@@ -153,7 +156,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             let elements = metadata.elements;
             let styles = this._parseStyles(astDocument);
 
-            let textContent = dom5.serialize(astDocument);
+            let textContent = parse5.serialize(astDocument);
             this._parsedCommandApplier =
                 new ParsedHtmlCommandApplier(astDocument);
 
@@ -269,7 +272,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         this._parsedCommandApplier.apply(command);
         this.set('documentInfo.textContent',
-            dom5.serialize(this.documentInfo.astDocument));
+            parse5.serialize(this.documentInfo.astDocument));
         this.client.sendCommand(command).then((response) => {
           this._updateSelection(response.elementInfo, response.bounds);
           this.fire('designer-document-update', response);
