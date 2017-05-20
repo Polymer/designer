@@ -11,7 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../../paper-button/paper-button.html">
 <link rel="import" href="../../../paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../../../paper-item/paper-item.html">
-<link rel="import" href="../../../paper-menu/paper-menu.html">
+<link rel="import" href="../../../paper-listbox/paper-listbox.html">
 <link rel="import" href="../../../paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../../src/commands/commands.html">
@@ -59,14 +59,14 @@ editing interface for them.
     <paper-dropdown-menu
         label="Style"
         always-float-label>
-      <paper-menu
+      <paper-listbox
           class="dropdown-content"
           selected="{{_currentSelector}}"
           attr-for-selected="value">
         <template is="dom-repeat" items="[[_selectors]]">
           <paper-item value="[[item]]">[[item]]</paper-item>
         </template>
-      </paper-menu>
+      </paper-listbox>
     </paper-dropdown-menu>
 
     <template

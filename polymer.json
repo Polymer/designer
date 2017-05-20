@@ -1,0 +1,6 @@
+{
+  "entrypoint": "electron-index.html",
+  "lint": {
+    "rules": ["polymer-1"]
+  }
+}
