@@ -14,24 +14,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="designer-breadcrumb">
 
-  <style>
-    :host {
-      display: flex;
-      box-sizing: border-box;
-      height: 24px;
-      font-size: 12px;
-      /*background-color: #9E9E9E;*/
-      background: var(--primary-background-color);
-      color: #fff;
-    }
-
-    paper-tabs {
-      height: 100%;
-    }
-
-  </style>
-
   <template>
+    <style>
+      :host {
+        display: flex;
+        box-sizing: border-box;
+        height: 24px;
+        font-size: 12px;
+        /*background-color: #9E9E9E;*/
+        background: var(--primary-background-color);
+        color: #fff;
+      }
+
+      paper-tabs {
+        height: 100%;
+      }
+    </style>
     <paper-tabs selected="{{_selectedIndex}}" noink noslide>
       <template is="dom-repeat" items="[[_tabNames]]">
         <paper-tab>[[item]]</paper-tab>

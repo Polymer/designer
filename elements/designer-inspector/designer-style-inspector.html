@@ -27,33 +27,32 @@ editing interface for them.
 -->
 <dom-module id="designer-style-inspector">
 
-  <style>
-    :host {
-      @apply(--paper-font-body1);
-      display: block;
-      padding: 16px;
-    }
-    h2 {
-      @apply(--designer-inspector-title);
-    }
-    paper-input.value {
-      @apply(--designer-inspector-row-value);
-    }
-    paper-input.property {
-      @apply(--designer-inspector-row-label);
-      --paper-input-container-underline: {
-        display: none;
-      };
-    }
-    .inspector-row {
-      @apply(--designer-inspector-row);
-    }
-    #add-container {
-      text-align: center;
-    }
-  </style>
-
   <template>
+    <style>
+      :host {
+        @apply --paper-font-body1;
+        display: block;
+        padding: 16px;
+      }
+      h2 {
+        @apply --designer-inspector-title;
+      }
+      paper-input.value {
+        @apply --designer-inspector-row-value;
+      }
+      paper-input.property {
+        @apply --designer-inspector-row-label;
+        --paper-input-container-underline: {
+          display: none;
+        };
+      }
+      .inspector-row {
+        @apply --designer-inspector-row;
+      }
+      #add-container {
+        text-align: center;
+      }
+    </style>
     <h2>Styles</h2>
 
     <paper-dropdown-menu

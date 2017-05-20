@@ -11,32 +11,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="designer-mini-nav">
 
-  <style>
-    :host {
-      overflow: visible;
-      background: var(--dark-primary-color);
-      color: var(--primary-text-color);
-    }
-    /*
-      TODO(justinfagnani): try to size #small based on the .small light-child
-    */
-    #small {
-      width: 64px;
-      height: 100%;
-      transition: width 300ms;
-      overflow: hidden;
-    }
-    :host([expanded]) #small {
-      width: 320px;
-    }
-    #large {
-      width: 320px;
-      height: 100%;
-      display: flex;
-    }
-  </style>
-
   <template>
+    <style>
+      :host {
+        overflow: visible;
+        background: var(--dark-primary-color);
+        color: var(--primary-text-color);
+      }
+      /*
+        TODO(justinfagnani): try to size #small based on the .small light-child
+      */
+      #small {
+        width: 64px;
+        height: 100%;
+        transition: width 300ms;
+        overflow: hidden;
+      }
+      :host([expanded]) #small {
+        width: 320px;
+      }
+      #large {
+        width: 320px;
+        height: 100%;
+        display: flex;
+      }
+    </style>
     <div id="small"><div id="large"><content></content></div></div>
   </template>
 

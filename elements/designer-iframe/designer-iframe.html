@@ -17,23 +17,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 <dom-module id="designer-iframe">
 
-  <style>
-    :host {
-      display: block;
-      position: relative;
-    }
-    iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-      box-sizing: border-box;
-    }
-  </style>
-
-  <template><iframe id="frame" sandbox="allow-scripts"></iframe></template>
+  <template>
+    <style>
+      :host {
+        display: block;
+        position: relative;
+      }
+      iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+        box-sizing: border-box;
+      }
+    </style>
+    <iframe id="frame" sandbox="allow-scripts"></iframe>
+  </template>
 
 </dom-module>
 

@@ -12,112 +12,112 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../src/dom-utils/dom-utils.html">
 
 <dom-module id="designer-breakpoint-selector">
-  <style>
-    :host {
-      display: block;
-      box-sizing: border-box;
-      overflow: hidden;
-      position: relative;
-      height: 24px;
-      --designer-breakpoint-selector-hover-background: var(--light-primary-color);
-      --designer-breakpoint-selector-selected-background: var(--accent-color);
-      @apply(--designer-breakpoint-selector);
-    }
-
-    #label-size {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      width: 200px;
-      z-index: 10000;
-      color: white;
-      left: 50%;
-      margin-left: -100px;
-      line-height: 20px;
-      text-align: center;
-      pointer-events: none;
-      @apply(--paper-font-body1);
-    }
-
-    #size-selector-topbar {
-      white-space: nowrap;
-      overflow: hidden;
-      position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      right: 0;
-    }
-
-    .item:hover {
-      background: var(--designer-breakpoint-selector-hover-background);
-    }
-
-    .item {
-      border-right: var(--divider);
-      border-left: var(--divider);
-      position: absolute;
-      left: 0;
-      top: 0;
-      height: 100%;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 500;
-      line-height: 24px;
-      text-align: right;
-      -webkit-transition: .1s all;
-    }
-
-    iron-selector {
-      cursor: pointer;
-    }
-
-    .item.iron-selected {
-      border-right: var(--divider);
-      border-left: var(--divider);
-      background: var(--designer-breakpoint-selector-selected-background);
-    }
-
-    .item.iron-selected .px:before {
-      border-top: 5px solid #fff;
-    }
-
-    .item.iron-selected .px {
-      color: white;
-    }
-
-    .item .px {
-      margin: 0 6px;
-    }
-
-    .right {
-      float: right;
-    }
-
-    .left {
-      float: left;
-    }
-
-    .item .px.right:before,
-    .item .px.left:before {
-      position: absolute;
-      content: "";
-      width: 0;
-    	height: 0;
-    	border-left: 5px solid transparent;
-    	border-right: 5px solid transparent;
-    	border-top: 5px solid var(--light-primary-color);
-    }
-
-    .item .px.right:before {
-      right: -5px;
-    }
-
-    .item .px.left:before {
-      left: -5px;
-    }
-  </style>
   <template>
+    <style>
+      :host {
+        display: block;
+        box-sizing: border-box;
+        overflow: hidden;
+        position: relative;
+        height: 24px;
+        --designer-breakpoint-selector-hover-background: var(--light-primary-color);
+        --designer-breakpoint-selector-selected-background: var(--accent-color);
+        @apply --designer-breakpoint-selector;
+      }
+
+      #label-size {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 200px;
+        z-index: 10000;
+        color: white;
+        left: 50%;
+        margin-left: -100px;
+        line-height: 20px;
+        text-align: center;
+        pointer-events: none;
+        @apply --paper-font-body1;
+      }
+
+      #size-selector-topbar {
+        white-space: nowrap;
+        overflow: hidden;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+      }
+
+      .item:hover {
+        background: var(--designer-breakpoint-selector-hover-background);
+      }
+
+      .item {
+        border-right: var(--divider);
+        border-left: var(--divider);
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 24px;
+        text-align: right;
+        -webkit-transition: .1s all;
+      }
+
+      iron-selector {
+        cursor: pointer;
+      }
+
+      .item.iron-selected {
+        border-right: var(--divider);
+        border-left: var(--divider);
+        background: var(--designer-breakpoint-selector-selected-background);
+      }
+
+      .item.iron-selected .px:before {
+        border-top: 5px solid #fff;
+      }
+
+      .item.iron-selected .px {
+        color: white;
+      }
+
+      .item .px {
+        margin: 0 6px;
+      }
+
+      .right {
+        float: right;
+      }
+
+      .left {
+        float: left;
+      }
+
+      .item .px.right:before,
+      .item .px.left:before {
+        position: absolute;
+        content: "";
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 5px solid var(--light-primary-color);
+      }
+
+      .item .px.right:before {
+        right: -5px;
+      }
+
+      .item .px.left:before {
+        left: -5px;
+      }
+    </style>
     <div id="size-selector-topbar">
 
       <iron-selector selected="{{selectedIndex}}">

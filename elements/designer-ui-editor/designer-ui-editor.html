@@ -17,38 +17,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="designer-elements-navigator.html">
 
 <dom-module id="designer-ui-editor">
-
-  <style>
-    :host {
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    designer-breakpoint-selector {
-      flex: 0 0 24px;
-      width: 100%
-    }
-    designer-breadcrumb {
-      border-style: solid;
-      border-color: var(--divider-color);
-      border-width: 1px 0 1px 0;
-      color: var(--primary-text-color);
-      font-weight: normal;
-      width: 100%
-    }
-    designer-iframe {
-      flex: 1;
-    }
-    designer-stage {
-      display: flex;
-      flex: 1;
-      position: relative;
-      width: 100%;
-    }
-  </style>
   <template>
-    <designer-breakpoint-selector breakpoint="{{breakpoint}}">
+    <style>
+      :host {
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      designer-breakpoint-selector {
+        flex: 0 0 24px;
+        width: 100%
+      }
+      designer-breadcrumb {
+        border-style: solid;
+        border-color: var(--divider-color);
+        border-width: 1px 0 1px 0;
+        color: var(--primary-text-color);
+        font-weight: normal;
+        width: 100%
+      }
+      designer-iframe {
+        flex: 1;
+      }
+      designer-stage {
+        display: flex;
+        flex: 1;
+        position: relative;
+        width: 100%;
+      }
+    </style>
+  <designer-breakpoint-selector breakpoint="{{breakpoint}}">
     </designer-breakpoint-selector>
     <designer-stage
         id="stage"

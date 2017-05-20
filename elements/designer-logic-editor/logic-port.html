@@ -14,28 +14,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="logic-port">
 
-  <style>
-    :host {
-      box-sizing: border-box;
-      white-space: nowrap;
-      display: flex;
-    }
-    :host([align=right]) iron-icon {
-      order: 2;
-    }
-    :host([align=right]) span {
-      order: 1;
-    }
-    iron-icon#icon {
-      width: 16px;
-      height: 16px;
-    }
-    span {
-      padding: 0 2px;
-    }
-  </style>
-
   <template>
+    <style>
+      :host {
+        box-sizing: border-box;
+        white-space: nowrap;
+        display: flex;
+      }
+      :host([align=right]) iron-icon {
+        order: 2;
+      }
+      :host([align=right]) span {
+        order: 1;
+      }
+      iron-icon#icon {
+        width: 16px;
+        height: 16px;
+      }
+      span {
+        padding: 0 2px;
+      }
+    </style>
     <iron-icon
         id="icon"
         icon="[[icon]]"

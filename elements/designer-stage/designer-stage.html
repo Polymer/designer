@@ -18,73 +18,72 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="designer-stage">
 
-  <style>
-    :host {
-      display: flex;
-      box-sizing: border-box;
-      position: relative;
-      justify-content: center;
-      outline: none;
-      overflow: auto;
-      @apply(--designer-stage);
-    }
-    #content {
-      width: 100%;
-      display: flex;
-      position: relative;
-    }
-    #glass {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 100;
-    }
-    designer-selection {
-      position: absolute;
-      z-index: 102;
-    }
-    #hover {
-      position: absolute;
-      /* z-index must be > 100 because iframes are z-index 100 o_O */
-      z-index: 101;
-    }
-    #text-edit-selection {
-      outline: solid 4px blue;
-      position: absolute;
-      display: none;
-      /* z-index must be > 100 because iframes are z-index 100 o_O */
-      z-index: 103;
-    }
-    #caret {
-      box-sizing: border-box;
-      position: absolute;
-      background: rgba(32, 32, 255, .4);
-      z-index: 104;
-      /* z-index must be > 100 because iframes are z-index 100 o_O */
-      min-width: 4px;
-    }
-    #proxy {
-      position: absolute;
-      /* z-index must be > 100 because iframes are z-index 100 o_O */
-      z-index: 101;
-      display: none;
-      opacity: 0.5;
-      background: #f88;
-      box-sizing: border-box;
-      padding: 0;
-      margin: 0;
-    }
-    #proxy > * {
-      width: 100% !important;
-      height: 100% !important;
-      display: block !important;
-      margin: 0;
-    }
-  </style>
-
   <template>
+    <style>
+      :host {
+        display: flex;
+        box-sizing: border-box;
+        position: relative;
+        justify-content: center;
+        outline: none;
+        overflow: auto;
+        @apply --designer-stage;
+      }
+      #content {
+        width: 100%;
+        display: flex;
+        position: relative;
+      }
+      #glass {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 100;
+      }
+      designer-selection {
+        position: absolute;
+        z-index: 102;
+      }
+      #hover {
+        position: absolute;
+        /* z-index must be > 100 because iframes are z-index 100 o_O */
+        z-index: 101;
+      }
+      #text-edit-selection {
+        outline: solid 4px blue;
+        position: absolute;
+        display: none;
+        /* z-index must be > 100 because iframes are z-index 100 o_O */
+        z-index: 103;
+      }
+      #caret {
+        box-sizing: border-box;
+        position: absolute;
+        background: rgba(32, 32, 255, .4);
+        z-index: 104;
+        /* z-index must be > 100 because iframes are z-index 100 o_O */
+        min-width: 4px;
+      }
+      #proxy {
+        position: absolute;
+        /* z-index must be > 100 because iframes are z-index 100 o_O */
+        z-index: 101;
+        display: none;
+        opacity: 0.5;
+        background: #f88;
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+      }
+      #proxy > * {
+        width: 100% !important;
+        height: 100% !important;
+        display: block !important;
+        margin: 0;
+      }
+    </style>
     <div id="content">
       <designer-selection
           id="selection"

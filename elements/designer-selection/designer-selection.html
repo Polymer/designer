@@ -8,75 +8,75 @@
   <body>
 
     <dom-module id="designer-selection">
-      <style>
-        :host {
-          display: block;
-          position: absolute;
-          box-sizing: border-box;
-        }
-        #bounds {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(128, 128, 255, .5);
-          border: solid 1px #88f;
-          box-sizing: border-box;
-        }
-        .handle {
-          position: absolute;
-          box-sizing: border-box;
-          width: 8px;
-          height: 8px;
-          border: solid 1px #88f;
-          background: #fff;
-        }
-        .handle:hover {
-          background: #88f;
-        }
-        #top {
-          top: -4px;
-          left: calc(50% - 4px);
-          cursor: ns-resize;
-        }
-        #left {
-          top: calc(50% - 4px);
-          left: -4px;
-          cursor: ew-resize;
-        }
-        #bottom {
-          bottom: -4px;
-          left: calc(50% - 4px);
-          cursor: ns-resize;
-        }
-        #right {
-          top: calc(50% - 4px);
-          right: -4px;
-          cursor: ew-resize;
-        }
-        #top_left {
-          top: -4px;
-          left: -4px;
-          cursor: nwse-resize;
-        }
-        #top_right {
-          top: -4px;
-          right: -4px;
-          cursor: nesw-resize;
-        }
-        #bottom_left {
-          bottom: -4px;
-          left: -4px;
-          cursor: nesw-resize;
-        }
-        #bottom_right {
-          bottom: -4px;
-          right: -4px;
-          cursor: nwse-resize;
-        }
-      </style>
       <template>
+        <style>
+          :host {
+            display: block;
+            position: absolute;
+            box-sizing: border-box;
+          }
+          #bounds {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(128, 128, 255, .5);
+            border: solid 1px #88f;
+            box-sizing: border-box;
+          }
+          .handle {
+            position: absolute;
+            box-sizing: border-box;
+            width: 8px;
+            height: 8px;
+            border: solid 1px #88f;
+            background: #fff;
+          }
+          .handle:hover {
+            background: #88f;
+          }
+          #top {
+            top: -4px;
+            left: calc(50% - 4px);
+            cursor: ns-resize;
+          }
+          #left {
+            top: calc(50% - 4px);
+            left: -4px;
+            cursor: ew-resize;
+          }
+          #bottom {
+            bottom: -4px;
+            left: calc(50% - 4px);
+            cursor: ns-resize;
+          }
+          #right {
+            top: calc(50% - 4px);
+            right: -4px;
+            cursor: ew-resize;
+          }
+          #top_left {
+            top: -4px;
+            left: -4px;
+            cursor: nwse-resize;
+          }
+          #top_right {
+            top: -4px;
+            right: -4px;
+            cursor: nesw-resize;
+          }
+          #bottom_left {
+            bottom: -4px;
+            left: -4px;
+            cursor: nesw-resize;
+          }
+          #bottom_right {
+            bottom: -4px;
+            right: -4px;
+            cursor: nwse-resize;
+          }
+        </style>
         <div id="bounds"></div>
         <template is="dom-repeat" items="{{directions}}">
           <div

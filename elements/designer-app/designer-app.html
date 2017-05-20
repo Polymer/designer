@@ -28,188 +28,187 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="designer-app">
 
-  <style>
-    :root {
-      --paper-grey-850: #303030;
-
-      /* primary */
-      --dark-primary-color: var(--paper-grey-900);
-      --default-primary-color: var(--paper-grey-800);
-      --light-primary-color: var(--paper-grey-700);
-      --text-primary-color: #ffffff;
-
-      --accent-color: var(--paper-blue-500);
-      --primary-background-color: var(--paper-grey-100);
-      --primary-text-color: rgba(0, 0, 0, var(--light-primary-opacity));
-      --secondary-text-color: rgba(0, 0, 0, var(--light-secondary-opacity));
-
-      --disabled-text-color: rgba(255, 255, 255, var(--dark-disabled-opacity));
-      --divider-color: rgba(0, 0, 0, var(--dark-divider-opacity));
-      color: var(--primary-text-color);
-
-      --paper-tooltip: {
-        background: black;
-        opacity: var(--dark-primary-opacity);
-      };
-
-      --shadow-elevation-2dp-inset: {
-        box-shadow: inset 0 2px 2px 0 rgba(0, 0, 0, 0.14),
-                    inset 0 1px 5px 0 rgba(0, 0, 0, 0.12),
-                    inset 0 3px 1px -2px rgba(0, 0, 0, 0.2);
-      };
-
-      --shadow-elevation-4dp-inset: {
-        box-shadow: inset 0 4px 5px 0 rgba(0, 0, 0, 0.14),
-                    inset 0 1px 10px 0 rgba(0, 0, 0, 0.12),
-                    inset 0 2px 4px -1px rgba(0, 0, 0, 0.4);
-      };
-
-      --divider: solid 1px var(--divider-color);
-
-      --paper-tabs-selection-bar-color: var(--accent-color);
-
-      --paper-tabs: {
-        border-bottom: var(--divider);
-      };
-
-      --designer-stage: {
-        @apply(--shadow-elevation-4dp-inset);
-      };
-
-      --designer-frame: {
-        @apply(--shadow-elevation-4dp);
-      };
-
-    }
-
-    :host {
-      background: #eee;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-    }
-    #main {
-      display: flex;
-      flex: 1 1 0;
-      flex-direction: row;
-      height: 100%;
-    }
-    #editor {
-      display: flex;
-      flex-direction: row;
-      flex: 1 1 0;
-    }
-    designer-logic-editor {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-    }
-    paper-toolbar#header {
-      @apply(--shadow-elevation-2dp);
-      background: var(--default-primary-color);
-      flex: 0 0 auto;
-    }
-    #filename {
-
-    }
-    #toolbar {
-      background: var(--primary-background-color);
-      color: var(--secondary-text-color);
-      flex: 0 0 auto;
-      border-bottom: var(--divider);
-    }
-    #logo {
-      width: 64px;
-      height: 64px;
-      padding: 6px;
-      box-sizing: border-box;
-    }
-    img.d-logo {
-      width: 48px;
-      height: 48px;
-    }
-    nav {
-      color: var(--secondary-text-color);
-      display: flex;
-      flex: 0 0 240px;
-      flex-direction: column;
-      font-size: 13px;
-      letter-spacing: .2px;
-      line-height: 24px;
-    }
-    nav#left-nav {
-      background: var(--primary-background-color);
-      border-right: var(--divider);
-      overflow: hidden;
-    }
-    nav#left-nav {
-      flex-basis: 0;
-      transition: flex-basis ease-in-out 0.38s;
-    }
-    nav#left-nav.open {
-      flex: 0 0 240px;
-    }
-    nav#left-nav .window {
-      width: 240px;
-    }
-    nav#left-nav iron-pages {
-      padding: 8px;
-    }
-    nav > #files > a {
-      display: block;
-      color: currentColor;
-      text-decoration: none;
-      padding: 8px;
-    }
-    nav > #files > a:hover {
-      text-decoration: underline;
-      cursor: pointer;
-    }
-    #doc-view {
-      display: flex;
-      flex: 1;
-      flex-direction: column;
-    }
-    .flex {
-      display: flex;
-      flex: 1;
-    }
-    designer-inspector {
-      flex: 0 0 280px;
-      overflow-y: auto;
-    }
-    /*designer-iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-      box-sizing: border-box;
-    }*/
-    designer-file-tree {
-      padding: 4px 16px;
-    }
-    #files {
-      text-align: center;
-    }
-    #files paper-button {
-      background: var(--paper-grey-800);
-      color: var(--paper-grey-500);
-    }
-    #documents {
-      display: none;
-    }
-    #editor-panel {
-      display: flex;
-      flex: 1;
-    }
-    #editor-panel > * {
-      flex: 1;
-    }
-  </style>
-
   <template>
+    <style>
+        :root {
+          --paper-grey-850: #303030;
+
+          /* primary */
+          --dark-primary-color: var(--paper-grey-900);
+          --default-primary-color: var(--paper-grey-800);
+          --light-primary-color: var(--paper-grey-700);
+          --text-primary-color: #ffffff;
+
+          --accent-color: var(--paper-blue-500);
+          --primary-background-color: var(--paper-grey-100);
+          --primary-text-color: rgba(0, 0, 0, var(--light-primary-opacity));
+          --secondary-text-color: rgba(0, 0, 0, var(--light-secondary-opacity));
+
+          --disabled-text-color: rgba(255, 255, 255, var(--dark-disabled-opacity));
+          --divider-color: rgba(0, 0, 0, var(--dark-divider-opacity));
+          color: var(--primary-text-color);
+
+          --paper-tooltip: {
+            background: black;
+            opacity: var(--dark-primary-opacity);
+          };
+
+          --shadow-elevation-2dp-inset: {
+            box-shadow: inset 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+                        inset 0 1px 5px 0 rgba(0, 0, 0, 0.12),
+                        inset 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+          };
+
+          --shadow-elevation-4dp-inset: {
+            box-shadow: inset 0 4px 5px 0 rgba(0, 0, 0, 0.14),
+                        inset 0 1px 10px 0 rgba(0, 0, 0, 0.12),
+                        inset 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+          };
+
+          --divider: solid 1px var(--divider-color);
+
+          --paper-tabs-selection-bar-color: var(--accent-color);
+
+          --paper-tabs: {
+            border-bottom: var(--divider);
+          };
+
+          --designer-stage: {
+            @apply --shadow-elevation-4dp-inset;
+          };
+
+          --designer-frame: {
+            @apply --shadow-elevation-4dp;
+          };
+
+        }
+
+        :host {
+          background: #eee;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+        }
+        #main {
+          display: flex;
+          flex: 1 1 0;
+          flex-direction: row;
+          height: 100%;
+        }
+        #editor {
+          display: flex;
+          flex-direction: row;
+          flex: 1 1 0;
+        }
+        designer-logic-editor {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+        }
+        paper-toolbar#header {
+          @apply --shadow-elevation-2dp;
+          background: var(--default-primary-color);
+          flex: 0 0 auto;
+        }
+        #filename {
+
+        }
+        #toolbar {
+          background: var(--primary-background-color);
+          color: var(--secondary-text-color);
+          flex: 0 0 auto;
+          border-bottom: var(--divider);
+        }
+        #logo {
+          width: 64px;
+          height: 64px;
+          padding: 6px;
+          box-sizing: border-box;
+        }
+        img.d-logo {
+          width: 48px;
+          height: 48px;
+        }
+        nav {
+          color: var(--secondary-text-color);
+          display: flex;
+          flex: 0 0 240px;
+          flex-direction: column;
+          font-size: 13px;
+          letter-spacing: .2px;
+          line-height: 24px;
+        }
+        nav#left-nav {
+          background: var(--primary-background-color);
+          border-right: var(--divider);
+          overflow: hidden;
+        }
+        nav#left-nav {
+          flex-basis: 0;
+          transition: flex-basis ease-in-out 0.38s;
+        }
+        nav#left-nav.open {
+          flex: 0 0 240px;
+        }
+        nav#left-nav .window {
+          width: 240px;
+        }
+        nav#left-nav iron-pages {
+          padding: 8px;
+        }
+        nav > #files > a {
+          display: block;
+          color: currentColor;
+          text-decoration: none;
+          padding: 8px;
+        }
+        nav > #files > a:hover {
+          text-decoration: underline;
+          cursor: pointer;
+        }
+        #doc-view {
+          display: flex;
+          flex: 1;
+          flex-direction: column;
+        }
+        .flex {
+          display: flex;
+          flex: 1;
+        }
+        designer-inspector {
+          flex: 0 0 280px;
+          overflow-y: auto;
+        }
+        /*designer-iframe {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          border: none;
+          box-sizing: border-box;
+        }*/
+        designer-file-tree {
+          padding: 4px 16px;
+        }
+        #files {
+          text-align: center;
+        }
+        #files paper-button {
+          background: var(--paper-grey-800);
+          color: var(--paper-grey-500);
+        }
+        #documents {
+          display: none;
+        }
+        #editor-panel {
+          display: flex;
+          flex: 1;
+        }
+        #editor-panel > * {
+          flex: 1;
+        }
+      </style>
     <!-- elements projected here should hide themselves -->
     <content></content>
     <div id="documents"></div>

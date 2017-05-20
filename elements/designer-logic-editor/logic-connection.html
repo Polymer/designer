@@ -12,32 +12,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="logic-connection">
 
-  <style>
-    :host {
-      display: block;
-      position: absolute;
-    }
-    #line {
-      stroke: rgba(255, 255, 255, 0.5);
-      stroke-width: 1.5px;
-      stroke-linecap: round;
-    }
-    #outline {
-      stroke: rgba(0, 0, 0, 0.5);
-      stroke-width: 4px;
-      stroke-linecap: round;
-    }
-    svg {
-      display: block;
-      position: absolute;
-      top: 0;
-      height: 100%;
-      left: 0;
-      width: 100%;
-    }
-  </style>
-
   <template>
+    <style>
+      :host {
+        display: block;
+        position: absolute;
+      }
+      #line {
+        stroke: rgba(255, 255, 255, 0.5);
+        stroke-width: 1.5px;
+        stroke-linecap: round;
+      }
+      #outline {
+        stroke: rgba(0, 0, 0, 0.5);
+        stroke-width: 4px;
+        stroke-linecap: round;
+      }
+      svg {
+        display: block;
+        position: absolute;
+        top: 0;
+        height: 100%;
+        left: 0;
+        width: 100%;
+      }
+    </style>
     <svg id="svg" viewbox$="[[viewbox]]">
       <line id="outline" x1$="[[x1]]" y1$="[[y1]]" x2$="[[x2]]" y2$="[[y2]]"></line>
       <line id="line" x1$="[[x1]]" y1$="[[y1]]" x2$="[[x2]]" y2$="[[y2]]"></line>

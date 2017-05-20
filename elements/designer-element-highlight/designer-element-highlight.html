@@ -15,40 +15,40 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <body>
 
     <dom-module id="designer-element-highlight">
-      <style>
-        :host {
-          display: block;
-          position: absolute;
-          box-sizing: border-box;
-        }
-        :host.insert-top {
-          border-top: solid 4px black;
-        }
-        :host.insert-bottom {
-          border-bottom: solid 4px black;
-        }
-        :host.insert-left {
-          border-left: solid 4px black;
-        }
-        :host.insert-right {
-          border-right: solid 4px black;
-        }
-        :host.insert-into {
-          background: rgba(255, 128, 128, .75);
-        }
-        #bounds {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(255, 128, 128, .5);
-          border: solid 1px #f88;
-          box-sizing: border-box;
-        }
-      </style>
       <template>
-        <div id="bounds"></div>
+        <style>
+          :host {
+            display: block;
+            position: absolute;
+            box-sizing: border-box;
+          }
+          :host.insert-top {
+            border-top: solid 4px black;
+          }
+          :host.insert-bottom {
+            border-bottom: solid 4px black;
+          }
+          :host.insert-left {
+            border-left: solid 4px black;
+          }
+          :host.insert-right {
+            border-right: solid 4px black;
+          }
+          :host.insert-into {
+            background: rgba(255, 128, 128, .75);
+          }
+          #bounds {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 128, 128, .5);
+            border: solid 1px #f88;
+            box-sizing: border-box;
+          }
+        </style>
+          <div id="bounds"></div>
       </template>
     </dom-module>
 
