@@ -117,10 +117,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _documentChanged(doc) {
         this._reset();
 
-        doc.addEventListener('designer-document-frame', (e) => {
-          this._setFrame(e.detail.frame);
+        doc.addEventListener('designer-request-document-frame', (e) => {
+          const frame = document.createElement('designer-iframe');
+          this._setFrame(frame);
+          frame.setSource(doc.url);
+
+          // Pass the frame back to the document, so it can create a connection
+          // to it
+          e.detail.frame = frame;
         });
-        this._setFrame(this.document.frame);
 
         // TODO: move to ui-editor
         doc.addEventListener('client-changed', (event) => {
@@ -164,6 +169,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onDesignerCommand(event, command) {
+        console.log('_onDesignerCommand', command);
         this.document.executeCommand(command);
         event.stopPropagation();
       },

@@ -77,7 +77,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             @apply --shadow-elevation-4dp-inset;
           };
 
-          --designer-frame: {
+          --designer-iframe: {
             @apply --shadow-elevation-4dp;
           };
 
@@ -381,7 +381,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // create new document element
         let doc = document.createElement('designer-document');
         doc.analyzer = this.analyzer;
-        doc.url = e.detail.href;
         this._currentDocument = doc;
         Polymer.dom(this.$.documents).appendChild(doc);
 
@@ -391,6 +390,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         editor.document = doc;
         this._currentEditor = editor;
         Polymer.dom(this.$['editor-panel']).appendChild(editor);
+
+        // set the url to fire off desiger-iframe creation
+        doc.url = e.detail.href;
 
         editor.addEventListener('name-changed', (event) => {
           this.editorName = event.detail.value;
