@@ -13,8 +13,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="designer-property-inspector-editor">
   <template>
-    <label><content select="[label]"></content>
-    <content select="[value]"></content>
+    <label><slot name="label"></slot></label>
+    <slot name="value"></slot>
   </template>
   <script>
 

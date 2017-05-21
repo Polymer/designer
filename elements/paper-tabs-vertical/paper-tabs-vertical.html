@@ -170,7 +170,7 @@ Example:
           selected="{{selected}}" selected-item="{{tab}}"
           attr-for-selected="[[attrForSelected]]" selectable="paper-tab-vertical">
 
-        <content select="*"></content>
+        <slot></slot>
 
         <div id="selectionBar" class$="[[computeSelectionBarClass(nobar, alignBottom)]]"
             on-transitionend="onBarTransitionEnd"></div>
