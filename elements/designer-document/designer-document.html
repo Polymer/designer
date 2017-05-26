@@ -18,20 +18,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="designer-document">
 
-  <style>
-    :host {
-      display: none;
-    }
-    #frame {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-      box-sizing: border-box;
-    }
-  </style>
+  <template>
+    <style>
+      :host {
+        display: none;
+      }
+      #frame {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+        box-sizing: border-box;
+      }
+    </style>
+  </template>
 
 </dom-module>
 
@@ -118,18 +120,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.frame.getConnection().then((c) => c.disconnect());
       },
 
-      _onUrlChanged() {
+      _onUrlChanged(url) {
         this.setDocument(this.url);
-        this.frame = document.createElement('designer-iframe');
-        this.frame.setSource(this.url);
+        const event = new CustomEvent('designer-request-document-frame', {
+          detail: {},
+        });
+        this.dispatchEvent(event);
+        this.frame = event.detail.frame;
+        console.assert(this.frame != null);
         this.frame.getConnection().then((conn) => {
           this._setConnection(conn);
         });
-        this.dispatchEvent(new CustomEvent('designer-document-frame', {
-          detail: {
-            frame: this.frame,
-          },
-        }));
       },
 
       /**
@@ -161,7 +162,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 new ParsedHtmlCommandApplier(astDocument);
 
             this.documentInfo = {
-              source: content,
+              source: textContent,
               url,
               filename,
               styles,

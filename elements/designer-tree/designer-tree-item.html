@@ -16,41 +16,40 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="designer-tree-item">
 
-  <style>
-    :host {
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      /*border: solid 1px red;*/
-    }
-    #item {
-      display: flex;
-      flex: 0 0 20px;
-      align-items: center;
-    }
-    #children {
-      display: flex;
-      flex-direction: column;
-      padding-left: 16px;
-    }
-    #name.link {
-      cursor: pointer;
-    }
-    #name.link:hover {
-      text-decoration: underline;
-    }
-    #expand {
-      width: 16px;
-      height: 16px;
-    }
-    #icon {
-      width: 20px;
-      height: 20px;
-      margin-right: 4px;
-    }
-  </style>
-
   <template>
+    <style>
+      :host {
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        /*border: solid 1px red;*/
+      }
+      #item {
+        display: flex;
+        flex: 0 0 20px;
+        align-items: center;
+      }
+      #children {
+        display: flex;
+        flex-direction: column;
+        padding-left: 16px;
+      }
+      #name.link {
+        cursor: pointer;
+      }
+      #name.link:hover {
+        text-decoration: underline;
+      }
+      #expand {
+        width: 16px;
+        height: 16px;
+      }
+      #icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 4px;
+      }
+    </style>
     <div id="item" on-click="_onClick">
       <iron-icon id="expand" icon="[[expandIcon]]"></iron-icon>
       <template is="dom-if" if="[[_showIcon(noicon)]]">

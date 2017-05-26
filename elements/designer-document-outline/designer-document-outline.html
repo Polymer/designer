@@ -12,15 +12,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="designer-document-outline">
 
-  <style>
-    :host {
-      display: block;
-      box-sizing: border-box;
-      font-size: 13px;
-    }
-  </style>
 
   <template>
+    <style>
+      :host {
+        display: block;
+        box-sizing: border-box;
+        font-size: 13px;
+      }
+    </style>
     <designer-tree-item
       controller="[[_controller]]"
       data="[[rootNode]]"

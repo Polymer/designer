@@ -12,50 +12,51 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="designer-element-palette">
 
-  <style>
-    :host {
-      display: block;
-      box-sizing: border-box;
-      font-size: 13px;
-    }
-    #elements {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
-    }
-    .element {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 78px;
-      height: 32px;
-      /*background: #424242;*/
-      box-sizing: border-box;
-      margin: 1px;
-      cursor: default;
-    }
-    #proxy {
-      position: fixed;
-      /* z-index must be > 100 because iframes are z-index 100 o_O */
-      z-index: 101;
-      display: none;
-      opacity: 0.75;
-      background: #f88;
-      box-sizing: border-box;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      cursor: copy;
-    }
-    #proxy > * {
-      width: 100% !important;
-      height: 100% !important;
-      margin: 0;
-    }
-  </style>
+
 
   <template>
+    <style>
+      :host {
+        display: block;
+        box-sizing: border-box;
+        font-size: 13px;
+      }
+      #elements {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+      }
+      .element {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 78px;
+        height: 32px;
+        /*background: #424242;*/
+        box-sizing: border-box;
+        margin: 1px;
+        cursor: default;
+      }
+      #proxy {
+        position: fixed;
+        /* z-index must be > 100 because iframes are z-index 100 o_O */
+        z-index: 101;
+        display: none;
+        opacity: 0.75;
+        background: #f88;
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        cursor: copy;
+      }
+      #proxy > * {
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0;
+      }
+    </style>
     <h1>Elements</h1>
     <div id="elements">
       <template is="dom-repeat" items="{{builtIns}}">

@@ -14,19 +14,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="designer-css-prop-tooltip">
 
-  <style>
-    :host {
-      display: inline-block;
-      @apply(--paper-font-body1);
-    }
-    th, td {
-      text-align: left;
-      vertical-align: top;
-      padding: 4px;
-    }
-  </style>
-
   <template>
+    <style>
+      :host {
+        display: inline-block;
+        @apply --paper-font-body1;
+      }
+      th, td {
+        text-align: left;
+        vertical-align: top;
+        padding: 4px;
+      }
+    </style>
     <h2>[[property]]</h2>
     <table>
       <tr><th>Value</th><td>[[_unescape(_cssData.syntax)]]</td></tr>

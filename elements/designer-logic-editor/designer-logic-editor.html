@@ -15,26 +15,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="designer-logic-editor">
 
-  <style>
-    :host {
-      display: flex;
-      box-sizing: border-box;
-      background-color: black;
-      color: #fff;
-    }
-    #stage {
-      position: relative;
-      flex: 1;
-    }
-    logic-patch {
-      position: absolute;
-    }
-    #nodes {
-      display: none;
-    }
-  </style>
-
   <template>
+    <style>
+      :host {
+        display: flex;
+        box-sizing: border-box;
+        background-color: black;
+        color: #fff;
+      }
+      #stage {
+        position: relative;
+        flex: 1;
+      }
+      logic-patch {
+        position: absolute;
+      }
+      #nodes {
+        display: none;
+      }
+    </style>
     <div id="stage">
       <!-- <logic-patch
           id="patch-1"

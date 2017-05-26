@@ -17,38 +17,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="designer-elements-navigator.html">
 
 <dom-module id="designer-ui-editor">
-
-  <style>
-    :host {
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    designer-breakpoint-selector {
-      flex: 0 0 24px;
-      width: 100%
-    }
-    designer-breadcrumb {
-      border-style: solid;
-      border-color: var(--divider-color);
-      border-width: 1px 0 1px 0;
-      color: var(--primary-text-color);
-      font-weight: normal;
-      width: 100%
-    }
-    designer-iframe {
-      flex: 1;
-    }
-    designer-stage {
-      display: flex;
-      flex: 1;
-      position: relative;
-      width: 100%;
-    }
-  </style>
   <template>
-    <designer-breakpoint-selector breakpoint="{{breakpoint}}">
+    <style>
+      :host {
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      designer-breakpoint-selector {
+        flex: 0 0 24px;
+        width: 100%
+      }
+      designer-breadcrumb {
+        border-style: solid;
+        border-color: var(--divider-color);
+        border-width: 1px 0 1px 0;
+        color: var(--primary-text-color);
+        font-weight: normal;
+        width: 100%
+      }
+      designer-iframe {
+        flex: 1;
+      }
+      designer-stage {
+        display: flex;
+        flex: 1;
+        position: relative;
+        width: 100%;
+      }
+    </style>
+  <designer-breakpoint-selector breakpoint="{{breakpoint}}">
     </designer-breakpoint-selector>
     <designer-stage
         id="stage"
@@ -118,10 +117,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _documentChanged(doc) {
         this._reset();
 
-        doc.addEventListener('designer-document-frame', (e) => {
-          this._setFrame(e.detail.frame);
+        doc.addEventListener('designer-request-document-frame', (e) => {
+          const frame = document.createElement('designer-iframe');
+          this._setFrame(frame);
+          frame.setSource(doc.url);
+
+          // Pass the frame back to the document, so it can create a connection
+          // to it
+          e.detail.frame = frame;
         });
-        this._setFrame(this.document.frame);
 
         // TODO: move to ui-editor
         doc.addEventListener('client-changed', (event) => {
@@ -165,6 +169,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _onDesignerCommand(event, command) {
+        console.log('_onDesignerCommand', command);
         this.document.executeCommand(command);
         event.stopPropagation();
       },

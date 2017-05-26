@@ -24,56 +24,56 @@ Inspects an element and provides tidbits about its properties, styles, and more.
 -->
 <dom-module id="designer-inspector">
 
-  <style>
-    :host {
-      @apply(--layout);
-      @apply(--layout-vertical);
-      @apply(--layout-flex);
-      @apply(--paper-font-body1);
-      /*font-size: 13px;*/
+  <template>
+    <style>
+      :host {
+        @apply --layout;
+        @apply --layout-vertical;
+        @apply --layout-flex;
+        @apply --paper-font-body1;
+        /*font-size: 13px;*/
 
-      background: var(--primary-background-color);
-      /*background: var(--designer-background-primary-color, --paper-grey-900);*/
-      box-sizing: border-box;
-      /*color: var(--secondary-text-color);*/
-      display: block;
-      overflow: auto;
+        background: var(--primary-background-color);
+        /*background: var(--designer-background-primary-color, --paper-grey-900);*/
+        box-sizing: border-box;
+        /*color: var(--secondary-text-color);*/
+        display: block;
+        overflow: auto;
 
-      --designer-inspector-title: {
-        @apply(--paper-font-subhead);
-        font-weight: bold;
-        margin: 0;
-      };
+        --designer-inspector-title: {
+          @apply --paper-font-subhead;
+          font-weight: bold;
+          margin: 0;
+        };
 
-      --designer-inspector-row: {
-        display: flex;
-        align-items: baseline;
-      };
+        --designer-inspector-row: {
+          display: flex;
+          align-items: baseline;
+        };
 
-      --designer-inspector-row-label: {
-        flex: 2;
-        text-overflow: ellipsis;
-        overflow-x: hidden;
-        white-space: nowrap;
-      };
+        --designer-inspector-row-label: {
+          flex: 2;
+          text-overflow: ellipsis;
+          overflow-x: hidden;
+          white-space: nowrap;
+        };
 
-      --designer-inspector-row-value: {
-        flex: 3;
-      };
+        --designer-inspector-row-value: {
+          flex: 3;
+        };
 
-      --paper-input-container-input: {
-        @apply(--paper-font-body1);
-      };
+        --paper-input-container-input: {
+          @apply --paper-font-body1;
+        };
 
-    }
+      }
 
-    * {
-      border-bottom: solid 1px rgba(255, 255, 255, .25);
-    }
+      * {
+        border-bottom: solid 1px rgba(255, 255, 255, .25);
+      }
 
-  </style>
-
-  <template></template>
+    </style>
+  </template>
 
 </dom-module>
 

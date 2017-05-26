@@ -12,49 +12,48 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="logic-patch">
 
-  <style>
-    :host {
-      cursor: default;
-      display: inline-block;
-      box-sizing: border-box;
-      position: absolute;
-      /*min-width: 100px;
-      min-height: 200px;*/
-      border-radius: 7px;
-      border: solid 2px red;
-      background: #200;
-      font-size: 12px;
-    }
-    h2 {
-      background: red;
-      margin: 0;
-      border-radius: 4px 4px 0 0;
-      border: solid 1px red;
-      box-sizing: border-box;
-      font-size: 16px;
-      font-weight: normal;
-      text-align: center;
-      padding: 4px;
-    }
-    #ports {
-      display: flex;
-    }
-    #ports > div {
-      /*flex: 1;*/
-    }
-    .group {
-      border-radius: 7px;
-      background: #400;
-      padding: 4px;
-      margin: 4px;
-      display: inline-block;
-    }
-    #outputs {
-      text-align: right;
-    }
-  </style>
-
   <template>
+    <style>
+      :host {
+        cursor: default;
+        display: inline-block;
+        box-sizing: border-box;
+        position: absolute;
+        /*min-width: 100px;
+        min-height: 200px;*/
+        border-radius: 7px;
+        border: solid 2px red;
+        background: #200;
+        font-size: 12px;
+      }
+      h2 {
+        background: red;
+        margin: 0;
+        border-radius: 4px 4px 0 0;
+        border: solid 1px red;
+        box-sizing: border-box;
+        font-size: 16px;
+        font-weight: normal;
+        text-align: center;
+        padding: 4px;
+      }
+      #ports {
+        display: flex;
+      }
+      #ports > div {
+        /*flex: 1;*/
+      }
+      .group {
+        border-radius: 7px;
+        background: #400;
+        padding: 4px;
+        margin: 4px;
+        display: inline-block;
+      }
+      #outputs {
+        text-align: right;
+      }
+    </style>
     <h2>[[name]]</h2>
     <div id="ports">
       <div id="inputs">

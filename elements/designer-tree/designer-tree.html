@@ -12,14 +12,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="designer-tree">
 
-  <style>
-    :host {
-      display: block;
-      box-sizing: border-box;
-    }
-  </style>
-
   <template>
+    <style>
+      :host {
+        display: block;
+        box-sizing: border-box;
+      }
+    </style>
     <template is="dom-repeat" items="[[_data]]">
       <designer-tree-item
           data="[[item]]"
