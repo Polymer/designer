@@ -186,7 +186,6 @@ define('polymer-designer/dom-utils', () => {
     getSourceId: getSourceId,
     hide: hide,
     isDescendant: isDescendant,
-    isDescendant: isDescendant,
     parseQueryString: parseQueryString,
     renameNode: renameNode,
     setBounds: setBounds,
