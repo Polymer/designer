@@ -29,9 +29,7 @@ var postamble = 'define(["polymer-designer/protocol/ServerConnection", ' +
     '})();';
 
 function buildFrameScript(files) {
-
   return  preamble + files.join('\n') + postamble;
-    ;
 }
 
 module.exports = {
