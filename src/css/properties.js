@@ -847,7 +847,7 @@ define('polymer-designer/css/properties', () => ({
             ],
             "initial": {
                 "en-US": "<code>start<\/code>, or a nameless value that acts as <code>left<\/code> if {{cssxref(\"direction\")}} is <code>ltr<\/code>, <code>right<\/code> if {{cssxref(\"direction\")}} is <code>rtl<\/code> if <code>start<\/code> is not supported by the browser.",
-                "en-US": "<code>start<\/code> oder ein namenloser Wert, der sich wie <code>left<\/code> verhält, falls {{cssxref(\"direction\")}} den Wert <code>ltr<\/code> hat, <code>right<\/code>, falls {{cssxref(\"direction\")}} den Wert <code>rtl<\/code> hat, falls <code>start<\/code> nicht vom Browser unterstützt wird.",
+                "de": "<code>start<\/code> oder ein namenloser Wert, der sich wie <code>left<\/code> verhält, falls {{cssxref(\"direction\")}} den Wert <code>ltr<\/code> hat, <code>right<\/code>, falls {{cssxref(\"direction\")}} den Wert <code>rtl<\/code> hat, falls <code>start<\/code> nicht vom Browser unterstützt wird.",
                 "fr": "<code>start<\/code>, ou une valeur non nomm\u00e9e se comportant comme <code>left<\/code> si {{cssxref(\"direction\")}} est <code>ltr<\/code>, <code>right<\/code> si {{cssxref(\"direction\")}} est <code>rtl<\/code> si <code>start<\/code> n'est pas support\u00e9 par le navigateur",
                 "ja": "<code>start<\/code>\u3002<code>start<\/code> \u3092\u30b5\u30dd\u30fc\u30c8\u3057\u306a\u3044\u30d6\u30e9\u30a6\u30b6\u3067\u306f\u3001{{cssxref(\"direction\", \"\u6587\u7ae0\u306e\u65b9\u5411\")}}\u304c <code>ltr<\/code> \u306a\u3089 <code>left<\/code>\u3001<code>rtl<\/code> \u306a\u3089 <code>right<\/code> \u3068\u3057\u3066\u52d5\u4f5c\u3059\u308b\u7121\u540d\u306e\u5024"
             },
